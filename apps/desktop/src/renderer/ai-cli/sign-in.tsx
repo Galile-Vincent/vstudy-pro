@@ -6,13 +6,14 @@ import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
 import { outputLinks, readableOutput } from './model';
 
-export function SignInAction({ session }: { session: CliActionSession }) {
+export function SignInAction({ session, onRetry }: { session: CliActionSession; onRetry?: () => void }) {
   const [code, setCode] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(false);
   const active = session.phase === 'running';
+  const cancelled = session.phase === 'cancelled';
   const url = outputLinks(session.output)[0];
   const deviceCode = readableOutput(session.output).match(/(?:device|user|one.time|verification|security)\s+code(?:\s+is)?(?:\s*\([^)\n]*\))?\s*[:：]?\s*([A-Z0-9]{4,}(?:-[A-Z0-9]{4,})+)/i)?.[1];
   const send = async () => {
@@ -24,8 +25,9 @@ export function SignInAction({ session }: { session: CliActionSession }) {
     catch { setError(true); }
     finally { setSending(false); }
   };
-  return <section className="ai-cli-sign-in" aria-label={tr('ai-cli:step_login')}>
-    <p role="status" className={session.phase === 'succeeded' ? 'ai-cli-success' : undefined}>{tr(session.phase === 'succeeded' ? 'ai-cli:signin_verified' : active ? sent ? 'ai-cli:code_sent' : url ? 'ai-cli:signin_waiting' : 'ai-cli:signin_preparing' : `ai-cli:phase_${session.phase}`)}</p>
+  return <section className="ai-cli-sign-in" data-cancelled={cancelled || undefined} aria-label={tr('ai-cli:step_login')}>
+    <p role="status" className={session.phase === 'succeeded' ? 'ai-cli-success' : undefined}>{tr(session.phase === 'succeeded' ? 'ai-cli:signin_verified' : active ? sent ? 'ai-cli:code_sent' : url ? 'ai-cli:signin_waiting' : 'ai-cli:signin_preparing' : cancelled ? 'ai-cli:signin_cancelled' : `ai-cli:phase_${session.phase}`)}</p>
+    {cancelled && onRetry && <Button variant="secondary" onClick={onRetry}>{tr('ai-cli:retry_signin')}</Button>}
     {active && <>
       {url && <div className="ai-cli-actions">
         <Button onClick={() => void desktop.invoke('shell:openExternal', { url }).catch(() => setError(true))}>{tr('ai-cli:open_signin')}</Button>

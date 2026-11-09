@@ -140,6 +140,100 @@ it('shows pending, running and failed step states with specific recovery', async
   expect(document.querySelector('.ai-cli-recovery')?.textContent).toContain('date and network');
 });
 
+const progress = () => document.querySelector('.ai-cli-live');
+const wait = (ms: number) => act(async () => { await new Promise(resolve => setTimeout(resolve, ms)); });
+
+it('announces running and completed installs once through one persistent live region', async () => {
+  fixture.hold(true); await mount(); await click('Install');
+  const region = progress()!;
+  expect(region.getAttribute('role')).toBe('status');
+  expect(region.textContent).toBe(i18n.t('ai-cli:announce_running', { step: i18n.t('ai-cli:step_install') }));
+  expect(document.querySelector('.ai-cli-chip')?.textContent).toBe(i18n.t('ai-cli:status_installing'));
+  expect(document.querySelectorAll('.ai-cli-live')).toHaveLength(1);
+  const changes: string[] = [];
+  new MutationObserver(() => changes.push(region.textContent ?? '')).observe(region, { childList: true, characterData: true, subtree: true });
+  fixture.hold(false); await wait(400);
+  expect(progress()).toBe(region);
+  expect(region.textContent).toBe(i18n.t('ai-cli:announce_done', { step: i18n.t('ai-cli:step_install') }));
+  expect(changes).toEqual([i18n.t('ai-cli:announce_done', { step: i18n.t('ai-cli:step_install') })]);
+  expect(document.querySelectorAll('[role=status]:not(.ai-cli-live)')).not.toContain(document.querySelector('.ai-cli-success'));
+});
+
+it('leaves the progress region quiet on failure so only the recovery alert speaks', async () => {
+  fixture.hold(true); await mount(); await click('Install');
+  fixture.fail('certificate'); fixture.hold(false); await wait(400);
+  expect(progress()?.textContent).toBe('');
+  expect(document.querySelectorAll('[role=alert]')).toHaveLength(1);
+  expect(document.querySelector('[role=alert]')?.classList.contains('ai-cli-recovery')).toBe(true);
+});
+
+it('shows a cancelled sign-in as one neutral status with retry, not as a failure', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'installed-not-signed-in' });
+  fixture.hold(true); await mount(); await click('Sign in');
+  await click('Stop this action');
+  const section = document.querySelector('.ai-cli-sign-in')!;
+  expect(section.querySelector('[role=status]')?.textContent).toBe(i18n.t('ai-cli:signin_cancelled'));
+  expect(document.querySelectorAll('[role=alert]')).toHaveLength(0);
+  expect(document.querySelector('.ai-cli-recovery')).toBeNull();
+  expect(fixture.tools[0]).toMatchObject({ status: 'error', error: { hint: 'cancelled' } });
+  expect(document.querySelector('.ai-cli-chip')?.getAttribute('data-status')).not.toBe('error');
+  expect(document.querySelector('.ai-cli-tool-heading')?.textContent).not.toContain(i18n.t('ai-cli:status_error'));
+  expect(document.querySelectorAll('.ai-cli-sign-in [role=status]')).toHaveLength(1);
+  expect(document.querySelector('.ai-cli-steps li[aria-current=step]')?.textContent).toContain(i18n.t('ai-cli:step_login'));
+  expect(document.body.textContent!.split(i18n.t('ai-cli:phase_cancelled'))).toHaveLength(1);
+  expect(document.querySelector('.ai-cli-steps li[aria-current=step]')?.getAttribute('data-state')).not.toBe('failed');
+  await click(i18n.t('ai-cli:retry_signin'));
+  expect(fixture.calls.at(-1)).toMatchObject({ channel: 'ai-cli:preview', payload: { actionId: 'login-claude' } });
+  expect(button(i18n.t('ai-cli:continue_reading'))).toBeDefined();
+});
+
+function cancelled(action?: 'install' | 'login' | 'test') {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'error', error: { code: 'cancelled', hint: 'cancelled', ...action && { action } } });
+}
+const current = () => document.querySelector('.ai-cli-steps li[aria-current=step]')?.textContent;
+const previews = () => fixture.calls.filter(call => call.channel === 'ai-cli:preview').map(call => call.payload.actionId);
+
+it('keeps Login current when a cancelled sign-in is reopened without a session', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'installed-not-signed-in' });
+  fixture.hold(true); await mount(); await click('Sign in'); await click('Stop this action');
+  await act(async () => root.unmount()); root = createRoot(host);
+  fixture.calls.length = 0;
+  await mount();
+  expect(fixture.tools[0]).toMatchObject({ status: 'error', error: { hint: 'cancelled', action: 'login' } });
+  expect(current()).toContain(i18n.t('ai-cli:step_login'));
+  expect(previews()).toEqual(['login-claude']);
+  expect(document.querySelectorAll('[role=alert]')).toHaveLength(0);
+});
+
+it('keeps Login current while the retry after a cancelled sign-in is running', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'installed-not-signed-in' });
+  fixture.hold(true); await mount(); await click('Sign in'); await click('Stop this action');
+  await click(i18n.t('ai-cli:retry_signin'));
+  await click('Sign in');
+  expect(runs().map(call => call.payload.actionId)).toEqual(['login-claude', 'login-claude']);
+  expect(current()).toContain(i18n.t('ai-cli:step_login'));
+  expect(previews().filter(id => String(id).startsWith('test-'))).toEqual([]);
+});
+
+it.each([['install', 'step_install'], ['login', 'step_login'], ['test', 'step_test']] as const)('keeps %s current after that action was cancelled', async (action, key) => {
+  cancelled(action); await mount();
+  expect(current()).toContain(i18n.t(`ai-cli:${key}`));
+  expect(previews()).toEqual([`${action}-claude`]);
+});
+
+it('falls back to the status-derived step for an older cancelled error without an action', async () => {
+  cancelled(); await mount();
+  expect(current()).toContain(i18n.t('ai-cli:step_test'));
+});
+
+it('mirrors main: a stopped action records its kind, and a started one clears it', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, path: '/existing/claude', version: '1.0.0', status: 'installed-not-signed-in' });
+  fixture.hold(true); await mount(); await click('Sign in');
+  expect(fixture.tools[0]).toMatchObject({ status: 'signing-in', error: null });
+  await click('Stop this action');
+  expect(fixture.tools[0]).toMatchObject({ status: 'error', error: { code: 'cancelled', hint: 'cancelled', action: 'login' } });
+});
+
 it('previews compatible updates and one-click rollback without disturbing existing chats', async () => {
   Object.assign(fixture.tools[0]!, { consented: true, tested: true, managed: true, version: '1.0.0', latestVersion: '2.0.0', status: 'update-available', releaseNotesUrl: 'https://example.com/release' });
   await mount(); await click('Review update to 2.0.0');
@@ -239,7 +333,7 @@ it('checks installed files again and moves to sign-in without running the newly 
   Object.assign(fixture.tools[2]!, { consented: true, manualInstallRequired: true });
   await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
   await click('Check again');
-  expect(document.body.textContent).toContain("We haven't found it yet.");
+  expect(live()).toBe(i18n.t('ai-cli:manual_not_found'));
   Object.assign(fixture.tools[2]!, { path: '/newly/installed/agy', status: 'installed-not-signed-in' });
   const checks = fixture.calls.filter(call => call.channel === 'ai-cli:list').length;
   await click('Check again');
@@ -247,6 +341,42 @@ it('checks installed files again and moves to sign-in without running the newly 
   expect(document.querySelector('.ai-cli-steps [aria-current=step]')?.textContent).toContain('Sign in');
   expect(fixture.calls.at(-1)?.payload.actionId).toBe('login-agy');
   expect(runs()).toHaveLength(0);
+});
+
+const live = () => [...document.querySelectorAll('.ai-cli-manual-live')].map(node => node.textContent).join('|');
+
+it('keeps the found announcement in one persistent region when the required panel gives way to sign-in', async () => {
+  Object.assign(fixture.tools[2]!, { consented: true, manualInstallRequired: true });
+  await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
+  const region = document.querySelector('.ai-cli-manual-live')!;
+  expect(region.getAttribute('role')).toBe('status');
+  expect(document.querySelector('.ai-cli-action-area .ai-cli-manual')).not.toBeNull();
+  Object.assign(fixture.tools[2]!, { path: '/newly/installed/agy', version: '2.0.0', status: 'installed-not-signed-in' });
+  await click('Check again');
+  expect(document.querySelector('.ai-cli-action-area .ai-cli-manual')).toBeNull();
+  expect(document.querySelector('.ai-cli-steps [aria-current=step]')?.textContent).toContain('Sign in');
+  expect(document.querySelectorAll('.ai-cli-manual-live')).toHaveLength(1);
+  expect(document.querySelector('.ai-cli-manual-live')).toBe(region);
+  expect(region.textContent).toBe(i18n.t('ai-cli:manual_found_version', { version: '2.0.0' }));
+  expect(live()).toBe(i18n.t('ai-cli:manual_found_version', { version: '2.0.0' }));
+});
+
+it('announces that a ready tool was found when it is checked again', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, tested: true, managed: true, version: '1.2.3', path: '/bin/claude', status: 'ready' });
+  await mount(<AiCliSetup initialProvider="claude" onClose={close} />);
+  await click('Check again');
+  expect(live()).toBe(i18n.t('ai-cli:manual_found_version', { version: '1.2.3' }));
+  expect(document.body.textContent).not.toContain(i18n.t('ai-cli:manual_not_found'));
+});
+
+it('announces that the check could not run instead of claiming the tool is missing', async () => {
+  Object.assign(fixture.tools[0]!, { consented: true, tested: true, managed: true, version: '1.2.3', path: '/bin/claude', status: 'ready' });
+  await mount(<AiCliSetup initialProvider="claude" onClose={close} />);
+  bridge.invoke.mockImplementation(async (channel, payload) => { if (channel === 'ai-cli:list') throw new Error('offline'); return fixture.invoke(channel, payload); });
+  await click('Check again');
+  expect(live()).toBe(i18n.t('ai-cli:manual_check_failed'));
+  expect(document.body.textContent).not.toContain(i18n.t('ai-cli:manual_not_found'));
+  expect(document.querySelector('[role=alert]')?.textContent).toContain(i18n.t('ai-cli:load_error'));
 });
 
 it('keeps other Unix terminal instructions platform-neutral and Codex unavailable outside macOS', async () => {
@@ -437,6 +567,34 @@ it('copies redacted details beside the failed action and offers sign-in recovery
     const recovery = document.querySelector<HTMLButtonElement>('.ai-cli-recovery button')!;
     await act(async () => recovery.click());
     expect(fixture.calls.at(-1)?.payload.actionId).toBe('login-claude');
+  } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
+});
+
+it('tells a student to free disk space and keeps the cause in copied details', async () => {
+  fixture.hold(true); await mount(); await click('Install');
+  fixture.fail('unknown'); fixture.output('ENOSPC: no space left on device, write'); fixture.hold(false);
+  const writeText = vi.fn<(text: string) => Promise<void>>(async () => {});
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+  try {
+    await wait(400);
+    const recovery = document.querySelector('.ai-cli-recovery')!;
+    expect(recovery.textContent).toContain(i18n.t('ai-cli:error_title_disk_full'));
+    expect(recovery.textContent).toContain(i18n.t('ai-cli:error_next_disk_full'));
+    expect(recovery.textContent).not.toContain(i18n.t('ai-cli:error_title_unknown'));
+    await click('Copy details');
+    expect(writeText.mock.calls[0]?.[0]).toContain('Last error: disk-full');
+  } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
+});
+
+it('keeps a permission cause in copied details when only the failure code is known', async () => {
+  fixture.hold(true); await mount(); await click('Install');
+  fixture.fail('permission-denied'); fixture.output(''); fixture.hold(false);
+  const writeText = vi.fn<(text: string) => Promise<void>>(async () => {});
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+  try {
+    await wait(400);
+    await click('Copy details');
+    expect(writeText.mock.calls[0]?.[0]).toContain('Last error: permission-denied');
   } finally { Reflect.deleteProperty(navigator, 'clipboard'); }
 });
 

@@ -4,7 +4,7 @@ import type { CliActionId, CliActionPlan, CliActionSession, CliFailure } from '.
 import { desktop } from '../bridge';
 import { aiCliChanged } from './entry';
 
-export function useCliAction(onFinished: () => Promise<void>) {
+export function useCliAction(onFinished: () => Promise<unknown>) {
   const [plan, setPlan] = useState<CliActionPlan>();
   const [session, setSession] = useState<CliActionSession>();
   const [error, setError] = useState<CliFailure>();

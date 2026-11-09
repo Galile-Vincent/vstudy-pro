@@ -16,6 +16,14 @@ it('keeps discovery, auth, update, and failure states separate', () => {
   expect(cliToolStateSchema.parse(state)).toMatchObject({ status: 'error', error: { code: 'checksum', hint: 'checksum' } });
   expect(transition(state, { type: 'installed' }).status).toBe('installed-not-signed-in');
 });
+it('records which action was cancelled and stays additive for older errors', () => {
+  const cancelled = transition({ ...initialState('claude'), status: 'signing-in', error: null } as CliToolState, { type: 'failed', code: 'cancelled', action: 'login' });
+  expect(cliToolStateSchema.parse(cancelled)).toMatchObject({ status: 'error', error: { code: 'cancelled', hint: 'cancelled', action: 'login' } });
+  const plain = transition(initialState('claude'), { type: 'failed', code: 'offline' });
+  expect(plain.error).toEqual({ code: 'offline', hint: 'offline' });
+  expect(cliToolStateSchema.safeParse({ ...plain, error: { code: 'cancelled', hint: 'cancelled' } }).success).toBe(true);
+  expect(cliToolStateSchema.safeParse({ ...plain, error: { code: 'cancelled', hint: 'cancelled', action: 'update' } }).success).toBe(false);
+});
 it.each(['not-installed', 'installing', 'installed-not-signed-in', 'signing-in', 'ready', 'update-available', 'updating', 'error'] as const)('enforces transitions from %s', status => {
   const state: CliToolState = status === 'error' ? { ...initialState('claude'), status, error: { code: 'offline', hint: 'offline' } } : { ...initialState('claude'), status, error: null };
   const cases = {
