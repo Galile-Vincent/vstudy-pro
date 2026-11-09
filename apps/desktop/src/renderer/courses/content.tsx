@@ -2,7 +2,6 @@ import { CourseFileActions, type DocumentAction, type DocumentOutcome } from '..
 import { useMoodleWebview } from './webview';
 import {
   createElement,
-  useEffect,
   useRef,
   useState,
   type ReactNode,
@@ -29,6 +28,7 @@ import type {
 import { externalUrlSchema } from "../../shared/ipc";
 import { tr, i18n } from "../../shared/i18n";
 import { desktop } from "../bridge";
+import { Section, Toolbar } from "../components/ui";
 import { Button } from "../components/ui/button";
 import {
   Sheet,
@@ -152,15 +152,8 @@ function WeeklySection({
   onModule: (module: MoodleModule) => void;
 }) {
   const [open, setOpen] = useState(section.current);
-  const ref = useRef<HTMLElement>(null);
-  useEffect(() => {
-    if (section.current) {
-      setOpen(true);
-      ref.current?.scrollIntoView?.({ block: "nearest", behavior: "instant" });
-    }
-  }, [section.current]);
   return (
-    <section ref={ref} className="moodle-week" data-current={section.current}>
+    <section className="moodle-week" data-current={section.current}>
       <h3 id={`week-heading-${section.id}`} tabIndex={-1}>
       <button
         className="moodle-week-heading"
@@ -257,6 +250,19 @@ export function CourseContent({
   const [opening, setOpening] = useState(false);
   return (
     <>
+      <Section title={tr("moodle:content")} actions={
+        detail.sections.some(section => section.current) && <Toolbar right={
+          <Button variant="ghost" onClick={() => {
+            const current = detail.sections.find(section => section.current);
+            const heading = document.getElementById(`week-heading-${current?.id}`);
+            heading?.focus({ preventScroll: true });
+            heading?.scrollIntoView?.({
+              block: "start",
+              behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+            });
+          }}>{tr("moodle:jump_current_week")}</Button>
+        } />
+      }>
       <div className="moodle-weeks">
         {detail.sections.length ? (
           detail.sections.map((section) => (
@@ -273,6 +279,7 @@ export function CourseContent({
           <p className="moodle-empty-inline">{tr((detail.panels?.contents ?? detail.fetchState) === "loading" ? "moodle:loading" : (detail.panels?.contents ?? detail.fetchState) === "error" ? `moodle:panel_error_${detail.panelErrors?.contents ?? "service"}` : "moodle:no_sections")}</p>
         )}
       </div>
+      </Section>
       <Sheet
         open={!!selected}
         onOpenChange={(open) => {
