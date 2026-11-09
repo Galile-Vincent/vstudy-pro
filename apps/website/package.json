@@ -10,12 +10,14 @@
     "typecheck": "astro check",
     "lint": "astro check",
     "verify:static": "node scripts/verify-static.mjs",
-    "deploy": "astro build && pnpm dlx wrangler@4 pages deploy dist --project-name vstudy --branch main"
+    "deploy": "astro build && pnpm dlx wrangler@4 pages deploy dist --project-name vstudy --branch main",
+    "test": "node scripts/test-media.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.4",
     "@types/node": "24.10.1",
     "astro": "7.4.7",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "sharp": "0.35.5"
   }
 }

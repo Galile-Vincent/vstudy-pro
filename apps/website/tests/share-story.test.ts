@@ -5,18 +5,20 @@ import { mediaCopy } from '../src/data/media-copy.ts';
 const palette = {sky:'#afd2ff',iris:'#cda5f5',accent:'#5546a3',ink:'#18181b',paper:'#fafafa'};
 for (const [language,c] of Object.entries(mediaCopy)) {
   for (const format of ['story','square'] as const) for (const look of ['light','dark','aurora'] as const) {
-    const data: ShareData = {format,look,headline:c.headline,chips:c.chips,free:c.free,url:'https://vstudy.vcstudio.app/download',version:'v0.4.4 beta',palette};
+    const data: ShareData = {format,look,headline:c.headline,chips:c.chips,free:c.free,displayUrl:'vstudy.vcstudio.app/download',beta:c.beta,version:`v1.2.3 ${c.beta}`,palette};
     test(`${language} ${format} ${look} exports complete text within its bounds`,() => {
       const layout = shareStoryLayout(data);
       assert.equal(layout.width,1080);
       assert.equal(layout.height,format === 'story' ? 1920 : 1080);
       assert.deepEqual(layout,shareStoryLayout(data));
       const texts = layout.commands.filter(c => c.kind === 'text');
-      for (const value of [...c.headline,...c.chips,c.free,'vstudy.vcstudio.app/download','v0.4.4 beta']) assert.ok(texts.some(c => c.text === value),value);
+      for (const value of [...c.headline,...c.chips,c.free,'vstudy.vcstudio.app/download',`v1.2.3 ${c.beta}`,c.beta]) assert.ok(texts.some(c => c.text === value),value);
       assert.equal(layout.commands.filter(c => c.kind === 'image').length,2);
       for (const command of layout.commands) {
         assert.ok(command.x >= 0 && command.y >= 0);
         if (command.kind === 'text') {
+          const width = [...command.text].reduce((sum,glyph) => sum + command.size * (/[^\u0000-\u024f]/u.test(glyph) ? 1 : 0.6),0);
+          assert.ok(width <= command.maxWidth,`${language} ${format} ${command.text}: ${width} > ${command.maxWidth}`);
           assert.ok(command.y+command.size <= layout.height,command.text);
           assert.ok(command.x+command.maxWidth <= layout.width,command.text);
         } else {
@@ -31,7 +33,7 @@ for (const [language,c] of Object.entries(mediaCopy)) {
 test('screenshot enlarges course rows without distortion and clears chips and CTA',() => {
   for (const format of ['story','square'] as const) {
     const c = mediaCopy.en;
-    const {commands} = shareStoryLayout({format,look:'light',headline:c.headline,chips:c.chips,free:c.free,url:'https://vstudy.vcstudio.app/download',version:'v0.4.4 beta',palette});
+    const {commands} = shareStoryLayout({format,look:'light',headline:c.headline,chips:c.chips,free:c.free,displayUrl:'vstudy.vcstudio.app/download',beta:c.beta,version:`v1.2.3 ${c.beta}`,palette});
     const shot = commands.find(c => c.kind === 'image' && c.source === 'screenshot')!;
     assert.ok(shot.kind === 'image');
     assert.ok(shot.crop);
@@ -45,6 +47,7 @@ test('screenshot enlarges course rows without distortion and clears chips and CT
     assert.ok(shot.y+shot.height+36 < footer.y);
     const button = commands.find(cmd => cmd.kind === 'rect' && cmd.y === footer.y-(format === 'story' ? 26 : 17));
     assert.ok(button && button.kind === 'rect' && button.radius > 30);
+    if (format === 'square') assert.ok(button.y-(shot.y+shot.height+36) >= 60);
     const dots = commands.filter(cmd => cmd.kind === 'rect' && cmd.width === 10 && cmd.height === 10);
     assert.equal(dots.length,3);
     assert.ok(shot.y > (format === 'story' ? 708 : 450));
@@ -60,10 +63,10 @@ function luminance(hex: string) {
 test('overlay text meets AA against each look and gradient stop',() => {
   for (const look of ['light','dark','aurora'] as const) {
     const c = mediaCopy.en;
-    const {commands} = shareStoryLayout({format:'story',look,headline:c.headline,chips:c.chips,free:c.free,url:'https://vstudy.vcstudio.app/download',version:'v0.4.4 beta',palette});
+    const {commands} = shareStoryLayout({format:'story',look,headline:c.headline,chips:c.chips,free:c.free,displayUrl:'vstudy.vcstudio.app/download',beta:c.beta,version:`v1.2.3 ${c.beta}`,palette});
     for (const command of commands) {
       if (command.kind !== 'text') continue;
-      const pill = command.text === 'beta' || command.text === c.free;
+      const pill = command.text === c.beta || command.text === c.free;
       const chip = c.chips.includes(command.text);
       const backgrounds = pill ? [look === 'dark' ? '#cbbaff' : palette.accent]
         : chip ? [look === 'dark' ? '#26232f' : '#ffffff']

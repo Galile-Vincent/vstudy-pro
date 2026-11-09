@@ -14,12 +14,13 @@ const stops = [...symbol.matchAll(/stop-color="(#[a-fA-F0-9]+)"/g)].map(match =>
 const palette = {accent:token('accent'),ink:token('ink'),paper:token('background'),sky:stops[0],iris:stops[5]};
 const colors = Object.values(palette);
 const kit = (file: string) => path(`brand/kit/${file}`);
-const url = new URL(path('download'), Astro.site).href;
-const config = {copy:c, palette, url, version: VERSION ? `v${VERSION} beta` : 'beta', symbol:kit('symbol.svg'), screenshot:kit('courses-home.png'), language};
+const url = new URL(path(`${language}/download/`), Astro.site).href;
+const displayUrl = `${Astro.site!.host}${path('download')}`;
+const config = {copy:c, palette, url, displayUrl, version: VERSION ? `v${VERSION} ${c.beta}` : c.beta, symbol:kit('symbol.svg'), screenshot:kit('courses-home.png'), language};
 const shots = ['courses-home','capture-to-chat','library','document-figures'];
 ---
 <Base {language} title={c.kit} description={c.intro} page="media/">
-  <main id="main" tabindex="-1" class="media container" data-media data-config={JSON.stringify(config)}>
+  <main id="main" tabindex="-1" class="media container" data-media data-error={c.error} data-config={JSON.stringify(config)}>
     <header class="media-head"><p class="media-eyebrow">VStudy Pro / {c.kit}</p><h1>{c.title}</h1><p>{c.intro}</p></header>
     <section aria-labelledby="media-share-title" class="media-share">
       <div class="media-editor">
