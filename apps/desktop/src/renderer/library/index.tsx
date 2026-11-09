@@ -182,6 +182,8 @@ export function LibraryView() {
     [folders, setFolders] = useState<Folder[]>([]),
     [tags, setTags] = useState<IpcResponse<"library:tags:list">>([]),
     [notice, setNotice] = useState("");
+  const selectedIds = useRef(selected);
+  selectedIds.current = selected;
   const menuAnchor = useRef<HTMLElement | null>(null);
   const placeOf = (item: Item) => courseName(item, language) ?? (folderPath(folders, item.folderId) || tr("library:unfiled"));
   const scroller = useRef<HTMLDivElement>(null),
@@ -263,7 +265,6 @@ export function LibraryView() {
     }
     setLoading(true);
     setError("");
-    setSelected([]);
     void Promise.all([
       desktop.invoke("library:documents:list", { ...query, cursor: undefined }),
       desktop.invoke("library:tree", {}),
@@ -283,7 +284,8 @@ export function LibraryView() {
           : 1;
         while (
           page.nextCursor &&
-          (rows.length * 64) / multiplier < restoreTop.current + 800
+          ((rows.length * 64) / multiplier < restoreTop.current + 800 ||
+            selectedIds.current.some(id => !rows.some(item => item.document.id === id)))
         ) {
           const next = await desktop.invoke("library:documents:list", {
             ...query,
@@ -294,6 +296,7 @@ export function LibraryView() {
           page.nextCursor = next.nextCursor;
         }
         setItems(rows);
+        setSelected(current => current.filter(id => rows.some(item => item.document.id === id)));
         setCursor(page.nextCursor ?? undefined);
         setFolders(f);
         setTags(t);

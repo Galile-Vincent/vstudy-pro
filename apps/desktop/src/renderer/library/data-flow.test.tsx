@@ -183,3 +183,22 @@ it.each([false, true])('keeps recovery outside optional metadata (grid %s)', asy
  expect(retry.closest('.document-meta,.document-added')).toBeNull();
  expect(retry.closest<HTMLElement>('.library-document')!.style.height).toBe('auto');
 });
+
+
+it('retains existing selections across conversion polls and removes departed IDs', async () => {
+ let rows = [row('selected'), row('departed'), row('converting')];
+ rows[2]!.document.status = 'converting';
+ state.invoke.mockImplementation(async c => c === 'library:documents:list'
+  ? {items: rows, nextCursor: null} : []);
+ mount(); await screen.findByText('selected', {selector: 'button'});
+ fireEvent.click(screen.getByText('selected').closest('.library-document')!);
+ fireEvent.click(screen.getByText('departed').closest('.library-document')!, {ctrlKey: true});
+ const calls = state.invoke.mock.calls.length;
+ await waitFor(() => expect(state.invoke.mock.calls.length).toBeGreaterThan(calls), {timeout: 2500});
+ expect(document.querySelectorAll('[data-selected=true]')).toHaveLength(2);
+ rows = rows.filter(r => r.document.id !== 'departed');
+ act(() => window.dispatchEvent(new Event('library-changed')));
+ await waitFor(() => expect(screen.queryByText('departed')).toBeNull());
+ expect(document.querySelectorAll('[data-selected=true]')).toHaveLength(1);
+ expect(screen.getByText('selected').closest('.library-document')?.getAttribute('data-selected')).toBe('true');
+});
