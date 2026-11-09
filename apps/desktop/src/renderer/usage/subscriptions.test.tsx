@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, cleanup, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { SubscriptionMeters } from './subscriptions';
 import { desktop } from '../bridge';
@@ -14,7 +14,7 @@ beforeEach(() => {
   localStorage.clear();
   vi.mocked(desktop.invoke).mockResolvedValue([usage('claude', [10, 70]), usage('codex', [85, 20])]);
 });
-afterEach(() => { cleanup(); vi.restoreAllMocks(); });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 it('defaults to one collapsed summary with the highest provider window and wired disclosure', async () => {
   render(<SubscriptionMeters compact />);
   await waitFor(() => expect(screen.getByText('85%', { selector: '.subscription-summary-percent' })).toBeTruthy());
@@ -86,4 +86,30 @@ it('exposes one subscription landmark when expanded', async () => {
   render(<SubscriptionMeters compact />);
   await screen.findByText('Codex · 5h', { selector: '.subscription-summary-label' });
   expect(screen.getAllByRole('region', { name: 'Subscription limits' })).toHaveLength(1);
+});
+
+it('only adds a details tab stop while the expanded content overflows', async () => {
+  let resize = () => {};
+  const disconnect = vi.fn();
+  vi.stubGlobal('ResizeObserver', class {
+    constructor(callback: () => void) { resize = callback; }
+    observe() {}
+    disconnect = disconnect;
+  });
+  localStorage.setItem(key, 'true');
+  const { container, unmount } = render(<SubscriptionMeters compact />);
+  await screen.findByText('Codex · 5h', { selector: '.subscription-summary-label' });
+  const details = container.querySelector('.subscription-details')!;
+  expect(details.getAttribute('tabindex')).toBeNull();
+  Object.defineProperties(details, {
+    scrollHeight: { configurable: true, value: 300 },
+    clientHeight: { configurable: true, value: 200 },
+  });
+  act(() => resize());
+  expect(details.getAttribute('tabindex')).toBe('0');
+  Object.defineProperty(details, 'clientHeight', { value: 400 });
+  act(() => resize());
+  expect(details.getAttribute('tabindex')).toBeNull();
+  unmount();
+  expect(disconnect).toHaveBeenCalled();
 });

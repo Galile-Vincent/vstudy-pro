@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { tr } from '../../shared/i18n';
@@ -28,6 +28,8 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
   const [rows, setRows] = useState<SubscriptionUsage[]>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const detailsRef = useRef<HTMLDivElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
   const [keychain, setKeychain] = useState(keychainAllowed);
   useEffect(() => {
     let active = true;
@@ -42,6 +44,21 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
     window.addEventListener('subscription-refresh', refresh);
     return () => { active = false; clearInterval(interval); window.removeEventListener('subscription-refresh', refresh); };
   }, []);
+  useEffect(() => {
+    const details = detailsRef.current;
+    if (!compact || !expanded || !details) return;
+    const measure = () => setOverflowing(details.scrollHeight > details.clientHeight
+      || details.scrollWidth > details.clientWidth);
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(measure);
+    observer?.observe(details);
+    for (const child of details.children) observer?.observe(child);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [compact, expanded, rows, error, i18n.language]);
   const highest = error ? undefined : rows?.filter(row => row.status === 'ready')
     .flatMap(row => row.windows.map(window => ({ ...window, provider: row.provider })))
     .sort((a, b) => b.usedPercent - a.usedPercent
@@ -69,7 +86,7 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
         {expanded ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
       </Button>
     </div>}
-    <div id={regionId} hidden={compact && !expanded} className={compact ? 'subscription-details' : undefined} tabIndex={compact ? 0 : undefined}>
+    <div id={regionId} ref={detailsRef} hidden={compact && !expanded} className={compact ? 'subscription-details' : undefined} tabIndex={compact && expanded && overflowing ? 0 : undefined}>
     <header><strong>{tr('usage:subscription_limits')}</strong><Button variant="ghost" size="icon" disabled={loading} aria-label={tr('common:refresh_usage')} onClick={() => window.dispatchEvent(new Event('subscription-refresh'))}><RefreshCw size={14} aria-hidden="true"/></Button></header>
     {error ? <small role="status">{tr('usage:quota_unavailable')}</small> : !rows ? <small role="status">{tr('usage:usage_loading')}</small> : rows.map(row => <div key={row.provider} className="subscription-provider">
       <div className="subscription-provider-name">{providerName(row.provider)}{row.status !== 'ready' && <small>{tr(`usage:quota_${row.status}`)}</small>}</div>
