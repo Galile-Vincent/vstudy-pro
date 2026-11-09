@@ -46,7 +46,8 @@
 .app-shell[data-view=workspace] .shell-topbar { display:none; }
 .app-shell[data-view=library] .shell-topbar > span { display:none; }
 .app-shell[data-sidebar-overlay=true] .shell-sidebar:not([hidden]) {
-  position:absolute; inset:var(--topbar-height) auto 0 0; z-index:50;
+  position:fixed; inset:var(--sidebar-overlay-top, var(--topbar-height)) auto 0 0; z-index:50;
+  height:auto; min-height:0; overflow:auto;
   width:min(85vw,var(--sidebar-width)); background:var(--surface); box-shadow:var(--elevation-floating);
 }
 @media(max-width:800px) { .app-shell .shell-sidebar { width:var(--sidebar-compact-width); padding:var(--space-2); } .app-shell .shell-topbar { padding-inline:var(--space-4); } }
