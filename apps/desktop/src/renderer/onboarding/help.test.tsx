@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
-import { GettingStarted, LearningHelp, openLearningHelp } from './help';
+import { GettingStarted, HelpMenu, LearningHelp, openLearningHelp } from './help';
+import { TooltipProvider } from '../components/ui/tooltip';
 import { i18n } from '../../shared/i18n';
 const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
 vi.mock('../shell', () => ({ useNavigate: () => ({ navigate }), useOptionalNavigation: () => undefined }));
 vi.mock('../bridge', () => ({ desktop: { invoke: async () => [] } }));
 vi.mock('./onboarding', () => ({ Onboarding: () => null }));
+vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
 afterEach(cleanup);
 it('closes the checklist on document navigation and has one unique title', async () => {
   await i18n.changeLanguage('en');
@@ -48,4 +50,32 @@ it('focuses the destination main after checklist navigation', async () => {
   unmount();
   document.getElementById('shell-content')?.remove();
   navigate.mockReset();
+});
+
+it('returns focus to the Help button after the shortcuts dialog closes with Escape', async () => {
+  await i18n.changeLanguage('en');
+  render(<TooltipProvider><HelpMenu /><LearningHelp /></TooltipProvider>);
+  const help = screen.getByRole('button', { name: i18n.t('onboarding:help') });
+  help.focus();
+  fireEvent.keyDown(help, { key: 'ArrowDown' });
+  const item = await screen.findByRole('menuitem', { name: i18n.t('onboarding:help_shortcuts') });
+  item.focus();
+  fireEvent.click(item);
+  await screen.findByRole('dialog', { name: i18n.t('onboarding:help_shortcuts') });
+  fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  expect(document.activeElement).toBe(help);
+});
+
+it('restores focus to the element that opened a dialog from the page', async () => {
+  const opener = document.createElement('button');
+  document.body.append(opener);
+  opener.focus();
+  render(<LearningHelp />);
+  act(() => openLearningHelp('checklist'));
+  await screen.findByRole('dialog');
+  fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  expect(document.activeElement).toBe(opener);
+  opener.remove();
 });

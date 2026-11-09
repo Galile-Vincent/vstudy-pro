@@ -21,6 +21,7 @@ import '../settings/appearance.css';
 import { UploadCard } from '../home/upload-card';
 import { errorText } from '../status';
 import { ProductPreview } from './product-preview';
+import { returnFocusTo } from './return-focus';
 import { goals, saveProgress, steps, useLearningProgress, type LearningProgress } from './progress';
 import { Walkthrough } from './walkthrough';
 import './onboarding.css';
@@ -39,8 +40,10 @@ function ChoiceCard({ name, value, checked, disabled, onChange, onReselect, titl
 
 const typeSample = 'Aa';
 
-export function Onboarding({ onComplete }: { onComplete: () => void }) {
+export function Onboarding({ onComplete, onCloseAutoFocus }: { onComplete: () => void; onCloseAutoFocus?: (event: Event) => void }) {
   useTranslation();
+  const [opener] = useState(() => document.activeElement);
+  const leaving = useRef(false);
   const started = useRef(Date.now());
   const [source, setSource] = useState<AcquisitionSource>();
   const newsletterConsent = useRef({email_provided:false, updates_opted_in:false});
@@ -80,6 +83,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
   };
   const exit = async (complete: boolean, action?: 'goal') => {
     setBusy(true); setError('');
+    leaving.current = action === 'goal';
     try {
       if (!consentDone) { try { await completeConsent(false); } catch { /* Optional analytics must never block entry. */ } }
       if (!complete) track('onboarding_skipped', {onboarding_version:1});
@@ -129,7 +133,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
     finally { setBusy(false); }
   };
   return <Dialog open onOpenChange={open => { if (!open && !busy) void exit(false); }}>
-    <DialogContent showCloseButton={false} className="onboarding" data-step={step} aria-labelledby="onboarding-title" onPointerDownOutside={event => event.preventDefault()} onOpenAutoFocus={event => { event.preventDefault(); heading.current?.focus(); }}>
+    <DialogContent showCloseButton={false} className="onboarding" data-step={step} aria-labelledby="onboarding-title" onPointerDownOutside={event => event.preventDefault()} onCloseAutoFocus={event => { if (leaving.current) { event.preventDefault(); document.querySelector<HTMLElement>('#shell-content[role=main]')?.focus(); } else (onCloseAutoFocus ?? returnFocusTo(() => opener))(event); }} onOpenAutoFocus={event => { event.preventDefault(); heading.current?.focus(); }}>
       <div className="onboarding-top"><p role="status">{tr('onboarding:progress', { current: index + 1, total: steps.length })}</p><Button variant="ghost" disabled={busy} onClick={() => void exit(false)}>{tr('onboarding:later')}</Button></div>
       <div className="onboarding-progress" aria-hidden="true">{steps.map(item => <span key={item} data-current={item === step}/>)}</div>
       <DialogTitle asChild><h1 id="onboarding-title" ref={heading} tabIndex={-1}>{tr(`onboarding:step_${step}`)}</h1></DialogTitle>

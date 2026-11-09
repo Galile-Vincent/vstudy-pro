@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popove
 import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip';
 import { useNavigate } from '../shell';
 import { Onboarding } from './onboarding';
+import { isInsideDialog, returnFocusTo } from './return-focus';
 import { markLearned, saveProgress, useLearningProgress } from './progress';
 import { lessons, Walkthrough, type Lesson } from './walkthrough';
 import './guidance.css';
@@ -31,6 +32,8 @@ export function LearningHelp() {
   const [view, setView] = useState<HelpView>();
   const { route } = useNavigate();
   const navigating = useRef(false);
+  const opener = useRef<Element | null>(null);
+  const restoreFocus = returnFocusTo(() => opener.current);
   const focusDestination = () => {
     document.querySelector<HTMLElement>('#shell-content[role=main]')?.focus();
   };
@@ -42,22 +45,23 @@ export function LearningHelp() {
     const show = (event: Event) => {
       const next = (event as CustomEvent<HelpView>).detail;
       navigating.current = false;
+      if (!isInsideDialog(document.activeElement)) opener.current = document.activeElement;
       setView(next);
       try { markLearned('help'); } catch { /* Help must open when profile storage is unavailable. */ }
     };
     window.addEventListener('vstudy:learning-help', show);
     return () => window.removeEventListener('vstudy:learning-help', show);
   }, []);
-  if (view === 'setup') return <Onboarding onComplete={() => setView(undefined)}/>;
+  if (view === 'setup') return <Onboarding onComplete={() => setView(undefined)} onCloseAutoFocus={restoreFocus}/>;
   if (view === 'checklist') return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}>
     <DialogContent aria-describedby={undefined} onCloseAutoFocus={event => {
-      if (navigating.current) { event.preventDefault(); focusDestination(); }
+      if (navigating.current) { event.preventDefault(); focusDestination(); } else restoreFocus(event);
     }}>
       <GettingStarted detailed dialogTitle onNavigate={() => { navigating.current = true; setView(undefined); }}/>
     </DialogContent>
   </Dialog>;
   if (!view) return null;
-  return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}><DialogContent className="learning-dialog" aria-describedby={undefined} showCloseButton={false}>
+  return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}><DialogContent className="learning-dialog" aria-describedby={undefined} showCloseButton={false} onCloseAutoFocus={restoreFocus}>
     <Brand lockup/><header><DialogTitle>{tr(`onboarding:help_${view}`)}</DialogTitle><Button variant="ghost" size="icon" aria-label={tr('common:close')} onClick={() => setView(undefined)}><X size={18}/></Button></header>
     {view === 'walkthroughs' ? <><p>{tr('onboarding:walkthroughs_body')}</p><nav className="learning-lessons" aria-label={tr('onboarding:help_walkthroughs')}>{lessons.map(item => <Button variant={lesson === item ? 'secondary' : 'ghost'} aria-pressed={lesson === item} key={item} onClick={() => setLesson(item)}>{tr(`onboarding:lesson_${item}`)}</Button>)}</nav><Walkthrough key={lesson} lesson={lesson}/></> : <><p>{tr('onboarding:shortcuts_body')}</p><dl className="learning-shortcuts">{['selection', 'sidebar', 'send', 'newline', 'dismiss', 'navigate'].map(key => <div key={key}><dt>{tr(`onboarding:shortcut_${key}`)}</dt><dd><kbd>{tr(`onboarding:keys_${key}`)}</kbd></dd></div>)}</dl></>}
   </DialogContent></Dialog>;

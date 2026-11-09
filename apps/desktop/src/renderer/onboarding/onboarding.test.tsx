@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { Onboarding } from './onboarding';
 import { defaultSettings } from '../../shared';
@@ -15,4 +15,17 @@ it('states the local-first promise on the welcome step', async () => {
   render(<Onboarding onComplete={() => {}} />);
   expect(await screen.findByText(tr('onboarding:welcome_body'))).toBeTruthy();
   expect(tr('onboarding:welcome_body')).toMatch(/stays on this computer.*AI is optional.*until you ask/);
+});
+
+it('returns focus to the opener when setup closes with Escape', async () => {
+  invoke.mockImplementation(async channel => channel === 'settings:get' ? defaultSettings : channel === 'settings:systemLocale' ? 'en-US' : channel === 'analytics:getState' ? { onboarding_completed: true } : {});
+  const opener = document.createElement('button');
+  document.body.append(opener);
+  opener.focus();
+  const { rerender } = render(<Onboarding onComplete={() => rerender(<></>)} />);
+  await screen.findByText(tr('onboarding:welcome_body'));
+  fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
+  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+  await waitFor(() => expect(document.activeElement).toBe(opener));
+  opener.remove();
 });
