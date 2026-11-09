@@ -244,7 +244,9 @@ html[data-theme=contrast] .art-reader-cover::after { display:none; }
 .shell-sidebar .subscription-meters header strong { font-size:var(--type-xs); }
 .shell-sidebar .subscription-meters small,
 .shell-sidebar .subscription-window > span { font-size:calc(var(--type-xs) - .0625rem); }
-.shell-sidebar .subscription-window > span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.shell-sidebar .subscription-window > span { white-space:nowrap; }
+.shell-sidebar .subscription-window .subscription-label { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.shell-sidebar .subscription-window small { flex:none; }
 
 .shell-sidebar [data-slot=sidebar-menu-button] { font-size:var(--type-sm); }
 .shell-sidebar [data-slot=sidebar-group-label] { font-size:var(--type-xs); }
