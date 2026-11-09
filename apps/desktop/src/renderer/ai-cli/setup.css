@@ -87,6 +87,7 @@ button.ai-cli-consent { display:inline-flex; align-items:center; padding:var(--s
 .ai-cli-preferences { padding:var(--space-4); }
 .ai-cli-sheet :focus-visible,.ai-cli-inventory :focus-visible,.ai-cli-preferences :focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 .ai-cli-sheet [data-slot=button]:focus-visible { box-shadow:none; }
+.ai-cli-sheet [data-slot=button][class*=underline-offset] { text-decoration:underline; }
 @media (max-width:719px) { .ai-cli-sheet[data-slot=dialog-content][data-state] { width:calc(100vw - var(--space-4)); max-height:calc(100dvh - var(--space-4)); } .ai-cli-header,.ai-cli-scroll,.ai-cli-footer { padding-inline:var(--space-4); } .ai-cli-chooser { grid-template-columns:1fr; } .ai-cli-chooser label { padding:var(--space-3); } .ai-cli-steps { gap:0; } .ai-cli-steps li { flex-wrap:wrap; } .ai-cli-footer { flex-wrap:wrap; } }
 @media (prefers-reduced-motion:reduce) { .ai-cli-sheet[data-slot=dialog-content] { animation:none; transition:none; } }
 @media (prefers-contrast:more) { .ai-cli-chooser label,.ai-cli-chip,.ai-cli-version { outline:1px solid var(--line); } }
