@@ -44,7 +44,6 @@ import {
   changed,
   reorderDestination,
   importFiles,
-  moveDocuments,
   selectedRange,
   courseName,
   groupByCourse,
@@ -383,20 +382,40 @@ export function LibraryView() {
     });
     setMenu(null);
   };
+  const moveItems = useRef<Item[]>([]);
+  const openMove = (value: boolean) => {
+    if (value) moveItems.current = items.filter(item => ids.includes(item.document.id));
+    setMove(value);
+  };
   const moveTo = async (folderId: Folder["id"] | null) => {
-    const previous = items.filter((i) => ids.includes(i.document.id));
-    await run(() => moveDocuments(ids, folderId));
-    setNotice(tr("library:moved"));
-    recovery.add(tr("library:moved"), async () => {
-      for (const i of previous)
+    const targets = moveItems.current;
+    const failures: string[] = [];
+    const remaining: Item[] = [];
+    let moved = 0;
+    for (const item of targets) {
+      try {
         await desktop.invoke("library:documents:move", {
-          documentIds: [i.document.id],
-          folderId: i.folderId,
+          documentIds: [item.document.id], folderId,
         });
-      changed();
-    });
-    setMove(false);
-    setMenu(null);
+        moved++;
+        recovery.add(tr("library:moved"), async () => {
+          await desktop.invoke("library:documents:move", {
+            documentIds: [item.document.id], folderId: item.folderId,
+          });
+          changed();
+        });
+      } catch (error) {
+        remaining.push(item);
+        failures.push(`${item.document.title}: ${errorText(error)}`);
+      }
+    }
+    moveItems.current = remaining;
+    setNotice(failures.length ? tr("library:movePartial", {
+      succeeded: format.number(moved), total: format.number(targets.length),
+      failed: format.number(failures.length), reasons: failures.join("; "),
+    }) : "");
+    if (moved) changed();
+    if (!failures.length) { setMove(false); setMenu(null); }
   };
   const reorder = async (item: Item, delta: number) => {
     const destination = reorderDestination(items, items.indexOf(item), delta);
@@ -484,6 +503,15 @@ export function LibraryView() {
           {grid ? <LayoutGrid /> : <List />}
         </Button>
     </div>
+  );
+  const liveRegion = (
+    <div className="library-live" aria-live="polite">
+        {tr("library:loaded", {
+          count: items.length,
+          formatted: format.number(items.length),
+        })}
+        {notice || recoveryNotice}
+      </div>
   );
   return (
     <section
@@ -654,7 +682,7 @@ export function LibraryView() {
           <Button variant="outline"
             onClick={async () => {
               setMenu(null);
-              setMove(true);
+              openMove(true);
             }}
           >
             {tr("library:move")}
@@ -1027,13 +1055,7 @@ export function LibraryView() {
         </div>
         </>
       )}
-      <div className="library-live" aria-live="polite">
-        {tr("library:loaded", {
-          count: items.length,
-          formatted: format.number(items.length),
-        })}
-        {notice || recoveryNotice}
-      </div>
+      {!move && liveRegion}
       {(notice || recoveryNotice) && (
         <div className="library-toast" role="status">
           {notice || recoveryNotice}
@@ -1051,7 +1073,7 @@ export function LibraryView() {
           )}
         </div>
       )}
-      <LibraryMenus menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={setMove} setTagging={setTagging}/>
+      <LibraryMenus moveNotice={notice} liveRegion={liveRegion} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={setTagging}/>
       {promptDialog}
     </section>
   );

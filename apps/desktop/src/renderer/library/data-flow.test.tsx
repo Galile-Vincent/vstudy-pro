@@ -22,7 +22,7 @@ it('offers Undo for the first deletion when the next deletion fails',async()=>{
   const {container}=mount();await screen.findByText('first');
   fireEvent.keyDown(container.querySelector('.library-results')!,{key:'a',ctrlKey:true});
   fireEvent.click(await screen.findByRole('button',{name:tr('library:delete')}));
-  await waitFor(()=>expect(container.querySelector('.library-live')?.textContent)
+  await waitFor(()=>expect(document.querySelector('.library-live')?.textContent)
     .toContain(tr('library:deletePartial',{
       succeeded:'1',total:'2',failed:'1',reasons:`second: ${tr('errors:generic')}`,
     })));
@@ -71,4 +71,29 @@ it('keeps both deletion recoveries across Library navigation',async()=>{
   await screen.findByText('second');
   fireEvent.click(await screen.findByRole('button',{name:/Undo/}));
   await screen.findByText('first');
+});
+
+it.each([false,true])('reports failed moves truthfully and keeps the picker open (partial %s)',async partial=>{
+ state.invoke.mockImplementation(async(channel,payload)=>{
+   if(channel==='library:documents:list')return {items:[row('first'),row('second'),row('third')],nextCursor:null};
+   if(channel==='library:tree')return [{id:'destination',name:'Destination',parentId:null}];
+   if(channel==='library:documents:move' && (!partial || payload.documentIds.includes('third')))throw new Error('VSTUDY_STATUS:'+JSON.stringify({code:'library.folder_missing',params:{}}));
+   return [];
+ });
+ const {container}=mount();await screen.findByText('first');
+ fireEvent.keyDown(container.querySelector('.library-results')!,{key:'a',ctrlKey:true});
+ fireEvent.click(await screen.findByRole('button',{name:tr('library:move')}));
+ fireEvent.click(await screen.findByRole('button',{name:'Destination'}));
+ await waitFor(()=>expect(document.querySelector('.library-live')?.textContent).toContain('Folder not found'));
+ expect(screen.getByRole('dialog',{name:tr('library:move')}).textContent).toContain('Folder not found');
+ expect(container.querySelector('.library-toast')?.textContent).not.toContain(tr('library:moved'));
+ if(partial){
+   fireEvent.click(screen.getByRole('button',{name:tr('library:close')}));
+   expect(document.querySelector('.library-live')?.textContent).toContain('2 of 3 moved, 1 failed');
+   fireEvent.click(screen.getByRole('button',{name:/Undo/}));
+   await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:move',{documentIds:['second'],folderId:null}));
+   fireEvent.click(screen.getByRole('button',{name:/Undo/}));
+   await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:move',{documentIds:['first'],folderId:null}));
+   expect(state.invoke).not.toHaveBeenCalledWith('library:documents:move',{documentIds:['third'],folderId:null});
+ }else expect(screen.queryByRole('button',{name:/Undo/})).toBeNull();
 });
