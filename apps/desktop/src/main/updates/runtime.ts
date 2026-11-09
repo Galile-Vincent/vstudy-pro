@@ -20,6 +20,9 @@ export async function createUpdates(store: Store) {
     } catch { unsupported = 'unsigned'; }
   } else if (process.platform === 'win32') {
     const root = dirname(app.getPath('exe'));
+    if (process.arch !== 'x64') unsupported = 'platform';
+    else if (!/^publisherName:\s*\S+/m.test(
+      readFileSync(join(process.resourcesPath, 'app-update.yml'), 'utf8'))) unsupported = 'unsigned';
     if (!existsSync(join(process.resourcesPath, 'app-update.yml')) ||
       !existsSync(join(root, 'Uninstall VStudy Pro.exe'))) unsupported = 'portable';
   } else unsupported = 'platform';

@@ -335,3 +335,10 @@ https://github.com/ava-apple/vstudy-pro/releases/latest/download/latest-mac.yml
 or latest.yml. Explicit payload downloads use that release's assets and GitHub's
 release CDN redirects. The generic provider uses no authentication, API calls,
 staging headers or cache query identifiers. Existing TLS validation stays enabled.
+
+macOS updates rely on Squirrel.Mac's Developer ID signature check after download.
+GitHub release write access controls the feed and permits replay of an older
+correctly signed build newer than the installed version. SHA-512 is not publisher
+authentication or rollback protection. Windows updates remain disabled until
+publisherName is configured, and require x64 NSIS. Recommend ed25519-signed feed
+files and an explicit rollback policy as follow-up. See UPDATES.md for egress hosts.
