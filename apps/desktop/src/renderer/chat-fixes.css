@@ -113,6 +113,7 @@
 .workspace [data-slot=aui_message-group] { gap:var(--space-8); margin-bottom:var(--space-8); }
 .workspace .aui-thread-viewport-footer { gap:var(--space-3); padding-block:var(--space-3) var(--space-6); }
 .web-chat-local .aui-thread-viewport-footer { gap:var(--space-3); padding:var(--space-3) var(--space-4) var(--space-4); }
+.aui-thread-root:has([data-slot=aui_message-group]:empty) .aui-thread-scroll-to-bottom { display:none; }
 :is(.workspace,.web-chat-local) .aui-thread-scroll-to-bottom { top:auto; bottom:calc(100% + var(--space-2)); inset-inline-end:var(--space-4); align-self:auto; }
 :is(.workspace,.web-chat-local) :is([data-slot=aui_composer-shell],.aui-edit-composer-root),
 .workspace .new-chat-composer {
