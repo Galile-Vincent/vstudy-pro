@@ -45,8 +45,6 @@ import { Button } from "../components/ui/button";
 import {
   Tabs,
   TabsContent,
-  TabsList,
-  TabsTrigger,
 } from "../components/ui/tabs";
 import { Skeleton } from "../components/ui/skeleton";
 import { useMoodleApi, type MoodleApi } from "./api";
@@ -695,16 +693,15 @@ function CoursesBody({
                   onValueChange={(v) => setTab(v as Tab)}
                   className="moodle-tabs"
                 >
-                  <TabsList
-                    variant="line"
+                  <SegmentedTabsList
                     aria-label={tr("moodle:course_sections")}
                   >
                     {tabs.map((key) => (
-                      <TabsTrigger key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"})}>
+                      <SegmentedTabsTrigger key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"})}>
                         {tr(`moodle:${key}`)}
-                      </TabsTrigger>
+                      </SegmentedTabsTrigger>
                     ))}
-                  </TabsList>
+                  </SegmentedTabsList>
                   <TabsContent value="content">
                     <div className="grid items-start gap-6 mb-6 min-[1280px]:grid-cols-2">
                       <Section title={tr("moodle:up_next")} actions={
