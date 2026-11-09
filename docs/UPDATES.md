@@ -13,7 +13,12 @@ older correctly signed Mac build newer than the installed version. The version
 comparison is not rollback protection. Recommend ed25519-signed feed files with
 an explicit rollback policy as follow-up; this change does not implement them.
 
-Downloads require user action. Prereleases are ignored. Restart requests hand off
+Downloads and installation require attached native confirmation in main. Quitting
+alone never installs: automatic install on quit is disabled to preserve the guard.
+Restart waits for active work and the existing before-quit coordinated shutdown.
+A failed Squirrel attempt requires relaunch before another installation request,
+preventing accumulation of native handlers. Prereleases such as 1.2.3-rc.1 are
+excluded by the stable version regex and handled as no update, not a generic error. Restart requests hand off
 to Squirrel; signature or installation failures can still occur after download.
 Checks default on, unlike the default-off AI-CLI check: owner review is required.
 Checks begin after onboarding and skip offline periods. Manual checks have a short

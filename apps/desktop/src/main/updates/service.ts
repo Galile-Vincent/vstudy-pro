@@ -64,7 +64,7 @@ export class Updates {
     on('update-not-available', () => this.dispatch({type:'current'}));
     on('download-progress', (info: {percent:number}) => this.dispatch({type:'progress', percent:info.percent}));
     on('update-downloaded', (info: {version:string}) => this.dispatch({type:'ready', version:info.version}));
-    on('error', (error: Error) => this.dispatch({type:'error', code:updateError(error)}));
+    on('error', (error: Error) => this.failed(error));
   }
   snapshot = (): UpdateSnapshot => ({state:this.state.status === 'checking' && this.quietState ? this.quietState : this.state, currentVersion:this.options.version,
     lastCheckedAt:this.lastCheckedAt, automatic:this.options.getAutomatic?.() ?? this.automatic, installing:this.installing, ...(this.result ? {result:this.result} : {})});
@@ -85,6 +85,10 @@ export class Updates {
     if (event.type === 'error') this.updater.autoInstallOnAppQuit = false;
     this.emit();
   }
+  private failed(error: unknown) {
+    if ((error as {code?:unknown})?.code === 'NO_STABLE_UPDATE') this.dispatch({type:'current'});
+    else this.dispatch({type:'error',code:updateError(error)});
+  }
   async check(manual = true) {
     if (!['idle', 'error', 'available'].includes(this.state.status)) return this.snapshot();
     this.manual = manual;
@@ -104,7 +108,7 @@ export class Updates {
     this.dispatch({type:'check'});
     recordEgress('app_update_check', 'https://github.com/ava-apple/vstudy-pro/releases/latest/download');
     try { await this.updater.checkForUpdates(); }
-    catch (error) { this.dispatch({type:'error', code:updateError(error)}); }
+    catch (error) { this.failed(error); }
     return this.snapshot();
   }
   async download() {

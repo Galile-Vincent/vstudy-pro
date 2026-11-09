@@ -125,3 +125,10 @@ it.each([['net::ERR_INTERNET_DISCONNECTED','offline'],['net::ERR_NAME_NOT_RESOLV
   ['ERR_CHECKSUM_MISMATCH','integrity']])('maps Electron error message %s', (message,code)=>{
   expect(updateError(new Error(message))).toBe(code);
 });
+
+it('treats prerelease-only feeds as no stable update',async()=>{
+  const {service,updater}=setup();
+  updater.checkForUpdates.mockRejectedValueOnce({code:'NO_STABLE_UPDATE'});
+  await service.check(); expect(service.snapshot().state).toEqual({status:'idle'});
+  expect(service.snapshot().result).toBe('current');
+});
