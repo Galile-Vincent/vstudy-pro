@@ -87,3 +87,10 @@ it('keeps one polling loop under the app StrictMode lifecycle', async () => {
   await act(() => vi.advanceTimersByTimeAsync(1000));
   expect(invoke.mock.calls).toEqual([['mcp:state', {}], ['mcp:state', {}]]);
 });
+
+it('keeps connectivity ready when an action fails', async () => {
+  await mount();
+  invoke.mockRejectedValueOnce(new Error('action rejected'));
+  await act(() => host.querySelector('button')!.click());
+  expect(host.textContent).toContain('ready:false');
+});

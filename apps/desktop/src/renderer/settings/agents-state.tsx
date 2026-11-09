@@ -87,7 +87,7 @@ export function AgentsProvider({ children }: { children: ReactNode }) {
       await refresh();
       return true;
     } catch {
-      if (alive.current) { setFailed(true); setConnection('offline'); }
+      if (alive.current) { setFailed(true); }
       return false;
     } finally {
       locked.current = false;
