@@ -31,23 +31,31 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jum
   const messageIds = useAuiState(state => state.thread.messages.map(message => message.id).join());
   const control = useRef<HTMLButtonElement>(null);
   const container = useRef<HTMLDivElement>(null);
+  const historyParent = useRef<HTMLElement | null>(null);
   const focusMessage = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (cursor || focusMessage.current === null) return;
     const id = focusMessage.current;
     focusMessage.current = null;
-    const parent = container.current?.parentElement;
+    const parent = historyParent.current ?? container.current?.parentElement;
     queueMicrotask(() => {
       const messages = parent?.querySelectorAll<HTMLElement>('[data-message-id]');
       const target = Array.from(messages ?? []).find(message => message.dataset.messageId === id);
-      if (target) { target.tabIndex = -1; target.focus(); }
-      else container.current?.focus();
+      if (!target) return;
+      target.tabIndex = -1;
+      target.focus({preventScroll: true});
+      const bounds = target.getBoundingClientRect();
+      const viewport = target.closest('[data-slot="aui_thread-viewport"]')?.getBoundingClientRect();
+      if (bounds.top < (viewport?.top ?? 0) || bounds.bottom > (viewport?.bottom ?? window.innerHeight)) {
+        target.scrollIntoView({block: 'nearest'});
+      }
     });
   }, [cursor, messageIds]);
   const pending = useRef(false), live = useRef(true);
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
   const load = useCallback(async () => {
     if (!cursor || pending.current || runtime.thread.getState().isRunning) return;
+    historyParent.current = container.current?.parentElement ?? null;
     const hadFocus = document.activeElement === control.current;
     pending.current = true; setLoading(true); setError('');
     try {
@@ -73,5 +81,6 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jum
   }, [jumpMessageId, jump, cursor, loading, error, running, targetFound, load]);
   const missingTarget = jumpMessageId && !targetFound && !loading && !error && (!cursor || (jump.id === jumpMessageId && jump.pages >= 5));
 
+  if (!cursor) return missingTarget ? <p role="status">{tr('history:message_not_found')}</p> : null;
   return <div ref={container} tabIndex={-1} role="group" aria-label={tr('common:load_earlier_messages')}>{missingTarget && <p role="status">{tr('history:message_not_found')}</p>}{cursor && (error ? <LoadError message={error} retry={() => void load()}/> : <Button ref={control} variant="ghost" disabled={loading || running} onClick={() => void load()}>{tr(loading ? 'common:loading_earlier_messages' : 'common:load_earlier_messages')}</Button>)}</div>;
 }
