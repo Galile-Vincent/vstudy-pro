@@ -6,7 +6,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { defaultSettings, documentIdSchema, settingsSchema, settingsPatchSchema } from '../shared/domain';
 import { desktop } from './bridge';
 import { CourseFileActions, openDocument, performDocumentAction } from './document-open';
-import { AppearanceSection } from './settings/appearance';
+import { ProviderSettings } from './providers';
 import { DocumentSettings } from './settings/documents';
 import { i18n } from '../shared/i18n';
 vi.mock('./bridge', () => ({desktop:{invoke:vi.fn()}}));
@@ -101,17 +101,16 @@ async function chooseMethod(trigger: HTMLElement, name: string) {
   await act(async () => fireEvent.click(getByRole(document.body,'option',{name})));
 }
 
-it('places the document default in Documents, separate from Text and reading', async () => {
+it('places the document default in General under Documents', async () => {
   await i18n.changeLanguage('en');
   vi.mocked(desktop.invoke).mockResolvedValue(defaultSettings);
-  const host=document.createElement('div'); const root=createRoot(host);
+  const host=document.createElement('div'); document.body.append(host); const root=createRoot(host);
   try {
-    await act(async () => root.render(<AppearanceSection/>));
-    const documents = getByRole(host,'heading',{name:'Documents'}).closest('section')!;
-    const reading = getByRole(host,'heading',{name:'Text and reading'}).closest('section')!;
+    await act(async () => root.render(<ProviderSettings providers={[]} onClose={() => {}} onRefresh={async () => {}} />));
+    const documents = getByRole(document.body,'heading',{name:'Documents'}).closest('section')!;
+    expect(getByRole(document.body,'tab',{name:'General'}).getAttribute('aria-selected')).toBe('true');
     expect(getByRole(documents,'combobox').textContent).toContain('VStudy reader');
     expect(documents.textContent).toContain('Open documents by default');
-    expect(reading.textContent).not.toContain('Open documents by default');
     expect(host.textContent).not.toContain('VStudy reader (Markdown)');
-  } finally {await act(async () => root.unmount());}
+  } finally {await act(async () => root.unmount()); host.remove();}
 });

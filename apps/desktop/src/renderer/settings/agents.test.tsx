@@ -142,7 +142,7 @@ it('lists pending requests with a review action', async () => {
 it('announces successful revocation inline', async () => {
   state.grants = [grantFixture()];
   await mount(); await click('Revoke access');
-  expect(view.host.querySelector('[role=status]')?.textContent).toContain('Access revoked');
+  expect(view.host.querySelector(`[data-grant-id="${ids.grant}"] [role=status]`)?.textContent).toContain('Access revoked');
 });
 
 it('allows a failed pairing denial to be retried and reports the error', async () => {
@@ -152,4 +152,18 @@ it('allows a failed pairing denial to be retried and reports the error', async (
   expect(view.host.textContent).toContain(tr('agents:action_error'));
   await click('Deny');
   expect(invoke.mock.calls.filter(([c])=>c==='mcp:pair-decision')).toHaveLength(2);
+});
+
+it('shows only the twenty newest activity entries even when input arrives out of order', async () => {
+  state.activity = Array.from({length:25}, (_,index) => ({
+    id: `activity-${index}`, at: new Date(Date.UTC(2026,0,index + 1)).toISOString(),
+    clientName: `Agent ${index}`, tool: 'list_courses', accountId: null, status: 'OK', args: {},
+  }));
+  await mount();
+  const rows = [...view.host.querySelectorAll('.agents-activity > li')];
+  expect(rows).toHaveLength(20);
+  expect(rows[0]?.textContent).toContain('Agent 24');
+  expect(rows[19]?.textContent).toContain('Agent 5');
+  expect(view.host.textContent).toContain('Showing the latest 20');
+  expect(view.host.querySelector('.agents-activity')?.textContent).not.toContain('Agent 4');
 });
