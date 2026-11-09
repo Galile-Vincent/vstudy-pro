@@ -70,7 +70,7 @@ it('ignores text drags', () => {
   fireEvent.dragEnter(container.firstChild!, { dataTransfer: { types: ['text/plain'] } });
   expect(container.firstElementChild!.getAttribute('data-dragging')).toBe('false');
 });
-it.each(['dragEnd', 'blur', 'dragLeave'])('clears nested drag depth on %s', event => {
+it.each(['dragEnd', 'blur'])('clears nested drag depth on %s', event => {
   const { container } = render(<UploadCard />);
   const card = container.firstElementChild!;
   for (let i = 0; i < 3; i++) fireEvent.dragEnter(card, { dataTransfer: { types: ['Files'] } });
@@ -125,4 +125,16 @@ it('keeps one persistent status for partial failures', async () => {
   expect(screen.getAllByRole('status')).toEqual([status]);
   expect(screen.queryByRole('alert')).toBeNull();
   expect(status.textContent).not.toBe('Imported');
+});
+
+it('keeps nested file drags highlighted with null relatedTarget', () => {
+  const { container } = render(<UploadCard />);
+  const card = container.firstElementChild!;
+  const child = screen.getByText('Drop to import');
+  fireEvent.dragEnter(card, { dataTransfer: { types: ['Files'] } });
+  fireEvent.dragEnter(child, { dataTransfer: { types: ['Files'] } });
+  fireEvent.dragLeave(card, { relatedTarget: null });
+  expect(card.getAttribute('data-dragging')).toBe('true');
+  fireEvent.dragLeave(child, { relatedTarget: null });
+  expect(card.getAttribute('data-dragging')).toBe('false');
 });
