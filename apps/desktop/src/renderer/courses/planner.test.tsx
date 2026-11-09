@@ -95,3 +95,20 @@ it('keeps both tab panels addressable and supports Arrow, Home and End navigatio
     expect(document.getElementById(tabs[index]!.getAttribute('aria-controls')!)?.hidden).toBe(false);
   }
 });
+
+it('resets the displayed course and submitted course together after quick add', async () => {
+  HTMLElement.prototype.scrollIntoView = vi.fn();
+  const { fireEvent, getByRole } = await import('@testing-library/react');
+  const { repo } = await mount();
+  const trigger = getByRole(host.querySelector('form')!, 'combobox');
+  await act(async () => { fireEvent.keyDown(trigger, { key: 'ArrowDown' }); });
+  const option = [...document.querySelectorAll<HTMLElement>('[role=option]')].at(-1)!;
+  await act(async () => { option.click(); });
+  await fill('input[name="title"]', 'First task');
+  await act(async () => { fireEvent.submit(host.querySelector('form')!); });
+  expect(repo.snapshot().tasks[0]?.courseId).not.toBeNull();
+  expect(trigger.textContent).toBe(i18n.t('planner:no_course'));
+  await fill('input[name="title"]', 'Second task');
+  await act(async () => { fireEvent.submit(host.querySelector('form')!); });
+  expect(repo.snapshot().tasks.find(task => task.title === 'Second task')?.courseId).toBeNull();
+});
