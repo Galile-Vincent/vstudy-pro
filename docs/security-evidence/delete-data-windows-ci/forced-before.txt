@@ -1,0 +1,331 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-949b7590/apps/desktop
+
+ ❯ src/main/storage/study-backup.test.ts (4 tests | 1 failed) 252ms
+   × restores study evidence and confirmed test answers, then deletes all restored data 69ms
+ ❯ src/main/services/delete-data.test.ts (17 tests | 6 failed) 59ms
+   × preserves all data on rename failure EACCES and relaunches 3ms
+   × preserves all data on rename failure EPERM and relaunches 0ms
+   × preserves all data on rename failure EBUSY and relaunches 0ms
+   × quiesces before one atomic rename and relaunches without deleting 0ms
+   × holds admission across concurrent calls and failures 1ms
+   × retries quarantines next startup, including incomplete cleanup 0ms
+ ❯ src/main/hardening.test.ts (5 tests | 1 failed | 1 skipped) 51ms
+   × rejects symlinks, hardlinks and signature mismatches; deletes every data tree 19ms
+ ❯ src/main/review/lifecycle.test.ts (3 tests | 1 failed) 188ms
+   × drains both real worker families before delete-all closes storage 31ms
+ ❯ src/main/services/delete-pending.test.ts (13 tests | 2 failed) 2369ms
+   × durably schedules a wipe after EPERM 8ms
+   × durably schedules a wipe after EBUSY 6ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/hardening.test.ts > rejects symlinks, hardlinks and signature mismatches; deletes every data tree
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/main/hardening.test.ts:60:30
+     58|     await createDataDeletion(root, async () => { stopped = true; }, as…
+     59|     expect(stopped).toBe(true);
+     60|     await expect(access(root)).rejects.toThrow();
+       |                              ^
+     61|   } finally { await import('node:fs/promises').then(fs => fs.rm(root, …
+     62| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  src/main/review/lifecycle.test.ts > drains both real worker families before delete-all closes storage
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/main/review/lifecycle.test.ts:59:50
+     57|  expect(calls).toContain('memory suspend');
+     58|  release();await operation;expect(settled).toBe(true);
+     59|  if(path==='delete-all')await expect(access(root)).rejects.toThrow();
+       |                                                  ^
+     60|  if(path!=='storage settle')expect(calls).toContain('memory dispose');
+     61|  await generation.dispose();await memory.dispose();store.close();await…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  src/main/storage/study-backup.test.ts > restores study evidence and confirmed test answers, then deletes all restored data
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/main/storage/study-backup.test.ts:87:57
+     85|   let stopped=false;
+     86|   await createDataDeletion(target,async()=>{restored!.close();restored…
+     87|   expect(stopped).toBe(true);await expect(access(target)).rejects.toMa…
+       |                                                         ^
+     88|  } finally {source?.close();restored?.close();await rm(root,{recursive…
+     89| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  src/main/services/delete-data.test.ts > preserves all data on rename failure EACCES and relaunches
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…}, true ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
+-     "code": "EACCES",
++   Error {
++     "message": "[vitest] No \"realpath\" export is defined on the \"node:fs/promises\" mock. Did you forget to return it from \"vi.mock\"?
++ If you need to partially mock a module, you can use \"importOriginal\" helper inside:
++ ",
++     "codeFrame": "vi.mock(import(\"node:fs/promises\"), async (importOriginal) => {
++   const actual = await importOriginal()
++   return {
++     ...actual,
++     // your mocked methods
++   }
++ })",
+    },
+    true,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/services/delete-data.test.ts:23:20
+     21|   expect(s.stop).toHaveBeenCalledOnce();
+     22|   expect(io.rm).not.toHaveBeenCalled();
+     23|   expect(s.report).toHaveBeenCalledWith(expect.objectContaining({code}…
+       |                    ^
+     24|   expect(io.open).toHaveBeenCalledWith('/owned.delete-pending',expect.…
+     25|   expect(s.relaunch).toHaveBeenCalledOnce();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  src/main/services/delete-data.test.ts > preserves all data on rename failure EPERM and relaunches
+AssertionError: expected "vi.fn()" to be called with arguments: [ …(2) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
+-     "code": "EPERM",
++   Error {
++     "message": "[vitest] No \"realpath\" export is defined on the \"node:fs/promises\" mock. Did you forget to return it from \"vi.mock\"?
++ If you need to partially mock a module, you can use \"importOriginal\" helper inside:
++ ",
++     "codeFrame": "vi.mock(import(\"node:fs/promises\"), async (importOriginal) => {
++   const actual = await importOriginal()
++   return {
++     ...actual,
++     // your mocked methods
++   }
++ })",
+    },
+    true,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/services/delete-data.test.ts:23:20
+     21|   expect(s.stop).toHaveBeenCalledOnce();
+     22|   expect(io.rm).not.toHaveBeenCalled();
+     23|   expect(s.report).toHaveBeenCalledWith(expect.objectContaining({code}…
+       |                    ^
+     24|   expect(io.open).toHaveBeenCalledWith('/owned.delete-pending',expect.…
+     25|   expect(s.relaunch).toHaveBeenCalledOnce();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  src/main/services/delete-data.test.ts > preserves all data on rename failure EBUSY and relaunches
+AssertionError: expected "vi.fn()" to be called with arguments: [ …(2) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
+-     "code": "EBUSY",
++   Error {
++     "message": "[vitest] No \"realpath\" export is defined on the \"node:fs/promises\" mock. Did you forget to return it from \"vi.mock\"?
++ If you need to partially mock a module, you can use \"importOriginal\" helper inside:
++ ",
++     "codeFrame": "vi.mock(import(\"node:fs/promises\"), async (importOriginal) => {
++   const actual = await importOriginal()
++   return {
++     ...actual,
++     // your mocked methods
++   }
++ })",
+    },
+    true,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/services/delete-data.test.ts:23:20
+     21|   expect(s.stop).toHaveBeenCalledOnce();
+     22|   expect(io.rm).not.toHaveBeenCalled();
+     23|   expect(s.report).toHaveBeenCalledWith(expect.objectContaining({code}…
+       |                    ^
+     24|   expect(io.open).toHaveBeenCalledWith('/owned.delete-pending',expect.…
+     25|   expect(s.relaunch).toHaveBeenCalledOnce();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+ FAIL  src/main/services/delete-data.test.ts > quiesces before one atomic rename and relaunches without deleting
+AssertionError: expected "vi.fn()" to be called with arguments: [ '/owned', StringMatching{…} ]
+
+Number of calls: 0
+
+ ❯ src/main/services/delete-data.test.ts:29:21
+     27| it('quiesces before one atomic rename and relaunches without deleting'…
+     28|   const s=setup(); await s.run();
+     29|   expect(io.rename).toHaveBeenCalledWith('/owned',expect.stringMatchin…
+       |                     ^
+     30|   expect(s.stop.mock.invocationCallOrder[0]).toBeLessThan(io.rename.mo…
+     31|   expect(io.rename.mock.invocationCallOrder[0]).toBeLessThan(s.relaunc…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
+
+ FAIL  src/main/services/delete-data.test.ts > holds admission across concurrent calls and failures
+AssertionError: expected "vi.fn()" to be called with arguments: [ ObjectContaining{…}, true ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   ObjectContaining {
+-     "message": "INCOMPLETE",
++   Error {
++     "message": "[vitest] No \"realpath\" export is defined on the \"node:fs/promises\" mock. Did you forget to return it from \"vi.mock\"?
++ If you need to partially mock a module, you can use \"importOriginal\" helper inside:
++ ",
++     "codeFrame": "vi.mock(import(\"node:fs/promises\"), async (importOriginal) => {
++   const actual = await importOriginal()
++   return {
++     ...actual,
++     // your mocked methods
++   }
++ })",
+    },
+    true,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/main/services/delete-data.test.ts:41:20
+     39|   io.rename.mockRejectedValueOnce(new Error('INCOMPLETE'));
+     40|   release(); await first; await expect(s.run()).rejects.toThrow('alrea…
+     41|   expect(s.report).toHaveBeenCalledWith(expect.objectContaining({messa…
+       |                    ^
+     42|   expect(s.stop).toHaveBeenCalledOnce(); expect(s.relaunch).toHaveBeen…
+     43| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯
+
+ FAIL  src/main/services/delete-data.test.ts > retries quarantines next startup, including incomplete cleanup
+AssertionError: expected "vi.fn()" to be called with arguments: [ …(2) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+-   "/owned.deleting-123-12345678-1234-1234-1234-123456789abc",
+-   ObjectContaining {
++   "\\owned.deleting-123-12345678-1234-1234-1234-123456789abc",
++   {
++     "force": true,
++     "maxRetries": 5,
+      "recursive": true,
++     "retryDelay": 200,
+    },
+  ]
+
+  2nd vi.fn() call:
+
+  [
+-   "/owned.deleting-123-12345678-1234-1234-1234-123456789abc",
+-   ObjectContaining {
++   "\\owned.deleting-123-12345678-1234-1234-1234-123456789abc",
++   {
++     "force": true,
++     "maxRetries": 5,
+      "recursive": true,
++     "retryDelay": 200,
+    },
+  ]
+
+
+Number of calls: 2
+
+ ❯ src/main/services/delete-data.test.ts:57:17
+     55|   await cleanupDeletedData('/owned',log); await cleanupDeletedData('/o…
+     56|   expect(io.rm).toHaveBeenCalledTimes(2);
+     57|   expect(io.rm).toHaveBeenCalledWith('/owned.deleting-123-12345678-123…
+       |                 ^
+     58|   expect(log).toHaveBeenCalledWith(expect.objectContaining({phase:'del…
+     59| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/11]⎯
+
+ FAIL  src/main/services/delete-pending.test.ts > durably schedules a wipe after EPERM
+Error: ENOENT: no such file or directory, open '/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/delete-pending-ZxHOi9/profile.delete-pending'
+ ❯ src/main/services/delete-pending.test.ts:30:21
+     28|   vi.spyOn(fs, 'rename').mockRejectedValueOnce(Object.assign(Error(cod…
+     29|   await createDataDeletion(root, async () => {}, async () => {}, () =>…
+     30|   expect(JSON.parse(await fs.readFile(root + '.delete-pending', 'utf8'…
+       |                     ^
+     31| });
+     32| it('retries partial deletion after a crash and does not follow owned s…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/11]⎯
+
+ FAIL  src/main/services/delete-pending.test.ts > durably schedules a wipe after EBUSY
+Error: ENOENT: no such file or directory, open '/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/delete-pending-4VKlIi/profile.delete-pending'
+ ❯ src/main/services/delete-pending.test.ts:30:21
+     28|   vi.spyOn(fs, 'rename').mockRejectedValueOnce(Object.assign(Error(cod…
+     29|   await createDataDeletion(root, async () => {}, async () => {}, () =>…
+     30|   expect(JSON.parse(await fs.readFile(root + '.delete-pending', 'utf8'…
+       |                     ^
+     31| });
+     32| it('retries partial deletion after a crash and does not follow owned s…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/11]⎯
+
+
+ Test Files  5 failed (5)
+      Tests  11 failed | 30 passed | 1 skipped (42)
+   Start at  19:01:28
+   Duration  2.46s (transform 319ms, setup 19ms, import 419ms, tests 2.92s, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-949b7590/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run --config vitest.delete-win32.config.ts
