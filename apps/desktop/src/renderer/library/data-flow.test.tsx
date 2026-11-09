@@ -487,3 +487,16 @@ it('uses nearest scrolling for arrows within and beyond the viewport', async () 
  fireEvent.keyDown(container.querySelector('[data-index="6"]')!,{key:'ArrowUp'});
  expect(viewport.scrollTop).toBe(48);
 });
+
+it('rerenders only affected cards when selection changes among 5000 IDs', async () => {
+ localStorage.setItem('library-grid','true');
+ document.documentElement.style.setProperty('--art-reader-card-height','300');
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'
+  ? {items:Array.from({length:5000},(_,i)=>row('doc'+i)),nextCursor:null}:[]);
+ const {container}=mount(); await screen.findByText('doc0');
+ fireEvent.keyDown(container.querySelector('.library-results')!,{key:'a',ctrlKey:true});
+ await waitFor(()=>expect(container.querySelector('.bulk-bar')?.textContent).toContain('5,000'));
+ state.art.mockClear();
+ fireEvent.click(screen.getByText('doc1').closest('.library-document')!,{ctrlKey:true});
+ expect(state.art.mock.calls.map(([id])=>id)).toEqual(['doc1']);
+});

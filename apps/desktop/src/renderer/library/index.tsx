@@ -77,9 +77,29 @@ function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpe
  const ref=useRef<HTMLButtonElement>(null);const [visible,setVisible]=useState(false);
  return <Tooltip delayDuration={500} open={visible} onOpenChange={next=>{const button=ref.current;const hidden=button?.closest('.library-document')?.querySelectorAll(':scope > div');setVisible(next&&!!button&&(button.scrollWidth>button.clientWidth||Array.from(hidden??[]).some(e=>getComputedStyle(e).display==='none')));}}><TooltipTrigger asChild><Button ref={ref} variant="ghost" className="document-title" tabIndex={-1} lang={contentLanguage(title)} onAuxClick={event=>{if(event.button===1){event.preventDefault();onOpen(event);}}} onClick={onOpen}>{title}</Button></TooltipTrigger><TooltipContent className="document-tooltip"><div>{title}</div><div>{details}</div></TooltipContent></Tooltip>;
 }
-const DocumentRow = memo(function DocumentRow({ render }: {
-  version: string; render: () => React.ReactNode;
-}) { return render(); }, (previous, next) => previous.version === next.version);
+function useEvent<T extends (...args: never[]) => unknown>(callback: T): T {
+  const latest = useRef(callback);
+  useLayoutEffect(() => { latest.current = callback; });
+  return useCallback(((...args) => latest.current(...args)) as T, []);
+}
+function retainItems(previous: Item[], next: Item[]) {
+  const byId = new Map(previous.map(item => [item.document.id, item]));
+  return next.map(item => {
+    const old = byId.get(item.document.id);
+    return old && JSON.stringify(old) === JSON.stringify(item) ? old : item;
+  });
+}
+type RowProps = {
+  item: Item; index: number; count: number; grid: boolean;
+  height: number; offset: number; columns: number; tabRow: boolean;
+  selected: boolean; folderId: string | null | undefined; place: string;
+  language: string; locale: string | undefined; page: number | undefined;
+  total: number | undefined; render: () => React.ReactNode;
+};
+const DocumentRow = memo(function DocumentRow({render}: RowProps) {
+  return render();
+}, (previous, next) => (Object.keys(previous) as (keyof RowProps)[])
+  .every(key => key === "render" || previous[key] === next[key]));
 const defaults: LibraryQuery = { sort: "manual", direction: "asc", limit: 50 };
 const compactQuery = "(max-width: 1099px)";
 function useCompactToolbar() {
@@ -290,7 +310,7 @@ export function LibraryView() {
         if (cancelled || id !== generation.current) return;
         cursor = page.nextCursor ?? undefined;
         const updates = new Map(page.items.map(item => [item.document.id, item]));
-        setItems(current => current.map(item => updates.get(item.document.id) ?? item));
+        setItems(current => retainItems(current, current.map(item => updates.get(item.document.id) ?? item)));
       } catch (error) {
         if (!cancelled) setError(errorText(error));
       } finally { pending = false; }
@@ -352,7 +372,7 @@ export function LibraryView() {
           rows.push(...next.items);
           page.nextCursor = next.nextCursor;
         }
-        setItems(rows);
+        setItems(current => retainItems(current, rows));
         const available = new Set(rows.map(item => item.document.id));
         if (provesExistence(query, page.nextCursor)) {
           const missing = selectedIds.current.filter(id => !available.has(id));
@@ -395,7 +415,7 @@ export function LibraryView() {
       focusAfter.current = null;
     }
   }, [loading, items]);
-  const run = async (action: () => Promise<unknown>) => {
+  const run = useEvent(async (action: () => Promise<unknown>) => {
     const focused = document.activeElement as HTMLElement | null;
     focusAfter.current = focused?.closest<HTMLElement>("[data-index]")?.id ?? menuAnchor.current?.closest<HTMLElement>("[data-index]")?.id ?? "shell-content";
     try {
@@ -403,7 +423,7 @@ export function LibraryView() {
     } catch (e) {
       setNotice(errorText(e));
     } finally { changed(); }
-  };
+  });
   const more = async () => {
     if (!cursor || fetching.current) return;
     fetching.current = true;
@@ -442,14 +462,14 @@ export function LibraryView() {
     setCursor(undefined);
     setSelected((openGroup ? all.filter((i) => (i.course?.id ?? uncategorizedKey) === openGroup.key) : all).map((i) => i.document.id));
   };
-  const open = (item: Item, newTab = false) => {
+  const open = useEvent((item: Item, newTab = false) => {
     void run(() => openDocument(item.document.id, () => (newTab ? openTab : navigate)({
       view: "workspace",
       documentId: item.document.id,
       query: route.query,
       title: newTab ? item.document.title : route.title,
     })));
-  };
+  });
   const ids =
     menu && !selectedSet.has(menu.document.id)
       ? [menu.document.id]
@@ -990,11 +1010,12 @@ export function LibraryView() {
               const lane = Math.floor(index / columns);
               const height = layout.heights[lane]!;
               const offset = layout.offsets[lane]!;
-              const version = JSON.stringify([
-                item, index, shown.length, grid, height, offset, columns, tabRow === d.id,
-                selected, query, folders, language, i18n.resolvedLanguage, progress[d.id],
-              ]);
-              return <DocumentRow key={d.id} version={version} render={() => (
+              return <DocumentRow key={d.id} item={item} index={index}
+                count={shown.length} grid={grid} height={height} offset={offset}
+                columns={columns} tabRow={tabRow === d.id} selected={selectedSet.has(d.id)}
+                folderId={query.folderId} place={placeOf(item)} language={language}
+                locale={i18n.resolvedLanguage} page={progress[d.id]?.page}
+                total={progress[d.id]?.total} render={() => (
                 <div
                   id={`library-document-${d.id}`}
                   data-index={index}
