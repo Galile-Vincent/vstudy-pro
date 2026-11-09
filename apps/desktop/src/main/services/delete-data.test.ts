@@ -109,3 +109,10 @@ it('aborts a storage-owning stream before waiting for its release', async () => 
   try { await vi.waitFor(() => expect(stop).toHaveBeenCalledOnce(),{timeout:100}); }
   finally { release(); await pending; }
 });
+
+it('aggregates multiple quarantine failures into one notice', async () => {
+  io.readdir.mockResolvedValue([1,2].map(n => `owned.deleting-${n}-12345678-1234-1234-1234-123456789abc`));
+  io.rm.mockRejectedValue(Error('locked'));
+  const notice=vi.fn(); await cleanupDeletedData('/owned',notice);
+  expect(notice).toHaveBeenCalledOnce();
+});

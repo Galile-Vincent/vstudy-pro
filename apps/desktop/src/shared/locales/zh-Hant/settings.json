@@ -14,7 +14,7 @@
   "retry": "重試",
   "offline": "離線模式",
   "delete": "刪除所有資料",
-  "delete_copy": "移除本應用程式的文件、對話、已儲存金鑰、快取和轉換環境，然後重新啟動。刪除會在重新啟動時完成；被鎖定的檔案將於下次啟動重試。資料庫外的原始檔案、CLI 登入和共用 Python 下載快取會保留。",
+  "delete_copy": "移除本應用程式資料夾內的文件、對話、資料庫副本、已儲存 API 金鑰、設定、記錄、快取及轉換工具，然後重新啟動。鎖定檔案會在 24 小時內於啟動時重試。Chromium 記錄（包括主機名稱）可能保留至下次啟動。作業系統鑰匙圈加密金鑰、應用程式資料夾外的原始檔案、匯出檔案、CLI 登入及共用 Python 下載快取會保留。",
   "confirm": "輸入 DELETE 以確認",
   "waiting": "正在等待鑰匙圈存取…",
   "keychain_failed": "無法存取鑰匙圈。請重試，或使用但不儲存金鑰。",
@@ -109,14 +109,15 @@
   "event_ai_cli_status": "AI 工具狀態檢查",
   "event_moodle_request": "Moodle 請求",
   "event_unknown": "網路請求",
-  "delete_failed": "刪除將在應用程式重新啟動時完成。若檔案仍被鎖定，下次啟動會重試。{{reason}}",
+  "delete_failed": "部分資料無法移除。請在 24 小時內重新啟動以重試；逾時後需再次確認刪除。{{reason}}",
   "delete_failed_permission": "無法刪除應用程式資料：存取遭拒，請確認檔案權限後重試。",
   "delete_failed_busy": "無法刪除應用程式資料：檔案使用中，請關閉其他程式後重試。",
   "delete_failed_files": "無法移除所有應用程式資料檔案，請確認磁碟空間後重試。",
   "remove_key_title": "移除 {{name}} 的金鑰？",
   "remove_key_copy": "您需要重新輸入金鑰才能使用此服務。",
   "provider_action": "{{action}} — {{name}}",
-  "delete_pending": "部分資料無法移除。應用程式重新啟動時會再次嘗試刪除。",
+  "delete_pending": "刪除尚未完成或請求已過期。請在設定中再次確認刪除以重試。",
   "delete_in_progress": "正在刪除資料。",
-  "delete_not_scheduled": "無法安排刪除。您的資料仍保留。請重新啟動後再試。{{reason}}"
+  "delete_not_scheduled": "無法安排刪除。您的資料仍保留，請重試。{{reason}}",
+  "delete_failure_title": "資料刪除未完成"
 }

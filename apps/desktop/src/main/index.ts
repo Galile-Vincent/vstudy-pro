@@ -326,9 +326,15 @@ if (ownsApplication) void app.whenReady().then(async () => {
     store?.close();
     store = undefined;
   }, async (error, scheduled) => {
-    const reason = error instanceof Error ? error.message : String(error);
+    const code = (error as NodeJS.ErrnoException | undefined)?.code;
+    const reason = tr(code === 'EACCES' || code === 'EPERM'
+      ? 'settings:delete_failed_permission' : code === 'EBUSY'
+        ? 'settings:delete_failed_busy' : 'settings:delete_failed_files');
     logDeletionFailure(error);
-    dialog.showErrorBox(tr('settings:delete_title'), tr(scheduled ? 'settings:delete_failed' : 'settings:delete_not_scheduled',{reason}));
+    void dialog.showMessageBox({type:'warning',title:tr('settings:delete_failure_title'),
+      message:tr(scheduled ? 'settings:delete_failed' : 'settings:delete_not_scheduled',{reason}),
+      buttons:[tr('common:close')],
+    });
   }, () => { restartOwnedApp(app); });
   let deleteRequested = false;
   deletion.handle('settings:deleteAllData', async (_request, event) => {

@@ -5,7 +5,7 @@ import type { McpRuntime } from './mcp/runtime';
 
 const mocks = vi.hoisted(() => ({
   initialize:vi.fn(), confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
-  showMessage: vi.fn(), fatal: vi.fn(), copyDiagnostics: vi.fn(), log: vi.fn(), registerIpc: vi.fn(), restore: undefined as undefined | (() => void),
+  showMessage: vi.fn(), fatal: vi.fn(), copyDiagnostics: vi.fn(), logDeletionFailure:vi.fn(), log: vi.fn(), registerIpc: vi.fn(), restore: undefined as undefined | (() => void),
 }));
 const electron = await vi.hoisted(async () => {
   const { EventEmitter } = await import('node:events');
@@ -49,7 +49,7 @@ vi.mock('./moodle/sso-protocol', () => ({ initializeMoodleProtocol: mocks.initia
 vi.mock('./storage/reconcile', () => ({ reconcileDownloads: vi.fn() }));
 vi.mock('./storage/restore-startup', () => ({ confirmRestoreStartup: mocks.confirm, rollbackRestoreStartup: mocks.rollback }));
 vi.mock('./storage/backup', () => ({ recoverRestore: vi.fn() }));
-vi.mock('./logging', () => ({ log: mocks.log, stopFileLogging: vi.fn(), copyDiagnostics: mocks.copyDiagnostics }));
+vi.mock('./logging', () => ({ log: mocks.log, stopFileLogging: vi.fn(), logDeletionFailure:mocks.logDeletionFailure, copyDiagnostics: mocks.copyDiagnostics }));
 vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage, showStartupError: mocks.fatal }));
 vi.mock('./window-state', () => ({readWindowState: () => ({width:1200,height:800,maximized:false}), trackWindowState:vi.fn()}));
 vi.mock('./shutdown', () => ({ coordinateShutdown: () => vi.fn() }));
@@ -411,4 +411,15 @@ it('bounds startup session deletion even when Chromium never responds', async ()
     await vi.advanceTimersByTimeAsync(12_001);
     expect(settled).toBe(true);
   } finally {vi.useRealTimers();window.webContents.emit('did-finish-load');}
+});
+
+it('reports deletion errors with a failure title in one unparented notice', async () => {
+  const window=await start();
+  const {createDataDeletion}=await import('./services/delete-data');
+  const report=vi.mocked(createDataDeletion).mock.calls[0]![2];
+  await report(Object.assign(Error('/private/secret/path'),{code:'EACCES'}),true);
+  expect(electron.dialog.showMessageBox).toHaveBeenCalledWith(expect.objectContaining({
+    title:'settings:delete_failure_title',message:'settings:delete_failed',
+  }));
+  window.webContents.emit('did-finish-load');
 });

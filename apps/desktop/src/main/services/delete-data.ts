@@ -51,7 +51,7 @@ export function createDataDeletion(
 export async function cleanupDeletedData(
   root: string, log: (event: {phase:string;error:unknown}) => void,
 ): Promise<boolean> {
-  let complete = true;
+  const failures: unknown[] = [];
   try {
     const parent = dirname(root), prefix = basename(root);
     const entries = await readdir(parent);
@@ -63,10 +63,12 @@ export async function cleanupDeletedData(
         if (candidate === root || !stat.isDirectory() || stat.isSymbolicLink()) return;
         await rm(candidate, removeOptions);
       }
-      catch (error) { complete = false; log({phase:'delete-cleanup-failed',error}); }
+      catch (error) { failures.push(error); }
     }));
-  } catch (error) { complete = false; log({phase:'delete-cleanup-failed',error}); }
-  return complete;
+  } catch (error) { failures.push(error); }
+  if (failures.length) log({phase:'delete-cleanup-failed',
+    error:new AggregateError(failures,'Quarantine deletion incomplete')});
+  return failures.length === 0;
 }
 
 const removeOptions = {recursive:true, force:true, maxRetries:5, retryDelay:200};

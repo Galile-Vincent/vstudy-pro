@@ -14,7 +14,7 @@
   "retry": "Retry",
   "offline": "Offline mode",
   "delete": "Delete all data",
-  "delete_copy": "Remove this app’s documents, conversations, saved keys, app caches and converter environment, then restart. Removal completes at restart; locked files will be retried on the next start. Original files outside the library, CLI logins and shared Python download caches are kept.",
+  "delete_copy": "Remove documents, conversations, database copies, saved API keys, settings, logs, app caches and converter tools from this app’s data folder, then restart. Locked files are retried on startup for up to 24 hours. Chromium bookkeeping, including host names, may remain until the next start. The OS keychain encryption key, original files outside the app data folder, exports, CLI logins and shared Python download caches are kept.",
   "confirm": "Type DELETE to confirm",
   "waiting": "Waiting for Keychain access…",
   "keychain_failed": "Couldn’t access the Keychain. Retry or use without saving keys.",
@@ -109,14 +109,15 @@
   "event_ai_cli_status": "AI tool status check",
   "event_moodle_request": "Moodle request",
   "event_unknown": "Network request",
-  "delete_failed": "Deletion will finish when the app restarts. If files remain locked, it will retry on the next start. {{reason}}",
+  "delete_failed": "Some data could not be removed. Restart to retry within 24 hours; after that, confirm deletion again. {{reason}}",
   "delete_failed_permission": "Could not delete app data: access was denied. Check file permissions and try again.",
   "delete_failed_busy": "Could not delete app data: files are in use. Close other apps and try again.",
   "delete_failed_files": "Could not remove all app data files. Check available disk space and try again.",
   "remove_key_title": "Remove the key for {{name}}?",
   "remove_key_copy": "You will need to enter a key again to use this provider.",
   "provider_action": "{{action}} — {{name}}",
-  "delete_pending": "Some data could not be removed. Deletion will retry when the app restarts.",
+  "delete_pending": "Deletion is incomplete or its request expired. Confirm deletion again in Settings to retry.",
   "delete_in_progress": "Deletion is already in progress.",
-  "delete_not_scheduled": "Deletion could not be scheduled. Your data remains. Restart and try again. {{reason}}"
+  "delete_not_scheduled": "Deletion could not be scheduled. Your data remains. Try again. {{reason}}",
+  "delete_failure_title": "Data deletion incomplete"
 }
