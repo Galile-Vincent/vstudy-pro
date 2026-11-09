@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
@@ -15,12 +15,13 @@ async function mount(compact: boolean) {
   document.documentElement.lang = 'en';
   document.documentElement.style.fontSize = '16px';
   document.documentElement.style.setProperty('--library-row-height', '4');
+  document.documentElement.style.setProperty('--library-search-row-height', '5');
   state.invoke.mockImplementation(async (channel: string) => channel === 'library:documents:list' ? { items: [item], nextCursor: null } : []);
   render(<TooltipProvider><LibraryView /></TooltipProvider>);
   await screen.findByText('notes');
   return screen.getByRole('textbox', { name: tr('library:search') }).closest('.library-toolbar') as HTMLElement;
 }
-afterEach(() => { cleanup(); vi.resetAllMocks(); localStorage.clear(); });
+afterEach(() => { cleanup(); vi.resetAllMocks(); localStorage.clear(); state.route.query={}; });
 
 describe('library toolbar', () => {
   it('keeps sort and layout beside search on wide windows', async () => {
@@ -38,4 +39,18 @@ describe('library toolbar', () => {
     expect(within(panel).getByRole('button', { name: tr('library:direction') })).toBeTruthy();
     expect(within(panel).getByRole('button', { name: tr('library:viewToggle') })).toBeTruthy();
   });
+});
+
+it('clears optional filters while preserving folder, sort, and search in both input and query',async()=>{
+ state.route.query={folderId:'folder',text:'notes',status:'ready',sort:'name'};
+ const toolbar=await mount(false);
+ fireEvent.click(within(toolbar).getByTestId('library-filters'));
+ const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ fireEvent.click(within(panel).getByRole('button',{name:tr('library:clearFilters')}));
+ await waitFor(()=>{
+  const calls=state.invoke.mock.calls.filter(([channel])=>channel==='library:documents:list');
+  expect(calls.at(-1)?.[1]).toMatchObject({folderId:'folder',text:'notes',sort:'name'});
+  expect(calls.at(-1)?.[1].status).toBeUndefined();
+ });
+ expect((screen.getByRole('textbox',{name:tr('library:search')}) as HTMLInputElement).value).toBe('notes');
 });
