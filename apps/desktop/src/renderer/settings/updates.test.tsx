@@ -17,3 +17,17 @@ it('shows version and last check and routes the automatic switch and manual chec
   fireEvent.click(screen.getByRole('button'));
   expect(state.invoke).toHaveBeenCalledWith('updates:check',{});
 });
+it('keeps an empty live region mounted and clears check feedback', async () => {
+  vi.useFakeTimers();
+  try {
+    const view = render(<UpdateSettings />);
+    const live = screen.getByRole('status');
+    expect(live.textContent).toBe('');
+    Object.assign(state.snapshot, {result:'current'});
+    view.rerender(<UpdateSettings />);
+    expect(screen.getByRole('status')).toBe(live);
+    expect(live.textContent).not.toBe('');
+    await import('@testing-library/react').then(({act}) => act(() => vi.advanceTimersByTimeAsync(5000)));
+    expect(live.textContent).toBe('');
+  } finally {delete (state.snapshot as {result?:string}).result; vi.useRealTimers();}
+});

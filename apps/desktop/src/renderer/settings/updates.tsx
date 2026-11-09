@@ -1,3 +1,4 @@
+import {useEffect, useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
@@ -8,6 +9,12 @@ import { SettingsGroup, SettingsRow } from './layout';
 export function UpdateSettings() {
   useTranslation();
   const snapshot = useUpdates();
+  const [announcement, setAnnouncement] = useState('');
+  useEffect(() => {
+    setAnnouncement(snapshot?.result ? tr(`updates:${snapshot.result}`) : '');
+    const timer = setTimeout(() => setAnnouncement(''), 5000);
+    return () => clearTimeout(timer);
+  }, [snapshot?.result, snapshot?.lastCheckedAt]);
   return <SettingsGroup title={tr('updates:title')}>
     <SettingsRow label={tr('updates:automatic')}
       description={snapshot?.state.status === 'unsupported' ? tr('updates:unavailable') : undefined}>
@@ -21,7 +28,7 @@ export function UpdateSettings() {
         || ['loading', 'unsupported'].includes(snapshot.state.status)} onClick={() => void desktop.invoke('updates:check', {})}>
         {tr('updates:check')}</Button>
     </SettingsRow>
-    {snapshot?.result && <p role="status">{tr(`updates:${snapshot.result}`)}</p>}
+    <p role="status" aria-live="polite" aria-atomic="true">{announcement}</p>
     {snapshot?.state.status === 'unsupported' && <SettingsRow label={tr('updates:unsupported')}>
       <Button variant="link" onClick={() => void desktop.invoke('shell:openExternal',
         {url:'https://vstudy.vcstudio.app/download'})}>{tr('updates:download')}</Button>
