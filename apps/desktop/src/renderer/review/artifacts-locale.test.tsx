@@ -71,3 +71,9 @@ it.each(['en', 'zh-Hant', 'ja'])('formats resolved dates in app language %s', as
     new Intl.DateTimeFormat(language, { timeZone: 'Asia/Taipei' }).format(new Date(artifact.createdAt)),
   ));
 });
+it.each([['en', en], ['zh-Hant', zhHant], ['ja', ja]] as const)('interpolates the required scope limit in %s', async (language, catalog) => {
+  await i18n.changeLanguage(language); setup('en');
+  render(<ArtifactPanel courseId="course" kind="note" selection={null} />);
+  expect(screen.getByText(catalog.scope_required.replace('{{max}}', '100'))).toBeTruthy();
+  expect(catalog.scope_required).toContain('{{max}}');
+});

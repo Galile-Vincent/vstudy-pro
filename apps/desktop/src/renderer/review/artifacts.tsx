@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { z } from "zod";
 import type { IpcResponse } from "../../shared/ipc";
 import type { Document } from "../../shared/domain";
+import { MAX_REVIEW_CONCEPTS } from "../../shared/review-artifacts";
 import type { studyScopeSchema } from "../../shared/review-artifacts";
 import { tr } from "../../shared/i18n";
 import { describeAssumption } from "../../shared/review-assumptions";
@@ -286,7 +287,7 @@ export function ArtifactPanel({
           )}
         </Button>
       </div>
-      {!scope && <p role="status">{tr("review:scope_required")}</p>}
+      {!scope && <p role="status">{tr("review:scope_required", { max: MAX_REVIEW_CONCEPTS })}</p>}
       {!choices.length && (
         <p>
           {tr("review:choose_provider")}{" "}
