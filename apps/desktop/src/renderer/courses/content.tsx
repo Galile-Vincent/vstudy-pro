@@ -147,11 +147,14 @@ const date = (value: string) =>
 function WeeklySection({
   section,
   onModule,
+  open,
+  setOpen,
 }: {
   section: MoodleSection;
+  open: boolean;
+  setOpen: (open: boolean) => void;
   onModule: (module: MoodleModule) => void;
 }) {
-  const [open, setOpen] = useState(section.current);
   return (
     <section className="moodle-week" data-current={section.current}>
       <h3 id={`week-heading-${section.id}`} tabIndex={-1}>
@@ -228,8 +231,12 @@ function WeeklySection({
 export function CourseContent({
   detail,
   openFile,
+  openWeeks,
+  setWeekOpen,
 }: {
   detail: MoodleCourseDetail;
+  openWeeks: ReadonlySet<string>;
+  setWeekOpen: (id: string, open: boolean) => void;
   openFile: (id: string, action?: DocumentAction) => Promise<DocumentOutcome | undefined>;
   onError: () => void;
 }) {
@@ -259,6 +266,8 @@ export function CourseContent({
             <WeeklySection
               key={section.id}
               section={section}
+              open={openWeeks.has(section.id)}
+              setOpen={(open) => setWeekOpen(section.id, open)}
               onModule={(module) => {
                 trigger.current = document.activeElement as HTMLElement;
                 setSelected(module);
