@@ -22,6 +22,8 @@ it('shows API setup content directly and keeps only the guide in a disclosure', 
     expect(document.querySelector('.settings-intro')?.closest('details')).toBeNull();
     expect(document.querySelectorAll('.settings-pane:not([hidden]) details')).toHaveLength(1);
     expect(document.querySelector('.settings-tabs[role=tablist]')).not.toBeNull();
+    expect([...document.querySelectorAll('[data-slot=setting-row] label')].some(label => label.textContent === i18n.t('ai-cli:tools'))).toBe(false);
+    expect(document.querySelector('.settings-pane:not([hidden]) [role=status]')).not.toBeNull();
   } finally { await act(async () => root.unmount()); host.remove(); }
 });
 

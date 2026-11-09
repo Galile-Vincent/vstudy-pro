@@ -34,7 +34,7 @@ export function AiCliInventory({ compact = false, settings = false }: { compact?
     ? `${cliNames[recommendedProvider(tools)]} · ${tr('ai-cli:ready_title')}` : tr('ai-cli:summary_unconnected');
   const entry = <Button variant="secondary" className="ai-cli-inventory-entry" onClick={() => openAiCliSetup()}><Sparkles size={16} aria-hidden="true" /><span>{tr('ai-cli:title')}</span></Button>;
   if (settings) return <Section level={3} title={tr('ai-cli:tools')}><Card variant="flat" className="p-[var(--space-4)]">
-    <SettingRow label={tr('ai-cli:tools')} description={<span role="status">{summary}</span>}>{entry}</SettingRow>
+    <SettingRow label={<span role="status">{summary}</span>}>{entry}</SettingRow>
   </Card></Section>;
   return <section className="ai-cli-inventory" data-compact={compact} aria-label={tr('ai-cli:tools')}>
     <Button variant="ghost" className="ai-cli-inventory-entry" onClick={() => { openAiCliSetup(); }}><Sparkles size={16} aria-hidden="true" /><span>{tr('ai-cli:tools')}</span><span className="ai-cli-dot" data-ready={ready} aria-hidden="true" /><span className="sr-only">{tr(ready ? 'ai-cli:ready_title' : 'ai-cli:setup_needed')}</span></Button>
