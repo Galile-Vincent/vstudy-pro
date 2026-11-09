@@ -1273,3 +1273,17 @@ it("preserves opened weeks across tabs and opens a new current week", async () =
   }
 });
 
+it.each([true, false])("expands a collapsed current week before jumping (reduced=%s)", async reduced => {
+  vi.mocked(window.matchMedia).mockReturnValue({matches: reduced} as MediaQueryList);
+  const scroll = vi.fn();
+  HTMLElement.prototype.scrollIntoView = scroll;
+  const api = createMockMoodleApi();
+  await mount(api, (await api.overview()).courses[0]!.id);
+  const heading = host.querySelector<HTMLElement>(".moodle-week[data-current=true] h3")!;
+  const disclosure = getByRole(heading, "button");
+  await act(async () => disclosure.click());
+  await act(async () => getByRole(host, "button", {name: "Jump to current week"}).click());
+  expect(disclosure.getAttribute("aria-expanded")).toBe("true");
+  expect(document.activeElement).toBe(heading);
+  expect(scroll).toHaveBeenCalledWith({block: "start", behavior: reduced ? "instant" : "smooth"});
+});
