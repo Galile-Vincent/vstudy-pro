@@ -116,3 +116,21 @@ it.each(modes)('tells the user when a draft cannot be saved and clears it once s
  await waitFor(() => expect(screen.queryByText('review:draft_save_failed')).toBeNull(), settled);
  expect(server.state.drafts.q1).toBe(0);
 });
+
+it.each(modes)('reopens at the first question that is not committed yet (%s)', async (_name, exam) => {
+ const server = fakeAttemptServer();
+ server.state.graded.q1 = false; server.state.graded.q2 = true;
+ invoke.mockImplementation(server.invoke);
+ render(<TestPlayer artifact={fakeArtifact(exam)} onRetake={vi.fn()} />);
+ expect(await screen.findByRole('heading', { name: 'Question 3' })).toBeTruthy();
+ fireEvent.click(screen.getByRole('button', { name: 'review:previous_item' }));
+ expect(await screen.findByRole('heading', { name: 'Question 2' })).toBeTruthy();
+});
+
+it.each(modes)('reopens at the first question when every question is committed (%s)', async (_name, exam) => {
+ const server = fakeAttemptServer();
+ for (const id of ['q1', 'q2', 'q3']) server.state.graded[id] = true;
+ invoke.mockImplementation(server.invoke);
+ render(<TestPlayer artifact={fakeArtifact(exam)} onRetake={vi.fn()} />);
+ expect(await screen.findByRole('heading', { name: exam ? 'exams:results' : 'Question 1' })).toBeTruthy();
+});

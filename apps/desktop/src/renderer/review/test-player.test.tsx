@@ -91,9 +91,9 @@ it('resumes saved answers and committed feedback via get after remount',async()=
   return {id:'saved',artifactId:'artifact',phase:'answering',answers:{a:1,b:'draft'},results:fullTest.items.map((item,i)=>({itemId:item.id,conceptKey:item.conceptKey,correct:i===0,reportedBad:false,...(i===0?{feedback:item}:{correct:null})}))};
  });
  render(<TestPlayer artifact={artifact} onRetake={vi.fn()}/>);
- await screen.findByText('First explanation');
- expect(invoke).toHaveBeenCalledWith('review:attempt:get',{attemptId:'saved'});
- fireEvent.click(screen.getByRole('button',{name:'review:next_item'}));
  expect((await screen.findByRole('textbox') as HTMLInputElement).value).toBe('draft');
+ expect(invoke).toHaveBeenCalledWith('review:attempt:get',{attemptId:'saved'});
  expect(screen.queryByText('Second explanation')).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'review:previous_item'}));
+ expect(await screen.findByText('First explanation')).toBeTruthy();
 });

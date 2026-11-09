@@ -86,7 +86,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
    if (!opening.current || opening.current.id !== artifact.id) opening.current = { id: artifact.id, promise: desktop.invoke('review:attempt:start', { artifactId: artifact.id }).then(value=>desktop.invoke('review:attempt:get',{attemptId:value.id})) };
    let next: Attempt;
    try { next = await opening.current.promise; } catch (error) { opening.current = null; throw error; }
-   if (active) { if(exam&&next.phase!=='answering')setResults(true); setAttempt(next); attemptId.current = next.id; draftsRef.current = { ...next.answers, ...next.drafts }; setDrafts(draftsRef.current); }
+   if (active) { if(exam&&next.phase!=='answering')setResults(true); setIndex(Math.max(0, items.findIndex(candidate => next.results.find(result => result.itemId === candidate.id)?.correct === null))); setAttempt(next); attemptId.current = next.id; draftsRef.current = { ...next.answers, ...next.drafts }; setDrafts(draftsRef.current); }
   };
   retryAction.current = load; setBusy(true); setFailed(false);
   void load().catch(() => { if (active) setFailed(true); }).finally(() => { if (active) setBusy(false); });
