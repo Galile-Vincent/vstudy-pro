@@ -470,7 +470,7 @@ export function LibraryView() {
       succeeded: format.number(moved), total: format.number(targets.length),
       failed: format.number(failures.length), reasons: failures.join("; "),
     }) : "");
-    if (moved) changed();
+    if (moved || failures.length) changed();
     if (!failures.length) { setMove(false); setMenu(null); }
     } finally { inFlight.current = false; setBusy(false); }
   };

@@ -83,7 +83,9 @@ it.each([false,true])('reports failed moves truthfully and keeps the picker open
  const {container}=mount();await screen.findByText('first');
  fireEvent.keyDown(container.querySelector('.library-results')!,{key:'a',ctrlKey:true});
  fireEvent.click(await screen.findByRole('button',{name:tr('library:move')}));
+ const treeCalls=state.invoke.mock.calls.filter(([c])=>c==='library:tree').length;
  fireEvent.click(await screen.findByRole('button',{name:'Destination'}));
+ await waitFor(()=>expect(state.invoke.mock.calls.filter(([c])=>c==='library:tree').length).toBeGreaterThan(treeCalls));
  await waitFor(()=>expect(document.querySelector('.library-live')?.textContent).toContain('Folder not found'));
  expect(screen.getByRole('dialog',{name:tr('library:move')}).textContent).toContain('Folder not found');
  expect(container.querySelector('.library-toast')?.textContent).not.toContain(tr('library:moved'));
