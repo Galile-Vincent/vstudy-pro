@@ -1,0 +1,163 @@
+{
+  "chat-fixes.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 2
+  },
+  "courses/art/surfaces.css": {
+    "shadow": 4,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 9
+  },
+  "courses/course-head.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 1
+  },
+  "courses/courses.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 30
+  },
+  "courses/home.css": {
+    "shadow": 1,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 24
+  },
+  "courses/planner.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 3
+  },
+  "courses/webview.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 1,
+    "surface-class": 0
+  },
+  "document-original.css": {
+    "shadow": 0,
+    "radius": 4,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 0
+  },
+  "exams/exams.css": {
+    "shadow": 1,
+    "radius": 1,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 0
+  },
+  "home/home.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 18
+  },
+  "library/library-surface.css": {
+    "shadow": 0,
+    "radius": 1,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 4
+  },
+  "library/library.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 31
+  },
+  "motion/surfaces.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 5
+  },
+  "onboarding/onboarding.css": {
+    "shadow": 1,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 0
+  },
+  "settings/agents.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 2
+  },
+  "settings/appearance.css": {
+    "shadow": 2,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 14
+  },
+  "settings/settings.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 15
+  },
+  "shell/art-reader.css": {
+    "shadow": 2,
+    "radius": 2,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 41
+  },
+  "shell/tab-strip.css": {
+    "shadow": 0,
+    "radius": 3,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 0
+  },
+  "style.css": {
+    "shadow": 1,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 3
+  },
+  "usage/usage.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 3
+  },
+  "web-chat/web-chat.css": {
+    "shadow": 1,
+    "radius": 1,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 0
+  },
+  "welcome/welcome.css": {
+    "shadow": 0,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 2,
+    "surface-class": 2
+  }
+}

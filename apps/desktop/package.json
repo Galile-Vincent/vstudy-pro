@@ -11,7 +11,7 @@
     "test": "node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run",
     "contrast:check": "node scripts/check-contrast.mjs",
     "typecheck": "node scripts/generate-locales.mjs && tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . && pnpm ui:check",
     "package": "pnpm build && node scripts/package-release.mjs",
     "smoke": "pnpm build && node scripts/smoke.mjs",
     "package:verify": "node scripts/distribution-smoke.mjs",
@@ -22,7 +22,9 @@
     "package:win:x64": "pnpm build && node scripts/package-release.mjs --target win-x64",
     "package:win:arm64": "pnpm build && node scripts/package-release.mjs --target win-arm64",
     "package:signed": "node scripts/package-signed.mjs",
-    "test:release": "node --test scripts/release.test.mjs"
+    "test:release": "node --test scripts/release.test.mjs",
+    "ui:check": "node scripts/ui-lint.mjs",
+    "ui:test": "node --test scripts/ui-lint.test.mjs"
   },
   "dependencies": {
     "@assistant-ui/react": "0.15.32",

@@ -1,0 +1,4 @@
+.course-card { box-shadow: 2px 3px 4px black; border-radius: 8px; color: #abcdef; backdrop-filter: blur(8px); }
+.safe { box-shadow: var(--elevation-raised); border-radius: var(--r-md); color: var(--ink); backdrop-filter: var(--glass-blur); }
+.focus { box-shadow: 0 0 0 2px var(--focus); }
+.none { box-shadow: none; backdrop-filter: none; }
