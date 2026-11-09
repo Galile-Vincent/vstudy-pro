@@ -28,7 +28,7 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
     return () => { observer.disconnect(); resize.disconnect(); window.removeEventListener('resize', measure); };
   }, [close]);
   useEffect(() => {
-    if (!visible) return;
+    if (!overlay || !visible) return;
     const escape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
       event.preventDefault();
@@ -37,6 +37,6 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
     };
     window.addEventListener('keydown', escape);
     return () => window.removeEventListener('keydown', escape);
-  }, [visible, close]);
+  }, [overlay, visible, close]);
   return overlay;
 }
