@@ -47,5 +47,10 @@
   "source_other": "その他",
   "source_prefer_not_to_say": "回答しない",
   "intro": "利用データの共有で VStudy Pro の改善にご協力ください。氏名、資料、質問、回答は一切収集しません。どちらを選んでも学習機能は同じです。",
-  "details_toggle": "収集する内容"
+  "details_toggle": "収集する内容",
+  "saved_state": "利用データの共有：{{state}}",
+  "state_on": "オン",
+  "state_off": "オフ",
+  "saved_hint": "この選択はすでに保存されています。変更はすぐに反映され、学習には影響しません。",
+  "open_privacy": "プライバシー設定を開く"
 }

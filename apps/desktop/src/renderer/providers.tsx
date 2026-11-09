@@ -112,7 +112,7 @@ export function ProviderSettings({
             <X size={16} />
           </Button>
         </div>
-        {guide && <Onboarding onComplete={() => setGuide(false)} />}
+        {guide && <Onboarding onComplete={() => setGuide(false)} onOpenPrivacy={() => setTab('privacy')} />}
         <Tabs orientation={orientation} value={tab} onValueChange={setTab} className="settings-body">
           <TabsList ref={setTabsList} variant="line" className="settings-tabs" aria-label={tr('common:settings')}>
             {(

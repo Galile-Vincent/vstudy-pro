@@ -47,5 +47,10 @@
   "source_other": "其他",
   "source_prefer_not_to_say": "不想回答",
   "intro": "分享使用資料，協助我們改善 VStudy Pro。我們絕不收集你的姓名、文件、問題或回答。不論選擇哪一項，學習功能都一樣。",
-  "details_toggle": "收集哪些資料"
+  "details_toggle": "收集哪些資料",
+  "saved_state": "分享使用資料：{{state}}",
+  "state_on": "開啟",
+  "state_off": "關閉",
+  "saved_hint": "你已經做過這個選擇。變更會立即生效，也不會影響學習。",
+  "open_privacy": "開啟隱私設定"
 }

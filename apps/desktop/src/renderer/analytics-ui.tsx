@@ -21,6 +21,9 @@ export function AnalyticsDisclosure() {
 export function ConsentChoice({ onChoose, busy = false }: { onChoose: (enabled: boolean) => void; busy?: boolean }) {
   return <div className="analytics-choices">{[false,true].map(enabled => <Button key={String(enabled)} variant="secondary" disabled={busy} onClick={() => onChoose(enabled)}>{tr(enabled ? 'analytics:share' : 'analytics:decline')}</Button>)}</div>;
 }
+export function ConsentSaved({ enabled, onOpenPrivacy, busy = false }: { enabled: boolean; onOpenPrivacy: () => void; busy?: boolean }) {
+  return <div className="analytics-saved"><p><strong>{tr('analytics:saved_state', { state: tr(enabled ? 'analytics:state_on' : 'analytics:state_off') })}</strong></p><p>{tr('analytics:saved_hint')}</p><Button variant="link" disabled={busy} onClick={onOpenPrivacy}>{tr('analytics:open_privacy')}</Button></div>;
+}
 export async function completeAnalyticsOnboarding(enabled: boolean, input: import('../shared/analytics').Onboarding) {
   await desktop.invoke('analytics:setConsent', { enabled });
   await desktop.invoke('analytics:completeOnboarding', input);
