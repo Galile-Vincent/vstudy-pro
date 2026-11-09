@@ -47,7 +47,7 @@ it('retries partial deletion after a crash and does not follow owned symlinks', 
 it('leaves a failed owned entry pending and retries with bounded filesystem retries', async () => {
   const {root} = await fixture(); await fs.writeFile(root + '.delete-pending', '{}');
   const original = (await vi.importActual<typeof fs>('node:fs/promises')).rm;
-  const remove = vi.spyOn(fs, 'rm').mockImplementationOnce(async () => {throw Error('locked');});
+  const remove = vi.spyOn(fs, 'rm').mockRejectedValue(Error('locked'));
   expect(await finishPendingDeletion(root, async () => {}, vi.fn())).toBe(false);
   expect(remove).toHaveBeenCalledWith(join(await fs.realpath(root),'vstudy.sqlite'),expect.objectContaining({maxRetries:5,retryDelay:200}));
   remove.mockImplementation(original);
@@ -99,4 +99,23 @@ it('deletes all writer artifacts and unknown entries except Chromium bookkeeping
   expect(await finishPendingDeletion(root,async () => {},vi.fn())).toBe(true);
   for (const name of removed) await expect(fs.access(join(root,name))).rejects.toThrow();
   for (const name of kept) await fs.access(join(root,name));
+});
+
+it('continues past a locked converter and prioritizes secrets and migration copies', async () => {
+  const {root} = await fixture();
+  for (const name of ['converter-venv','secrets.json','providers.json','vstudy.sqlite.before-v2.bak']) {
+    await fs.writeFile(join(root,name),'private');
+  }
+  await fs.writeFile(root + '.delete-pending','{}');
+  const actual = await vi.importActual<typeof fs>('node:fs/promises');
+  const remove = vi.spyOn(fs,'rm').mockImplementation(async (path, options) => {
+    if (String(path).endsWith('converter-venv')) throw Error('locked');
+    return actual.rm(path,options);
+  });
+  remove.mockClear();
+  expect(await finishPendingDeletion(root,async () => {},vi.fn())).toBe(false);
+  for (const name of ['secrets.json','providers.json','vstudy.sqlite','vstudy.sqlite.before-v2.bak']) {
+    await expect(fs.access(join(root,name))).rejects.toThrow();
+  }
+  expect(remove.mock.calls[0]?.[0]).toBe(join(await fs.realpath(root),'providers.json'));
 });

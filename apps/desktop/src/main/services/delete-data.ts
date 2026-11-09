@@ -74,6 +74,35 @@ export const CHROMIUM_HELD_ENTRIES = new Set([
 function ownedEntry(name: string): boolean {
   return !CHROMIUM_HELD_ENTRIES.has(name);
 }
+function deletionPriority(name: string): number {
+  if (/^(secrets|providers)(?:\.|$)/.test(name)) return 0;
+  if (name.startsWith('vstudy.sqlite') || /\.(bak|tmp)$/.test(name)) return 1;
+  return 2;
+}
+export async function deleteOwnedEntries(
+  target: string,
+): Promise<{path:string;error:unknown}[]> {
+  const names = await readdir(target).catch(error => {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  });
+  const failed: {path:string;error:unknown}[] = [];
+  for (const name of names.filter(ownedEntry).sort((a,b) =>
+    deletionPriority(a) - deletionPriority(b) || a.localeCompare(b))) {
+    const path = join(target,name);
+    try { await rm(path,removeOptions); }
+    catch (error) { failed.push({path,error}); }
+  }
+  for (const delay of [100,300,700]) {
+    if (!failed.length) break;
+    await new Promise(resolve => setTimeout(resolve,delay));
+    for (const failure of [...failed]) {
+      try { await rm(failure.path,removeOptions); failed.splice(failed.indexOf(failure),1); }
+      catch (error) { failure.error = error; }
+    }
+  }
+  return failed;
+}
 export async function markDeletionPending(root: string): Promise<void> {
   const file = await open(root + '.delete-pending', 'w', 0o600);
   try {
@@ -109,13 +138,12 @@ export async function finishPendingDeletion(
         if ((await lstat(join(directory,name))).isSymbolicLink()) throw Error('Unsafe session partition');
       }
     } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-    for (const name of await readdir(target).catch(error => {
-      if (error.code === 'ENOENT') return [];
-      throw error;
-    })) {
-      if (ownedEntry(name)) await rm(join(target, name), removeOptions);
-    }
+    const failures = await deleteOwnedEntries(target);
     await clearSessions(partitions);
+    if (failures.length) {
+      for (const failure of failures) log({phase:'delete-pending-failed',error:failure.error});
+      return false;
+    }
     await rm(root + '.delete-pending', {force:true});
     return true;
   } catch (error) { log({phase:'delete-pending-failed',error}); return false; }
