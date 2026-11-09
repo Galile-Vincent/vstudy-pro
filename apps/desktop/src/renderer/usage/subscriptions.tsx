@@ -1,22 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RefreshCw } from 'lucide-react';
+import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { tr } from '../../shared/i18n';
 import type { SubscriptionUsage } from '../../shared/subscription-usage';
 import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
+import { Progress } from '../components/ui/progress';
 import { SubscriptionWindowMeter } from './meter';
 import './usage.css';
 
 const providerName = (provider: SubscriptionUsage['provider']) => provider === 'claude' ? 'Claude' : 'Codex';
 
+const expandedKey = 'vstudy-subscription-meters-expanded';
 let keychainAllowed = false;
 
 export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
   const { i18n } = useTranslation();
+  const regionId = useId();
+  const [expanded, setExpanded] = useState(() => {
+    try { return localStorage.getItem(expandedKey) === 'true'; } catch { return false; }
+  });
+  const toggle = () => {
+    const next = !expanded;
+    setExpanded(next);
+    try { localStorage.setItem(expandedKey, String(next)); } catch { /* Storage may be disabled. */ }
+  };
   const [rows, setRows] = useState<SubscriptionUsage[]>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const detailsRef = useRef<HTMLDivElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
   const [keychain, setKeychain] = useState(keychainAllowed);
   useEffect(() => {
     let active = true;
@@ -31,7 +44,68 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
     window.addEventListener('subscription-refresh', refresh);
     return () => { active = false; clearInterval(interval); window.removeEventListener('subscription-refresh', refresh); };
   }, []);
+  useEffect(() => {
+    const details = detailsRef.current;
+    if (!compact || !expanded || !details) return;
+    const measure = () => setOverflowing(details.scrollHeight > details.clientHeight
+      || details.scrollWidth > details.clientWidth);
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(measure);
+    observer?.observe(details);
+    for (const child of details.children) observer?.observe(child);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [compact, expanded, rows, error, i18n.language]);
+  const highest = error ? undefined : rows?.filter(row => row.status === 'ready')
+    .flatMap(row => row.windows.map(window => ({ ...window, provider: row.provider })))
+    .sort((a, b) => b.usedPercent - a.usedPercent
+      || (a.resetsAt ? Date.parse(a.resetsAt) : Infinity)
+        - (b.resetsAt ? Date.parse(b.resetsAt) : Infinity)
+      || a.provider.localeCompare(b.provider)
+      || a.label.localeCompare(b.label))[0];
+  const summaryLabel = highest ? tr('usage:quota_window_label', {
+    provider: providerName(highest.provider),
+    window: tr(highest.label === '5h' ? 'usage:quota_5h' : 'usage:quota_weekly'),
+  }) : tr('usage:quota_summary');
+  const unavailable = rows?.filter(row => row.status !== 'ready').length ?? 0;
+  const summaryValue = highest ? tr('usage:quota_window_used', {
+    label: summaryLabel, percent: Math.round(highest.usedPercent),
+  }) : tr('usage:quota_unknown');
   return <section className="subscription-meters" data-compact={compact} aria-label={tr('usage:subscription_limits')} aria-busy={loading}>
+    {compact && <div className="subscription-summary">
+      <span className="subscription-summary-label" title={summaryLabel}>{summaryLabel}</span>
+      <span className="subscription-summary-percent">{highest ? `${Math.round(highest.usedPercent)}%` : '—'}</span>
+      <Progress
+        className="subscription-progress"
+        value={highest?.usedPercent ?? 0}
+        aria-label={summaryLabel}
+        aria-valuenow={highest?.usedPercent}
+        aria-valuetext={summaryValue}
+      />
+      {(error || unavailable > 0) && <small className="subscription-summary-unavailable">
+        {error ? tr('usage:quota_unavailable') : tr('usage:quota_unavailable_count', { count: unavailable })}
+      </small>}
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-expanded={expanded}
+        aria-controls={regionId}
+        aria-label={tr(expanded ? 'usage:quota_collapse' : 'usage:quota_expand')}
+        onClick={toggle}
+      >
+        {expanded ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
+      </Button>
+    </div>}
+    <div
+      id={regionId}
+      ref={detailsRef}
+      hidden={compact && !expanded}
+      className={compact ? 'subscription-details' : undefined}
+      tabIndex={compact && expanded && overflowing ? 0 : undefined}
+    >
     <header><strong>{tr('usage:subscription_limits')}</strong><Button variant="ghost" size="icon" disabled={loading} aria-label={tr('common:refresh_usage')} onClick={() => window.dispatchEvent(new Event('subscription-refresh'))}><RefreshCw size={14} aria-hidden="true"/></Button></header>
     {error ? <small role="status">{tr('usage:quota_unavailable')}</small> : !rows ? <small role="status">{tr('usage:usage_loading')}</small> : rows.map(row => <div key={row.provider} className="subscription-provider">
       <div className="subscription-provider-name">{providerName(row.provider)}{row.status !== 'ready' && <small>{tr(`usage:quota_${row.status}`)}</small>}</div>
@@ -49,5 +123,6 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
       setLoading(true);
       void desktop.invoke('usage:subscriptions', { allowClaudeKeychain, refresh: true }).then(value => { setRows(value); setError(false); }).catch(() => setError(true)).finally(() => setLoading(false));
     }}/>{tr('usage:quota_keychain')}</label>}
+    </div>
   </section>;
 }

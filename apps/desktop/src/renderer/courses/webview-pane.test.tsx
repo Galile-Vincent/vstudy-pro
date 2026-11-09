@@ -16,7 +16,7 @@ it.each([false,true])('announces copy only on success and clears it (failure %s)
   const host=document.createElement('div'),root=createRoot(host);document.body.append(host);
   try{
     await act(()=>root.render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" accountId="school" target={{kind:'page',url:'https://school.example/course/view.php?id=1'}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>));
-    const footer=document.querySelector('footer.moodle-webview-footer')!,copy=footer.querySelectorAll('button')[3]!;
+    const footer=document.querySelector('footer')!,copy=footer.querySelectorAll('button')[3]!;
     await act(()=>copy.click());
     expect(footer.querySelector('[role=status]')?.textContent.includes('copied')).toBe(!fail);
     await act(()=>vi.advanceTimersByTimeAsync(2200));
@@ -74,6 +74,9 @@ it('offers one retry control for a resource-limited pane',async()=>{
  try {
  render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" accountId="school" target={{kind:'page',url:'https://school.example/'}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>);
  await screen.findByRole('alert');expect(screen.getAllByRole('button',{name:'Retry'})).toHaveLength(1);
+ expect(screen.getAllByRole('main')).toHaveLength(1);
+ expect(screen.getAllByRole('heading',{level:1})).toHaveLength(1);
+ expect(screen.getByRole('heading',{level:2}).textContent).toBeTruthy();
  }finally{cleanup();}
 });
 it('offers the imported document after returning to a completed file',async()=>{
@@ -91,4 +94,28 @@ it('never overlays a completed-file card on a Moodle page',async()=>{
  try{render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111" accountId="school" target={{kind:'page',url:'https://school.example/course/view.php?id=1'}} onClose={()=>{}} onDocument={()=>{}} onReconnect={()=>{}}/>);
  await screen.findByText('Course');expect(screen.queryByRole('button',{name:'Open document'})).toBeNull();
  }finally{cleanup();}
+});
+
+it.each([
+  ['connecting', null], ['loading', null], ['error', 'offline'],
+  ['error', 'session-expired'], ['error', 'unavailable'], ['error', 'blocked'],
+])('keeps one main and a coherent heading tree in %s / %s', async (status, error) => {
+  const { render, screen, cleanup } = await import('@testing-library/react');
+  invoke.mockResolvedValue({ id: 'state-pane', generation: 1, status, error,
+    url: 'https://school.example/', title: 'Course', secure: true, zoom: 1,
+    canGoBack: false, canGoForward: false });
+  try {
+    render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111"
+      accountId="school" target={{ kind: 'page', url: 'https://school.example/' }}
+      onClose={() => {}} onDocument={() => {}} onReconnect={() => {}} />);
+    await screen.findByRole('heading', { name: 'Course', level: 1 });
+    expect(screen.getAllByRole('main')).toHaveLength(1);
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    if (error) {
+      expect(screen.getByRole('heading', { level: 2 }).closest('[role=alert]')).toBeTruthy();
+    } else {
+      expect(screen.getByRole('progressbar')).toBeTruthy();
+      expect(screen.queryByRole('heading', { level: 2 })).toBeNull();
+    }
+  } finally { cleanup(); }
 });
