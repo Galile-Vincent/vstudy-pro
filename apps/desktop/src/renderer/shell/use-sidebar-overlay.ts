@@ -7,8 +7,20 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
     let wasOverlay = false;
     const measure = () => {
       const sidebar = document.querySelector<HTMLElement>('.shell-sidebar');
-      const width = sidebar ? parseFloat(getComputedStyle(sidebar).width) : 0;
-      const next = width > window.innerWidth * .4;
+      const shell = sidebar?.closest<HTMLElement>('.app-shell');
+      if (!sidebar || !shell) return;
+      // Probe base layout without disturbing live layout or exit transitions.
+      const probeShell = shell.cloneNode(false) as HTMLElement;
+      const probe = sidebar.cloneNode(false) as HTMLElement;
+      probeShell.dataset.sidebarOverlay = 'false';
+      probeShell.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none';
+      probe.hidden = false;
+      probe.style.transition = 'none';
+      probeShell.append(probe);
+      shell.parentElement?.append(probeShell);
+      const position = getComputedStyle(probe).position;
+      const next = position === 'absolute' || position === 'fixed';
+      probeShell.remove();
       setOverlay(next);
       const toggle = document.querySelector<HTMLElement>('.shell-toggle');
       const top = toggle?.closest('header')?.getBoundingClientRect().bottom ?? 0;
@@ -21,11 +33,14 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
     const resize = new ResizeObserver(measure);
     const main = document.querySelector('.shell-main');
     if (main) resize.observe(main);
+    const layout = new MutationObserver(measure);
+    const shell = document.querySelector('.app-shell');
+    if (shell) layout.observe(shell, { attributes: true, attributeFilter: ['data-view'] });
     const topbar = document.querySelector('.shell-topbar');
     if (topbar) resize.observe(topbar);
     window.addEventListener('resize', measure);
     measure();
-    return () => { observer.disconnect(); resize.disconnect(); window.removeEventListener('resize', measure); };
+    return () => { observer.disconnect(); layout.disconnect(); resize.disconnect(); window.removeEventListener('resize', measure); };
   }, [close]);
   useEffect(() => {
     if (!overlay || !visible) return;

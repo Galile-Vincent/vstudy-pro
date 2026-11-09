@@ -32,7 +32,7 @@
 .app-shell[data-view=library] .shell-topbar > span { display:none; }
 .app-shell[data-sidebar-overlay=true] .shell-sidebar:not([hidden]) {
   position:fixed; inset:var(--sidebar-overlay-top, var(--topbar-height)) auto 0 0; z-index:50;
-  height:auto; min-height:0; overflow:auto;
+  height:auto; min-height:0; max-height:calc(100dvh - var(--sidebar-overlay-top, var(--topbar-height))); overflow:hidden;
   width:min(85vw,var(--sidebar-width)); background:var(--surface); box-shadow:var(--elevation-floating);
 }
 @media(max-width:800px) { .app-shell .shell-sidebar { width:var(--sidebar-compact-width); padding:var(--space-2); } .app-shell .shell-topbar { padding-inline:var(--space-4); } }
