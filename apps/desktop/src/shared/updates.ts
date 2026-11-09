@@ -1,6 +1,7 @@
 import { z } from 'zod';
 const version = z.string().regex(/^\d+\.\d+\.\d+$/);
 export const updateStateSchema = z.discriminatedUnion('status', [
+  z.object({ status: z.literal('loading') }).strict(),
   z.object({ status: z.literal('idle') }).strict(),
   z.object({ status: z.literal('checking') }).strict(),
   z.object({ status: z.literal('available'), version, size:z.number().positive().optional(),

@@ -11,14 +11,14 @@ export function UpdateSettings() {
   return <SettingsGroup title={tr('updates:title')}>
     <SettingsRow label={tr('updates:automatic')}
       description={snapshot?.state.status === 'unsupported' ? tr('updates:unavailable') : undefined}>
-      <Switch disabled={snapshot?.state.status === 'unsupported'} aria-label={tr('updates:automatic')} checked={snapshot?.automatic ?? true}
+      <Switch disabled={!snapshot || ['loading', 'unsupported'].includes(snapshot.state.status)} aria-label={tr('updates:automatic')} checked={snapshot?.automatic ?? true}
         onCheckedChange={enabled => void desktop.invoke('updates:setAuto', {enabled})} />
     </SettingsRow>
     <SettingsRow label={tr('updates:version', {version:snapshot?.currentVersion ?? __APP_VERSION__})}
       description={tr('updates:last_check', {time:snapshot?.lastCheckedAt
         ? new Date(snapshot.lastCheckedAt).toLocaleString() : tr('updates:never')})}>
       <Button variant="secondary" disabled={!snapshot || snapshot.state.status === 'checking'
-        || snapshot.state.status === 'unsupported'} onClick={() => void desktop.invoke('updates:check', {})}>
+        || ['loading', 'unsupported'].includes(snapshot.state.status)} onClick={() => void desktop.invoke('updates:check', {})}>
         {tr('updates:check')}</Button>
     </SettingsRow>
     {snapshot?.result && <p role="status">{tr(`updates:${snapshot.result}`)}</p>}

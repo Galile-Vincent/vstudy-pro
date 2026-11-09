@@ -24,11 +24,15 @@ the restart action with Try again; pending native completion handlers are remove
 excluded by the stable version regex and handled as no update, not a generic error. Restart requests hand off
 to Squirrel; signature or installation failures can still occur after download.
 Checks default on, unlike the default-off AI-CLI check: owner review is required.
+Setup starts in a neutral loading state, has a 20-second deadline, and retries
+once after 60 seconds if setup fails or signing cannot be established. It fails
+closed until initialization succeeds.
 Checks begin after onboarding and skip offline periods. Manual checks have a short
 cooldown; automatic checks retain a ten-minute interval. Last checked records success.
 
 Metadata uses github.com/ava-apple/vstudy-pro/releases/latest/download/latest-mac.yml
-(or latest.yml for signed Windows). Payload names are fixed relative versioned ZIP
+(or latest.yml for signed Windows). Metadata reads abort above 64 KiB and payload sizes are limited to 2 GiB.
+Payload names are fixed relative versioned ZIP
 or EXE names. GitHub redirects can contact release-assets.githubusercontent.com,
 objects.githubusercontent.com and github-releases.githubusercontent.com. These
 are expected destinations, not an enforced redirect-host allowlist. Squirrel also

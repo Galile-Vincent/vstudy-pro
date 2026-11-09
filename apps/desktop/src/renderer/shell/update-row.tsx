@@ -21,7 +21,7 @@ export function UpdateRow() {
   useTranslation();
   const snapshot = useUpdates();
   const state = snapshot?.state;
-  const label = snapshot?.waiting ? tr('updates:waiting') : snapshot?.installError ? tr('updates:install_failed') : !state || ['idle', 'unsupported'].includes(state.status) ? '' : state.status === 'available'
+  const label = snapshot?.waiting ? tr('updates:waiting') : snapshot?.installError ? tr('updates:install_failed') : !state || ['idle', 'unsupported', 'loading'].includes(state.status) ? '' : state.status === 'available'
     ? tr('updates:available', {version:state.version}) : state.status === 'downloading'
       ? tr('updates:downloading', {percent:state.percent}) : tr(`updates:${state.status}`);
   const action = () => {

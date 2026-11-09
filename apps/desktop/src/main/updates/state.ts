@@ -3,7 +3,7 @@ export type UpdateEvent = { type: 'check' } | { type: 'available'; version: stri
   | { type: 'current' } | { type: 'download' } | { type: 'progress'; percent: number }
   | { type: 'ready'; version: string } | { type: 'error'; code: Extract<UpdateState, {status:'error'}>['code'] };
 export function reduceUpdate(state: UpdateState, event: UpdateEvent): UpdateState {
-  if (state.status === 'unsupported') return state;
+  if (state.status === 'unsupported' || state.status === 'loading') return state;
   switch (event.type) {
     case 'check': return ['idle', 'error', 'available'].includes(state.status) ? { status: 'checking' } : state;
     case 'available': return state.status === 'checking' ? updateStateSchema.parse({ status: 'available',

@@ -24,17 +24,18 @@ export class Updates {
   private timer: ReturnType<typeof setTimeout>;
   private monitor: ReturnType<typeof setInterval>;
   private disposed = false;
+  private setupRetry: ReturnType<typeof setTimeout> | undefined;
   private firstCheck = false;
   private wasOnline = false;
   private interval: ReturnType<typeof setInterval>;
   private events: [Parameters<Updater['on']>[0], (...args: never[]) => void][] = [];
   constructor(private updater: Updater, private options: {
     unsupported?: Extract<UpdateState, {status:'unsupported'}>['reason'] | undefined;
-    version: string; automatic: boolean; online: () => boolean;
+    loading?:boolean; version: string; automatic: boolean; online: () => boolean;
     getAutomatic?: () => boolean; ready?: () => boolean;
     saveAutomatic: (enabled: boolean) => void; now?: () => number;
   }) {
-    this.state = options.unsupported ? {status:'unsupported', reason:options.unsupported} : {status:'idle'};
+    this.state = options.loading ? {status:'loading'} : options.unsupported ? {status:'unsupported', reason:options.unsupported} : {status:'idle'};
     this.automatic = options.automatic;
     this.attach(updater);
     this.timer = setTimeout(() => { void this.automaticCheck(); }, 15_000);
@@ -52,6 +53,9 @@ export class Updates {
     if (this.state.status === 'unsupported') return;
     this.firstCheck = true;
     await this.check(false);
+  }
+  retrySetup(work: () => Promise<void>) {
+    if (!this.disposed) this.setupRetry = setTimeout(() => { if (!this.disposed) void work(); }, 60_000);
   }
   initialize(updater: Updater, unsupported?: Extract<UpdateState, {status:'unsupported'}>['reason']) {
     if (this.disposed) return;
@@ -173,6 +177,7 @@ export class Updates {
   }
   dispose() {
     this.disposed = true;
+    clearTimeout(this.setupRetry);
     this.waitAbort?.abort();
     clearTimeout(this.installTimer);
     clearTimeout(this.timer); clearInterval(this.interval); clearInterval(this.monitor);

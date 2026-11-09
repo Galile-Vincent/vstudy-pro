@@ -13,11 +13,13 @@ it.each(['throwing','hanging'])('returns immediately and fails closed for %s set
   const ready = new Promise<void>(resolve=>{shown=resolve;});
   const service = createUpdates({settings:{get:()=>({autoCheckUpdates:true}),set:vi.fn()}} as never,ready);
   expect(mocks.exec).not.toHaveBeenCalled();
-  expect(service.snapshot().state.status).toBe('unsupported');
+  expect(service.snapshot().state.status).toBe('loading');
   const initialize = vi.spyOn(Updates.prototype, 'initialize');
-  shown(); await vi.advanceTimersByTimeAsync(7100);
+  shown(); await vi.advanceTimersByTimeAsync(20_100);
   expect(initialize).toHaveBeenCalled();
   expect(service.snapshot().state).toEqual({status:'unsupported',reason:'unsigned'});
+  await vi.advanceTimersByTimeAsync(80_100);
+  expect(initialize).toHaveBeenCalledTimes(2);
   initialize.mockRestore(); service.dispose();
 });
 
@@ -30,4 +32,7 @@ it('requires Windows x64, a publisher and NSIS installation',()=>{
   expect(windowsUpdateSupport(config,'arm64',true)).toBe('platform');
   expect(windowsUpdateSupport(config,'x64',false)).toBe('portable');
   expect(windowsUpdateSupport(config,'x64',true)).toBeUndefined();
+});
+it('accepts a publisher containing an ampersand', () => {
+  expect(windowsUpdateSupport('provider: generic\nurl: https://github.com/ava-apple/vstudy-pro/releases/latest/download\npublisherName: "A & B"', 'x64', true)).toBeUndefined();
 });
