@@ -59,6 +59,8 @@ small { font-size: var(--text-xs); }
 .button.compact { min-height:40px; padding:var(--space-2) var(--space-4); border-radius:var(--r-sm); }
 .text-link { color:var(--accent); display:inline-flex; gap:var(--space-2); align-items:center; font-size:var(--text-sm); font-weight:600; }
 .text-link:hover { text-decoration:underline; }
+.beta-badge { display:inline-block; vertical-align:middle; padding:0 var(--space-2); border:1px solid var(--line); border-radius:var(--r-pill); background:var(--subtle); color:var(--accent); font-size:var(--text-xs); font-weight:600; line-height:1.6; white-space:nowrap; }
+.release-version { white-space:nowrap; }
 .site-footer { border-top:1px solid var(--line); padding:var(--space-10) 0; }
 .footer-inner { display:flex; justify-content:space-between; gap:var(--space-8); align-items:start; font-size:var(--text-sm); }
 .footer-inner p { margin-top:var(--space-2); }

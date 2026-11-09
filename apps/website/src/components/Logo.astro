@@ -1,16 +1,20 @@
 ---
 import { path } from '../config';
-interface Props { lockup?: boolean; }
-const { lockup = false } = Astro.props;
+import { ui } from '../data/ui';
+interface Props { lockup?: boolean; beta?: boolean; }
+const { lockup = false, beta = false } = Astro.props;
 ---
 <span class:list={['brand-art', { 'brand-lockup': lockup }]} aria-hidden="true">
   <img src={path(`brand/${lockup ? 'lockup-light' : 'symbol'}.svg`)} alt="VStudy Pro" width={lockup ? 926 : 226} height={lockup ? 193 : 178} />
   {lockup && <img class="brand-dark" src={path('brand/lockup-dark.svg')} alt="VStudy Pro" width="926" height="193" />}
+  {beta && <span class="brand-beta">{ui.en.beta}</span>}
 </span>
 <style>
   .brand-art { display:inline-block; position:relative; width:28px; flex-shrink:0; }
   .brand-lockup { width:158px; }
   .brand-art img { width:100%; height:auto; }
+  .brand-beta { position:absolute; right:-5px; bottom:-3px; padding:1px 3px; border:1px solid var(--background); border-radius:var(--r-pill); background:var(--accent); color:var(--on-accent); font:600 8px/1.1 var(--font); letter-spacing:0; white-space:nowrap; }
+  .brand-lockup .brand-beta { right:auto; left:24.4%; transform:translateX(-75%); }
   .brand-dark { position:absolute; inset:0; opacity:0; }
   :global([data-scheme=dark]) .brand-lockup > img:first-child { opacity:0; }
   :global([data-scheme=dark]) .brand-dark { opacity:1; }

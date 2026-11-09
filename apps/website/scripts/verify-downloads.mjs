@@ -39,6 +39,18 @@ for (const route of downloadRoutes) {
     assert.equal(html.includes(`data-installer="${installer.id}"`), installer.releaseEnabled, `${route} shows enabled cards`);
   }
   assert.ok(html.includes(`href="${downloadBase}/SHA256SUMS.txt"`), `${route} checksums`);
+  const language = html.match(/<html lang="([^"]+)"/)[1];
+  const [versionLabel, beta, mediaKit] = {
+    en: ['Version', 'beta', 'Media kit'],
+    'zh-Hant': ['版本', '測試版', '媒體資源'],
+    ja: ['バージョン', 'ベータ', 'メディアキット'],
+  }[language];
+  const footer = html.match(/<footer class="site-footer"[^>]*>([\s\S]*?)<\/footer>/)[1];
+  if (release) assert.ok(footer.replace(/<[^>]*>/g, '').includes(`${versionLabel} ${release.version} ${beta}`), `${route} localized footer beta`);
+  assert.ok(footer.includes(`href="/${language}/media/">${mediaKit}</a>`), `${route} localized media link`);
+  for (const landmark of [html.match(/<header class="site-header"[^>]*>([\s\S]*?)<\/header>/)[1], footer]) {
+    assert.match(landmark, /class="brand-beta"[^>]*>beta<\/span>/, `${route} brand beta`);
+  }
   const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)[1];
   const details = [...main.matchAll(/<details\b([^>]*)>/g)];
   assert.equal(details.length, 6, `${route} has six help sections`);
@@ -49,6 +61,9 @@ for (const route of downloadRoutes) {
     'verify-download', 'update-uninstall',
   ], `${route} help order`);
   if (release) {
+    const releaseLine = main.match(/<p class="dl-release"[^>]*>([\s\S]*?)<\/p>/)[1];
+    assert.ok(releaseLine.replace(/<[^>]*>/g, '').startsWith(`${versionLabel} ${release.version} ${beta} · `), `${route} localized beta follows the release version`);
+    assert.doesNotMatch(releaseLine, /aria-hidden|aria-label/, `${route} version and beta stay in reading order`);
     assert.ok(html.includes(`<time datetime="${release.publishedAt}"`), `${route} publication timestamp`);
     for (const asset of Object.values(release.assets)) assert.ok(html.includes(`${(asset.bytes / 1_000_000).toFixed(1)} MB`), `${route} verified size`);
   } else assert.doesNotMatch(html, /\d+(?:\.\d+)?\s*(?:MB|MiB)\b/, 'No invented installer size');
@@ -60,4 +75,4 @@ for (const route of ['', 'en/', 'zh-Hant/', 'ja/', 'en/docs/getting-started/', '
   assert.ok(html.includes(`href="/${lang}/download/"`), `${route} links to the download page`);
   for (const installer of installers) assert.ok(!html.includes(`${downloadBase}/${installer.file}`), `${route} must not link installers directly`);
 }
-console.log(`PASS: ${cases.length} platform cases; three download pages link enabled installers and checksums; homepages and guides link to the download page.`);
+console.log(`PASS: ${cases.length} platform cases; three download pages show localized beta versions, brand badges, media links, enabled installers and checksums; homepages and guides link to the download page.`);
