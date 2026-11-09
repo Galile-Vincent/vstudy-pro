@@ -99,9 +99,9 @@ for (const [language, goal] of matrix) {
     }
     await capture('start');
     if (goal === 'sample') {
-      for (let step = 0; step < 5; step++) await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
+      for (let step = 0; step < 4; step++) await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
       await page.locator('input[name=onboarding-scheme][value=dark]').check();
-      for (let step = 0; step < 5; step++) await next(); await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(720, 900));
+      for (let step = 0; step < 4; step++) await next(); await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(720, 900));
       await capture('start-dark-720'); await audit('start-dark-720');
       await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1200, 900)); await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
     }
