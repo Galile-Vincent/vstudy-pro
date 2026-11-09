@@ -187,7 +187,7 @@ export function ProviderRow({
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
-            <Button aria-label={tr('settings:provider_action',{action:tr('common:save_key'),name:providerName[provider.config.id]})} variant="default" size="sm" disabled={busy || !key.trim()}>
+            <Button aria-label={tr('settings:provider_action',{action:tr(error && key.trim() ? 'settings:retry' : 'common:save_key'),name:providerName[provider.config.id]})} variant="default" size="sm" disabled={busy || !key.trim()}>
               {tr(error && key.trim() ? 'settings:retry' : 'common:save_key')}
             </Button>
             <Button aria-label={tr('settings:provider_action',{action:tr('settings:session_key'),name:providerName[provider.config.id]})}

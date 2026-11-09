@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {act} from 'react';
+import {render,screen,fireEvent,cleanup} from '@testing-library/react';
 import {createRoot} from 'react-dom/client';
 import {expect,it,vi} from 'vitest';
 vi.mock('./bridge',()=>({desktop:{invoke:vi.fn(async()=>({ok:true}))}}));
@@ -57,4 +58,16 @@ it('names provider actions with the provider', async () => {
   await act(() => root.render(<ProviderRow provider={{config:{kind:'api',id:'openai-api',enabled:true},availability:{available:true},models:[]}} onRefresh={async()=>{}}/>));
   expect([...host.querySelectorAll('button')].find(b=>b.textContent==='Get a key')?.getAttribute('aria-label')).toContain('OpenAI');
  } finally {await act(() => root.unmount());host.remove();}
+});
+
+it('includes visible Retry text in the save key accessible name', async () => {
+ const {desktop}=await import('./bridge');
+ vi.mocked(desktop.invoke).mockImplementation(async channel=>{if(channel==='secrets:has')return {hasKey:false} as never;throw new Error('failed');});
+ try {
+  render(<ProviderRow provider={{config:{kind:'api',id:'anthropic-api',enabled:true},availability:{available:true},models:[]}} onRefresh={async()=>{}}/>);
+  fireEvent.change(screen.getByLabelText('Anthropic API key'),{target:{value:'key'}});
+  fireEvent.submit(screen.getByLabelText('Anthropic API key').closest('form')!);
+  await screen.findByRole('alert');
+  expect(screen.getByRole('button',{name:'Retry — Anthropic'}).textContent).toBe('Retry');
+ } finally {cleanup();}
 });
