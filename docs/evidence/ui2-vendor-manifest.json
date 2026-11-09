@@ -208,9 +208,10 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/card.tsx",
       "registrySha256": "ef8305b12c3112dab42a4708b41b1ebcc042fa5ab4c20f039da8d45b09ed5059",
-      "patchedSha256": "b8e6dbae3605e13cda623e495657d17bb56cb37fa29ba41ae40662bab586592d",
+      "patchedSha256": "e92279d91e21de7d42acce0b9cd93364b64b79ae58f9c035589dfaf1c35d85a9",
       "patch": "docs/vendor-patches/ui--card.tsx.patch",
-      "reason": "Use the local cn helper and the translucent card surface tokens with a hairline border."
+      "reason": "Use the local cn helper and the translucent card surface tokens with a hairline border. Extend with token-based variants and native interactive targets.",
+      "foundationPatch": "docs/vendor-patches/ui--card-foundation.patch"
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/checkbox.tsx",
@@ -359,6 +360,51 @@
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/suggestions.test.tsx",
       "sha256": "f2edc0a196fb9513547ebf2fde9028c25d8d4e0c0445f1fe01a260068c11624f",
       "reason": "Application-authored regression test for wrapping long suggestion labels; no upstream source exists."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/empty-state.tsx",
+      "sha256": "22d9b0ed04c0b6ab9457ff776ff8156114a647ac308ae80fe34964e2b3a18266",
+      "reason": "Shared application UI foundation and behavior tests."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/form-field.tsx",
+      "sha256": "e7cfa8aa232d01ba0b5ef0a2152a80f6f935a87d1d62df2cdefe84cf39ea9325",
+      "reason": "Shared application UI foundation and behavior tests."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/foundation.test.tsx",
+      "sha256": "5d659d0293ceb24ef29833dbb4b5cd20c47f092d29cfe4742160281687707cf9",
+      "reason": "Shared application UI foundation and behavior tests."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/index.ts",
+      "sha256": "a464a174a9ec3594bb9d8956c878158074cf0069f834ceab0fcf6950e756d433",
+      "reason": "Shared application UI foundation and behavior tests."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/list-row.tsx",
+      "sha256": "f3103fabf3dcebce114ce4362f4eadf2fdd11bdedae9e632f946d8018186ad60",
+      "reason": "Shared application UI foundation and behavior tests."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
+      "sha256": "ba67b9d291614f582ab0575f210f204d6d20368e0f726023bd9aad6735083b08",
+      "reason": "Shared application UI foundation and behavior tests."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/segmented-tabs.tsx",
+      "sha256": "dd7a7a981ce2d19a8b40b6923bce7d8c442de6405a530e4a9d099b5031701487",
+      "reason": "Shared application UI foundation and behavior tests."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/stat.tsx",
+      "sha256": "c4ffbd4b39b7cd0b8ab361d8d210dad8b00eb6fa847e3f44641ffdc15b274299",
+      "reason": "Shared application UI foundation and behavior tests."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/ui.css",
+      "sha256": "20faa0ff7a635728227a5420e9185eb020cf1763eb17ae34b8106b3616887669",
+      "reason": "Shared application UI foundation and behavior tests."
     }
   ]
 }
