@@ -8,7 +8,13 @@ function paint(ctx: CanvasRenderingContext2D, commands: DrawCommand[], images: R
       ctx.font = `${command.weight} ${command.size}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
       ctx.fillStyle = command.color;
       ctx.textBaseline = 'top';
-      ctx.fillText(command.text, command.x, command.y, command.maxWidth);
+      const width = ctx.measureText(command.text).width;
+      if (width > command.maxWidth) {
+        ctx.font = `${command.weight} ${command.size * command.maxWidth / width}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+      }
+      const measured = ctx.measureText(command.text).width;
+      const x = command.align === 'center' ? command.x + (command.maxWidth-measured)/2 : command.x;
+      ctx.fillText(command.text, x, command.y);
     } else if (command.kind === 'gradient') {
       const gradient = ctx.createLinearGradient(0,0,command.width,command.height);
       command.colors.forEach((color,i) => gradient.addColorStop(i/(command.colors.length-1),color));
@@ -22,7 +28,13 @@ function paint(ctx: CanvasRenderingContext2D, commands: DrawCommand[], images: R
         ctx.fill();
       } else {
         ctx.clip();
-        ctx.drawImage(images[command.source],command.x,command.y,command.width,command.height);
+        const image = images[command.source];
+        if (command.crop) {
+          const crop = command.crop;
+          ctx.drawImage(image,crop.x*image.naturalWidth,crop.y*image.naturalHeight,crop.width*image.naturalWidth,crop.height*image.naturalHeight,command.x,command.y,command.width,command.height);
+        } else {
+          ctx.drawImage(image,command.x,command.y,command.width,command.height);
+        }
       }
     }
     ctx.restore();
