@@ -236,6 +236,7 @@ export const Thread: FC<ThreadProps> = ({
 
 
 function focusComposer(event: React.MouseEvent<HTMLElement>) {
+  if (event.defaultPrevented || document.activeElement !== event.currentTarget) return;
   event.currentTarget.closest('.aui-thread-root')
     ?.querySelector<HTMLTextAreaElement>('.aui-composer-input')?.focus();
 }
@@ -681,7 +682,7 @@ const ComposerAction: FC = () => {
               s.composer.submission !== undefined)
           }
         >
-          <ComposerPrimitive.Cancel onClick={e => { const input = e.currentTarget.closest(".aui-thread-root")?.querySelector<HTMLTextAreaElement>(".aui-composer-input"); requestAnimationFrame(() => input?.focus()); }} asChild>
+          <ComposerPrimitive.Cancel onClick={focusComposer} asChild>
             <Button
               type="button"
               variant="default"
