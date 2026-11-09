@@ -9,5 +9,6 @@
   "answer_directly_request": "前の質問の答えを直接教えてください。",
   "answer_directly_running": "現在の返信が終わってから、直接の回答を求めてください。",
   "answer_directly_empty": "先に質問してください。「直接答える」は直前の質問への返答です。",
-  "answer_directly_unavailable": "このチャットのモデルは利用できません。先に利用可能なモデルを選んでください。"
+  "answer_directly_unavailable": "このチャットのモデルは利用できません。先に利用可能なモデルを選んでください。",
+  "model_switch_note": "切り替えると新しい会話が始まります"
 }

@@ -3,7 +3,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { Chat } from './chat';
-import { conversationSchema } from '../shared/domain';
+import { conversationSchema, type Message } from '../shared/domain';
 import { i18n, tr } from '../shared/i18n';
 const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock('./bridge', () => ({ desktop: { invoke, onChatEvent: () => () => {} } }));
@@ -18,10 +18,10 @@ const scopes = {
   course: { scope: 'course', courseId: course },
   document: { scope: 'document', documentId: course },
 };
-function mount(scope: keyof typeof scopes, onDraft = vi.fn()) {
+function mount(scope: keyof typeof scopes, history: Message[] = []) {
   invoke.mockResolvedValue({ items: [], nextCursor: null });
   const conversation = conversationSchema.parse({ id, ...scopes[scope], providerId: 'openai-api', modelId: 'mock-model', createdAt: '2026-11-06T08:00:00.000Z' });
-  return render(<Chat conversation={conversation} history={[]} draft="" onDraft={onDraft} selection={null} onClearSelection={() => {}} providers={[]} model="" onModel={() => {}} onSettings={() => {}} onProvidersChanged={async () => {}} onUsage={() => {}} />);
+  return render(<Chat conversation={conversation} history={history} draft="" onDraft={() => {}} selection={null} onClearSelection={() => {}} providers={[]} model="" onModel={() => {}} onSettings={() => {}} onProvidersChanged={async () => {}} onUsage={() => {}} />);
 }
 it.each(['en', 'zh-Hant', 'ja'])('keeps a general chat free of document wording in %s', async language => {
   await i18n.changeLanguage(language);
@@ -49,4 +49,13 @@ it('keeps the document and course wording', () => {
   const course = mount('course');
   expect(course.container.querySelector('textarea')!.getAttribute('aria-label')).toBe(tr('moodle:ask_course'));
   expect(screen.getByRole('button', { name: tr('art-reader:summarize') })).toBeTruthy();
+});
+const sent = [{ id: '00000000-0000-4000-8000-000000000009', conversationId: id, role: 'user', parts: [{ type: 'text', text: 'Hi' }], createdAt: '2026-11-06T08:00:00.000Z' }] as unknown as Message[];
+it.each(['en', 'zh-Hant', 'ja'])('states the model switch consequence once messages exist in %s', async language => {
+  await i18n.changeLanguage(language);
+  mount('general');
+  expect(screen.queryByText(tr('chat:model_switch_note'))).toBeNull();
+  cleanup();
+  mount('general', sent);
+  expect(screen.getByText(tr('chat:model_switch_note'))).toBeTruthy();
 });

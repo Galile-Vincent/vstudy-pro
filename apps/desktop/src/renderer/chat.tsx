@@ -158,7 +158,7 @@ export function Chat({
   const renderChat = (runtime: ReturnType<typeof useLocalRuntime>) => {
     const extensions = {
       documentContext, onClearDocumentContext, selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
-      picker: <><ChatTutorModeControl mode={tutorMode} onChange={setTutorMode} unavailable={unavailable} onAnswer={() => budget.guardSend(tr('chat:answer_directly_request'), () => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); })}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
+      picker: <><ChatTutorModeControl mode={tutorMode} onChange={setTutorMode} unavailable={unavailable} onAnswer={() => budget.guardSend(tr('chat:answer_directly_request'), () => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); })}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /><ModelSwitchNote/></>,
       documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
     };
     return <AssistantRuntimeProvider runtime={runtime}><ChatRuntimeEffects runtime={runtime} promptRequest={promptRequest} restoredDraft={restoredDraft} onDraft={value=>{composerDraft.current=value;onDraft(value);}}/><DocumentChatContext.Provider value={extensions}>
@@ -206,6 +206,11 @@ function ComposerBanner() {
   useTranslation();
   const {usage,budget} = useDocumentChat();
   return <><MemoryConsentCard /><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert" title={tr('common:the_estimate_allows_1_024_output_tokens_actual_usage_can_be_higher')}><span>{budget.reason}</span><div className="usage-warning-actions"><Button type="button" variant="outline" size="sm" onClick={budget.approve}>{tr('common:send_anyway')}</Button><Button type="button" variant="ghost" size="sm" onClick={budget.dismiss}>{tr('common:cancel')}</Button></div></div>}</>;
+}
+function ModelSwitchNote() {
+  useTranslation();
+  const started = useAuiState(s => s.thread.messages.length > 0);
+  return started ? <span className="muted min-w-0 text-xs">{tr('chat:model_switch_note')}</span> : null;
 }
 function ComposerModel() {
   useTranslation(); return useDocumentChat().picker; }
