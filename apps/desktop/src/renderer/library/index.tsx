@@ -1,4 +1,4 @@
-import { localDate, dayBound } from './dates';
+import { localDate, dayBound, validDay } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import { Brand } from '../components/brand';
@@ -138,7 +138,7 @@ export function LibraryView() {
   const updateDate = (key: "addedAfter" | "addedBefore", value: string) => {
     const next = { ...dateDraft, [key]: value };
     setDateDraft(next);
-    const invalid = !!(next.addedAfter && next.addedBefore && next.addedAfter > next.addedBefore);
+    const invalid = !validDay(next.addedAfter) || !validDay(next.addedBefore) || !!(next.addedAfter && next.addedBefore && next.addedAfter > next.addedBefore);
     setDateError(invalid);
     if (!invalid) setQuery(q => ({
       ...q,
