@@ -227,8 +227,8 @@ html[data-reduced-transparency=true],html[data-theme=contrast] { --glass-blur:no
 :root.dark :is([data-slot=button][data-variant=default],button.primary):active { filter:brightness(.86); }
 
 /* Floating surfaces: popovers, menus, selects and dialogs share the stronger glass fill. */
-:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=sheet-content],[data-slot=tooltip-content]:not(.bg-foreground),.select-popup) { border:0; }
-:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=sheet-content],.select-popup):not(.settings-dialog) { background:var(--glass-fill-float); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow-float); }
+:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=tooltip-content]:not(.bg-foreground),.select-popup) { border:0; }
+:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup):not(.settings-dialog) { background:var(--glass-fill-float); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow-float); }
 
 /* Chrome: no band or line under the top bar; scrolled content fades out under it instead. */
 .app-shell .shell-main { background:var(--page-field); }
@@ -236,9 +236,9 @@ html[data-reduced-transparency=true],html[data-theme=contrast] { --glass-blur:no
 .app-shell:not([data-view=workspace]) .shell-content [data-scrolled=true] { mask-image:linear-gradient(to bottom,transparent 0,var(--ink) var(--space-6)); }
 
 @media(prefers-contrast:more) {
- .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=sheet-content],.select-popup) { border:1px solid var(--ink); box-shadow:none; }
+ .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup) { border:1px solid var(--ink); box-shadow:none; }
 }
 @media(forced-colors:active) {
- .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=sheet-content],.select-popup) { border:1px solid CanvasText; }
+ .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup) { border:1px solid CanvasText; }
 }
 @media(prefers-reduced-motion:reduce) { .glass-lift,.glass-lift:hover { transition:none; transform:none; } }
