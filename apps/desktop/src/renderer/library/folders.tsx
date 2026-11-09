@@ -45,7 +45,7 @@ export function FolderGrid({ groups, formatNumber, onOpen }: { groups: CourseGro
             >
               <FolderClosed className="folder-row-icon" aria-hidden="true" />
               <span className="min-w-0">
-              <span className="course-folder-name">{name}</span>
+              <span className="course-folder-name" title={name}>{name}</span>
               <span className="course-folder-meta">
                 {tr("library:folderFiles", { count: group.items.length, formatted: formatNumber(group.items.length) })}
                 {group.pages > 0 && <span>{tr("library:pages", { count: group.pages, formatted: formatNumber(group.pages) })}</span>}

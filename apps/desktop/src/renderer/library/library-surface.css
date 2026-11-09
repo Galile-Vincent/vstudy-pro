@@ -1,12 +1,12 @@
 .library-folders { flex:1; min-height:0; overflow:auto; padding:var(--space-1); }
-.folder-grid { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:minmax(0,1fr); gap:var(--space-3); }
-.folder-row { display:flex; align-items:center; gap:var(--space-3); width:100%; min-height:80px; padding:var(--space-4); border:0; border-radius:var(--r-sm); background:transparent; color:var(--ink); text-align:start; cursor:pointer; }
+.folder-grid { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:minmax(0,1fr); gap:var(--space-2); }
+.folder-row { display:flex; align-items:center; gap:var(--space-3); width:100%; min-height:64px; padding:var(--space-3) var(--space-4); border:0; border-radius:var(--r-sm); background:transparent; color:var(--ink); text-align:start; cursor:pointer; }
 .folder-row:hover { background:var(--active); }
 .folder-row:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
 .folder-row-icon { width:24px; height:24px; flex:none; color:var(--folder-tone,var(--muted)); }
 .course-folder-name { display:block; font-size:var(--type-base); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .course-folder-meta { display:flex; flex-wrap:wrap; gap:var(--space-2); color:var(--muted); font-size:var(--type-sm); }
-@container library-page (width >= 724px) { .folder-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@container library-page (width >= 660px) { .folder-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(forced-colors:active) { .folder-row { border:1px solid CanvasText; } }
 @media(prefers-contrast:more) { .folder-row { border:1px solid var(--ink); } }
 
