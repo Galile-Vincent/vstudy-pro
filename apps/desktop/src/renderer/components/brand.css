@@ -13,3 +13,4 @@
 .w-header .vstudy-lockup { width:150px; margin-right:auto; }
 .learning-dialog .vstudy-lockup { width:180px; }
 .library-empty .vstudy-symbol,.moodle-empty .vstudy-symbol { width:64px; margin-bottom:var(--space-4); }
+.vstudy-brand > .beta-badge { position:absolute; right:-5px; bottom:-4px; padding:1px 3px; font-size:8px; }

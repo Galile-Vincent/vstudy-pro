@@ -1,6 +1,7 @@
 import { defineConfig } from "electron-vite";
 import { resolve } from "node:path";
 import { repairPtyHelpers } from './src/main/providers/setup/pty-helper.mjs';
+import { version } from "./package.json";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
@@ -13,6 +14,7 @@ export default defineConfig({
     build: { externalizeDeps: false, rollupOptions: { output: { format: "cjs" } } },
   },
   renderer: {
+    define: { __APP_VERSION__: JSON.stringify(version) },
     build: { minify: "esbuild", cssMinify: true },
     resolve: { alias: { "@": resolve("src/renderer") } },
     html: { cspNonce: "vstudy-development" },

@@ -1,6 +1,8 @@
 import { defineConfig } from "vitest/config";
+import { version } from "./package.json";
 import { resolve } from "node:path";
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(version) },
   resolve: { alias: { "@": resolve("src/renderer") } },
   test: {
     pool: "forks", maxWorkers: 2, environment: "node", include: ["src/**/*.test.{ts,tsx}"],

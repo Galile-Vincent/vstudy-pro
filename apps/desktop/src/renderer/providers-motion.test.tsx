@@ -39,3 +39,8 @@ it('also delays dismissal requested by the dialog and cancels completion on unmo
   await act(async()=>root.render(null)); await act(async()=>vi.advanceTimersByTime(300));
   expect(onClose).not.toHaveBeenCalled();
 });
+
+it('shows the version and beta badge in General settings', async () => {
+  await mount();
+  expect(host.querySelector('.app-version')?.textContent).toBe('v0.4.4 beta');
+});
