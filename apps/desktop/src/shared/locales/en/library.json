@@ -1,4 +1,5 @@
 {
+  "rowName": "{{title}}, {{selection}}",
   "conversion_pages": "Converting page {{page}} of {{total}}",
   "conversion_complete": "Conversion complete",
   "conversion_preparing": "Preparing text reader…",

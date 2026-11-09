@@ -961,7 +961,10 @@ export function LibraryView() {
                   id={`library-document-${d.id}`}
                   data-index={index}
                   role="listitem"
-                  aria-label={`${d.title}, ${tr(selectedSet.has(d.id) ? "library:itemSelected" : "library:itemUnselected")}`}
+                  aria-label={tr("library:rowName", {
+                    title:d.title,
+                    selection:tr(selectedSet.has(d.id) ? "library:itemSelected" : "library:itemUnselected"),
+                  })}
                   aria-posinset={index + 1}
                   aria-setsize={shown.length}
                   data-selected={selectedSet.has(d.id)}

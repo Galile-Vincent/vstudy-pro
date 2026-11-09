@@ -378,3 +378,12 @@ it('preserves a page two selection on refresh and clears it on a query change', 
  await waitFor(()=>expect(state.invoke.mock.calls.some(([c,q])=>c==='library:documents:list' && q.text)).toBe(true));
  expect(document.querySelectorAll('[data-selected=true]')).toHaveLength(0);
 });
+
+it.each(['en','zh-Hant','ja'])('localizes row name punctuation (%s)', async locale => {
+ await i18n.changeLanguage(locale);
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[row('Notes')],nextCursor:null}:[]);
+ mount(); await screen.findByText('Notes');
+ const punctuation=locale==='en'?', ':'、';
+ expect(screen.getByRole('listitem',{name:`Notes${punctuation}${tr('library:itemUnselected')}`})).toBeTruthy();
+ await i18n.changeLanguage('en');
+});

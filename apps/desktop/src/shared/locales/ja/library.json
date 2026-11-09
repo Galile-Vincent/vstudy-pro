@@ -1,4 +1,5 @@
 {
+  "rowName": "{{title}}、{{selection}}",
   "conversion_pages": "{{total}} ページ中 {{page}} ページを変換中",
   "conversion_complete": "変換が完了しました",
   "conversion_preparing": "文章の読み取りを準備中…",

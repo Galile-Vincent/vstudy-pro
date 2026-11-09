@@ -1,4 +1,5 @@
 {
+  "rowName": "{{title}}、{{selection}}",
   "conversion_pages": "正在轉換第 {{page}}／{{total}} 頁",
   "conversion_complete": "轉換完成",
   "conversion_preparing": "正在準備讀取文字…",
