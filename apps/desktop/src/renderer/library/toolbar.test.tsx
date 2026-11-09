@@ -114,3 +114,17 @@ it('submits equal picked days inclusively through local 23:59',async()=>{
 });
 
 beforeEach(() => recovery.reset());
+
+it('does not resurrect a removed date chip when editing the other bound',async()=>{
+ state.route.query={addedAfter:new Date(2026,9,1).toISOString()};
+ const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
+ const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ fireEvent.change(within(panel).getByRole('combobox',{name:tr('library:addedAfter')}),{target:{value:'custom'}});
+ fireEvent.click(within(document.querySelector('.filter-chips')! as HTMLElement).getByRole('button',{name:/Added after/}));
+ expect((within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}) as HTMLInputElement).value).toBe('');
+ fireEvent.change(within(panel).getByLabelText(tr('library:addedBefore')),{target:{value:'2026-11-01'}});
+ await waitFor(()=>{
+  const q=state.invoke.mock.calls.filter(([c])=>c==='library:documents:list').at(-1)?.[1];
+  expect(q.addedBefore).toBeTruthy();expect(q.addedAfter).toBeUndefined();
+ });
+});
