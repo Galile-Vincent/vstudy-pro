@@ -458,3 +458,17 @@ it('keeps 300 loaded rows, scroll and active row after a poll', async () => {
  expect(viewport.scrollTop).toBe(12800);
  expect(active.isConnected).toBe(true);
 });
+
+it('bounds mounted rows after deletion with scroll past the content end', async () => {
+ let rows=Array.from({length:5001},(_,i)=>row('doc'+i));
+ state.invoke.mockImplementation(async(c)=>{
+  if(c==='library:documents:softDelete'){rows=rows.slice(1);return {};}
+  return c==='library:documents:list'?{items:rows,nextCursor:null}:[];
+ });
+ const {container}=mount(); await screen.findByText('doc0');
+ fireEvent.click(screen.getByText('doc0').closest('.library-document')!);
+ fireEvent.scroll(container.querySelector('.library-results')!,{target:{scrollTop:320000}});
+ fireEvent.click(screen.getByRole('button',{name:tr('library:delete')}));
+ await waitFor(()=>expect(container.querySelector('[aria-setsize="5000"]')).toBeTruthy(),{timeout:10000});
+ expect(container.querySelectorAll('.library-document').length).toBeLessThan(80);
+});

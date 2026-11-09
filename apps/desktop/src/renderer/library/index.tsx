@@ -1,4 +1,5 @@
 import { provesExistence } from './selection';
+import { virtualWindow } from './window';
 import { localDate, dayBound, validDay } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
@@ -592,12 +593,10 @@ export function LibraryView() {
   }, [shown, columns, rowHeight]);
   const rowContext = useRef({ shown, items, layout, columns, rowHeight, grid, selected, selectedSet });
   rowContext.current = { shown, items, layout, columns, rowHeight, grid, selected, selectedSet };
-  const firstLane = Math.max(0, layout.offsets.findIndex(offset => offset > top) - 1);
-  const start = Math.max(0, firstLane - 2) * columns;
-  const bottom = top + (scroller.current?.clientHeight || 800);
-  const lastLane = layout.offsets.findIndex(offset => offset > bottom);
-  const end = Math.min(shown.length,
-    (lastLane < 0 ? layout.heights.length : lastLane + 3) * columns);
+  const {start, end} = virtualWindow(
+    layout.offsets, columns, shown.length, top,
+    scroller.current?.clientHeight || 800,
+  );
   const visibleIndices = Array.from(
     {length: end - start},
     (_, offset) => start + offset,
