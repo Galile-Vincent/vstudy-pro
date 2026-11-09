@@ -655,7 +655,7 @@ export function LibraryView() {
     >
       <div className="library-title">
         <div>
-          <h1 ref={heading} tabIndex={-1}>{route.title ?? (folderPath(folders, query.folderId) || tr("common:library"))}</h1>
+          <h1 ref={heading} tabIndex={-1}>{openGroup ? openGroup.name ?? tr("library:unfiled") : (folderPath(folders, query.folderId) || route.title || tr("common:library"))}</h1>
           <p className="muted">{tr("library:documentCount", { count: items.length, formatted: format.number(items.length) + (cursor ? "+" : "") })}</p>
         </div>
         <Button variant="outline" className="primary"

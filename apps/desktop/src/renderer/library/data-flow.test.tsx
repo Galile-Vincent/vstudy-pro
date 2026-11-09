@@ -236,7 +236,7 @@ it.each(['back', 'breadcrumb'])('restores the originating folder after %s naviga
  fireEvent.click(screen.getByRole('button', {name:tr('library:viewFolders')}));
  const folder = screen.getByRole('button', {name:tr('library:openFolder', {name:tr('library:unfiled')})});
  act(() => folder.focus()); fireEvent.click(folder);
- expect(document.activeElement).toBe(screen.getByRole('heading', {level:1}));
+ expect(document.activeElement).toBe(screen.getByRole('heading', {level:1, name:tr('library:unfiled')}));
  fireEvent.click(action === 'back'
   ? screen.getByRole('button', {name:tr('library:backToFolders')})
   : document.querySelector('.folder-crumb-root')!);
