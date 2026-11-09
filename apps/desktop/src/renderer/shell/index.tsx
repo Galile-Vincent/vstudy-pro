@@ -1,3 +1,4 @@
+import { UpdateRow } from './update-row';
 import { TabStrip } from './tab-strip';
 import { mergeTabPresentation, activeTab, currentRoute, createTab, loadTabs, saveTabs, tabReducer, type TabAction } from './tab-state';
 import { MAX_APP_TABS, type TabSet, type TabRoute } from '../../shared/app-tabs';
@@ -391,6 +392,7 @@ export function AppShell({
         </SidebarContent>
         <SidebarFooter>
           <SubscriptionMeters compact />
+          <UpdateRow collapsed={import.meta.env.DEV && new URLSearchParams(window.location.search).get('updateCollapsed') === '1'} />
           <div className="art-reader-profile">
             <span
               className="art-reader-avatar"

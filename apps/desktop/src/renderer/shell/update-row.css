@@ -1,0 +1,15 @@
+.update-row { display:flex; flex-wrap:wrap; align-items:center; min-inline-size:0; gap:var(--space-1); }
+.update-row > button:first-child { height:calc(var(--space-8) + var(--space-1)); min-inline-size:0; flex:1; justify-content:flex-start; padding-inline:var(--space-1); font-size:var(--type-xs); }
+.update-row > button > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.update-row > button > svg { flex-shrink:0; }
+.update-row [data-slot=progress] { flex-basis:100%; }
+.update-row [data-slot=progress-indicator] { transition:none; }
+.update-row[data-collapsed=true] > button > span { display:none; }
+.update-row[data-collapsed=true] > button:first-child { padding-inline:var(--space-2); }
+@media (forced-colors:active) {
+  .update-row button { border:1px solid ButtonText; }
+  .update-row [data-slot=progress] { border:1px solid CanvasText; }
+  .update-row [data-slot=progress-indicator] { background:Highlight; }
+}
+
+.update-row:dir(rtl) [data-slot=progress] { transform:scaleX(-1); }

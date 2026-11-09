@@ -1,0 +1,17 @@
+{
+  "title": "更新",
+  "automatic": "自動檢查更新",
+  "check": "立即檢查",
+  "version": "版本 {{version}}",
+  "last_check": "上次檢查：{{time}}",
+  "never": "尚未檢查",
+  "available": "有可用更新 - v{{version}}",
+  "downloading": "下載中 {{percent}}%",
+  "ready": "重新啟動以更新",
+  "error": "更新失敗",
+  "checking": "正在檢查更新",
+  "unsupported": "下載最新版本",
+  "notes": "更新內容",
+  "retry": "再試一次",
+  "download": "下載"
+}

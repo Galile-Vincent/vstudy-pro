@@ -1,0 +1,17 @@
+{
+  "title": "アップデート",
+  "automatic": "アップデートを自動確認",
+  "check": "今すぐ確認",
+  "version": "バージョン {{version}}",
+  "last_check": "最終確認：{{time}}",
+  "never": "未確認",
+  "available": "更新があります - v{{version}}",
+  "downloading": "ダウンロード中 {{percent}}%",
+  "ready": "再起動して更新",
+  "error": "更新に失敗しました",
+  "checking": "更新を確認中",
+  "unsupported": "最新バージョンをダウンロード",
+  "notes": "更新内容",
+  "retry": "再試行",
+  "download": "ダウンロード"
+}

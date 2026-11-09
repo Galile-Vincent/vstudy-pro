@@ -1,0 +1,17 @@
+{
+  "title": "Updates",
+  "automatic": "Check for updates automatically",
+  "check": "Check now",
+  "version": "Version {{version}}",
+  "last_check": "Last checked: {{time}}",
+  "never": "Never",
+  "available": "Update available - v{{version}}",
+  "downloading": "Downloading {{percent}}%",
+  "ready": "Restart to update",
+  "error": "Update failed",
+  "checking": "Checking for updates",
+  "unsupported": "Download the latest version",
+  "notes": "What’s new",
+  "retry": "Try again",
+  "download": "Download"
+}
