@@ -32,7 +32,8 @@ let host: HTMLDivElement;
 ).IS_REACT_ACT_ENVIRONMENT = true;
 beforeEach(async () => {
   navigationMock.value = null;
-  vi.stubGlobal("matchMedia",vi.fn(() => ({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()})));
+  HTMLElement.prototype.getAnimations = vi.fn(() => []);
+  vi.stubGlobal("matchMedia",vi.fn(() => ({matches:false,addEventListener:vi.fn(),removeEventListener:vi.fn()})));
   await i18n.changeLanguage("en");
   host = document.createElement("div");
   document.body.append(host);
@@ -778,7 +779,7 @@ it('keeps retained course content in place during a background panel refresh',as
   api.course=async()=>detail;
   await mount(api,detail.course.id);
   expect(host.querySelectorAll('.moodle-module').length).toBeGreaterThan(0);
-  expect(host.querySelector('.moodle-skeleton')).toBeNull();
+  expect(getByRole(host, "heading", {level: 3, name: /This week/})).not.toBeNull();
   expect(host.querySelector('[role=status][aria-busy=true]')).not.toBeNull();
 });
 it('shows a loading state when course content is absent',async()=>{
@@ -1221,6 +1222,9 @@ it("D1 exposes week headings and labelled disclosure regions", async () => {
     const heading = getByRole(week as HTMLElement, "heading", { level: 3 });
     const button = getByRole(heading, "button");
     const panel = document.getElementById(button.getAttribute("aria-controls")!);
+    const expanded = button.getAttribute("aria-expanded");
+    expect(["true", "false"]).toContain(expanded);
+    expect(panel?.hidden).toBe(expanded === "false");
     expect(panel?.getAttribute("role")).toBe("region");
     expect(panel?.getAttribute("aria-labelledby")).toBe(heading.id);
   }
@@ -1234,7 +1238,7 @@ it("D3 opens at the top and explicitly jumps with focus and reduced motion", asy
   await act(async () => getByRole(host, "button", { name: "Jump to current week" }).click());
   const heading = host.querySelector(".moodle-week[data-current=true] h3");
   expect(document.activeElement).toBe(heading);
-  expect(scroll).toHaveBeenCalledWith({ block: "start", behavior: "instant" });
+  expect(scroll).toHaveBeenCalledWith({ block: "start", behavior: "smooth" });
 });
 
 it.each(["material", "announcement"])("restores focus after Escape closes the %s sheet", async kind => {
@@ -1320,4 +1324,23 @@ it.each([true, false])("includes file metadata in the open button name (ready=%s
     ].every(text => name.includes(text)),
   });
   expect(button.textContent).toContain(file.module);
+});
+
+it.each(["locked", "lazy"])("jumps safely to a %s current week after a tab round-trip", async kind => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  const current = detail.sections.find(section => section.current)!;
+  current.accessible = kind !== "locked";
+  current.modules = [];
+  api.course = async () => detail;
+  await mount(api, detail.course.id);
+  await tab("Deadlines");
+  await tab("Content");
+  await act(async () => getByRole(host, "button", {name: "Jump to current week"}).click());
+  const heading = getByRole(host, "heading", {level: 3, name: /This week/});
+  const button = getByRole(heading, "button");
+  expect(document.activeElement).toBe(heading);
+  expect(button.getAttribute("aria-expanded")).toBe(kind === "locked" ? "false" : "true");
+  const panel = document.getElementById(button.getAttribute("aria-controls")!)!;
+  expect(panel.hidden).toBe(kind === "locked");
 });
