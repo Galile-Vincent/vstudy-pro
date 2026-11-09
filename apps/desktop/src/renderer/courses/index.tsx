@@ -610,7 +610,11 @@ function CoursesBody({
                   variant="ghost"
                   size="icon"
                   aria-label={tr("moodle:disconnect")}
-                  onClick={() => void disconnect(account.id)}
+                  onClick={event => {
+                    disconnectTrigger.current = event.currentTarget;
+                    disconnectSchool.current = account.siteName;
+                    setConfirmDisconnect(account.id);
+                  }}
                 >
                   <Unplug />
                 </Button>
