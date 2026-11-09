@@ -241,3 +241,18 @@ it.each(['back', 'breadcrumb'])('restores the originating folder after %s naviga
   : document.querySelector('.folder-crumb-root')!);
  expect(document.activeElement).toBe(screen.getByRole('button', {name:tr('library:openFolder', {name:tr('library:unfiled')})}));
 });
+
+
+it('exposes Space and range selection through labelled checkboxes', async () => {
+ state.invoke.mockImplementation(async c => c === 'library:documents:list'
+  ? {items:[row('first'),row('second')], nextCursor:null} : []);
+ mount(); await screen.findByText('first');
+ const first = screen.getByText('first').closest<HTMLElement>('.library-document')!;
+ act(() => first.focus()); fireEvent.keyDown(first, {key:' '});
+ expect(within(first).getByRole('checkbox', {checked:true})).toBeTruthy();
+ fireEvent.keyDown(first, {key:'ArrowDown', shiftKey:true});
+ expect(screen.getAllByRole('checkbox', {checked:true})).toHaveLength(2);
+ expect(screen.getByRole('listitem', {name:/second.*Selected/})).toBeTruthy();
+ fireEvent.click(within(first).getByRole('checkbox'));
+ expect(within(first).getByRole('checkbox', {checked:false})).toBeTruthy();
+});

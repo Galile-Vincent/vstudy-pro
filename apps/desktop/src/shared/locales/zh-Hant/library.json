@@ -220,5 +220,8 @@
   "recoveryCount": "{{count}} 份文件",
   "moved_one": "已移動 {{formatted}} 份文件 · 30 秒內可復原",
   "moved_other": "已移動 {{formatted}} 份文件 · 30 秒內可復原",
-  "recoveryAction": "操作 {{number}}"
+  "recoveryAction": "操作 {{number}}",
+  "itemSelected": "已選取",
+  "itemUnselected": "未選取",
+  "selectDocument": "選取 {{name}}"
 }

@@ -220,5 +220,8 @@
   "recoveryCount": "{{count}} documents",
   "moved_one": "{{formatted}} document moved · Undo within 30 seconds",
   "moved_other": "{{formatted}} documents moved · Undo within 30 seconds",
-  "recoveryAction": "Action {{number}}"
+  "recoveryAction": "Action {{number}}",
+  "itemSelected": "Selected",
+  "itemUnselected": "Not selected",
+  "selectDocument": "Select {{name}}"
 }

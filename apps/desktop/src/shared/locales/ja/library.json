@@ -220,5 +220,8 @@
   "recoveryCount": "{{count}}件のドキュメント",
   "moved_one": "{{formatted}}件のドキュメントを移動しました · 30秒以内に元に戻せます",
   "moved_other": "{{formatted}}件のドキュメントを移動しました · 30秒以内に元に戻せます",
-  "recoveryAction": "操作 {{number}}"
+  "recoveryAction": "操作 {{number}}",
+  "itemSelected": "選択済み",
+  "itemUnselected": "未選択",
+  "selectDocument": "{{name}}を選択"
 }

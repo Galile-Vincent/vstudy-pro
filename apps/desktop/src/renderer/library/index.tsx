@@ -921,6 +921,7 @@ export function LibraryView() {
                   id={`library-document-${d.id}`}
                   data-index={index}
                   role="listitem"
+                  aria-label={`${d.title}, ${tr(selected.includes(d.id) ? "library:itemSelected" : "library:itemUnselected")}`}
                   aria-posinset={index + 1}
                   aria-setsize={shown.length}
                   data-selected={selected.includes(d.id)}
@@ -1039,7 +1040,9 @@ export function LibraryView() {
                     if (e.key === "Enter") open(item, e.metaKey || e.ctrlKey);
                     if (e.key === " ") {
                       e.preventDefault();
-                      setSelected([d.id]);
+                      anchor.current = d.id;
+                      setSelected(current => current.includes(d.id)
+                        ? current.filter(id => id !== d.id) : [...current, d.id]);
                     }
                     if (
                       e.key === "ContextMenu" ||
@@ -1058,6 +1061,15 @@ export function LibraryView() {
                     }
                   }}
                 >
+                  <input type="checkbox" className="sr-only" tabIndex={-1}
+                    aria-label={tr('library:selectDocument', {name:d.title})}
+                    checked={selected.includes(d.id)}
+                    onDoubleClick={event => event.stopPropagation()}
+                    onChange={event => {
+                      anchor.current = d.id;
+                      setSelected(current => event.target.checked
+                        ? [...current, d.id] : current.filter(id => id !== d.id));
+                    }}/>
 {grid ? <><DocumentArt id={d.id} kind={d.sourceName.split('.').pop()?.toUpperCase() ?? 'MD'}/><div className="document-cell">
                     <FileText className="document-glyph" aria-hidden="true" />
                     <div className="document-info">
