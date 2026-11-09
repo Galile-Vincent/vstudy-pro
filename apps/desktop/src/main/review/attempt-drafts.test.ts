@@ -78,6 +78,50 @@ it('ignores a draft write that is older than the stored one', () => {
  } finally { f.store.close(); }
 });
 
+const forge = (f: ReturnType<typeof setup>['f'], attemptId: string, itemId: string, draft: unknown) => f.store.db
+ .prepare('INSERT INTO study_attempt_drafts(attemptId,itemId,draftJson,updatedAt,seq) VALUES(?,?,?,?,?)')
+ .run(attemptId, itemId, JSON.stringify(draft), '2026-11-08T00:00:00.000Z', 1);
+
+it('accepts a draft for an uncommitted question of an open attempt in a backup', () => {
+ const { f, engine, attempt } = setup();
+ try {
+  engine.answer(attempt.id, 'q1', 1);
+  engine.commit(attempt.id, 'q1');
+  forge(f, attempt.id, 'q2', 'Force');
+  expect(() => validateStudyData(f.store.db)).not.toThrow();
+ } finally { f.store.close(); }
+});
+
+it('rejects a backup holding a draft for a question that is already committed', () => {
+ const { f, engine, attempt } = setup();
+ try {
+  engine.answer(attempt.id, 'q1', 1);
+  engine.commit(attempt.id, 'q1');
+  forge(f, attempt.id, 'q1', 0);
+  expect(() => validateStudyData(f.store.db)).toThrow('storage.invalid_backup');
+ } finally { f.store.close(); }
+});
+
+it('rejects a backup holding a draft in a graded attempt', () => {
+ const { f, engine, attempt } = setup();
+ try {
+  engine.answer(attempt.id, 'q1', 1);
+  engine.answer(attempt.id, 'q2', 'Force');
+  expect(engine.commit(attempt.id).phase).toBe('graded');
+  forge(f, attempt.id, 'q2', 'Other');
+  expect(() => validateStudyData(f.store.db)).toThrow('storage.invalid_backup');
+ } finally { f.store.close(); }
+});
+
+it('rejects a backup holding a draft in an attempt that is no longer open', () => {
+ const { f, attempt } = setup();
+ try {
+  f.store.db.prepare("UPDATE study_attempts SET phase='committed',committedAt=startedAt WHERE id=?").run(attempt.id);
+  forge(f, attempt.id, 'q1', 1);
+  expect(() => validateStudyData(f.store.db)).toThrow('storage.invalid_backup');
+ } finally { f.store.close(); }
+});
+
 it('removes drafts with their attempt', () => {
  const { f, engine, attempt } = setup();
  try {

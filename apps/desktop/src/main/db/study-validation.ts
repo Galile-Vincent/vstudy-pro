@@ -83,9 +83,11 @@ export function validateStudyData(db:DatabaseSync):void {
   });
   check('study_attempt_drafts',row=>{
    const draft=z.object({attemptId:id,itemId:text,draftJson:z.string(),updatedAt:at,seq:z.number().int().nonnegative()}).strict().parse(row);
-   const attempt=db.prepare('SELECT artifactId FROM study_attempts WHERE id=?').get(draft.attemptId);
+   const attempt=db.prepare('SELECT artifactId,phase FROM study_attempts WHERE id=?').get(draft.attemptId);
    const item=attempt&&tests.get(String(attempt.artifactId))?.items.find(item=>item.id===draft.itemId);
    if(!item||!isStudyAnswer(item,json(draft.draftJson,8192)))throw new Error('invalid draft');
+   const state=db.prepare('SELECT correct FROM study_attempt_items WHERE attemptId=? AND itemId=?').get(draft.attemptId,draft.itemId);
+   if(attempt.phase!=='answering'||!state||state.correct!==null)throw new Error('invalid draft state');
   });
   check('study_attempt_items',row=>z.object({attemptId:id,itemId:text,conceptKey:text,correct:bit.nullable(),selfGrade:z.enum(['correct','partial','incorrect']).nullable(),appliedAt:at.nullable(),reportedBad:bit}).strict().parse(row));
   const prefs=db.prepare("SELECT value FROM settings WHERE key='studyPrefs'").get();if(prefs)studyPrefsSchema.parse(json(prefs.value,8192));
