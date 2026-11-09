@@ -64,3 +64,32 @@ it.each(['search', 'input', 'menu', 'consumed', 'inside'])('respects Escape owne
   expect(close).toHaveBeenCalledTimes(target === 'inside' ? 1 : 0);
   if (target !== 'inside') expect(document.activeElement).toBe(element);
 });
+
+import { readFileSync } from 'node:fs';
+const tokens = readFileSync('src/renderer/tokens.css', 'utf8');
+const shell = readFileSync('src/renderer/shell/shell.css', 'utf8');
+const artReader = readFileSync('src/renderer/shell/art-reader.css', 'utf8');
+it.each([700, 1100, 1280])('probes real responsive rules without latching at %ipx', async width => {
+  let viewport = width;
+  const source = document.createElement('style'); source.dataset.test = '';
+  source.textContent = [tokens, shell, artReader].join('\n'); document.head.append(source);
+  const applied = document.createElement('style'); applied.dataset.test = '';
+  const rules = (list: CSSRuleList): string[] => Array.from(list).flatMap(rule => {
+    if (rule instanceof CSSMediaRule) {
+      const max = /max-width:\s*(\d+)px/.exec(rule.conditionText);
+      return max && viewport <= Number(max[1]) ? rules(rule.cssRules) : [];
+    }
+    return rule instanceof CSSStyleRule && rule.selectorText.includes('shell-sidebar')
+      ? [rule.cssText] : [];
+  });
+  const sheet = source.sheet!;
+  applied.textContent = rules(sheet.cssRules).join('\n');
+  source.remove(); document.head.append(applied);
+  await act(() => root.render(<Frame />));
+  expect(host.querySelector('.app-shell')!.getAttribute('data-sidebar-overlay')).toBe(String(width < 1200));
+  await act(() => resize());
+  expect(host.querySelector('.app-shell')!.getAttribute('data-sidebar-overlay')).toBe(String(width < 1200));
+  viewport = 1280; applied.textContent = rules(sheet.cssRules).join('\n');
+  await act(() => resize());
+  expect(host.querySelector('.app-shell')!.getAttribute('data-sidebar-overlay')).toBe('false');
+});
