@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, useState } from "react";
-import { getByRole, queryByRole, waitFor } from "@testing-library/dom";
+import { getByRole, getAllByRole, queryByRole, waitFor } from "@testing-library/dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Courses, deadlineGroup } from "./index";
@@ -1007,9 +1007,8 @@ it('keeps focus on a surviving target after the last disconnect', async () => {
   const api = createMockMoodleApi();
   await mount(api);
   await act(async () => getByRole(host, 'button', {name: /^Disconnect /}).click());
-  await act(async () => getByRole(document.body, 'dialog').querySelector<HTMLButtonElement>('button[data-variant=destructive]')!.click());
-  await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
-  expect(document.activeElement).toBe(host.querySelector('[data-slot=page-header] button:last-child'));
+  await act(async () => getByRole(getByRole(document.body, 'dialog'), 'button', {name: 'Disconnect school'}).click());
+  await waitFor(() => expect(document.activeElement).toBe(getByRole(host, 'button', {name: 'Connect school'})));
 });
 
 it('shows one Connect school action only after an empty overview loads', async () => {
@@ -1018,10 +1017,12 @@ it('shows one Connect school action only after an empty overview loads', async (
   let resolve!: (value: typeof overview) => void;
   api.overview = () => new Promise(done => { resolve = done; });
   await mount(api);
-  expect(host.querySelector('h1:empty')).toBeNull();
+  expect(getAllByRole(host, 'heading', {level: 1})).toHaveLength(1);
+  expect(getByRole(host, 'heading', {level: 1, name: 'Courses'})).toBeTruthy();
   expect(host.textContent).not.toContain('Connect school');
   await act(async () => resolve({...overview, accounts: [], courses: []}));
-  expect(host.querySelectorAll('h1:empty')).toHaveLength(0);
+  expect(getAllByRole(host, 'heading', {level: 1})).toHaveLength(1);
+  expect(getByRole(host, 'heading', {level: 1, name: 'Courses'})).toBeTruthy();
   expect(getByRole(host, 'button', {name: 'Connect school'})).toBeTruthy();
 });
 
@@ -1100,9 +1101,9 @@ it('supplies no empty heading during course loading or unavailable states', asyn
   let resolve!: (value: Awaited<ReturnType<MoodleApi['course']>>) => void;
   api.course = () => new Promise(done => {resolve = done;});
   await mount(api, id);
-  expect(host.querySelector('h1:empty')).toBeNull();
+  expect(queryByRole(host, 'heading', {level: 1})).toBeNull();
   await act(async () => resolve(undefined as unknown as Awaited<ReturnType<MoodleApi['course']>>));
-  expect(host.querySelector('h1:empty')).toBeNull();
+  expect(queryByRole(host, 'heading', {level: 1})).toBeNull();
   expect(host.querySelectorAll('main')).toHaveLength(1);
 });
 
