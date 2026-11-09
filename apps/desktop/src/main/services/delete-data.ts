@@ -41,7 +41,8 @@ export function createDataDeletion(
       reviewWorkers.resume('delete-all');
       await report(error, scheduled);
     } finally {
-      relaunch();
+      if (scheduled) relaunch();
+      else started = false;
     }
   };
 }
@@ -106,14 +107,23 @@ export async function deleteOwnedEntries(
   return failed;
 }
 export async function markDeletionPending(root: string): Promise<void> {
-  const file = await open(root + '.delete-pending', 'w', 0o600);
+  const marker = root + '.delete-pending';
   try {
-    await file.writeFile(JSON.stringify({token:randomUUID(), timestamp:Date.now()}));
-    await file.sync();
-  } finally { await file.close(); }
-  if (process.platform !== 'win32') {
-    const parent = await open(dirname(root), 'r');
-    try { await parent.sync(); } finally { await parent.close(); }
+    const file = await open(marker, 'w', 0o600);
+    try {
+      await file.writeFile(JSON.stringify({token:randomUUID(), timestamp:Date.now()}));
+      await file.sync();
+    } finally { await file.close(); }
+    if (process.platform !== 'win32') {
+      const parent = await open(dirname(root), 'r');
+      try { await parent.sync(); }
+      catch (error) {
+        if (!['EINVAL','ENOTSUP'].includes((error as NodeJS.ErrnoException).code ?? '')) throw error;
+      } finally { await parent.close(); }
+    }
+  } catch (error) {
+    await rm(marker,{force:true});
+    throw error;
   }
 }
 export async function finishPendingDeletion(

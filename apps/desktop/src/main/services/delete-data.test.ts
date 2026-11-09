@@ -84,3 +84,16 @@ it('does not promise deferred deletion when the marker cannot be persisted', asy
   expect(s.stop).not.toHaveBeenCalled();
   expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'disk full'}),false);
 });
+
+it('removes a partially written marker and keeps the app usable', async () => {
+  io.open.mockResolvedValueOnce({writeFile:vi.fn().mockRejectedValue(Error('disk full')),close:vi.fn()});
+  const s = setup(); await s.run();
+  expect(io.rm).toHaveBeenCalledWith('/owned.delete-pending',{force:true});
+  expect(s.relaunch).not.toHaveBeenCalled();
+  expect(s.stop).not.toHaveBeenCalled();
+});
+it.each(['EINVAL','ENOTSUP'])('accepts unsupported directory fsync %s', async code => {
+  io.open.mockResolvedValueOnce({writeFile:vi.fn(),sync:vi.fn(),close:vi.fn()})
+    .mockResolvedValueOnce({sync:vi.fn().mockRejectedValue(Object.assign(Error(code),{code})),close:vi.fn()});
+  const s=setup(); await s.run(); expect(s.stop).toHaveBeenCalledOnce();
+});
