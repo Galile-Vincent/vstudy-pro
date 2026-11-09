@@ -1,3 +1,4 @@
+import { localDate, dayBound } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import { Brand } from '../components/brand';
@@ -129,8 +130,8 @@ export function LibraryView() {
   };
   const [customDates,setCustomDates] = useState(false);
   const [dateDraft, setDateDraft] = useState({
-    addedAfter: query.addedAfter?.slice(0, 10) ?? "",
-    addedBefore: query.addedBefore?.slice(0, 10) ?? "",
+    addedAfter: localDate(query.addedAfter),
+    addedBefore: localDate(query.addedBefore),
   });
   const [dateError, setDateError] = useState(false);
   const updateDate = (key: "addedAfter" | "addedBefore", value: string) => {
@@ -140,8 +141,8 @@ export function LibraryView() {
     setDateError(invalid);
     if (!invalid) setQuery(q => ({
       ...q,
-      addedAfter: next.addedAfter ? new Date(next.addedAfter).toISOString() : undefined,
-      addedBefore: next.addedBefore ? new Date(next.addedBefore).toISOString() : undefined,
+      addedAfter: next.addedAfter ? dayBound(next.addedAfter) : undefined,
+      addedBefore: next.addedBefore ? dayBound(next.addedBefore,true) : undefined,
     }));
   };
   const [filtersOpen,setFiltersOpen] = useState(false);
@@ -646,7 +647,7 @@ export function LibraryView() {
                 {tr(`library:${key}`)}
               </label>
             ))}
-            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:query.addedAfter?.slice(0,10) ?? "",addedBefore:query.addedBefore?.slice(0,10) ?? ""});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
+            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:localDate(query.addedAfter),addedBefore:localDate(query.addedBefore)});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
             </Select></label>
             {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} aria-invalid={dateError} value={dateDraft[key]} onChange={e => updateDate(key,e.target.value)}/></label>)}

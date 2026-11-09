@@ -90,3 +90,16 @@ it.each(['en','zh-Hant','ja'])('localizes converter, dates and sizes in filter c
  expect(chips.textContent).toContain(new Intl.NumberFormat(locale,{style:'unit',unit:'megabyte',unitDisplay:'short'}).format(10));
  await i18n.changeLanguage('en');
 });
+
+it('submits equal picked days inclusively through local 23:59',async()=>{
+ const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
+ const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ fireEvent.change(within(panel).getByRole('combobox',{name:tr('library:addedAfter')}),{target:{value:'custom'}});
+ for(const key of ['addedAfter','addedBefore'])fireEvent.change(within(panel).getByLabelText(tr(`library:${key}`),{selector:'input'}),{target:{value:'2026-11-02'}});
+ await waitFor(()=>{
+  const q=state.invoke.mock.calls.filter(([c])=>c==='library:documents:list').at(-1)?.[1];
+  expect(q.addedAfter).toBe(new Date(2026,10,2).toISOString());
+  expect(q.addedBefore).toBe(new Date(2026,10,2,23,59,59,999).toISOString());
+ });
+ expect(document.querySelector('.filter-chips')?.textContent).toContain(new Intl.DateTimeFormat('en').format(new Date(2026,10,2)));
+});
