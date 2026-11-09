@@ -73,7 +73,7 @@ it('uses deferred deletion directly on Windows without renaming the root', async
     await fs.access(root + '.delete-pending');
   } finally { Object.defineProperty(process,'platform',platform); }
 });
-it('clears every persisted partition and preserves unknown profile entries', async () => {
+it('clears every persisted partition and deletes unknown profile entries', async () => {
   const {root} = await fixture();
   await fs.mkdir(join(root,'Partitions','moodle-old'),{recursive:true});
   await fs.mkdir(join(root,'converter-python'));
@@ -83,5 +83,20 @@ it('clears every persisted partition and preserves unknown profile entries', asy
   expect(await finishPendingDeletion(root,clear,vi.fn())).toBe(true);
   expect(clear).toHaveBeenCalledWith(['moodle-old']);
   await expect(fs.access(join(root,'converter-python'))).rejects.toThrow();
-  await fs.access(join(root,'unknown'));
+  await expect(fs.access(join(root,'unknown'))).rejects.toThrow();
+});
+
+it('deletes all writer artifacts and unknown entries except Chromium bookkeeping', async () => {
+  const {root} = await fixture();
+  const removed = ['vstudy.sqlite.before-v7.bak',
+    'vstudy.sqlite.before-v8.bak.12345678-1234-1234-1234-123456789abc.tmp',
+    'logs', 'mcp', 'review', 'library', 'ai-tools', 'converter-venv',
+    'window-state.json', 'analytics-queue.json', 'secrets.json', 'providers.json', 'unknown'];
+  const kept = ['Local State', 'lockfile', 'SingletonLock', 'SingletonCookie',
+    'SingletonSocket', 'Network', 'Preferences'];
+  for (const name of [...removed, ...kept]) await fs.writeFile(join(root,name),'private');
+  await fs.writeFile(root + '.delete-pending','{}');
+  expect(await finishPendingDeletion(root,async () => {},vi.fn())).toBe(true);
+  for (const name of removed) await expect(fs.access(join(root,name))).rejects.toThrow();
+  for (const name of kept) await fs.access(join(root,name));
 });

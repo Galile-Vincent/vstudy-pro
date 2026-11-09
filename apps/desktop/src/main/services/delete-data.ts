@@ -66,17 +66,13 @@ export async function cleanupDeletedData(
 }
 
 const removeOptions = {recursive:true, force:true, maxRetries:5, retryDelay:200};
-const ownedNames = new Set([
-  'secrets.json', 'providers.json', 'executable-pins.json', 'library',
-  'ai-tools', 'converter-venv', 'converter-python', 'mcp', 'logs', 'tmp', 'fts-check.json',
-  'window-state.json', 'window-state.json.tmp', 'restore-pending.json',
-  'restore-startup.json',
+// Chromium owns these while Electron is alive; session APIs clear their user data.
+export const CHROMIUM_HELD_ENTRIES = new Set([
+  'Local State', 'lockfile', 'SingletonLock', 'SingletonCookie',
+  'SingletonSocket', 'Network', 'Preferences',
 ]);
 function ownedEntry(name: string): boolean {
-  const temporary = /^(.*)\.[0-9a-f-]{36}\.tmp$/.exec(name);
-  if (temporary && ownedNames.has(temporary[1]!)) return true;
-  return ownedNames.has(name) || /^vstudy\.sqlite(?:-(?:wal|shm|journal))?$/.test(name)
-    || /^moodle(?:$|[-.])/.test(name) || /^\.(?:backup|restore|download)-/.test(name);
+  return !CHROMIUM_HELD_ENTRIES.has(name);
 }
 export async function markDeletionPending(root: string): Promise<void> {
   const file = await open(root + '.delete-pending', 'w', 0o600);
