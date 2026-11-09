@@ -63,7 +63,7 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
   const loadConsent = useCallback(() => {
     setConsent({ kind: 'loading' });
     void desktop.invoke('analytics:getState', {}).then(state => {
-      setConsent(state.onboarding_completed && state.consent_decided ? { kind: 'decided', enabled: state.enabled } : { kind: 'undecided' });
+      setConsent(state.consent_decided ? { kind: 'decided', enabled: state.enabled } : { kind: 'undecided' });
       if (state.acquisition_source) setSource(state.acquisition_source);
     }).catch(() => setConsent({ kind: 'failed' }));
   }, []);

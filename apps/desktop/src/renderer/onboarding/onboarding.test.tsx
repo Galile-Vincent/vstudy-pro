@@ -155,3 +155,34 @@ it('does not write consent when an undecided user leaves without choosing', asyn
   await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
   expect(consentCalls()).toEqual([]);
 });
+
+describe.each([
+  [false, false], [false, true], [true, false], [true, true],
+] as const)('onboarding_completed=%s consent_decided=%s', (completed, decided) => {
+  const flags = { onboarding_completed: completed, consent_decided: decided, enabled: decided };
+
+  it('shows the choices only when no decision is saved', async () => {
+    replay(flags);
+    render(<Onboarding onComplete={() => {}} />);
+    if (decided) {
+      expect(await screen.findByText(tr('analytics:saved_state', { state: tr('analytics:state_on') }))).toBeTruthy();
+      expect(choiceButtons()).toEqual([]);
+    } else {
+      await screen.findByRole('button', { name: tr('analytics:share') });
+      expect(screen.queryByText(/Usage sharing:/)).toBeNull();
+    }
+  });
+
+  it('keeps the saved decision when the guide is dismissed', async () => {
+    saveProgress({ step: 'privacy', status: 'active' });
+    const stored = fakeMain(flags);
+    const onComplete = vi.fn();
+    render(<Onboarding onComplete={onComplete} />);
+    await waitFor(() => expect(screen.queryByText(tr('analytics:checking'))).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: tr('onboarding:later') }));
+    await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
+    expect(consentCalls()).toEqual([]);
+    expect(stored.enabled).toBe(decided);
+    expect(stored.consent_decided).toBe(decided);
+  });
+});
