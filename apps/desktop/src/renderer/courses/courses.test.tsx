@@ -197,7 +197,7 @@ describe("Courses", () => {
     const file = (await api.course(courseId)).files[0]!;
     const fileRow = getByRole(host, 'button', {name: name => name.startsWith(`Open file: ${file.name}`)});
     expect(fileRow.textContent).toContain(file.name);
-    expect(getByRole(host, 'button', {name:`Open in Moodle: ${file.name}`}).title).toBe('Open in Moodle');
+    expect(getByRole(host, 'button', {name:`Open original file: ${file.name}`}).title).toBe('Open in Moodle');
     expect(
       host.querySelector("[role=tabpanel][data-state=active]")?.textContent,
     ).toContain("Practice worksheet.docx");
@@ -1371,3 +1371,17 @@ it("announces initial course loading once with exactly one heading", async () =>
   expect(getAllByRole(host, "status").filter(status => status.textContent?.includes("Loading"))).toHaveLength(1);
 });
 
+it("names external open actions for their deadline notification and file", async () => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  detail.deadlines[0]!.url = "https://school.test/deadline";
+  detail.notifications[0]!.url = "https://school.test/notification";
+  api.course = async () => detail;
+  await mount(api, detail.course.id);
+  await tab("Deadlines");
+  expect(getByRole(host, "button", {name: `Open deadline: ${detail.deadlines[0]!.title}`})).not.toBeNull();
+  await tab("Notifications");
+  expect(getByRole(host, "button", {name: `Open notification: ${detail.notifications[0]!.subject}`})).not.toBeNull();
+  await tab("Files");
+  expect(getByRole(host, "button", {name: `Open original file: ${detail.files[0]!.name}`})).not.toBeNull();
+});
