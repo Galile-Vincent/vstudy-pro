@@ -875,12 +875,14 @@ export function LibraryView() {
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select>}</FormField>
             {!showFolders && compactToolbar && <div className="filter-view"><span>{tr("library:sort")}</span>{viewControls}</div>}
-            <footer><Button variant="outline" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button></footer>
+            {filters.length > 0 && <footer><Button variant="outline" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button></footer>}
           </PopoverContent>
         </Popover>
         {!showFolders && !compactToolbar && viewControls}
       </>} />
       <div className="filter-chips">
+        {filters.length > 0 && !filtersOpen && <Button variant="outline"
+          className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button>}
         {filters.map(([key, value]) => (
           <Button variant="outline"
             key={key}

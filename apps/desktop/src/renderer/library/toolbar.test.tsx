@@ -159,3 +159,10 @@ it('labels every filter above its control and offers one clear action', async ()
   }
   expect(screen.getAllByRole('button', {name:tr('library:clearFilters')})).toHaveLength(1);
 });
+
+it('offers Clear beside active chips while filters are closed', async () => {
+ state.route.query = {status:'ready'};
+ await mount(false);
+ expect(within(document.querySelector('.filter-chips')! as HTMLElement)
+  .getByRole('button', {name:tr('library:clearFilters')})).toBeTruthy();
+});
