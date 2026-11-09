@@ -59,7 +59,7 @@ it('labels sections and preserves page header and toolbar slots', () => {
 it('renders caller empty copy, action and stat units and delta', () => {
   render(<><EmptyState title="No files" description="Import one" action={<button>Import</button>}/><Stat label="Time" value={12} unit="min" delta="+2"/></>);
   expect(screen.getByRole('heading').textContent).toBe('No files');
-  expect(screen.getByText('min')).toBeTruthy();
+  expect(screen.getByText('min').parentElement?.textContent).toBe('12 min');
   expect(screen.getByText('+2')).toBeTruthy();
 });
 it('exposes selected tabs and uses roving keyboard focus', async () => {
@@ -72,4 +72,13 @@ it('exposes selected tabs and uses roving keyboard focus', async () => {
   screen.getByRole('tab', {name:'Two'}).focus();
   fireEvent.keyDown(screen.getByRole('tab', {name:'Two'}), {key:'ArrowRight'});
   await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('tab', {name:'One'})));
+});
+
+it('supports contextual empty-state heading levels', () => {
+  const { rerender } = render(<EmptyState title="Empty" />);
+  expect(screen.getByRole('heading', { level: 3 }).textContent).toBe('Empty');
+  for (const level of [2, 3, 4, 5, 6] as const) {
+    rerender(<EmptyState title="Empty" headingLevel={level} />);
+    expect(screen.getByRole('heading', { level }).textContent).toBe('Empty');
+  }
 });

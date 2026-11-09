@@ -363,7 +363,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/empty-state.tsx",
-      "sha256": "22d9b0ed04c0b6ab9457ff776ff8156114a647ac308ae80fe34964e2b3a18266",
+      "sha256": "060258daaea9c55fbcd7e738ffa0a22692dfee77d82697b5d95de7e2201e218c",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -373,7 +373,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/foundation.test.tsx",
-      "sha256": "fcb6689df03c5e42e919f2165f2722b8d3cb359080f691ca8fd25b37d4d762cb",
+      "sha256": "f276d37467f4fb720a303976000cc3b3e00522998fef637f027cee5ba2c78c2c",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -388,7 +388,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
-      "sha256": "5bd3b894f712f72ef19071b9ed41b0ce332233a4360d19a7facdd080d896d076",
+      "sha256": "5847001f2594fab1a310a4ef549f558a6050dfb2c3e860bffce4e48c2e2a3406",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -398,12 +398,12 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/stat.tsx",
-      "sha256": "c4ffbd4b39b7cd0b8ab361d8d210dad8b00eb6fa847e3f44641ffdc15b274299",
+      "sha256": "3f32ddaff26bf705879492f18b519b1ab8b44a0650f5d3ae61b5705d4b75a0fe",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/ui.css",
-      "sha256": "20faa0ff7a635728227a5420e9185eb020cf1763eb17ae34b8106b3616887669",
+      "sha256": "ab7191abb3203d23e6f2dbe0c05bba0b36b47321692c3e608300258eda663a94",
       "reason": "Shared application UI foundation and behavior tests."
     }
   ]
