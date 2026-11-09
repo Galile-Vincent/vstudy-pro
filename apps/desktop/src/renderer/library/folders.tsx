@@ -66,6 +66,7 @@ export function FolderGrid({ groups, formatNumber, onOpen }: { groups: CourseGro
           <li key={group.key}>
             <button
               type="button"
+              id={`library-folder-${encodeURIComponent(group.key)}`}
               className="course-folder"
               data-uncategorized={group.key === uncategorizedKey}
               style={group.courseId ? ({ "--folder-tone": `var(--${toneFor(group.key)})` } as CSSProperties) : undefined}

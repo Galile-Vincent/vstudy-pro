@@ -1,3 +1,4 @@
+import { updateStateSchema, type UpdateSnapshot } from '../shared/updates';
 import { createReviewMock, reviewDemoChat } from './review/dev-mock';
 import { libraryDemoItems } from './library/dev-mock';
 import realCourseRows from '../main/moodle/fixtures/real-cycu-courses.tsv?raw';
@@ -50,12 +51,17 @@ The relationship is $E = mc^2$.
 export function createMockBridge(): DesktopApi {
   const reviewDemo = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('reviewDemo') === '1';
   const libraryDemo = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('libraryDemo') === '1';
+  const updateParams = new URLSearchParams(typeof window === 'undefined' ? '' : window.location.search);
+  const updateDemo = updateParams.get('updateState') ?? 'idle';
+  const states = {idle:{status:'idle'}, checking:{status:'checking'}, available:{status:'available',version:'0.4.5',releaseUrl:'https://github.com/ava-apple/vstudy-pro/releases/tag/v0.4.5'}, downloading:{status:'downloading',percent:42}, ready:{status:'ready',version:'0.4.5'}, error:{status:'error',code:'network'}, unsupported:{status:'unsupported',reason:'portable'}};
+  let updateSnapshot: UpdateSnapshot = {state:updateStateSchema.parse(states[updateDemo as keyof typeof states] ?? states.idle), currentVersion:'0.4.4',lastCheckedAt:null,automatic:true};
+  const updateListeners = new Set<(value: UpdateSnapshot) => void>();
   const reviewMock = createReviewMock(reviewDemo);
   const documents: Document[] = [],
     conversations: Conversation[] = [],
     messages: Message[] = [];
   if (reviewDemo) { const fixture=reviewDemoChat(); conversations.push(...fixture.conversations); messages.push(...fixture.messages); }
-  let settings: Settings = { ...defaultSettings };
+  let settings: Settings = { ...defaultSettings, ...(updateParams.has('updateState') ? {onboardingCompleted:true,welcomeSeen:true} : {}) };
   const keys = new Set<string>();
   const listeners = new Map<string, (event: ChatEvent) => void>();
   const configs: ProviderConfig[] = [
@@ -140,6 +146,12 @@ export function createMockBridge(): DesktopApi {
       case "welcome:sampleDocument":
         result = mockMarkdown;
         break;
+      case 'updates:state': result = updateSnapshot; break;
+      case 'updates:setAuto': updateSnapshot = {...updateSnapshot,automatic:(request as {enabled:boolean}).enabled}; result = updateSnapshot; break;
+      case 'updates:check': updateSnapshot = {...updateSnapshot,state:states.available as UpdateSnapshot['state'],lastCheckedAt:Date.now()}; result = updateSnapshot; break;
+      case 'updates:download': updateSnapshot = {...updateSnapshot,state:{status:'downloading',percent:42}}; result = updateSnapshot; break;
+      case 'updates:install': result = updateSnapshot; break;
+      case 'updates:notes': result = {ok:true}; break;
       case "settings:get":
         result = settings;
         break;
@@ -286,10 +298,12 @@ export function createMockBridge(): DesktopApi {
         break;
       }
     }
+    if (channel.startsWith('updates:')) for (const listener of updateListeners) listener(updateSnapshot);
     return result as IpcResponse<C>;
   };
   return {
     invoke,
+    onUpdateState(listener) { updateListeners.add(listener); return () => {updateListeners.delete(listener);}; },
     onReviewProgress() { return () => {}; },
     onChatEvent(id, listener) {
       listeners.set(id, listener);

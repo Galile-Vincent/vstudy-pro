@@ -24,7 +24,7 @@ export function PageHeader({
       {leading && <div>{leading}</div>}
       <div className="flex flex-wrap items-start justify-between gap-[var(--space-4)]">
         <div className="min-w-0">
-          <h1 className="text-[length:var(--type-display)] font-medium">{title}</h1>
+          {title != null && title !== '' && <h1 className="text-[length:var(--type-display)] font-medium">{title}</h1>}
           {description && <p className="text-[var(--muted)]">{description}</p>}
         </div>
         {actions && <div className="min-w-0 max-w-full">{actions}</div>}

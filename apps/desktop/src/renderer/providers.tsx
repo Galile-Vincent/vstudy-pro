@@ -1,3 +1,4 @@
+import { UpdateSettings } from './settings/updates';
 import { AppVersion } from './components/app-version';
 import { aiCliSetupEvent } from './ai-cli/entry';
 import { AiCliInventory } from './ai-cli/inventory';
@@ -145,6 +146,7 @@ export function ProviderSettings({
                       <SettingsGroup title={tr('settings:languages')}>
                         <LanguageSettings />
                       </SettingsGroup>
+                      <UpdateSettings />
                       <SettingsGroup title={tr('settings:welcome')}>
                         <SettingsRow label={tr('settings:welcomeGuide')} description={tr('settings:welcome_guide_hint')}>
                           <Button size="sm" variant="secondary" onClick={() => setGuide(true)}>
