@@ -175,6 +175,11 @@ it('shows a cancelled sign-in as one neutral status with retry, not as a failure
   expect(section.querySelector('[role=status]')?.textContent).toBe(i18n.t('ai-cli:signin_cancelled'));
   expect(document.querySelectorAll('[role=alert]')).toHaveLength(0);
   expect(document.querySelector('.ai-cli-recovery')).toBeNull();
+  expect(fixture.tools[0]).toMatchObject({ status: 'error', error: { hint: 'cancelled' } });
+  expect(document.querySelector('.ai-cli-chip')?.getAttribute('data-status')).not.toBe('error');
+  expect(document.querySelector('.ai-cli-tool-heading')?.textContent).not.toContain(i18n.t('ai-cli:status_error'));
+  expect(document.querySelectorAll('.ai-cli-sign-in [role=status]')).toHaveLength(1);
+  expect(document.querySelector('.ai-cli-steps li[aria-current=step]')?.textContent).toContain(i18n.t('ai-cli:step_login'));
   expect(document.body.textContent!.split(i18n.t('ai-cli:phase_cancelled'))).toHaveLength(1);
   expect(document.querySelector('.ai-cli-steps li[aria-current=step]')?.getAttribute('data-state')).not.toBe('failed');
   await click(i18n.t('ai-cli:retry_signin'));

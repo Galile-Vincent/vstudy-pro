@@ -39,6 +39,14 @@ export function cliFixture() {
         }
         return { ...current };
       }
+      case 'ai-cli:close': {
+        if (current?.id === payload.id && current.phase === 'running') {
+          current = { ...current, phase: 'cancelled', error: 'cancelled', exitCode: -1 };
+          const tool = tools.find(item => item.provider === current.actionId.split('-').at(-1));
+          if (tool) Object.assign(tool, { status: 'error', error: { code: 'cancelled', hint: 'cancelled' } });
+        }
+        return { ok: true };
+      }
       default: return { ok: true };
     }
   };

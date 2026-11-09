@@ -35,12 +35,13 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
   const runner = useCliAction(refresh);
   useEffect(() => { if (loaded && !selectedProvider) setProvider(provider); }, [loaded, selectedProvider, provider]);
   const tool = tools.find(item => item.provider === provider);
-  const step = tool ? currentStep(tool) : 'install';
+  const toolCancelled = tool?.status === 'error' && tool.error.hint === 'cancelled';
+  const loginCancelled = runner.session?.phase === 'cancelled' && runner.session.actionId.startsWith('login-');
+  const step = tool ? loginCancelled && toolCancelled ? 'login' : currentStep(tool) : 'install';
   const manualStep = !!tool?.manualInstallRequired && step === 'install';
   const running = runner.session?.phase === 'running';
   const busy = running || runner.busy || savingConsent;
-  const loginCancelled = runner.session?.phase === 'cancelled' && runner.session.actionId.startsWith('login-');
-  const failed = runner.error ?? (runner.plan && !runner.plan.available ? runner.plan.reason : undefined) ?? (!runner.plan ? (loginCancelled ? undefined : runner.session?.error) ?? (tool?.status === 'error' ? tool.error.hint : undefined) : undefined);
+  const failed = runner.error ?? (runner.plan && !runner.plan.available ? runner.plan.reason : undefined) ?? (!runner.plan ? (loginCancelled ? undefined : runner.session?.error) ?? (tool?.status === 'error' && !toolCancelled ? tool.error.hint : undefined) : undefined);
   useEffect(() => {
     if (tool?.consented && !tool.tested && !running && !manualStep && !savingConsent && !runner.session?.error) void runner.preview(setupAction(provider, step));
   }, [provider, step, tool?.consented, tool?.tested, running, manualStep, savingConsent, runner.session?.error, runner.preview]);
@@ -51,7 +52,8 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
     return () => { disposed = true; };
   }, [provider, tool?.consented, tool?.status, tool?.latestVersion, tool?.manualUpdateRequired]);
   const runningStatus = { install: 'installing', login: 'signing-in', test: 'testing' }[step];
-  const displayStatus = failed ? 'error' : running && !tool?.tested ? runningStatus : tool?.status === 'ready' && !tool.tested ? 'not_tested' : tool?.status;
+  const neutralStatus = { install: 'not-installed', login: 'installed-not-signed-in', test: 'not_tested' }[step];
+  const displayStatus = failed ? 'error' : running && !tool?.tested ? runningStatus : toolCancelled ? neutralStatus : tool?.status === 'ready' && !tool.tested ? 'not_tested' : tool?.status;
   const doneStep = setupSteps.find(item => runner.session?.actionId.startsWith(`${item}-`));
   const announcement = running && !tool?.tested && step !== 'login' ? tr('ai-cli:announce_running', { step: tr(`ai-cli:step_${step}`) })
     : !failed && runner.session?.phase === 'succeeded' && doneStep && doneStep !== 'login' ? tr(doneStep === 'test' ? 'ai-cli:test_success' : 'ai-cli:announce_done', { step: tr(`ai-cli:step_${doneStep}`) }) : '';
