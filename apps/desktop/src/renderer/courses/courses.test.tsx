@@ -195,7 +195,7 @@ describe("Courses", () => {
     await tab("Files");
     const file = (await api.course(courseId)).files[0]!;
     const fileRow = getByRole(host, 'button', {name:`Open file: ${file.name}`});
-    expect(fileRow.title).toBe(`Open file: ${file.name}`);
+    expect(fileRow.textContent).toContain(file.name);
     expect(getByRole(host, 'button', {name:`Open in Moodle: ${file.name}`}).title).toBe('Open in Moodle');
     expect(
       host.querySelector("[role=tabpanel][data-state=active]")?.textContent,
@@ -299,7 +299,7 @@ describe("Courses", () => {
         resolve = done;
       });
     await mount(api);
-    expect(host.querySelectorAll(".moodle-skeleton")).toHaveLength(3);
+    expect(host.querySelector("[data-slot=empty-state][role=status]")).not.toBeNull();
     await act(async () =>
       resolve({
         ...overview,
@@ -367,7 +367,7 @@ describe("Courses", () => {
       "That action could not be completed.",
     );
     expect(
-      host.querySelector<HTMLButtonElement>(".moodle-file-row")?.disabled,
+      host.querySelector<HTMLButtonElement>(".moodle-file-actions button")?.disabled,
     ).toBe(false);
     api.openFile = original;
     await click("Operational amplifiers.pdf");
@@ -668,7 +668,7 @@ it("strips active HTML and token-bearing images from module sheets", async () =>
   api.course = async () => detail;
   await mount(api, detail.course.id);
   await act(async () =>
-    host.querySelector<HTMLButtonElement>(".moodle-module")!.click(),
+    host.querySelector<HTMLButtonElement>(".moodle-module button")!.click(),
   );
   const sheet = document.querySelector("[data-slot=sheet-content]")!;
   expect(sheet.textContent).toContain("Safe text");
@@ -705,7 +705,7 @@ it("shows announcement previews and opens their full safe body", async () => {
   await mount(api, (await api.overview()).courses[0]!.id);
   await tab("Announcements");
   const announcement = host.querySelector<HTMLButtonElement>(
-    ".moodle-announcement",
+    ".moodle-announcement button",
   )!;
   expect(announcement.textContent).toContain("Please review the lecture notes");
   await act(async () => announcement.click());
@@ -781,13 +781,13 @@ it('keeps retained course content in place during a background panel refresh',as
   expect(host.querySelector('.moodle-skeleton')).toBeNull();
   expect(host.querySelector('[role=status][aria-busy=true]')).not.toBeNull();
 });
-it('still shows an initial panel skeleton when course content is absent',async()=>{
+it('shows a loading state when course content is absent',async()=>{
   const api=createMockMoodleApi();
   const detail=await api.course((await api.overview()).courses[0]!.id);
   detail.panels={contents:'loading'};detail.sections=[];detail.course.identity.teachers=[];
   api.course=async()=>detail;
   await mount(api,detail.course.id);
-  expect(host.querySelector('.moodle-skeleton')).not.toBeNull();
+  expect(host.querySelector('[data-slot=empty-state][aria-busy=true]')).not.toBeNull();
 });
 
 it('keeps empty count slots, caps the visible number, and orders the accessible row name', async () => {
@@ -1103,7 +1103,7 @@ it('names the unavailable page with one h1 after course loading', async () => {
   let resolve!: (value: Awaited<ReturnType<MoodleApi['course']>>) => void;
   api.course = () => new Promise(done => {resolve = done;});
   await mount(api, id);
-  expect(queryByRole(host, 'heading', {level: 1})).toBeNull();
+  expect(getAllByRole(host, 'heading', {level: 1})).toHaveLength(1);
   await act(async () => resolve(undefined as unknown as Awaited<ReturnType<MoodleApi['course']>>));
   expect(getAllByRole(host, 'heading', {level: 1})).toHaveLength(1);
   expect(getByRole(host, 'heading', {level: 1, name: 'This course is unavailable.'})).toBeTruthy();
@@ -1235,4 +1235,20 @@ it("D3 opens at the top and explicitly jumps with focus and reduced motion", asy
   const heading = host.querySelector(".moodle-week[data-current=true] h3");
   expect(document.activeElement).toBe(heading);
   expect(scroll).toHaveBeenCalledWith({ block: "start", behavior: "instant" });
+});
+
+it.each(["material", "announcement"])("restores focus after Escape closes the %s sheet", async kind => {
+  const api = createMockMoodleApi();
+  await mount(api, (await api.overview()).courses[0]!.id);
+  if (kind === "announcement") await tab("Announcements");
+  const trigger = host.querySelector<HTMLButtonElement>(
+    kind === "material" ? ".moodle-module button" : ".moodle-announcement button",
+  )!;
+  await act(async () => { trigger.focus(); trigger.click(); });
+  const sheet = document.querySelector<HTMLElement>("[data-slot=sheet-content]")!;
+  expect(sheet).not.toBeNull();
+  await act(async () => {
+    sheet.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+  });
+  await waitFor(() => expect(document.activeElement).toBe(trigger));
 });
