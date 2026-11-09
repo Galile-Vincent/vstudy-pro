@@ -18,8 +18,9 @@ export function reduceUpdate(state: UpdateState, event: UpdateEvent): UpdateStat
   }
 }
 export function updateError(error: unknown): Extract<UpdateState, {status:'error'}>['code'] {
-  const code = String((error as {code?:unknown})?.code ?? '');
-  if (/SHA512|CHECKSUM|SIGNATURE/.test(code)) return 'integrity';
+  const code = String((error as {code?:unknown})?.code ?? '') + ' ' +
+    String((error as {message?:unknown})?.message ?? '');
+  if (/SHA512|CHECKSUM|SIGNATURE|[Ss]ignature|[Ss]quirrel|[Vv]erification/.test(code)) return 'integrity';
   if (/ENOTFOUND|ECONN|ETIMEDOUT|ERR_UPDATER_(LATEST_VERSION_NOT_FOUND|CHANNEL_FILE_NOT_FOUND)/.test(code)) return 'network';
   return 'failed';
 }

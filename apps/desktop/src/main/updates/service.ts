@@ -12,6 +12,7 @@ export class Updates {
   private lastAttempt = -Infinity;
   private result: UpdateSnapshot['result'];
   private manual = false;
+  private installing = false;
   private listeners = new Set<(snapshot: UpdateSnapshot) => void>();
   private timer: ReturnType<typeof setTimeout>;
   private interval: ReturnType<typeof setInterval>;
@@ -39,7 +40,7 @@ export class Updates {
     this.interval = setInterval(() => { if (this.automatic) void this.check(false); }, 6 * 60 * 60_000);
   }
   snapshot = (): UpdateSnapshot => ({state:this.state, currentVersion:this.options.version,
-    lastCheckedAt:this.lastCheckedAt, automatic:this.automatic, ...(this.result ? {result:this.result} : {})});
+    lastCheckedAt:this.lastCheckedAt, automatic:this.automatic, installing:this.installing, ...(this.result ? {result:this.result} : {})});
   subscribe(listener: (snapshot: UpdateSnapshot) => void) {
     this.listeners.add(listener); return () => { this.listeners.delete(listener); };
   }
@@ -85,7 +86,11 @@ export class Updates {
     return this.snapshot();
   }
   install() {
-    if (this.state.status === 'ready') this.updater.quitAndInstall();
+    if (this.state.status === 'ready' && !this.installing) {
+      this.installing = true; this.emit();
+      try { this.updater.quitAndInstall(); }
+      catch { this.dispatch({type:'error',code:'integrity'}); }
+    }
     return this.snapshot();
   }
   setAuto(enabled: boolean) {

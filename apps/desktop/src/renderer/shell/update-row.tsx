@@ -25,6 +25,7 @@ export function UpdateRow({ collapsed = false }: { collapsed?: boolean }) {
     ? tr('updates:available', {version:state.version}) : state.status === 'downloading'
       ? tr('updates:downloading', {percent:state.percent}) : tr(`updates:${state.status}`);
   const action = () => {
+    if (snapshot?.installing) return;
     const channel = state?.status === 'ready' ? 'updates:install'
       : state?.status === 'available' ? 'updates:download' : 'updates:check';
     void desktop.invoke(channel, {}).catch(() => {});
@@ -38,7 +39,7 @@ export function UpdateRow({ collapsed = false }: { collapsed?: boolean }) {
           <Download aria-hidden="true" /><span>{label}</span>
         </Button>
         : <Button variant="ghost" onClick={action} aria-label={label} title={label}
-          disabled={state?.status === 'checking' || state?.status === 'downloading'}>
+          disabled={snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading'}>
           <RefreshCw aria-hidden="true" /><span>{label}</span>
         </Button>}
       {state?.status === 'available' && !collapsed && <Button variant="link" size="icon-sm" aria-label={tr('updates:notes')} title={tr('updates:notes')}

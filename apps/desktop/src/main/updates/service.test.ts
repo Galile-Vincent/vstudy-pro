@@ -99,3 +99,10 @@ it('manual checks bypass automatic interval after a short cooldown', async () =>
   await service.check(); expect(updater.checkForUpdates).toHaveBeenCalledTimes(2);
   vi.restoreAllMocks();
 });
+
+it('registers installation only once until a result', async () => {
+  const {service,updater} = setup();
+  await service.check(); updater.emit('update-available',{version:'0.4.5'});
+  await service.download(); updater.emit('update-downloaded',{version:'0.4.5'});
+  service.install(); service.install(); expect(updater.quitAndInstall).toHaveBeenCalledOnce();
+});
