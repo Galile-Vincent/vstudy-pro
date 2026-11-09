@@ -141,17 +141,8 @@ export async function finishPendingDeletion(
       if (error.code === 'ENOENT') return root;
       throw error;
     });
-    let partitions: string[] = [];
-    try {
-      const directory = join(target, 'Partitions');
-      if ((await lstat(directory)).isSymbolicLink()) throw Error('Unsafe session directory');
-      partitions = (await readdir(directory)).filter(name => !name.includes('/') && !name.includes('\\'));
-      for (const name of partitions) {
-        if ((await lstat(join(directory,name))).isSymbolicLink()) throw Error('Unsafe session partition');
-      }
-    } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
     const failures = await deleteOwnedEntries(target);
-    await clearSessions(partitions);
+    await clearSessions([]);
     if (failures.length) {
       for (const failure of failures) log({phase:'delete-pending-failed',error:failure.error});
       return false;

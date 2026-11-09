@@ -28,7 +28,9 @@ const electron = await vi.hoisted(async () => {
   return {
     app, dialog: { showMessageBox: vi.fn(async () => ({ response: 1 })) }, BrowserWindow: Window, nativeTheme: new EventEmitter(), safeStorage: {}, ipcMain: { removeHandler: vi.fn() },
     protocol: { registerSchemesAsPrivileged: vi.fn(), handle: vi.fn() },
-    session: { defaultSession: {
+    session: { fromPath:vi.fn(() => {throw Error("duplicate context");}), defaultSession: {
+      clearStorageData:vi.fn(), clearCache:vi.fn(), clearAuthCache:vi.fn(),
+      closeAllConnections:vi.fn(), flushStorageData:vi.fn(), cookies:{flushStore:vi.fn()},
       setDevicePermissionHandler: vi.fn(), setPermissionRequestHandler: vi.fn(), setPermissionCheckHandler: vi.fn(),
       webRequest: { onBeforeRequest: vi.fn(), onHeadersReceived: vi.fn() },
     } },
@@ -385,4 +387,14 @@ it('returns the main window to privileged callers even without OS focus',async()
   const restore=mocks.registerIpc.mock.calls[0]![3] as ()=>Promise<unknown>;
   expect(await restore()).toBe(window);
   expect(window.focus).toHaveBeenCalledOnce();
+});
+
+it('flushes default cookies without opening partition contexts during deletion', async () => {
+  const window = await start();
+  const {finishPendingDeletion} = await import('./services/delete-data');
+  const clear = vi.mocked(finishPendingDeletion).mock.calls[0]![1];
+  await clear(['web-chat-test']);
+  expect(electron.session.fromPath).not.toHaveBeenCalled();
+  expect(electron.session.defaultSession.cookies.flushStore).toHaveBeenCalled();
+  window.webContents.emit('did-finish-load');
 });

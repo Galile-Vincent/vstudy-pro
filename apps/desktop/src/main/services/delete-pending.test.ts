@@ -81,7 +81,8 @@ it('clears every persisted partition and deletes unknown profile entries', async
   await fs.writeFile(root + '.delete-pending','{}');
   const clear = vi.fn();
   expect(await finishPendingDeletion(root,clear,vi.fn())).toBe(true);
-  expect(clear).toHaveBeenCalledWith(['moodle-old']);
+  expect(clear).toHaveBeenCalledWith([]);
+  await expect(fs.access(join(root,'Partitions'))).rejects.toThrow();
   await expect(fs.access(join(root,'converter-python'))).rejects.toThrow();
   await expect(fs.access(join(root,'unknown'))).rejects.toThrow();
 });

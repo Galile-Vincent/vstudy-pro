@@ -245,15 +245,14 @@ if (ownsApplication) void app.whenReady().then(async () => {
   if (process.platform === 'win32') app.setAppUserModelId('com.vstudy.pro');
   startupStage = 'recovery';
   const userData = app.getPath("userData");
-  const deletionFinished = await finishPendingDeletion(userData, async partitions => {
-    for (const current of [session.defaultSession,
-      ...partitions.map(name => session.fromPath(join(userData,'Partitions',name)))]) {
-      await current.clearStorageData();
-      await current.clearCache();
-      await current.clearAuthCache();
-      await current.closeAllConnections();
-      current.flushStorageData();
-    }
+  const deletionFinished = await finishPendingDeletion(userData, async () => {
+    const current = session.defaultSession;
+    await current.clearStorageData();
+    await current.clearCache();
+    await current.clearAuthCache();
+    await current.closeAllConnections();
+    current.flushStorageData();
+    await current.cookies.flushStore();
   }, log);
   const cleanupFinished = await cleanupDeletedData(userData, log);
   mkdirSync(userData, { recursive: true });
