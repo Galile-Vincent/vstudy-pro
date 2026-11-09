@@ -1287,3 +1287,18 @@ it.each([true, false])("expands a collapsed current week before jumping (reduced
   expect(document.activeElement).toBe(heading);
   expect(scroll).toHaveBeenCalledWith({block: "start", behavior: reduced ? "instant" : "smooth"});
 });
+
+it("nests empty deadline messages below group headings", async () => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  detail.deadlines = [];
+  api.course = async () => detail;
+  await mount(api, detail.course.id);
+  await tab("Deadlines");
+  expect(getAllByRole(host, "main")).toHaveLength(1);
+  expect(getAllByRole(host, "heading", {level: 1})).toHaveLength(1);
+  for (const group of host.querySelectorAll<HTMLElement>(".moodle-deadline-group")) {
+    expect(getAllByRole(group, "heading", {level: 3})).toHaveLength(1);
+    expect(getByRole(group, "heading", {level: 4}).textContent).toBe("No deadlines here. Take a breath.");
+  }
+});
