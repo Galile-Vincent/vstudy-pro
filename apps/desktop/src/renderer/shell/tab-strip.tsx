@@ -101,13 +101,14 @@ export function TabStrip() {
           onAuxClick={event => { if (event.button === 1) { event.preventDefault(); closeTab(tab.id); } }}>
           <button type="button" role="tab" id={`tab-${tab.id}`} aria-controls="active-tab-panel" aria-selected={tab.id === tabs.activeId} tabIndex={tab.id === tabs.activeId ? 0 : -1}
             aria-busy={nativeStatus==='loading'} title={nativeStatus==='discarded' ? tr('tabs:discarded') : labels[index]} onClick={() => activateTab(tab.id)} onKeyDown={event => {
+              if (event.key === 'Delete') { event.preventDefault(); closeTab(tab.id); return; }
               const target = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.tabs.length - 1 : event.key === 'ArrowRight' ? (index + 1) % tabs.tabs.length : event.key === 'ArrowLeft' ? (index - 1 + tabs.tabs.length) % tabs.tabs.length : undefined;
               if (target === undefined) return;
               event.preventDefault();
               if (event.shiftKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) reorder(index, index + (event.key === 'ArrowLeft' ? -1 : 1));
               else { activateTab(tabs.tabs[target]!.id); document.getElementById(`tab-${tabs.tabs[target]!.id}`)?.focus(); }
             }}><Icon size={15} aria-hidden="true"/><span>{nativeStatus==='loading' ? '◌ ' : nativeStatus==='discarded' ? '↻ ' : ''}{labels[index]}</span>{nativeStatus==='discarded' && <span className="sr-only">{tr('tabs:discarded')}</span>}</button>
-          <button type="button" className="app-tab-close" aria-label={tr('tabs:close', { title: labels[index] })} onClick={() => closeTab(tab.id)}><X size={13}/></button>
+          <button type="button" tabIndex={-1} className="app-tab-close" aria-label={tr('tabs:close', { title: labels[index] })} onClick={() => closeTab(tab.id)}><X size={13}/></button>
         </div>;
       })}
     </div>}
