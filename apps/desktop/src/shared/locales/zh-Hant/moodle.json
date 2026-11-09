@@ -31,7 +31,7 @@
   "reconnect": "重新連結",
   "loading": "正在載入課程",
   "progress": "課程進度",
-  "course_actions": "課程操作",
+  "course_actions": "{{course}}的動作",
   "course_sections": "課程分頁",
   "overview": "總覽",
   "deadlines": "截止日期",
@@ -252,5 +252,6 @@
   "view_list": "清單",
   "view_cards": "卡片",
   "open_file": "開啟檔案：{{name}}",
-  "course_more": "更多課程操作"
+  "course_more": "更多課程操作",
+  "open_course_tab": "在新分頁開啟 {{course}}"
 }
