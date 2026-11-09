@@ -62,3 +62,40 @@ test('counts color values in declarations and styles without counting anchors or
     assert.equal(inspect(`const style = {${key}: '#abc'}`, false).color, 1, key);
   }
 });
+
+test('covers literal colors in utility, shorthand, and SVG fixtures', () => {
+  for (const source of [
+    'bg-[#fff]', 'text-[rgb(1,2,3)]', 'border-[#abc]',
+    'shadow-[0_0_4px_#000]',
+  ]) {
+    assert.equal(inspect(`@apply ${source};`).color, 1, source);
+    assert.equal(inspect(`<div className="${source}" />`, false).color, 1, source);
+  }
+  for (const key of [
+    'border', 'outline', 'border-top', 'background', '-webkit-text-fill-color',
+  ]) {
+    const value = key.includes('fill') ? '#fff' : '1px solid #fff';
+    assert.equal(inspect(`.x { ${key}: ${value}; }`).color, 1, key);
+    assert.equal(inspect(`const style = {'${key}': '${value}'}`, false).color, 1, key);
+  }
+  for (const key of ['fill', 'stroke']) {
+    assert.equal(inspect(`<path ${key}="#fff" />`, false).color, 1, key);
+    assert.equal(inspect(`<path ${key}={'#fff'} />`, false).color, 1, key);
+    assert.equal(inspect(`.x { ${key}: #fff; }`).color, 1, key);
+  }
+  for (const css of [true, false]) {
+    const value = 'color-mix(in srgb, var(--ink), #fff)';
+    const source = css ? `.x { color: ${value}; }` : `const style = {color: '${value}'}`;
+    assert.equal(inspect(source, css).color, 1);
+  }
+  for (const source of [
+    '<a href="#abc" id="#x">#fff plain text</a>',
+    '<path fill="url(#abc)" stroke={"url(#def)"} />',
+    'const style = {fill: "url(#abc)"}',
+  ]) assert.equal(inspect(source, false).color, 0, source);
+  for (const source of [
+    '#abc {}', '.x { fill: url(#abc); }',
+    '.x { content: "#fff plain text"; }',
+    '.x { background: url(#abc); }',
+  ]) assert.equal(inspect(source).color, 0, source);
+});
