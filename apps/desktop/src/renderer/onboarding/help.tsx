@@ -1,7 +1,7 @@
 /** Global Help entry points and contextual, profile-local learning guidance. */
 import { Card, Section } from '../components/ui';
 import { Brand } from '../components/brand';
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, CircleHelp, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
@@ -29,7 +29,6 @@ export function HelpMenu() {
 export function LearningHelp() {
   useTranslation();
   const [view, setView] = useState<HelpView>();
-  const titleId = useId();
   const [lesson, setLesson] = useState<Lesson>('school');
   useEffect(() => {
     const show = (event: Event) => {
@@ -42,8 +41,8 @@ export function LearningHelp() {
   }, []);
   if (view === 'setup') return <Onboarding onComplete={() => setView(undefined)}/>;
   if (view === 'checklist') return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}>
-    <DialogContent aria-describedby={undefined} aria-labelledby={titleId}>
-      <GettingStarted detailed titleId={titleId} onNavigate={() => setView(undefined)}/>
+    <DialogContent aria-describedby={undefined}>
+      <GettingStarted detailed dialogTitle onNavigate={() => setView(undefined)}/>
     </DialogContent>
   </Dialog>;
   if (!view) return null;
@@ -52,8 +51,8 @@ export function LearningHelp() {
     {view === 'walkthroughs' ? <><p>{tr('onboarding:walkthroughs_body')}</p><nav className="learning-lessons" aria-label={tr('onboarding:help_walkthroughs')}>{lessons.map(item => <Button variant={lesson === item ? 'secondary' : 'ghost'} aria-pressed={lesson === item} key={item} onClick={() => setLesson(item)}>{tr(`onboarding:lesson_${item}`)}</Button>)}</nav><Walkthrough key={lesson} lesson={lesson}/></> : <><p>{tr('onboarding:shortcuts_body')}</p><dl className="learning-shortcuts">{['selection', 'sidebar', 'send', 'newline', 'dismiss', 'navigate'].map(key => <div key={key}><dt>{tr(`onboarding:shortcut_${key}`)}</dt><dd><kbd>{tr(`onboarding:keys_${key}`)}</kbd></dd></div>)}</dl></>}
   </DialogContent></Dialog>;
 }
-export function GettingStarted({ detailed = false, titleId, onNavigate }: {
-  detailed?: boolean; titleId?: string; onNavigate?: () => void;
+export function GettingStarted({ detailed = false, dialogTitle = false, onNavigate }: {
+  detailed?: boolean; dialogTitle?: boolean; onNavigate?: () => void;
 }) {
   useTranslation();
   const progress = useLearningProgress();
@@ -98,7 +97,7 @@ export function GettingStarted({ detailed = false, titleId, onNavigate }: {
       className="getting-started min-w-0 p-[var(--space-6)]"
     >
       <Section
-        title={titleId ? <DialogTitle asChild id={titleId}><span>{tr('onboarding:checklist')}</span></DialogTitle> : tr('onboarding:checklist')}
+        title={dialogTitle ? <DialogTitle asChild><span>{tr('onboarding:checklist')}</span></DialogTitle> : tr('onboarding:checklist')}
         actions={
           <span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>
         }

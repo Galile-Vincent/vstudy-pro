@@ -10,9 +10,10 @@ vi.mock('./onboarding', () => ({ Onboarding: () => null }));
 afterEach(cleanup);
 it('closes the checklist on document navigation and has one unique title', async () => {
   await i18n.changeLanguage('en');
+  const warning = vi.spyOn(console, 'error');
   render(<><GettingStarted /><LearningHelp /></>);
   act(() => openLearningHelp('checklist'));
-  const dialog = screen.getByRole('dialog');
+  const dialog = screen.getByRole('dialog', { name: i18n.t('onboarding:checklist') });
   const headings = dialog.querySelectorAll('h2');
   expect(headings).toHaveLength(1);
   const ids = Array.from(document.querySelectorAll('[id]'), node => node.id);
@@ -20,6 +21,8 @@ it('closes the checklist on document navigation and has one unique title', async
   fireEvent.click(Array.from(dialog.querySelectorAll('button')).find(button => button.textContent?.includes(i18n.t('onboarding:check_document')))!);
   expect(navigate).toHaveBeenCalledWith('library');
   expect(screen.queryByRole('dialog')).toBeNull();
+  expect(warning).not.toHaveBeenCalled();
+  warning.mockRestore();
 });
 
 it('uses a single checklist region', () => {
