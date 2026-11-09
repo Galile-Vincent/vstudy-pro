@@ -45,3 +45,11 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
 .exams-view button[data-slot="button"][data-variant="secondary"]:hover:not(:disabled) { background:var(--active); }
 .exams-view button[data-slot="button"]:focus-visible { outline:none; box-shadow:0 0 0 3px color-mix(in oklab,var(--focus) 40%,transparent); }
 @media (forced-colors:active) { .exams-view button[data-slot="button"]:focus-visible { outline:2px solid Highlight; outline-offset:3px; } }
+@media print {
+  :is(.shell-content,.shell-main,.app-shell,.min-h-svh,#root):has(.exams-view) { display:block; block-size:auto; overflow:visible; }
+  .app-shell:has(.exams-view) > :not(.shell-main),.shell-main:has(.exams-view) > :not(.shell-content) { display:none; }
+  .exams-view { block-size:auto; overflow:visible; }
+  .exam-footer { position:static; }
+  .exam-breakdown > li { break-inside:avoid; }
+  .exam-breakdown details::details-content { content-visibility:visible; display:block; }
+}
