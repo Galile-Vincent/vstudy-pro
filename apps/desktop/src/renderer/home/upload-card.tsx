@@ -171,7 +171,6 @@ export function UploadCard({
     <Root
       {...(title ? { variant: 'flat' as const } : {})}
       className={title ? 'home-upload min-w-0 p-[var(--space-6)]' : 'home-upload'}
-      style={dragging ? { background: 'var(--active)' } : undefined}
       data-dragging={dragging}
       onDragEnter={(e) => {
         if (busy || !e.dataTransfer.types.includes('Files')) return;

@@ -43,3 +43,9 @@
 .home-recent-thumbnail .art-reader-cover-type { left:var(--space-1); bottom:var(--space-1); }
 .home-page [data-slot=list-row] { min-width:0; }
 .home-page [data-slot=list-row] button { white-space:normal; height:auto; }
+
+.home-upload[data-dragging=true] { background:var(--active); }
+html[data-theme=contrast] .home-upload[data-dragging=true] { outline:2px solid var(--focus); }
+@media (forced-colors:active) {
+  .home-upload[data-dragging=true] { outline:2px solid Highlight; }
+}
