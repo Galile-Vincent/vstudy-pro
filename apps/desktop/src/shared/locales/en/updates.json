@@ -17,5 +17,8 @@
   "current": "You’re up to date",
   "checked": "Checked just now",
   "offline": "You’re offline",
-  "cooldown": "Please wait a few seconds before checking again"
+  "cooldown": "Please wait a few seconds before checking again",
+  "confirm_download": "Download this update?",
+  "confirm_install": "Restart and install this update?",
+  "confirm_detail": "Restart waits for conversions, imports, chats and Moodle work to finish."
 }

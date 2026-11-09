@@ -17,5 +17,8 @@
   "current": "已是最新版本",
   "checked": "剛剛已檢查",
   "offline": "目前離線",
-  "cooldown": "請稍候幾秒再檢查"
+  "cooldown": "請稍候幾秒再檢查",
+  "confirm_download": "下載此更新？",
+  "confirm_install": "重新啟動並安裝此更新？",
+  "confirm_detail": "重新啟動會等待轉換、匯入、聊天和 Moodle 工作完成。"
 }

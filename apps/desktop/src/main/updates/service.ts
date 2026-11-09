@@ -80,7 +80,7 @@ export class Updates {
     if (this.state.status !== 'available') return this.snapshot();
     if (!this.options.online()) { this.dispatch({type:'error', code:'offline'}); return this.snapshot(); }
     recordEgress('app_update_download', 'https://github.com/ava-apple/vstudy-pro/releases/latest/download');
-    this.updater.autoInstallOnAppQuit = true;
+    this.updater.autoInstallOnAppQuit = false;
     this.dispatch({type:'download'});
     void this.updater.downloadUpdate().catch(error => this.dispatch({type:'error', code:updateError(error)}));
     return this.snapshot();

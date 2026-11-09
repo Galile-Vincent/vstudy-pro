@@ -108,8 +108,25 @@ export function registerIpc(
       updateOwners.add(event); return updates.snapshot();
     });
     registrar.handle('updates:check', () => updates.check());
-    registrar.handle('updates:download', () => updates.download());
-    registrar.handle('updates:install', () => updates.install());
+    const updateConsent = async (event:IpcMainInvokeEvent, action:'download' | 'install') => {
+      const result = await showAttachedMessage({type:'question',message:tr(`updates:confirm_${action}`),
+        detail:tr('updates:confirm_detail'),buttons:[tr('common:cancel'),tr('common:continue')],
+        defaultId:0,cancelId:0}, event.sender);
+      return result.response === 1 && !event.sender.isDestroyed();
+    };
+    registrar.handle('updates:download', async (_request,event) =>
+      await updateConsent(event,'download') ? updates.download() : updates.snapshot());
+    let installing = false;
+    registrar.handle('updates:install', async (_request,event) => {
+      if (installing || updates.snapshot().state.status !== 'ready') return updates.snapshot();
+      installing = true;
+      try {
+        if (!await updateConsent(event,'install')) return updates.snapshot();
+        await disposeMoodle.waitForIdle(); await chat.waitForIdle();
+        await disposeDocuments.waitForIdle(); await disposeLibrary.waitForIdle();
+        return updates.install();
+      } finally { installing = false; }
+    });
     registrar.handle('updates:setAuto', ({enabled}) => updates.setAuto(enabled));
     registrar.handle('updates:notes', async (_request, event) => {
       const state = updates.snapshot().state;

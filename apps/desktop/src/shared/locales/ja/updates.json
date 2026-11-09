@@ -17,5 +17,8 @@
   "current": "最新バージョンです",
   "checked": "今確認しました",
   "offline": "オフラインです",
-  "cooldown": "数秒待ってから再確認してください"
+  "cooldown": "数秒待ってから再確認してください",
+  "confirm_download": "更新をダウンロードしますか？",
+  "confirm_install": "再起動して更新をインストールしますか？",
+  "confirm_detail": "変換、インポート、チャット、Moodle の処理が完了するまで待機します。"
 }

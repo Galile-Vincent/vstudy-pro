@@ -32,7 +32,7 @@ it('checks, offers, downloads with consent, clamps progress, and installs only w
   updater.emit('update-available', {version:'0.4.5'});
   expect(service.snapshot().state).toEqual({status:'available', version:'0.4.5',
     releaseUrl:'https://github.com/ava-apple/vstudy-pro/releases/tag/v0.4.5'});
-  await service.download(); expect(updater.autoInstallOnAppQuit).toBe(true);
+  await service.download(); expect(updater.autoInstallOnAppQuit).toBe(false);
   updater.emit('download-progress', {percent:42.4}); expect(service.snapshot().state).toEqual({status:'downloading',percent:42});
   updater.emit('download-progress', {percent:120}); expect(service.snapshot().state).toEqual({status:'downloading',percent:100});
   updater.emit('update-downloaded', {version:'0.4.5'});
