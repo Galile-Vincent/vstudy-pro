@@ -118,6 +118,14 @@ export function LibraryView() {
     catch { /* Corrupt optional sort preferences must not prevent opening the library. */ }
     return {...defaults, ...sort, ...route.query};
   });
+  const clearFilters = () => {
+    setCustomDates(false);
+    setQuery(q => ({
+      ...defaults, sort: q.sort, direction: q.direction,
+      view: q.view, folderId: q.folderId, subfolders: q.subfolders,
+      text: text.trim() || undefined,
+    }));
+  };
   const [customDates,setCustomDates] = useState(false);
   const [filtersOpen,setFiltersOpen] = useState(false);
   const compactToolbar = useCompactToolbar();
@@ -628,7 +636,7 @@ export function LibraryView() {
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select></label>
             {!showFolders && compactToolbar && <div className="filter-view"><span>{tr("library:sort")}</span>{viewControls}</div>}
-            <footer><Button variant="outline" className="ghost" onClick={() => setQuery(defaults)}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
+            <footer><Button variant="outline" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
           </PopoverContent>
         </Popover>
         {!showFolders && !compactToolbar && viewControls}
@@ -650,7 +658,7 @@ export function LibraryView() {
         ))}
         {filters.length > 0 && (
           <>
-            <Button variant="outline" className="ghost" onClick={() => setQuery({ ...defaults, ...route.query })}>
+            <Button variant="outline" className="ghost" onClick={clearFilters}>
               {tr("library:clearFilters")}
             </Button>
             <Button variant="outline" className="ghost"
@@ -738,7 +746,7 @@ export function LibraryView() {
               text
                 ? setText("")
                 : filters.length
-                  ? setQuery(defaults)
+                  ? clearFilters()
                   : void run(() => importFiles(query.folderId ?? null))
             }
           >
