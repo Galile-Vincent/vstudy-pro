@@ -22,8 +22,15 @@ it.each([[50, 0, '-50%'], [200, 100, '-0%']])('bounds value %s with max %s', (va
     .toContain(`translateX(${offset})`);
 });
 
-it.each([null, NaN, -1, Infinity])('keeps invalid value %s indeterminate', value => {
+it.each([undefined, null, NaN, Infinity])('keeps invalid value %s indeterminate', value => {
   render(<Progress value={value} />);
   expect(screen.getByRole('progressbar').getAttribute('data-state')).toBe('indeterminate');
   expect(document.querySelector('[data-slot=progress-indicator]')?.getAttribute('style')).not.toContain('NaN');
 });
+
+it.each([[200, 100, 100], [-1, 100, 0], [50, 0, 50], [200, 50, 50]])(
+  'clamps finite value %s to max %s for accessibility', (value, max, expected) => {
+    render(<Progress value={value} max={max} />);
+    expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe(String(expected));
+  },
+);
