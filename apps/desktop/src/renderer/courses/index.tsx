@@ -395,7 +395,7 @@ function CoursesBody({
       onError={failure}
     />
   );
-  const deadlines = (items: MoodleDeadline[]) =>
+  const deadlines = (items: MoodleDeadline[], headingLevel: 3 | 4 = 3) =>
     items.length ? (
       <div className="moodle-rows">
         {items.map((d) => (
@@ -430,7 +430,7 @@ function CoursesBody({
         ))}
       </div>
     ) : (
-      <EmptyState title={tr("moodle:no_deadlines")} />
+      <EmptyState headingLevel={headingLevel} title={tr("moodle:no_deadlines")} />
     );
   const notifications = (
     limit?: number,
@@ -744,6 +744,7 @@ function CoursesBody({
                               detail.deadlines
                                 .filter((d) => deadlineGroup(d) === group)
                                 .sort((a, b) => a.dueAt.localeCompare(b.dueAt)),
+                              4,
                             )}
                           </section>
                         ),
