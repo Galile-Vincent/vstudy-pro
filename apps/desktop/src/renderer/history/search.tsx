@@ -6,6 +6,7 @@ import { tr } from '../../shared/i18n';
 import type { ChatHit, ChatPatch, ChatSearch } from '../../shared/chat-history';
 import type { IpcResponse } from '../../shared/ipc';
 import { desktop } from '../bridge';
+import { useFormat } from '../i18n';
 import { SurfaceErrorBoundary } from '../components/surface-error-boundary';
 import { HistoryResults } from './results';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
@@ -24,6 +25,7 @@ export function HistorySearch(props: HistorySearchProps) {
 }
 function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusFallback, onSummary }: HistorySearchProps) {
   useTranslation();
+  const format = useFormat();
   const [filters, setFilters] = useState<ChatSearch>({ scope: 'all', limit: 30, query: '', ...(documentId ? { documentId } : {}), ...(courseId ? { courseIds: [courseId] } : {}) });
   const [page, setPage] = useState<IpcResponse<'chats:search'>>({ items: [], nextCursor: null });
   const [facets, setFacets] = useState<IpcResponse<'chats:facets'>>({ courses: [], documents: [], models: [] });
@@ -35,6 +37,8 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
   } | null>(null);
   const [renaming, setRenaming] = useState<ChatHit | null>(null), [title, setTitle] = useState('');
   const [grouped, setGrouped] = useState(false);
+  const [outcome, setOutcome] = useState<{ count: number; more: boolean } | 'error' | null>(null);
+  const announce = useRef<{ timer?: ReturnType<typeof setTimeout>; filters: ChatSearch | null }>({ filters: null });
   const serial = useRef(0), host = useRef<HTMLDivElement>(null);
   const searchInput = useRef<HTMLInputElement>(null), undoButton = useRef<HTMLButtonElement>(null);
   const afterDelete = useRef<{ id: string; neighbours: string[]; ready: boolean } | null>(null);
@@ -45,11 +49,15 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
   const focusFallback = () => { if (onFocusFallback) onFocusFallback(); else searchInput.current?.focus(); };
   const leaveUndo = () => { if (document.activeElement === undoButton.current) focusFallback(); };
   const set = (patch: Partial<ChatSearch>) => { afterDelete.current = null; setFilters(f => ({ ...f, ...patch, cursor: undefined })); };
+  useEffect(() => () => clearTimeout(announce.current.timer), []);
   useEffect(() => { let live = true; void desktop.invoke('chats:facets', {}).then(v => { if (live)
     setFacets(v); }).catch(() => { if (live)
     setError(true); }); return () => { live = false; }; }, [revision]);
   useEffect(() => {
     const generation = ++serial.current;
+    const quiet = announce.current;
+    clearTimeout(quiet.timer);
+    const say = (next: NonNullable<typeof outcome>) => { quiet.timer = setTimeout(() => setOutcome(next), 500); };
     const want = pages.current.filters === filters ? pages.current.count : 1;
     setLoading(true);
     setError(false);
@@ -66,8 +74,15 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
     const timer = setTimeout(() => { void load().then(({ result, loaded }) => { if (generation === serial.current) {
       pages.current = { filters, count: loaded };
       setPage(result);
-    } }).catch(() => { if (generation === serial.current)
-      setError(true); }).finally(() => { if (generation === serial.current)
+      if (quiet.filters !== filters) {
+        quiet.filters = filters;
+        say({ count: result.items.length, more: !!result.nextCursor });
+      }
+    } }).catch(() => { if (generation === serial.current) {
+      setError(true);
+      quiet.filters = null;
+      say('error');
+    } }).finally(() => { if (generation === serial.current)
       setLoading(false); }); }, 120);
     return () => { clearTimeout(timer); serial.current++; };
   }, [filters, revision]);
@@ -153,6 +168,10 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
         setLoading(false);
     }
   };
+  const searching = loading && !page.items.length;
+  const announcement = outcome === 'error' ? tr('history:error') : outcome
+    ? tr(outcome.more ? 'history:count_more' : 'history:count', { count: outcome.count, formatted: format.number(outcome.count) })
+    : '';
   return <div className={'history-search' + (compact ? ' history-compact' : '')} ref={host} onKeyDown={event => {
       if (event.nativeEvent.isComposing)
         return;
@@ -192,7 +211,7 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
   {undo && <div role="status" className="history-undo">{tr('history:updated')}<button ref={undoButton} onClick={() => { afterDelete.current = null; void desktop.invoke('chats:update', { conversationId: undo.id, patch: undo.patch }).then(() => { leaveUndo(); setUndo(null); restoreRow(undo.restore); setRevision(n => n + 1); window.dispatchEvent(new Event('vstudy:history-changed')); }).catch(() => setError(true)); }}>{tr('history:undo')}</button></div>}
   {error && <p role="alert">{tr('history:error')} <button onClick={() => setRevision(n => n + 1)}>{tr('common:retry')}</button></p>}
   <div className="history-results" ref={resultsList} aria-busy={loading}>
-   <p role="status">{loading && !page.items.length ? tr('history:searching') : ''}</p>
+   <p role="status" className={searching ? undefined : 'sr-only'}>{searching ? tr('history:searching') : announcement}</p>
    {!loading && !page.items.length && !error && <EmptyState headingLevel={2} icon={<Search size={28}/>} title={tr(filters.query ? 'history:no_results' : 'history:empty')} description={tr(filters.query ? 'history:no_results_hint' : 'history:empty_hint')}/>}
    {<HistoryResults items={page.items} onOpen={onOpen} onUpdate={(h, p) => { void update(h, p); }} onRename={h => { setTitle(h.title); setRenaming(h); }} groupByCourse={grouped}/>}
    {page.nextCursor && <button disabled={loading} onClick={() => void more()}>{tr('history:more')}</button>}
