@@ -2,6 +2,7 @@
 import { guides, getGuide } from '../../data/docs';
 import { getLegal, legalSlugs } from '../../data/legal';
 import { languages, type Language } from '../../data/ui';
+import { mediaCopy } from '../../data/media-copy';
 import { path } from '../../config';
 export function getStaticPaths() { return languages.map(language => ({params:{lang:language},props:{language}})); }
 export function GET({ props }: { props: { language: Language } }) {
@@ -21,5 +22,9 @@ export function GET({ props }: { props: { language: Language } }) {
       url:path(`${props.language}/${slug}/#${section.id}`),
     }));
   });
-  return Response.json([...entries,...legal]);
+  const media = mediaCopy[props.language];
+  return Response.json([...entries,...legal,{
+    title:media.kit, heading:media.share, text:`${media.intro} ${media.about}`,
+    url:path(`${props.language}/media/`),
+  }]);
 }
