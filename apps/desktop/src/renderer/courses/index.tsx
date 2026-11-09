@@ -1098,7 +1098,7 @@ function CoursesBody({
                                 aria-hidden="true"
                               >
                                 <span
-                                  className="course-count course-overdue inline-flex items-center gap-1 text-[var(--danger)]"
+                                  className="course-count course-overdue w-[calc(var(--space-4)*3.5)] shrink-0 inline-flex items-center gap-1 text-[var(--danger)]"
                                   data-count={attention.overdue}
                                   title={
                                     attention.overdue
@@ -1116,7 +1116,7 @@ function CoursesBody({
                                   )}
                                 </span>
                                 <span
-                                  className="course-count course-unread-count inline-flex items-center gap-1 text-[var(--muted)]"
+                                  className="course-count course-unread-count w-[calc(var(--space-4)*3.5)] shrink-0 inline-flex items-center gap-1 text-[var(--muted)]"
                                   data-count={attention.unread}
                                   title={
                                     attention.unread
@@ -1136,7 +1136,7 @@ function CoursesBody({
                               </div>
                               <button
                                 type="button"
-                                className="course-pin grid size-9 place-items-center rounded-[var(--r-sm)] aria-pressed:bg-[var(--active)]"
+                                className="course-pin grid size-[calc(var(--space-3)*3)] shrink-0 place-items-center rounded-[var(--r-sm)] aria-pressed:bg-[var(--active)]"
                                 aria-pressed={pinned}
                                 aria-label={tr(
                                   pinned ? "moodle:unpin_course" : "moodle:pin_course",

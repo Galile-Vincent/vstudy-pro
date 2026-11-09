@@ -782,7 +782,11 @@ it('keeps empty count slots, caps the visible number, and orders the accessible 
   await mount(api);
   expect(host.querySelector('.course-unread-count')?.textContent).toBe('99+');
   expect(host.querySelector('.course-unread-count')?.getAttribute('title')).toBe('120 unread updates');
-  expect(host.querySelector('.course-counts')?.children).toHaveLength(2);
+  for (const slot of ['.course-overdue', '.course-unread-count']) {
+    expect(host.querySelector(slot)?.classList.contains('w-[calc(var(--space-4)*3.5)]')).toBe(true);
+    expect(host.querySelector(slot)?.classList.contains('shrink-0')).toBe(true);
+  }
+  expect(host.querySelector('.course-pin')?.classList.contains('size-[calc(var(--space-3)*3)]')).toBe(true);
   expect(host.querySelector('.course-heading-row')).toBeNull();
   const button = host.querySelector<HTMLButtonElement>('.course-open')!;
   const labels = button.getAttribute('aria-labelledby')!.split(' ').map(id=>document.getElementById(id)!.textContent);
