@@ -1,25 +1,33 @@
 ---
 import Base from '../layouts/Base.astro';
 import PlatformLogo from './PlatformLogo.astro';
-import { RELEASES_URL } from '../config';
-import { downloadBase, installers, releaseMetadata } from '../data/downloads';
+import { RELEASES_URL, release } from '../config';
+import { downloadBase as latestDownloadBase, installers, releaseMetadata } from '../data/downloads';
 import { installCopy, macInstall, windowsInstall } from '../data/install-copy';
 import { downloadCopy } from '../data/download-copy';
+import { ui } from '../data/ui';
 import type { Language } from '../data/ui';
 import '../styles/download.css';
 interface Props { language: Language; }
 const { language } = Astro.props;
+const metadata = releaseMetadata(release);
+const downloadBase = release ? `https://github.com/ava-apple/vstudy-pro/releases/download/v${release.version}` : latestDownloadBase;
 const c = downloadCopy[language];
+const labels = ui[language];
+const releaseDate = release && new Intl.DateTimeFormat({ en: 'en-US', 'zh-Hant': 'zh-TW', ja: 'ja-JP' }[language], { year: 'numeric', month: language === 'en' ? 'short' : 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(release.publishedAt));
 const install = installCopy[language];
 const href = (file: string) => `${downloadBase}/${file}`;
 const available = installers.filter(installer => installer.releaseEnabled);
 ---
 <Base {language} title={c.title} description={c.metaDescription} page="download/">
   <main id="main" tabindex="-1" class="dl container">
-    <header class="dl-head"><h1>{c.title}</h1></header>
+    <header class="dl-head">
+      <h1>{c.title}</h1>
+      {release && <p class="dl-release">{labels.version} {release.version} · {labels.updated} <time datetime={release.publishedAt}>{releaseDate}</time></p>}
+    </header>
     <ul class="dl-cards">
       {available.map(installer => {
-        const metadata = releaseMetadata[installer.id];
+        const asset = metadata[installer.id];
         const copy = c.arch[installer.id];
         return <li class="dl-card" data-installer={installer.id}>
           <a class="dl-card-main" href={href(installer.file)}>
@@ -31,8 +39,7 @@ const available = installers.filter(installer => installer.releaseEnabled);
             <span class="dl-card-text">
               <span class="dl-card-name">{copy.name}</span>
               <span class="dl-card-note">{copy.note}</span>
-              <span class="dl-card-kind">{installer.kind === 'dmg' ? c.dmg : c.exe}</span>
-              {metadata && <span class="dl-card-kind">{metadata.version} · {(metadata.bytes / 1024 / 1024).toFixed(1)} MB</span>}
+              <span class="dl-card-kind">{installer.kind === 'dmg' ? c.dmg : c.exe}{asset && <> · {(asset.bytes / 1_000_000).toFixed(1)} MB</>}</span>
             </span>
             <span class="dl-card-action">{c.getIt} .{installer.kind}</span>
           </a>

@@ -1,6 +1,7 @@
 /** Installer inventory and browser recommendations. Unknown release metadata stays absent. */
 import targets from '../../../desktop/distribution-targets.json' with {type: 'json'};
 export type InstallerId = 'mac-arm64' | 'mac-x64' | 'win-x64' | 'win-arm64';
+import type { SiteRelease } from './release';
 export const downloadBase = 'https://github.com/ava-apple/vstudy-pro/releases/latest/download';
 export const installers = targets.map(target => ({
   id: target.key as InstallerId, label: target.label,
@@ -9,7 +10,13 @@ export const installers = targets.map(target => ({
 }));
 
 /** Populate only from verified published assets, never the source package version. */
-export const releaseMetadata: Partial<Record<InstallerId, { version: string; bytes: number }>> = {};
+export function releaseMetadata(release: SiteRelease | undefined): Partial<Record<InstallerId, { version: string; bytes: number }>> {
+  if (!release) return {};
+  return Object.fromEntries(installers.flatMap(installer => {
+    const asset = release.assets[installer.id];
+    return asset ? [[installer.id, { version: release.version, bytes: asset.bytes }]] : [];
+  }));
+}
 
 export interface PlatformHints {
   platform?: string;

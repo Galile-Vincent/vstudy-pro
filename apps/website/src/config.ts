@@ -1,9 +1,11 @@
 /** Build-time links and release metadata shared by every page. */
-import desktop from '../../desktop/package.json';
+import { parseRelease } from './data/release';
+const snapshots = import.meta.glob('./data/release.json', { query: '?raw', import: 'default', eager: true });
+export const release = parseRelease(snapshots['./data/release.json'] as string | undefined);
 
 export const REPO_URL = 'https://github.com/ava-apple/vstudy-pro';
 export const RELEASES_URL = `${REPO_URL}/releases/latest`;
-export const VERSION = desktop.version;
+export const VERSION = release?.version;
 export const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 export const path = (route: string) => `${base}/${route}`;
 

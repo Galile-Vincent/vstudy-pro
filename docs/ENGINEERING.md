@@ -150,6 +150,8 @@ Knip does not follow the CSS imports in the current project configuration. Its C
 
 ### Script installation and Homebrew
 
+After the release publishes, run `node scripts/update-site-release.mjs vX.Y.Z`, commit the verified website metadata, then rebuild and deploy the website.
+
 After publishing a release, run `node scripts/update-cask.mjs VERSION` and commit the updated cask. It reads the versioned DMG entry from the published SHA256SUMS.txt. An optional second argument supplies a checksum fixture. Run `node --test scripts/update-cask.test.mjs`.
 
 The macOS installer is `scripts/install/install.sh`. Run `bash scripts/install/install.test.sh` on Apple silicon macOS. It builds a small real DMG and exercises install, replacement, checksum rejection, uninstall, and dry-run. `VSTUDY_RELEASE_BASE` is a test-only asset-directory URL override, including `file://` fixtures. Never set it in user-facing install commands. The Windows script is `scripts/install/install.ps1`; verify on Windows x64 before claiming native installation works.

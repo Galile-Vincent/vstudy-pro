@@ -57,7 +57,7 @@ const en = {
   finalBody: 'Start with a reading. Bring the rest of your semester when you are ready.',
   requirements: 'For macOS on Apple silicon. Current builds are not notarized. See the first-launch guide before opening.',
   firstLaunch: 'Installation and first launch', footer: 'A calmer place for your coursework.',
-  privacy: 'Privacy Policy', terms: 'Terms of Service', source: 'Source on GitHub', contact: 'Contact', aboutStudio: 'About VCStudio', builtBy: 'Built by Vincent @ VCStudio', version: 'Version', themeNames: ['VStudy','Ocean','Grove','Ember','Iris','Rose','Slate','Paper','High contrast'],
+  privacy: 'Privacy Policy', terms: 'Terms of Service', source: 'Source on GitHub', contact: 'Contact', aboutStudio: 'About VCStudio', builtBy: 'Built by Vincent @ VCStudio', version: 'Version', updated: 'Updated', themeNames: ['VStudy','Ocean','Grove','Ember','Iris','Rose','Slate','Paper','High contrast'],
 };
 type Copy = { [K in keyof typeof en]: typeof en[K] };
 const zh: Copy = {
@@ -75,7 +75,7 @@ const zh: Copy = {
   privacyTitle:'你的資料庫，留在你的電腦。',privacyBody:'文件、對話與讀書計畫儲存在本機。不需要 VStudy 帳號，也不會自動同步裝置。選用的使用分析預設關閉，開啟後也不會包含你的問題或文件內容。',privacyDetail:'AI 由你選擇。啟用後，供應商會收到問題與相關閱讀內容。連接 Moodle 時則會聯繫你的學校。',privacyLink:'了解哪些資料會傳出電腦',
   themesTitle:'讓工作空間更像你。',themesBody:'九組明暗主題，可選擇實心、柔和或玻璃卡片。調整閱讀字級、語言，以及預設使用閱讀器或系統應用程式開啟文件。',themeHint:'選擇主題即可預覽此頁配色。兩顆色球分別顯示明亮與深色版本。',
   faqTitle:'開始之前，你可能想知道。',faqs:[['一定要使用 AI 嗎？','不用。沒有 AI 供應商也能閱讀文件、瀏覽已儲存的課程與管理計畫。AI 功能需要啟用供應商並連上網路。'],['支援我的學校嗎？','VStudy 支援公開 HTTPS Moodle 網站。學校必須開放相容的行動網路服務。可搜尋內建名錄或輸入 Moodle 網址，部分學校會限制第三方存取。'],['可以離線讀書嗎？','本機文件、對話、計畫與已儲存的課程仍可使用。新的 Moodle 內容與 AI 回答需要網路。Markdown 與純文字匯入不需要 Python 轉換器。'],['在哪裡下載？','下載按鈕會開啟下載頁，列出所有安裝檔並建議適合你裝置的版本，校驗碼與版本說明也在那裡。若缺少檔案，請確認最新已發布版本。'],['第一次開啟要注意什麼？','未簽署的組建可能觸發 Mac 的 Gatekeeper 或 Windows 的 SmartScreen。請先驗證檔案並確認來源。安裝指南包含兩個系統的操作與已簽署版本說明。']],
-  finalTitle:'為重要的課業，留出空間。',finalBody:'從一份閱讀資料開始，準備好後再帶入整個學期。',requirements:'適用於 Apple 晶片 Mac。目前組建尚未公證，開啟前請閱讀首次啟動指南。',firstLaunch:'安裝與首次啟動',footer:'讓課業更有條理的空間。',privacy:'隱私權政策',terms:'服務條款',source:'GitHub 原始碼',contact:'聯絡我們',aboutStudio:'關於 VCStudio',builtBy:'由 Vincent @ VCStudio 打造',version:'版本',themeNames:['VStudy','海洋','森林','餘燼','鳶尾','玫瑰','石板','紙張','高對比'],
+  finalTitle:'為重要的課業，留出空間。',finalBody:'從一份閱讀資料開始，準備好後再帶入整個學期。',requirements:'適用於 Apple 晶片 Mac。目前組建尚未公證，開啟前請閱讀首次啟動指南。',firstLaunch:'安裝與首次啟動',footer:'讓課業更有條理的空間。',privacy:'隱私權政策',terms:'服務條款',source:'GitHub 原始碼',contact:'聯絡我們',aboutStudio:'關於 VCStudio',builtBy:'由 Vincent @ VCStudio 打造',version:'版本',updated:'更新日期',themeNames:['VStudy','海洋','森林','餘燼','鳶尾','玫瑰','石板','紙張','高對比'],
 };
 const ja: Copy = {
   captureTitle:'ページを会話に添える。',captureBody:'元のページや範囲を添付し、画像対応モデルに質問。送信のタイミングは自分で選べます。',usageTitle:'使用量をいつでも確認。',usageBody:'サイドバーで取得済みの利用枠を確認し、使用量設定で月間 USD とトークンの予算を設定できます。',connectTitle:'AI に、一歩ずつ接続。',connectBody:'インストール、ログイン、テストの順に進みます。その他の選択肢でプロバイダーを選び、設定で API キーを管理します。',
@@ -92,6 +92,6 @@ const ja: Copy = {
   privacyTitle:'ライブラリは、あなたのパソコンに。',privacyBody:'資料、会話、学習計画はローカルに保存。VStudy アカウントも端末間の自動同期もありません。アナリティクスは任意で、オンにしない限り送信されず、質問や資料の内容は含まれません。',privacyDetail:'AI を使うかはあなた次第。有効にすると、質問と関連する資料の文脈をプロバイダーに送ります。Moodle 接続は学校と通信します。',privacyLink:'パソコンの外に送る情報を確認',
   themesTitle:'自分らしいワークスペースに。',themesBody:'明暗に対応する 9 組のテーマ。ソリッド、ソフト、ガラスのカード、文字サイズ、言語、リーダーやシステムアプリでの開き方を選べます。',themeHint:'テーマを選ぶとこのページでプレビューできます。2 つの球はライトとダークの配色です。',
   faqTitle:'始める前に。',faqs:[['AI は必須ですか？','いいえ。AI プロバイダーなしでも資料を読み、保存済みの授業を確認し、予定を管理できます。AI 機能には有効なプロバイダーとネット接続が必要です。'],['自分の学校でも使えますか？','公開 HTTPS の Moodle サイトに対応します。学校側で互換性のあるモバイル Web サービスを有効にする必要があります。内蔵の一覧で検索するか Moodle URL を入力します。第三者のアクセスを制限する学校もあります。'],['オフラインで学習できますか？','ローカルの資料、会話、計画、保存済みの授業は利用できます。新しい Moodle コンテンツと AI の回答にはネット接続が必要です。Markdown とテキストの取り込みには Python 変換器が不要です。'],['どこでダウンロードできますか？','ボタンを押すとダウンロードページが開き、全インストーラーとお使いの端末へのおすすめを確認できます。チェックサムとリリースノートもあります。ファイルがない場合は最新の公開リリースを確認してください。'],['初回起動では何が起きますか？','未署名のビルドでは Mac の Gatekeeper や Windows の SmartScreen が警告する場合があります。ファイルと入手元を検証してください。インストールガイドに両システムの手順と署名済みリリースの説明があります。']],
-  finalTitle:'大切な学びに、余白を。',finalBody:'まずはひとつの資料から。準備ができたら、学期の残りもここへ。',requirements:'Apple シリコン搭載 Mac 向け。現在のビルドは未公証です。初回起動ガイドを確認してください。',firstLaunch:'インストールと初回起動',footer:'授業と向き合う、落ち着いた場所。',privacy:'プライバシーポリシー',terms:'利用規約',source:'GitHub のソース',contact:'お問い合わせ',aboutStudio:'VCStudio について',builtBy:'Vincent @ VCStudio が開発',version:'バージョン',themeNames:['VStudy','Ocean','Grove','Ember','Iris','Rose','Slate','Paper','ハイコントラスト'],
+  finalTitle:'大切な学びに、余白を。',finalBody:'まずはひとつの資料から。準備ができたら、学期の残りもここへ。',requirements:'Apple シリコン搭載 Mac 向け。現在のビルドは未公証です。初回起動ガイドを確認してください。',firstLaunch:'インストールと初回起動',footer:'授業と向き合う、落ち着いた場所。',privacy:'プライバシーポリシー',terms:'利用規約',source:'GitHub のソース',contact:'お問い合わせ',aboutStudio:'VCStudio について',builtBy:'Vincent @ VCStudio が開発',version:'バージョン',updated:'更新日',themeNames:['VStudy','Ocean','Grove','Ember','Iris','Rose','Slate','Paper','ハイコントラスト'],
 };
 export const ui = { en, 'zh-Hant': zh, ja };
