@@ -328,3 +328,17 @@ it('does not steal search focus after choosing files repeatedly', async () => {
  await waitFor(()=>expect(state.invoke.mock.calls.some(([c,q])=>c==='library:documents:list' && q.text==='inside')).toBe(true));
  expect(document.activeElement).toBe(search);
 });
+
+it.each([false,true])('falls back when the originating folder disappears (other folder %s)', async other => {
+ let rows=[row('inside')];
+ const remaining={...row('remaining'),course:{id:'course',fullName:'Other',identity:{title:{en:'Other',zh:'其他'},teachers:[],term:'1142'}}};
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:rows,nextCursor:null}:[]);
+ mount(); await screen.findByText('inside');
+ fireEvent.click(screen.getByRole('button',{name:tr('library:viewFolders')}));
+ fireEvent.click(screen.getByRole('button',{name:tr('library:openFolder',{name:tr('library:unfiled')})}));
+ rows=other?[remaining]:[];
+ act(()=>window.dispatchEvent(new Event('library-changed')));
+ await waitFor(()=>expect(document.activeElement).toBe(other
+  ? screen.getByRole('button',{name:tr('library:openFolder',{name:'Other'})})
+  : screen.getByRole('heading',{level:1})));
+});

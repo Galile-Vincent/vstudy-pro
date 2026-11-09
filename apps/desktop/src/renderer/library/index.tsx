@@ -229,7 +229,9 @@ export function LibraryView() {
     folderFocus.current = null;
     if (!target) return;
     if (target === "heading") heading.current?.focus();
-    else document.getElementById(`library-folder-${encodeURIComponent(target)}`)?.focus();
+    else (document.getElementById(`library-folder-${encodeURIComponent(target)}`)
+      ?? document.querySelector<HTMLElement>(".course-folder")
+      ?? heading.current)?.focus();
   });
   const chooseMode = (next: LibraryMode) => {
     writeMode(next);
