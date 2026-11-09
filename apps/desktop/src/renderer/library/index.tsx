@@ -563,12 +563,9 @@ export function LibraryView() {
   );
   const liveRegion = (
     <div className="library-live" aria-live="polite">
-        {tr("library:loaded", {
-          count: items.length,
-          formatted: format.number(items.length),
+        {dateError ? tr('library:dateRangeInvalid') : notice || recoveryNotice || tr('library:loaded', {
+          count: items.length, formatted: format.number(items.length),
         })}
-        {notice || recoveryNotice}
-        {dateError && tr("library:dateRangeInvalid")}
       </div>
   );
   return (
@@ -682,7 +679,7 @@ export function LibraryView() {
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
             </Select></label>
             {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} aria-invalid={dateError} value={dateDraft[key]} onChange={e => updateDate(key,e.target.value)}/></label>)}
-            {dateError && <p role="alert">{tr("library:dateRangeInvalid")}</p>}
+            {dateError && <p>{tr("library:dateRangeInvalid")}</p>}
             <label>{tr("library:size")}<Select aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select></label>
@@ -1117,9 +1114,9 @@ export function LibraryView() {
         </div>
         </>
       )}
-      {!move && liveRegion}
+      {liveRegion}
       {(notice || recoveryNotice) && (
-        <div className="library-toast" role="status">
+        <div className="library-toast">
           {notice || recoveryNotice}
           {notice && <Button variant="ghost" onClick={() => setNotice("")}>{tr("library:close")}</Button>}
           {recoveries.length > 0 && (
@@ -1137,7 +1134,7 @@ export function LibraryView() {
           )}
         </div>
       )}
-      <LibraryMenus busy={busy} moveNotice={notice} liveRegion={liveRegion} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
+      <LibraryMenus busy={busy} moveNotice={notice} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
       {promptDialog}
     </section>
   );

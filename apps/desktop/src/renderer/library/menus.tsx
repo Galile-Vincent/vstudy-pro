@@ -1,6 +1,6 @@
 import { DropdownMenuLabel } from '../components/ui/dropdown-menu';
 import { useNavigate } from '../shell';
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useFormat } from '../i18n';
 import { Checkbox } from '../components/checkbox';
 import { Button } from '../components/ui/button';
@@ -9,8 +9,8 @@ import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { LibraryDialog } from './dialog';
 import type { Item,Folder } from './model';
-export function LibraryMenus({busy,moveNotice,liveRegion,menu,move,tagging,anchor,items,folders,tags,ids,prompt,run,remove,moveTo,open,setMenu,setMove,setTagging}: {
- busy: boolean; moveNotice: string; liveRegion: ReactNode;
+export function LibraryMenus({busy,moveNotice,menu,move,tagging,anchor,items,folders,tags,ids,prompt,run,remove,moveTo,open,setMenu,setMove,setTagging}: {
+ busy: boolean; moveNotice: string;
  menu: Item|null; move:boolean;tagging:boolean;anchor:HTMLElement|null;items:Item[];folders:Folder[];tags:Item['tags'];ids:Item['document']['id'][];
  prompt:(title:string,initial?:string)=>Promise<string|null>;
  run:(action:()=>Promise<unknown>)=>Promise<void>;
@@ -115,7 +115,6 @@ export function LibraryMenus({busy,moveNotice,liveRegion,menu,move,tagging,ancho
             setMenu(null);
           }}
         >
-          {liveRegion}
           {moveNotice && <p>{moveNotice}</p>}
           <div className="folder-picker">
             <Button variant="ghost" disabled={busy} onClick={() => void moveTo(null)}>
@@ -137,7 +136,6 @@ export function LibraryMenus({busy,moveNotice,liveRegion,menu,move,tagging,ancho
             setMenu(null);
           }}
         >
-          {liveRegion}
           <div className="folder-picker">
             <p>{tr('library:tag_hint')}</p>{tags.map((tag) => (
               <label key={tag.id}>

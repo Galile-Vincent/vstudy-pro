@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
@@ -90,7 +90,7 @@ it.each([false,true])('reports failed moves truthfully and keeps the picker open
  expect(screen.getByRole('dialog',{name:tr('library:move')}).textContent).toContain('Folder not found');
  expect(container.querySelector('.library-toast')?.textContent).not.toContain(tr('library:moved'));
  if(partial){
-   fireEvent.click(screen.getByRole('button',{name:tr('library:close')}));
+   fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:tr('library:close')}));
    expect(document.querySelector('.library-live')?.textContent).toContain('2 of 3 moved, 1 failed');
    fireEvent.click(screen.getByRole('button',{name:/Undo/}));
    await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:move',{documentIds:['second'],folderId:null}));
@@ -121,7 +121,8 @@ it('clears a failed move notice when reopening the picker',async()=>{
  fireEvent.click(screen.getByRole('button',{name:tr('library:move')}));
  fireEvent.click(screen.getByRole('button',{name:'Destination'}));
  await waitFor(()=>expect(screen.getByRole('dialog').textContent).toContain('failed'));
- fireEvent.click(screen.getByRole('button',{name:tr('library:close')}));
+ fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:tr('library:close')}));
+ fireEvent.click(screen.getByText('first').closest('.library-document')!);
  fireEvent.click(screen.getByRole('button',{name:tr('library:move')}));
  expect(screen.getByRole('dialog').textContent).not.toContain('failed');
 });
@@ -141,4 +142,17 @@ it.each(['delete','move'])('ignores a double click during %s',async action=>{
  fireEvent.click(button);fireEvent.click(button);
  expect(state.invoke.mock.calls.filter(([c])=>c===channel)).toHaveLength(1);
  await act(async()=>finish());
+});
+
+it('keeps one persistent live region through the move dialog',async()=>{
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[row('first')],nextCursor:null}:[]);
+ mount();await screen.findByText('first');
+ const live=document.querySelector('.library-live');
+ fireEvent.click(screen.getByText('first').closest('.library-document')!);
+ fireEvent.click(screen.getByRole('button',{name:tr('library:move')}));
+ expect(document.querySelectorAll('.library-live')).toHaveLength(1);
+ expect(document.querySelector('.library-live')).toBe(live);
+ fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:tr('library:close')}));
+ expect(document.querySelector('.library-live')).toBe(live);
+ expect(document.querySelectorAll('.library-toast[role="status"]')).toHaveLength(0);
 });
