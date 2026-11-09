@@ -9,6 +9,8 @@ import { utilityProcess } from 'electron';
 import { fork } from 'node:child_process';
 import { join } from 'node:path';
 import type { IpcRequest, IpcResponse } from '../../shared/ipc';
+const idle = new Set<Promise<void>>();
+export async function waitForSearchWorkers() { await Promise.all(idle); }
 const searches = new Set<() => Promise<void>>();
 let stopped = false;
 /** Terminate and await all search workers before closing their underlying store. */
@@ -33,6 +35,8 @@ export function searchInWorker<C extends 'library:search' | 'library:documents:l
       if (error) reject(error); else resolve(result!);
     };
     const closed = new Promise<void>(done => (worker as EventEmitter).once('exit', () => { searches.delete(stop); done(); }));
+    idle.add(closed);
+    void closed.then(() => idle.delete(closed));
     const stop = async () => { finish(new Error('Search service closed')); await closed; };
     searches.add(stop);
     const timer = setTimeout(() => finish(new Error(SEARCH_TIMEOUT)), timeoutMs);

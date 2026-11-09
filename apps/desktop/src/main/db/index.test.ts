@@ -91,6 +91,7 @@ describe("SQLite repositories", () => {
     const file = join(path, "store.sqlite");
     const first = openStore(file);
     expect(first.settings.get()).toEqual({
+      autoCheckUpdates:true,
       themeId:"vstudy",colorScheme:"system",contrast:100,glassOpacity:80,cardTransparency:"soft",customThemes:[],
       uiScale:100,density:"comfortable",accent:"neutral",readerFont:"system",readerSize:"m",material:"solid",
       welcomeSeen:false,language:"auto",replyLanguage:"auto",
@@ -99,6 +100,7 @@ describe("SQLite repositories", () => {
       lastModelId: null, lastDocumentId: null,
     });
     first.settings.set({
+      autoCheckUpdates: false,
       chatSide: "right",
       lastProviderId: "claude-cli",
       lastModelId: "test", lastDocumentId: "00000000-0000-4000-8000-000000000001" as import("../../shared").Document["id"],
@@ -106,6 +108,7 @@ describe("SQLite repositories", () => {
     first.close();
     const second = openStore(file);
     stores.push(second);
+    expect(second.settings.get().autoCheckUpdates).toBe(false);
     expect(second.settings.get().chatSide).toBe("right");
     expect(second.settings.get().lastDocumentId).toBe("00000000-0000-4000-8000-000000000001");
     const raw = new DatabaseSync(file);
