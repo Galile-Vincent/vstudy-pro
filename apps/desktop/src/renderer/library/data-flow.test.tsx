@@ -500,3 +500,26 @@ it('rerenders only affected cards when selection changes among 5000 IDs', async 
  fireEvent.click(screen.getByText('doc1').closest('.library-document')!,{ctrlKey:true});
  expect(state.art.mock.calls.map(([id])=>id)).toEqual(['doc1']);
 });
+
+it('measures a tall status block without stretching ready grid neighbours', async () => {
+ const observers:{target:Element;callback:()=>void}[]=[];
+ vi.stubGlobal('ResizeObserver',class{
+  constructor(private callback:()=>void){}
+  observe(target:Element){observers.push({target,callback:this.callback});}
+  disconnect(){} unobserve(){}
+ });
+ localStorage.setItem('library-grid','true');
+ document.documentElement.style.setProperty('--art-reader-card-height','300');
+ const failed=row('failed');failed.document.status='failed';
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'
+  ? {items:[failed,row('ready'),row('next')],nextCursor:null}:[]);
+ mount();await screen.findByText('failed',{selector:'button'});
+ const status=document.querySelector('.document-status')!;
+ vi.spyOn(status,'getBoundingClientRect').mockReturnValue({height:180} as DOMRect);
+ act(()=>observers.find(observer=>observer.target===status)?.callback());
+ const failedRow=status.closest<HTMLElement>('.library-document')!;
+ expect(parseFloat(failedRow.style.height)).toBe(480);
+ expect(parseFloat(screen.getByText('ready',{selector:'button'}).closest<HTMLElement>('.library-document')!.style.height)).toBe(300);
+ expect(parseFloat(screen.getByText('next',{selector:'button'}).closest<HTMLElement>('.library-document')!.style.top)).toBeGreaterThanOrEqual(480);
+ vi.stubGlobal('ResizeObserver',class{observe(){}unobserve(){}disconnect(){}});
+});

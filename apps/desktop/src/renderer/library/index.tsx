@@ -89,6 +89,21 @@ function retainItems(previous: Item[], next: Item[]) {
     return old && JSON.stringify(old) === JSON.stringify(item) ? old : item;
   });
 }
+function StatusBlock({id, measure, children}: {
+  id: string; measure: (id: string, height: number) => void;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const element = ref.current!;
+    const update = () => measure(id, element.getBoundingClientRect().height);
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    update();
+    return () => observer.disconnect();
+  }, [id, measure]);
+  return <div ref={ref} className="document-status">{children}</div>;
+}
 type RowProps = {
   item: Item; index: number; count: number; grid: boolean;
   height: number; offset: number; columns: number; tabRow: boolean;
@@ -599,18 +614,23 @@ export function LibraryView() {
   const baseHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : (rowRem || 2.75) * (textScale || 16);
   const rowHeight = baseHeight;
   const columns = grid ? Math.max(1, Math.floor(viewportWidth / 280)) : 1;
+  const [statusHeights, setStatusHeights] = useState<Record<string, number>>({});
+  const measureStatus = useCallback((id: string, height: number) => {
+    if (height <= 0) return;
+    setStatusHeights(current => current[id] === height ? current : {...current, [id]: height});
+  }, []);
+  const itemHeight = (item: Item) => rowHeight + (item.document.status === "ready"
+    ? 0 : statusHeights[item.document.id] ?? 80 * (textScale || 16) / 16);
   const layout = useMemo(() => {
     const offsets = [0];
     const heights: number[] = [];
     for (let index = 0; index < shown.length; index += columns) {
-      const status = shown.slice(index, index + columns)
-        .some(item => item.document.status !== "ready");
-      const height = rowHeight + (status ? 80 : 0);
+      const height = Math.max(...shown.slice(index, index + columns).map(itemHeight)) + (grid ? 16 : 0);
       heights.push(height);
       offsets.push(offsets[offsets.length - 1]! + height);
     }
     return { offsets, heights };
-  }, [shown, columns, rowHeight]);
+  }, [shown, columns, rowHeight, statusHeights, textScale]);
   const rowContext = useRef({ shown, items, layout, columns, rowHeight, grid, selected, selectedSet });
   rowContext.current = { shown, items, layout, columns, rowHeight, grid, selected, selectedSet };
   const {start, end} = virtualWindow(
@@ -1008,7 +1028,7 @@ export function LibraryView() {
               const item = shown[index]!;
               const d = item.document;
               const lane = Math.floor(index / columns);
-              const height = layout.heights[lane]!;
+              const height = itemHeight(item);
               const offset = layout.offsets[lane]!;
               return <DocumentRow key={d.id} item={item} index={index}
                 count={shown.length} grid={grid} height={height} offset={offset}
@@ -1032,8 +1052,10 @@ export function LibraryView() {
                   onMouseEnter={() => {  }}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
-                    height: height - (grid ? 16 : 0),
-                    minHeight: height - (grid ? 16 : 0),
+                    height,
+                    minHeight: height,
+                    rowGap: !grid && d.status !== "ready" ? 0 : undefined,
+                    gridTemplateRows: !grid && d.status !== "ready" ? `${rowHeight}px max-content` : undefined,
                     position: "absolute",
                     top: offset,
                     left: `${((index % columns) * 100) / columns}%`,
@@ -1260,7 +1282,7 @@ export function LibraryView() {
                   <div className="document-added">{format.date(d.createdAt)}</div>
                   <div className="document-type"><Badge variant="secondary">{d.sourceName.split('.').pop()?.toUpperCase()}</Badge></div>
                   <Button variant="ghost" size="icon-sm" className="document-actions" aria-label={tr('library:actions',{name:d.title})} tabIndex={-1} onClick={e=>{menuAnchor.current=e.currentTarget;setMenu(item);}}><MoreHorizontal/></Button></>}
-                  {d.status !== 'ready' && <div className="document-status">
+                  {d.status !== 'ready' && <StatusBlock id={d.id} measure={measureStatus}>
                     <span className="status-badge" data-status={d.status}>
                       {d.status === 'failed' ? <AlertTriangle/> : <LoaderCircle/>}
                       {tr(`library:${d.status}`)}
@@ -1272,7 +1294,7 @@ export function LibraryView() {
                     {d.status === 'converting' && <progress
                       value={progress[d.id]?.page} max={progress[d.id]?.total}
                       aria-label={tr('common:conversion_progress')}/>}
-                  </div>}
+                  </StatusBlock>}
                 </div>
               )} />;
             })}
