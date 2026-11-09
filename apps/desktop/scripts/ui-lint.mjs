@@ -9,15 +9,21 @@ export function inspect(source, css = true) {
   const token = value => /^var\(--[\w-]+\)$/.test(value.trim());
   const property = (names, check, rule) => {
     const end = css ? String.raw`([^;\n}]+)` : String.raw`(?:"([^"]*)"|'([^']*)'|([^,;\n}]+))`;
-    const pattern = new RegExp(String.raw`(?:${names})\s*:\s*${end}`, 'g');
+    const pattern = new RegExp(String.raw`(?:^|[\s{;,])(?:"(?:${names})"|'(?:${names})'|(?:${names}))\s*:\s*${end}`, 'g');
     for (const match of text.matchAll(pattern)) {
-      const value = (match[1] ?? match[2] ?? match[3]).trim();
+      const value = (match[1] ?? match[2] ?? match[3]).trim().replace(/\s*!important\s*$/i, '').trim();
       if (!check(value)) counts[rule]++;
     }
   };
   property('box-shadow|boxShadow', value => token(value) || value === 'none' || /^0 0 0 \d+(?:\.\d+)?px (?:var\(--[\w-]+\)|currentColor)$/.test(value), 'shadow');
-  property('border-radius|borderRadius|border-(?:start|end)-(?:start|end)-radius|border(?:Top|Bottom)(?:Left|Right)Radius', value => !/\d+(?:\.\d+)?px/.test(value), 'radius');
-  counts.color = [...text.matchAll(/#[\da-f]{3,8}\b|\brgba?\(/gi)].length;
+  property('border-radius|borderRadius|border-(?:start|end)-(?:start|end)-radius|border-(?:top|bottom)-(?:left|right)-radius|border(?:Top|Bottom)(?:Left|Right)Radius', value => /var\(--r-/.test(value) || !/(?:\d+(?:\.\d+)?px|^\d+(?:\.\d+)?$)/.test(value), 'radius');
+  const namedColors = /\b(?:aliceblue|antiquewhite|aqua|aquamarine|azure|beige|bisque|black|blanchedalmond|blue|blueviolet|brown|burlywood|cadetblue|chartreuse|chocolate|coral|cornflowerblue|cornsilk|crimson|cyan|darkblue|darkcyan|darkgoldenrod|darkgray|darkgreen|darkgrey|darkkhaki|darkmagenta|darkolivegreen|darkorange|darkorchid|darkred|darksalmon|darkseagreen|darkslateblue|darkslategray|darkslategrey|darkturquoise|darkviolet|deeppink|deepskyblue|dimgray|dimgrey|dodgerblue|firebrick|floralwhite|forestgreen|fuchsia|gainsboro|ghostwhite|gold|goldenrod|gray|green|greenyellow|grey|honeydew|hotpink|indianred|indigo|ivory|khaki|lavender|lavenderblush|lawngreen|lemonchiffon|lightblue|lightcoral|lightcyan|lightgoldenrodyellow|lightgray|lightgreen|lightgrey|lightpink|lightsalmon|lightseagreen|lightskyblue|lightslategray|lightslategrey|lightsteelblue|lightyellow|lime|limegreen|linen|magenta|maroon|mediumaquamarine|mediumblue|mediumorchid|mediumpurple|mediumseagreen|mediumslateblue|mediumspringgreen|mediumturquoise|mediumvioletred|midnightblue|mintcream|mistyrose|moccasin|navajowhite|navy|oldlace|olive|olivedrab|orange|orangered|orchid|palegoldenrod|palegreen|paleturquoise|palevioletred|papayawhip|peachpuff|peru|pink|plum|powderblue|purple|rebeccapurple|red|rosybrown|royalblue|saddlebrown|salmon|sandybrown|seagreen|seashell|sienna|silver|skyblue|slateblue|slategray|slategrey|snow|springgreen|steelblue|tan|teal|thistle|tomato|turquoise|violet|wheat|white|whitesmoke|yellow|yellowgreen)\b/gi;
+  property('color|background[\\w-]*|border[\\w-]*[Cc]olor|border-color|outline-color|outlineColor|fill|stroke|box-shadow|boxShadow|text-shadow|textShadow|caret-color|caretColor|accent-color|accentColor', value => {
+    const literals = value.replace(/var\([^)]*\)/g, '').match(/#[\da-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch)\(/gi) ?? [];
+    const names = value.replace(/var\([^)]*\)/g, '').match(namedColors) ?? [];
+    counts.color += literals.length + names.length;
+    return true;
+  }, 'color');
   property('(?:-webkit-)?backdrop-filter|backdropFilter', value => token(value) || value === 'none', 'backdrop');
   if (css) {
     for (const match of text.matchAll(/([^{}]+)\{/g)) counts['surface-class'] += [...match[1].matchAll(/\.[\w-]+-(?:card|panel|tile)(?![\w-])/g)].length;
