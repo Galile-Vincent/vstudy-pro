@@ -20,3 +20,26 @@ export function createDraftFlush(
     if (!io.send(requestId)) finish('unavailable');
   });
 }
+
+export function coordinateDraftClose(
+ window: {
+  on(event: 'close', listener: (event: { preventDefault(): void }) => void): unknown;
+  close(): void;
+  isDestroyed(): boolean;
+ },
+ flush: () => Promise<unknown>,
+ canClose = () => false,
+) {
+ let allowed = false;
+ let closing = false;
+ window.on('close', event => {
+  if (allowed || canClose()) return;
+  event.preventDefault();
+  if (closing) return;
+  closing = true;
+  void flush().finally(() => {
+   allowed = true;
+   if (!window.isDestroyed()) window.close();
+  });
+ });
+}

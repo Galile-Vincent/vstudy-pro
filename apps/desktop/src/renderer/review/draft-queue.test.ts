@@ -17,3 +17,21 @@ it('continues saving after empty flushes interleaved with writes', async () => {
  unsubscribe();
  expect(draftQueue('attempt', send)).not.toBe(queue);
 });
+
+it('flushes the latest value after an in-flight write before acknowledging', async () => {
+ let finish = () => {};
+ const send = vi.fn().mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }))
+  .mockResolvedValue(undefined);
+ const queue = draftQueue('attempt', send);
+ queue.set('q1', 0);
+ await Promise.resolve();
+ queue.set('q1', 1);
+ let acknowledged = false;
+ const flush = queue.flush().then(() => { acknowledged = true; });
+ await Promise.resolve();
+ expect(acknowledged).toBe(false);
+ finish();
+ await flush;
+ expect(send.mock.calls.map(call => call[1])).toEqual([0, 1]);
+ expect(queue.answers()).toEqual({});
+});

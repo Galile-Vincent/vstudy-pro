@@ -18,7 +18,7 @@ import { log, copyDiagnostics } from './logging';
 import { showAttachedMessage, showStartupError, type StartupStage } from './dialogs';
 import { readWindowState, trackWindowState } from './window-state';
 import { coordinateShutdown } from './shutdown';
-import { createDraftFlush } from './review/draft-flush';
+import { coordinateDraftClose, createDraftFlush } from './review/draft-flush';
 import { draftFlushAckChannel, draftFlushIdSchema, draftFlushRequestChannel } from '../shared/review-generate';
 import { acquireOwnership } from './ownership';
 import { tr } from './i18n';
@@ -208,6 +208,7 @@ async function createWindow(show = true): Promise<void> {
     unresponsiveTimeout.unref();
   });
   current.on('responsive', cancelUnresponsive);
+  coordinateDraftClose(current, () => flushWindowDrafts(current), () => quitting);
   current.on("closed", () => {
     cancelUnresponsive();
     clearTimeout(showTimeout);
@@ -345,21 +346,24 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 let quitting = false;
-const flushRendererDrafts = createDraftFlush({
+function flushWindowDrafts(target: BrowserWindow) {
+ return createDraftFlush({
   send: requestId => {
-    if (!window || window.isDestroyed() || window.webContents.isLoading()) return false;
-    window.webContents.send(draftFlushRequestChannel, requestId);
+    if (target.isDestroyed() || target.webContents.isLoading()) return false;
+    target.webContents.send(draftFlushRequestChannel, requestId);
     return true;
   },
   listen: acknowledged => {
     const receive = (event: Electron.IpcMainEvent, payload: unknown) => {
       const id = draftFlushIdSchema.safeParse(payload);
-      if (id.success && !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl)) acknowledged(id.data);
+      if (id.success && !target.isDestroyed() && event.sender === target.webContents && event.senderFrame === target.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl)) acknowledged(id.data);
     };
     ipcMain.on(draftFlushAckChannel, receive);
     return () => { ipcMain.removeListener(draftFlushAckChannel, receive); };
   },
-});
+ })();
+}
+const flushRendererDrafts = () => Promise.all(BrowserWindow.getAllWindows().map(flushWindowDrafts));
 const shutdown = coordinateShutdown({
   stopWork: async () => { await flushRendererDrafts(); await disposeIpc?.(); await telemetry?.stop(); },
   flush: () => { if (app.isReady()) session.defaultSession.flushStorageData(); },
