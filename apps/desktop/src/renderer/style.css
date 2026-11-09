@@ -955,8 +955,6 @@ html[data-input-modality=keyboard] [data-slot=aui_composer-shell]:has(:focus-vis
 
 .shell-sidebar button { justify-content:flex-start; }
 [data-slot=model-selector-search] { border:0; box-shadow:none; outline:none; }
-.home-secondary { grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
-.home-secondary .home-card { gap:var(--space-3); }
 
 .settings-tabs [data-slot=tabs-trigger] { color:var(--ink); opacity:1; }
 
