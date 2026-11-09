@@ -147,8 +147,7 @@ const available = installers.filter(installer => installer.releaseEnabled);
       if (badge) badge.hidden = !recommended;
     });
   });
-  document.querySelector('[data-open-help]')?.addEventListener('click', event => {
-    event.preventDefault();
+  document.querySelector('[data-open-help]')?.addEventListener('click', () => {
     const help = document.querySelector<HTMLDetailsElement>('#mac-first-open');
     if (help) {
       help.open = true;

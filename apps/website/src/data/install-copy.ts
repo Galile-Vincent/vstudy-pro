@@ -22,7 +22,7 @@ interface InstallCopy {
 export const installCopy = {
   "en": {
     "firstOpen": "First open on Mac? See the quick steps",
-    "macHelpTitle": "Mac says it cannot be opened",
+    "macHelpTitle": "First time opening on Mac",
     "updateUninstallTitle": "Update and uninstall",
     "macTitle": "Mac (Apple silicon)",
     "dmgTitle": "Option 1 - Download the DMG (easiest, nothing else needed)",
@@ -34,14 +34,12 @@ export const installCopy = {
       "Open VStudy Pro from Applications or Launchpad."
     ],
     "signingStatus": {
-      "title": "If macOS says it cannot open the app or verify the developer",
-      "text": "The Mac app is not yet signed with an Apple Developer ID or notarized by Apple. Proceed only if you downloaded it from this project’s releases page and trust the project.",
+      "title": "First time opening on Mac",
+      "text": "The Mac app is signed with an Apple Developer ID and notarized by Apple. It opens like any other Mac app. The Windows installer is not signed yet, so SmartScreen may warn on first run.",
       "steps": [
-        "Try to open VStudy Pro once, then dismiss the warning.",
-        "Open System Settings > Privacy & Security. Scroll down to Security.",
-        "Click Open Anyway, authenticate if asked, then confirm with Open."
+        "The signed and notarized build normally opens without a security warning. On first launch, macOS asks whether you want to open an app downloaded from the Internet. Click Open."
       ],
-      "older": "On older macOS versions, right-click VStudy Pro in Applications, choose Open, then confirm with Open.",
+      "older": "Unsigned Mac builds v0.3.0 and earlier needed System Settings > Privacy & Security > Open Anyway. If macOS still blocks the current build, download it again from the project releases and verify its signature before continuing.",
       "optional": "Checking the checksum is optional.",
       "verifyLink": "Verify your download",
       "source": "Project releases",
@@ -53,7 +51,7 @@ export const installCopy = {
     "bullets": [
       "Downloads the latest DMG and checks its SHA-256 checksum.",
       "Closes VStudy Pro and installs it in Applications. Your library stays.",
-      "Removes the quarantine flag only from this app so it can open. It never uses sudo."
+      "Verifies the installed app’s signature and Apple notarization. Keeps quarantine for verified builds. It never uses sudo."
     ],
     "read": "Read the script first",
     "aiTitle": "Let an AI agent install it",
@@ -74,11 +72,11 @@ export const installCopy = {
     "copy": "Copy",
     "copied": "Copied",
     "failed": "Copy failed",
-    "prompt": "Install VStudy Pro for me. First fetch and READ https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh on Apple silicon macOS, or install.ps1 in the same directory on Windows x64. Explain the signing status described on the download page and that the Mac script removes quarantine only from this app. Run the reviewed script, confirm SHA-256 verification passed, open VStudy Pro, and report the installed path and result. Do not use sudo, disable system protections globally, or delete user data. Stop on any verification failure."
+    "prompt": "Install VStudy Pro for me. First fetch and READ https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh on Apple silicon macOS, or install.ps1 in the same directory on Windows x64. Explain that the Mac app is signed and notarized and the Windows installer is unsigned. Confirm the Mac signature and notarization checks pass. Run the reviewed script, confirm SHA-256 verification passed, open VStudy Pro, and report the installed path and result. Do not use sudo, disable system protections globally, or delete user data. Stop on any verification failure."
   },
   "zh-Hant": {
     "firstOpen": "第一次在 Mac 開啟？查看操作步驟",
-    "macHelpTitle": "Mac 顯示無法開啟",
+    "macHelpTitle": "第一次在 Mac 開啟",
     "updateUninstallTitle": "更新與解除安裝",
     "macTitle": "Mac（Apple 晶片）",
     "dmgTitle": "方法 1 - 下載 DMG（最簡單，不必先裝其他工具）",
@@ -90,14 +88,12 @@ export const installCopy = {
       "從「應用程式」或 Launchpad 開啟 VStudy Pro。"
     ],
     "signingStatus": {
-      "title": "如果 macOS 顯示無法開啟或無法驗證開發者",
-      "text": "Mac 版尚未使用 Apple 開發者 ID 簽署，也尚未經 Apple 公證。只有從本專案的版本發布頁下載，且你信任本專案時，才繼續操作。",
+      "title": "第一次在 Mac 開啟",
+      "text": "Mac 版已使用 Apple 開發者 ID 簽署，並通過 Apple 公證，可像其他 Mac app 一樣開啟。Windows 安裝程式尚未簽署，首次執行時 SmartScreen 可能會顯示警告。",
       "steps": [
-        "先嘗試開啟 VStudy Pro 一次，再關閉警告。",
-        "開啟「系統設定 > 隱私權與安全性」，向下捲動至「安全性」。",
-        "按「強制打開」，依提示驗證身分，再按「打開」確認。"
+        "已簽署並公證的版本通常不會顯示安全性警告。首次開啟時，macOS 會詢問是否要開啟從網際網路下載的 app，按「打開」即可。"
       ],
-      "older": "較舊的 macOS 可在「應用程式」中對 VStudy Pro 按右鍵，選「打開」，再按「打開」確認。",
+      "older": "v0.3.0 與更早的未簽署 Mac 版本需要到「系統設定 > 隱私權與安全性」按「強制打開」。如果目前版本仍被阻擋，請從專案版本發布頁重新下載，並先驗證簽章再繼續。",
       "optional": "校驗碼驗證是選用步驟。",
       "verifyLink": "驗證下載檔案",
       "source": "專案版本發布頁",
@@ -109,7 +105,7 @@ export const installCopy = {
     "bullets": [
       "下載最新的 DMG，並驗證 SHA-256 校驗碼。",
       "關閉 VStudy Pro，安裝到「應用程式」。你的文件庫會保留。",
-      "只移除此 app 的隔離標記，讓它能開啟。不會使用 sudo。"
+      "驗證已安裝 app 的簽章與 Apple 公證，並保留通過驗證版本的隔離標記。不會使用 sudo。"
     ],
     "read": "先閱讀安裝腳本",
     "aiTitle": "請 AI 智能體幫你安裝",
@@ -130,11 +126,11 @@ export const installCopy = {
     "copy": "複製",
     "copied": "已複製",
     "failed": "複製失敗",
-    "prompt": "請幫我安裝 VStudy Pro。Apple 晶片 macOS 請先取得並完整閱讀 https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh；Windows x64 請閱讀同目錄的 install.ps1。說明下載頁列出的簽署狀態，以及 Mac 腳本只會移除此 app 的隔離標記。執行已閱讀的腳本，確認 SHA-256 驗證通過，開啟 VStudy Pro，回報安裝路徑與結果。不要使用 sudo、全面停用系統防護或刪除使用者資料。驗證失敗時立即停止。"
+    "prompt": "請幫我安裝 VStudy Pro。Apple 晶片 macOS 請先取得並完整閱讀 https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh；Windows x64 請閱讀同目錄的 install.ps1。說明 Mac 版已簽署並公證，Windows 安裝程式尚未簽署。確認 Mac 簽章與公證驗證通過。執行已閱讀的腳本，確認 SHA-256 驗證通過，開啟 VStudy Pro，回報安裝路徑與結果。不要使用 sudo、全面停用系統防護或刪除使用者資料。驗證失敗時立即停止。"
   },
   "ja": {
     "firstOpen": "Mac で初めて開く場合は、起動手順を確認",
-    "macHelpTitle": "Mac で開けないと表示されたら",
+    "macHelpTitle": "Mac で初めて開くとき",
     "updateUninstallTitle": "更新とアンインストール",
     "macTitle": "Mac（Apple シリコン）",
     "dmgTitle": "方法 1 - DMG をダウンロード（いちばん簡単。事前の準備は不要）",
@@ -146,14 +142,12 @@ export const installCopy = {
       "「アプリケーション」または Launchpad から VStudy Pro を開きます。"
     ],
     "signingStatus": {
-      "title": "macOS で「開けない」「開発元を確認できない」と表示されたら",
-      "text": "Mac 版は Apple の Developer ID による署名と公証がまだ済んでいません。このプロジェクトのリリースページから入手し、プロジェクトを信頼できる場合のみ続けてください。",
+      "title": "Mac で初めて開くとき",
+      "text": "Mac 版は Apple の Developer ID で署名され、Apple の公証も受けています。他の Mac アプリと同じように開けます。Windows インストーラーはまだ未署名のため、初回実行時に SmartScreen の警告が表示される場合があります。",
       "steps": [
-        "VStudy Pro を一度開こうとしてから、警告を閉じます。",
-        "「システム設定 > プライバシーとセキュリティ」を開き、「セキュリティ」まで下にスクロールします。",
-        "「このまま開く」をクリックし、必要に応じて認証してから「開く」で確定します。"
+        "署名と公証が済んだバージョンでは、通常、セキュリティの警告は表示されません。初回起動時は、インターネットからダウンロードしたアプリを開くかどうか macOS が確認します。「開く」をクリックしてください。"
       ],
-      "older": "古い macOS では、「アプリケーション」で VStudy Pro を右クリックし、「開く」を選んで、もう一度「開く」で確定できます。",
+      "older": "v0.3.0 以前の未署名の Mac 版では、「システム設定 > プライバシーとセキュリティ」で「このまま開く」を選ぶ必要がありました。現在のバージョンでもブロックされる場合は、プロジェクトのリリースから再ダウンロードし、署名を検証してから続けてください。",
       "optional": "チェックサムの確認は任意です。",
       "verifyLink": "ダウンロードを検証",
       "source": "プロジェクトのリリース",
@@ -165,7 +159,7 @@ export const installCopy = {
     "bullets": [
       "最新の DMG をダウンロードし、SHA-256 チェックサムを確認します。",
       "VStudy Pro を終了し、「アプリケーション」にインストールします。ライブラリは残ります。",
-      "このアプリの隔離属性だけを削除して、起動できるようにします。sudo は使いません。"
+      "インストールしたアプリの署名と Apple の公証を検証します。検証済みのバージョンの隔離属性は保持します。sudo は使いません。"
     ],
     "read": "先にスクリプトを読む",
     "aiTitle": "AI エージェントにインストールを任せる",
@@ -186,6 +180,6 @@ export const installCopy = {
     "copy": "コピー",
     "copied": "コピーしました",
     "failed": "コピー失敗",
-    "prompt": "VStudy Pro をインストールしてください。Apple シリコン macOS では https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh を取得して全文を読んでください。Windows x64 では同じディレクトリの install.ps1 を読んでください。ダウンロードページに記載された署名状況を説明し、Mac スクリプトがこのアプリの隔離属性だけを削除することも伝えてください。読んだスクリプトを実行し、SHA-256 検証の成功を確認して VStudy Pro を開き、インストール先と結果を報告してください。sudo、システム保護の一括無効化、ユーザーデータの削除は禁止です。検証に失敗したら停止してください。"
+    "prompt": "VStudy Pro をインストールしてください。Apple シリコン macOS では https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh を取得して全文を読んでください。Windows x64 では同じディレクトリの install.ps1 を読んでください。Mac 版は署名と公証が済んでおり、Windows インストーラーは未署名であることを説明してください。Mac の署名と公証の検証が成功したことを確認してください。読んだスクリプトを実行し、SHA-256 検証の成功を確認して VStudy Pro を開き、インストール先と結果を報告してください。sudo、システム保護の一括無効化、ユーザーデータの削除は禁止です。検証に失敗したら停止してください。"
   }
 } satisfies Record<Language, InstallCopy>;

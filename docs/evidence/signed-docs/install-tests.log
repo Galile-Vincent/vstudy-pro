@@ -1,0 +1,67 @@
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/dry/VStudy Pro.app
+Dry run: would quit VStudy Pro and verify-and-install the app. No downloads or changes.
+hdiutil: WARNING: 'hdiutil attach -nobrowse -readonly -mountpoint ...' is deprecated. Please use 'diskutil image attach --mountOptions nobrowse --readOnly --mountPoint ...' instead.
+hdiutil: WARNING: 'hdiutil detach ...' is deprecated. Please use 'diskutil eject ...' instead.
+hdiutil: WARNING: 'hdiutil attach -nobrowse -readonly -mountpoint ...' is deprecated. Please use 'diskutil image attach --mountOptions nobrowse --readOnly --mountPoint ...' instead.
+hdiutil: WARNING: 'hdiutil detach ...' is deprecated. Please use 'diskutil eject ...' instead.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/apps/VStudy Pro.app
+Resolving release
+Downloading checksums from file:///var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/release
+Downloading VStudy-Pro-mac-arm64.dmg
+SHA-256 verified: 0cd313331fc5add119227f47ff551177b3bc069c2ddd7be647fd68225e17a9d4 (VStudy-Pro-mac-arm64.dmg)
+Mounting read-only
+hdiutil: WARNING: 'hdiutil attach -nobrowse -readonly -mountpoint ...' is deprecated. Please use 'diskutil image attach --mountOptions nobrowse --readOnly --mountPoint ...' instead.
+/dev/disk12         	GUID_partition_scheme
+/dev/disk12s1       	Apple_HFS                      	/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-install.uEQXRA/mount
+Copying app with ditto
+Requesting VStudy Pro to quit politely
+Moving verified app into place
+Error: Signature or notarization verification failed. Previous app restored if present.
+hdiutil: WARNING: 'hdiutil detach ...' is deprecated. Please use 'diskutil eject ...' instead.
+"disk12" ejected.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/invalid-signature/VStudy Pro.app
+Resolving release
+Downloading checksums from file:///var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/release
+Downloading VStudy-Pro-mac-arm64.dmg
+SHA-256 verified: 0cd313331fc5add119227f47ff551177b3bc069c2ddd7be647fd68225e17a9d4 (VStudy-Pro-mac-arm64.dmg)
+Mounting read-only
+hdiutil: WARNING: 'hdiutil attach -nobrowse -readonly -mountpoint ...' is deprecated. Please use 'diskutil image attach --mountOptions nobrowse --readOnly --mountPoint ...' instead.
+/dev/disk12         	GUID_partition_scheme
+/dev/disk12s1       	Apple_HFS                      	/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-install.p7jAQ7/mount
+Copying app with ditto
+Requesting VStudy Pro to quit politely
+Moving verified app into place
+Error: Signature or notarization verification failed. Previous app restored if present.
+hdiutil: WARNING: 'hdiutil detach ...' is deprecated. Please use 'diskutil eject ...' instead.
+"disk12" ejected.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/apps/VStudy Pro.app
+Resolving release
+Downloading checksums from file:///var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/release
+Downloading VStudy-Pro-mac-arm64.dmg
+SHA-256 verified: 0cd313331fc5add119227f47ff551177b3bc069c2ddd7be647fd68225e17a9d4 (VStudy-Pro-mac-arm64.dmg)
+Mounting read-only
+hdiutil: WARNING: 'hdiutil attach -nobrowse -readonly -mountpoint ...' is deprecated. Please use 'diskutil image attach --mountOptions nobrowse --readOnly --mountPoint ...' instead.
+/dev/disk12         	GUID_partition_scheme
+/dev/disk12s1       	Apple_HFS                      	/private/var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T/vstudy-install.BbBVO9/mount
+Copying app with ditto
+Requesting VStudy Pro to quit politely
+Moving verified app into place
+Verified: signed by Developer ID Application: Test Publisher (TESTTEAM) (TESTTEAM) and notarized by Apple
+Installed /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/apps/VStudy Pro.app. Re-run this script to update.
+hdiutil: WARNING: 'hdiutil detach ...' is deprecated. Please use 'diskutil eject ...' instead.
+"disk12" ejected.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/apps/VStudy Pro.app
+Requesting VStudy Pro to quit politely
+Removing only /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/apps/VStudy Pro.app
+User data retained. Before uninstalling, use Settings > Privacy > Delete all data to delete app data.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/bad/VStudy Pro.app
+Resolving release
+Downloading checksums from file:///var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/release
+Downloading VStudy-Pro-mac-arm64.dmg
+Error: SHA-256 mismatch. Nothing installed.
+Destination: /var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/missing/VStudy Pro.app
+Resolving release
+Downloading checksums from file:///var/folders/m_/hlq7_f2j6wn88q4c28hvjl1m0000gn/T//vstudy-install-test.Heu58E/release
+Downloading VStudy-Pro-mac-arm64.dmg
+Error: Missing, duplicate, or invalid checksum entry
+PASS: signed accepted without quarantine removal, legacy unsigned, modern rejection with rollback, real DMG install, replacement, uninstall, dry-run, mismatch and missing checksum

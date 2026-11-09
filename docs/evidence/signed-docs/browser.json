@@ -1,0 +1,80 @@
+[
+  {
+    "lang": "en",
+    "width": 375,
+    "result": {
+      "hash": "#mac-first-open",
+      "open": true,
+      "overflow": false,
+      "scroll": 569,
+      "text": "First time opening on Mac\n+\nDouble-click the downloaded .dmg file.\nDrag VStudy Pro into Applications in the window that opens.\nEject the VStudy Pro disk image in Finder.\nOpen VStudy Pro from Applications or Launchpad.\nFirst time opening on Mac\n\nThe Mac app is signed with an Apple Developer ID and notarized by Apple. It opens like any other Mac app. The Windows installer is not signed yet, so SmartScreen may warn on first run. Project releases\n\nThe signed and notarized build normally opens without a security warning. On first launch, macOS asks whether you want to open an app downloaded from the Internet. Click Open.\n\nUnsigned Mac builds v0.3.0 and earlier needed System Settings > Privacy & Security > Open Anyway. If macOS still blocks the current build, download it again from the project releases and verify its signature before continuing.\n\nChecking the checksum is optional. Verify your download · Apple’s opening instructions",
+      "top": 191.640625,
+      "width": 375
+    }
+  },
+  {
+    "lang": "en",
+    "width": 1280,
+    "result": {
+      "hash": "#mac-first-open",
+      "open": true,
+      "overflow": false,
+      "scroll": 353,
+      "text": "First time opening on Mac\n+\nDouble-click the downloaded .dmg file.\nDrag VStudy Pro into Applications in the window that opens.\nEject the VStudy Pro disk image in Finder.\nOpen VStudy Pro from Applications or Launchpad.\nFirst time opening on Mac\n\nThe Mac app is signed with an Apple Developer ID and notarized by Apple. It opens like any other Mac app. The Windows installer is not signed yet, so SmartScreen may warn on first run. Project releases\n\nThe signed and notarized build normally opens without a security warning. On first launch, macOS asks whether you want to open an app downloaded from the Internet. Click Open.\n\nUnsigned Mac builds v0.3.0 and earlier needed System Settings > Privacy & Security > Open Anyway. If macOS still blocks the current build, download it again from the project releases and verify its signature before continuing.\n\nChecking the checksum is optional. Verify your download · Apple’s opening instructions",
+      "top": 192.46875,
+      "width": 1280
+    }
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 375,
+    "result": {
+      "hash": "#mac-first-open",
+      "open": true,
+      "overflow": false,
+      "scroll": 592,
+      "text": "第一次在 Mac 開啟\n+\n按兩下下載好的 .dmg 檔案。\n在開啟的視窗中，將 VStudy Pro 拖入「應用程式」。\n在 Finder 退出 VStudy Pro 磁碟映像。\n從「應用程式」或 Launchpad 開啟 VStudy Pro。\n第一次在 Mac 開啟\n\nMac 版已使用 Apple 開發者 ID 簽署，並通過 Apple 公證，可像其他 Mac app 一樣開啟。Windows 安裝程式尚未簽署，首次執行時 SmartScreen 可能會顯示警告。 專案版本發布頁\n\n已簽署並公證的版本通常不會顯示安全性警告。首次開啟時，macOS 會詢問是否要開啟從網際網路下載的 app，按「打開」即可。\n\nv0.3.0 與更早的未簽署 Mac 版本需要到「系統設定 > 隱私權與安全性」按「強制打開」。如果目前版本仍被阻擋，請從專案版本發布頁重新下載，並先驗證簽章再繼續。\n\n校驗碼驗證是選用步驟。 驗證下載檔案 · Apple 的開啟說明",
+      "top": 191.734375,
+      "width": 375
+    }
+  },
+  {
+    "lang": "zh-Hant",
+    "width": 1280,
+    "result": {
+      "hash": "#mac-first-open",
+      "open": true,
+      "overflow": false,
+      "scroll": 377,
+      "text": "第一次在 Mac 開啟\n+\n按兩下下載好的 .dmg 檔案。\n在開啟的視窗中，將 VStudy Pro 拖入「應用程式」。\n在 Finder 退出 VStudy Pro 磁碟映像。\n從「應用程式」或 Launchpad 開啟 VStudy Pro。\n第一次在 Mac 開啟\n\nMac 版已使用 Apple 開發者 ID 簽署，並通過 Apple 公證，可像其他 Mac app 一樣開啟。Windows 安裝程式尚未簽署，首次執行時 SmartScreen 可能會顯示警告。 專案版本發布頁\n\n已簽署並公證的版本通常不會顯示安全性警告。首次開啟時，macOS 會詢問是否要開啟從網際網路下載的 app，按「打開」即可。\n\nv0.3.0 與更早的未簽署 Mac 版本需要到「系統設定 > 隱私權與安全性」按「強制打開」。如果目前版本仍被阻擋，請從專案版本發布頁重新下載，並先驗證簽章再繼續。\n\n校驗碼驗證是選用步驟。 驗證下載檔案 · Apple 的開啟說明",
+      "top": 191.5625,
+      "width": 1280
+    }
+  },
+  {
+    "lang": "ja",
+    "width": 375,
+    "result": {
+      "hash": "#mac-first-open",
+      "open": true,
+      "overflow": false,
+      "scroll": 592,
+      "text": "Mac で初めて開くとき\n+\nダウンロードした .dmg ファイルをダブルクリックします。\n開いたウインドウで VStudy Pro を「アプリケーション」にドラッグします。\nFinder で VStudy Pro のディスクイメージを取り出します。\n「アプリケーション」または Launchpad から VStudy Pro を開きます。\nMac で初めて開くとき\n\nMac 版は Apple の Developer ID で署名され、Apple の公証も受けています。他の Mac アプリと同じように開けます。Windows インストーラーはまだ未署名のため、初回実行時に SmartScreen の警告が表示される場合があります。 プロジェクトのリリース\n\n署名と公証が済んだバージョンでは、通常、セキュリティの警告は表示されません。初回起動時は、インターネットからダウンロードしたアプリを開くかどうか macOS が確認します。「開く」をクリックしてください。\n\nv0.3.0 以前の未署名の Mac 版では、「システム設定 > プライバシーとセキュリティ」で「このまま開く」を選ぶ必要がありました。現在のバージョンでもブロックされる場合は、プロジェクトのリリースから再ダウンロードし、署名を検証してから続けてください。\n\nチェックサムの確認は任意です。 ダウンロードを検証 · Apple の起動手順",
+      "top": 191.734375,
+      "width": 375
+    }
+  },
+  {
+    "lang": "ja",
+    "width": 1280,
+    "result": {
+      "hash": "#mac-first-open",
+      "open": true,
+      "overflow": false,
+      "scroll": 353,
+      "text": "Mac で初めて開くとき\n+\nダウンロードした .dmg ファイルをダブルクリックします。\n開いたウインドウで VStudy Pro を「アプリケーション」にドラッグします。\nFinder で VStudy Pro のディスクイメージを取り出します。\n「アプリケーション」または Launchpad から VStudy Pro を開きます。\nMac で初めて開くとき\n\nMac 版は Apple の Developer ID で署名され、Apple の公証も受けています。他の Mac アプリと同じように開けます。Windows インストーラーはまだ未署名のため、初回実行時に SmartScreen の警告が表示される場合があります。 プロジェクトのリリース\n\n署名と公証が済んだバージョンでは、通常、セキュリティの警告は表示されません。初回起動時は、インターネットからダウンロードしたアプリを開くかどうか macOS が確認します。「開く」をクリックしてください。\n\nv0.3.0 以前の未署名の Mac 版では、「システム設定 > プライバシーとセキュリティ」で「このまま開く」を選ぶ必要がありました。現在のバージョンでもブロックされる場合は、プロジェクトのリリースから再ダウンロードし、署名を検証してから続けてください。\n\nチェックサムの確認は任意です。 ダウンロードを検証 · Apple の起動手順",
+      "top": 192.46875,
+      "width": 1280
+    }
+  }
+]

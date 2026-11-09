@@ -31,8 +31,8 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
           id: 'first-launch',
           title: '開啟可信任的組建',
           paragraphs: [
-            '沒有簽署憑證時，Mac 使用臨時簽署，沒有 Developer ID 或公證；Windows 為未簽署。請先驗證下載檔案並確認來源可信任，才接受例外。請勿全面停用 Gatekeeper 或 SmartScreen。',
-            '已簽署且公證的 Mac 版本通常只需一般首次開啟確認。已簽署的 Windows 版本會顯示發布者身分，但信譽尚未建立時 SmartScreen 仍可能警告。實際簽署狀態以版本說明為準。',
+            '已發布的 Mac 版已使用 Apple 開發者 ID 簽署並通過 Apple 公證。Windows 安裝程式尚未簽署，SmartScreen 可能顯示警告。請先驗證下載檔案並確認來源可信任。',
+            'Mac 版通常只需一般首次開啟確認，按「打開」即可。v0.3.0 與更早的未簽署 Mac 版本需要到「系統設定 > 隱私權與安全性」按「強制打開」。',
           ],
           steps: [
             'Mac：若遭阻擋，先嘗試開啟一次，再到「系統設定 > 隱私權與安全性」。確認已驗證的 app 可信任後，於提供選項時選擇「強制打開」，並依要求驗證身分。',
@@ -94,8 +94,8 @@ export const translations: Partial<Record<Language, Record<string, Pick<Guide, '
           id: 'first-launch',
           title: '信頼できるビルドを開く',
           paragraphs: [
-            '認証情報がないビルドでは、Mac は Developer ID と公証のないアドホック署名、Windows は未署名です。ファイルと入手元を検証し、信頼できる場合のみ例外を許可してください。Gatekeeper や SmartScreen 全体を無効にしないでください。',
-            '署名と公証済みの Mac 版では通常の初回確認を使います。署名済み Windows 版には発行元が表示されますが、評価が定まるまで SmartScreen が警告する場合があります。実際の署名状態はリリースノートを確認してください。',
+            '公開済みの Mac 版は Apple の Developer ID で署名され、Apple の公証も受けています。Windows インストーラーは未署名のため、SmartScreen の警告が表示される場合があります。ファイルと入手元を検証してください。',
+            'Mac 版では通常の初回確認で「開く」をクリックします。v0.3.0 以前の未署名の Mac 版では、「システム設定 > プライバシーとセキュリティ」で「このまま開く」を選ぶ必要がありました。',
           ],
           steps: [
             'Mac：ブロックされたら一度起動を試し、「システム設定 > プライバシーとセキュリティ」を開きます。検証済みアプリを信頼できる場合のみ、表示される場合に「このまま開く」を選び、必要なら認証します。',

@@ -31,16 +31,28 @@
 5. Open VStudy Pro from Applications or Launchpad.
 
 <!-- mac-signing-status -->
-> The Mac app is not yet signed with an Apple Developer ID or notarized by Apple. Proceed only if you downloaded it from this project’s releases page and trust the project. [Project releases](https://github.com/ava-apple/vstudy-pro/releases/latest).
+> The Mac app is signed with an Apple Developer ID and notarized by Apple. It opens like any other Mac app. The Windows installer is not signed yet, so SmartScreen may warn on first run. [Install guide](#mac-apple-silicon).
 <!-- /mac-signing-status -->
 
-**If macOS says it cannot open the app or verify the developer**
+**First time opening on Mac**
 
-1. Try to open VStudy Pro once, then dismiss the warning.
-2. Open System Settings > Privacy & Security. Scroll down to Security.
-3. Click Open Anyway, authenticate if asked, then confirm with Open.
+The signed and notarized build normally opens without a security warning. On first launch, macOS asks whether you want to open an app downloaded from the Internet. Click Open.
 
-On older macOS versions, right-click VStudy Pro in Applications, choose Open, then confirm with Open. Checking the checksum is optional. [Verify your download](#optional---verify-your-download). [Apple’s opening instructions](https://support.apple.com/en-us/102445).
+<details>
+<summary>If macOS still blocks it</summary>
+
+Unsigned Mac builds v0.3.0 and earlier needed System Settings > Privacy & Security > Open Anyway. If macOS still blocks the current build, download it again from the project releases and verify its signature before continuing.
+
+</details>
+
+#### Verify the signature
+
+```sh
+codesign --verify --deep --strict --verbose=2 "/Applications/VStudy Pro.app"
+spctl -a -t exec -vv "/Applications/VStudy Pro.app"
+```
+
+Gatekeeper should report `accepted` and `source=Notarized Developer ID`.
 
 #### Option 2 - One line in Terminal (also needs nothing installed)
 
@@ -54,7 +66,7 @@ No Homebrew, npm, Xcode, or Python needed. The command uses only tools built int
 
 - Downloads the latest DMG and checks its SHA-256 checksum.
 - Closes VStudy Pro and installs it in Applications. Your library stays.
-- Removes the quarantine flag only from this app so it can open. It never uses sudo.
+- Verifies the installed app’s signature and Apple notarization. Keeps quarantine for verified builds. It never uses sudo.
 
 [Read the script first](https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh).
 
@@ -63,7 +75,7 @@ No Homebrew, npm, Xcode, or Python needed. The command uses only tools built int
 Copy this prompt into your AI agent.
 
 ```text
-Install VStudy Pro for me. First fetch and READ https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh on Apple silicon macOS, or install.ps1 in the same directory on Windows x64. Explain the signing status described on the download page and that the Mac script removes quarantine only from this app. Run the reviewed script, confirm SHA-256 verification passed, open VStudy Pro, and report the installed path and result. Do not use sudo, disable system protections globally, or delete user data. Stop on any verification failure.
+Install VStudy Pro for me. First fetch and READ https://raw.githubusercontent.com/ava-apple/vstudy-pro/main/scripts/install/install.sh on Apple silicon macOS, or install.ps1 in the same directory on Windows x64. Explain that the Mac app is signed and notarized and the Windows installer is unsigned. Confirm the Mac signature and notarization checks pass. Run the reviewed script, confirm SHA-256 verification passed, open VStudy Pro, and report the installed path and result. Do not use sudo, disable system protections globally, or delete user data. Stop on any verification failure.
 ```
 
 ### Windows x64
@@ -131,4 +143,4 @@ Documents, Markdown, and chats are **not encrypted at rest** by the app. Saved s
 
 **Settings > Privacy** lists bounded, session-only app-initiated requests and CLI launches, including AI tool metadata checks and downloads. Background AI tool checks are a separate opt-in. The inventory is not a packet capture and cannot enumerate every request inside a CLI or Chromium; byte counts are unknown. External browser and mail links require confirmation. Read the [security model](SECURITY.md) before using sensitive material.
 
-safeStorage encrypts saved credentials with Mac Keychain or Windows DPAPI. After an update from an unsigned Mac build, Keychain may ask for access again. Choose Always Allow for the app you trust. [Storage details](STORAGE.md).
+safeStorage encrypts saved credentials with Mac Keychain or Windows DPAPI. After updating from an unsigned Mac build (v0.3.0 or earlier) to a signed build, macOS asks once to access "VStudy Pro Safe Storage". Choose Always Allow. Your saved keys are not lost. [Storage details](STORAGE.md).

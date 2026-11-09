@@ -19,11 +19,6 @@ cask "vstudy-pro" do
 
   app "VStudy Pro.app"
 
-  postflight_steps do
-    run "/usr/bin/xattr",
-        args: ["-dr", "com.apple.quarantine", "{{appdir}}/VStudy Pro.app"]
-  end
-
   zap trash: [
     "~/Library/Application Support/@vstudy/desktop",
     "~/Library/Preferences/com.vstudy.pro.plist",
