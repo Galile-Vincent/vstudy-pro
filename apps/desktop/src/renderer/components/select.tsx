@@ -8,6 +8,7 @@ export function Select({
   onChange,
   disabled,
   className,
+  position,
   ...props
 }: {
   children: ReactNode;
@@ -16,6 +17,7 @@ export function Select({
   disabled?: boolean;
   'aria-label'?: string;
   className?: string;
+  position?: 'item-aligned' | 'popper';
 }) {
   const options = Children.toArray(children).flatMap(child =>
     isValidElement<{ value: string; children: ReactNode }>(child)
@@ -39,7 +41,7 @@ export function Select({
       >
         <SelectValue />
       </SelectTrigger>
-      <SelectContent className="border-0 rounded-[var(--r-md)] bg-[var(--surface)] shadow-[var(--elevation-floating)] p-[var(--space-1)]">
+      <SelectContent position={position} className="border-0 rounded-[var(--r-md)] bg-[var(--surface)] shadow-[var(--elevation-floating)] p-[var(--space-1)]">
         {options.map(option => (
           <SelectItem
             key={option.value}

@@ -113,7 +113,7 @@ export function ProviderSettings({
         }}>
         <div className="settings-header">
           <DialogTitle>{tr('common:settings')}</DialogTitle>
-          <Select className="settings-section-select" aria-label={tr('common:settings')}
+          <Select position="popper" className="settings-section-select" aria-label={tr('common:settings')}
             value={tab} onChange={event => setTab(event.target.value)}>
             {['general', 'appearance', 'providers', 'agents', 'usage', 'storage', 'privacy'].map(id => (
               <option key={id} value={id}>

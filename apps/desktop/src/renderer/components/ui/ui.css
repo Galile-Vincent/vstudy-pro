@@ -11,7 +11,6 @@
  [data-slot=segmented-tabs-trigger][data-state=active],[data-slot=list-row][data-selected=true] { outline:thin solid var(--ink); }
 }
 html[data-theme=contrast] [data-slot=segmented-tabs-trigger][data-state=active] { outline:thin solid var(--ink); }
-html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=segmented-tabs-trigger]):is(:focus-visible,[data-demo-state=focus]) { outline:2px solid var(--focus); outline-offset:2px; }
 
 [data-slot=setting-row] { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-3) var(--space-6); min-width:0; }
 [data-slot=setting-row] > div:first-child { flex:1; min-width: min(100%,12rem); }
@@ -32,7 +31,8 @@ html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=se
  [data-slot=segmented-control] > [data-state=checked] { outline:thin solid var(--ink); }
 }
 
-html:is([data-theme=contrast],[data-contrast=more]) :is([data-slot=card],[data-slot=setting-row],[data-slot=segmented-control]) { outline:1px solid var(--hairline); outline-offset:0; }
+html:is([data-theme=contrast],[data-contrast=more]) :is([data-slot=card],[data-slot=setting-row],[data-slot=segmented-control]) { border:1px solid var(--hairline); }
 @media (prefers-contrast:more), (forced-colors:active) {
- :is([data-slot=card],[data-slot=setting-row],[data-slot=segmented-control]) { outline:1px solid var(--hairline); outline-offset:0; }
+ :is([data-slot=card],[data-slot=setting-row],[data-slot=segmented-control]) { border:1px solid var(--hairline); }
 }
+html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=segmented-tabs-trigger]):is(:focus-visible,[data-demo-state=focus]) { outline:2px solid var(--focus); outline-offset:2px; }
