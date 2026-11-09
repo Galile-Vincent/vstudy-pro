@@ -1,5 +1,5 @@
 import {randomUUID} from 'node:crypto';
-import {mkdtemp,writeFile,access,rm} from 'node:fs/promises';
+import {mkdtemp,writeFile,access,rm,readdir} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {expect,it,vi} from 'vitest';
@@ -56,7 +56,12 @@ it.each(['storage settle','shutdown','delete-all'] as const)('drains both real w
  expect(()=>generation.generate({...request,idempotencyKey:randomUUID()})).toThrow('suspended');
  expect(calls).toContain('memory suspend');
  release();await operation;expect(settled).toBe(true);
- if(path==='delete-all')await expect(access(root)).rejects.toThrow();
+ if(path==='delete-all'){
+  await expect(access(join(root,'owned'))).rejects.toThrow();
+  if(process.platform==='win32')expect(await readdir(root)).toEqual([]);
+  else await expect(access(root)).rejects.toThrow();
+  await expect(access(root+'.delete-pending')).rejects.toThrow();
+ }
  if(path!=='storage settle')expect(calls).toContain('memory dispose');
  await generation.dispose();await memory.dispose();store.close();await rm(root,{recursive:true,force:true});
 });

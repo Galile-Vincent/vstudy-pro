@@ -84,6 +84,9 @@ it('restores study evidence and confirmed test answers, then deletes all restore
   validateStudyData(restored.db);
   let stopped=false;
   await createDataDeletion(target,async()=>{restored!.close();restored=undefined;stopped=true;},async error=>{throw error;},()=>{})();
-  expect(stopped).toBe(true);await expect(access(target)).rejects.toMatchObject({code:'ENOENT'});
+  expect(stopped).toBe(true);
+  if(process.platform==='win32')expect(await (await import('node:fs/promises')).readdir(target)).toEqual([]);
+  else await expect(access(target)).rejects.toMatchObject({code:'ENOENT'});
+  await expect(access(target+'.delete-pending')).rejects.toMatchObject({code:'ENOENT'});
  } finally {source?.close();restored?.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });

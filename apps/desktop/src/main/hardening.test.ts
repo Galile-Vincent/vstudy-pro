@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import { it, expect } from 'vitest';
-import { mkdtemp, writeFile, mkdir, stat, link, symlink, access } from 'node:fs/promises';
+import { mkdtemp, writeFile, mkdir, stat, link, symlink, access, readdir } from 'node:fs/promises';
 import { tmpdir, homedir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -57,7 +57,9 @@ it('rejects symlinks, hardlinks and signature mismatches; deletes every data tre
     let stopped = false;
     await createDataDeletion(root, async () => { stopped = true; }, async error => {throw error;}, () => {})();
     expect(stopped).toBe(true);
-    await expect(access(root)).rejects.toThrow();
+    if (process.platform === 'win32') expect(await readdir(root)).toEqual([]);
+    else await expect(access(root)).rejects.toThrow();
+    await expect(access(root + '.delete-pending')).rejects.toThrow();
   } finally { await import('node:fs/promises').then(fs => fs.rm(root, { recursive: true, force: true })); }
 });
 it.skipIf(process.platform === 'win32')('repairs DB, library and secret file permissions on every start', async () => {
