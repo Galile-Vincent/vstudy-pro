@@ -85,5 +85,12 @@
   "deleted_default": "テーマを削除し、標準の VStudy テーマに戻しました。",
   "save_failed": "テーマを保存できませんでした。再試行してください。",
   "overwrite": "「{{name}}」を置き換えますか？",
-  "overwrite_copy": "この ID のテーマは既に存在します。置き換えますか？"
+  "overwrite_copy": "この ID のテーマは既に存在します。置き換えますか？",
+  "invalid_id": "テーマ ID には小文字の英数字とハイフンを使用してください。",
+  "unknown_field": "テーマ JSON に不明な項目があります。",
+  "reserved_id": "この ID は標準テーマ用です。別の ID を使用してください。",
+  "invalid_json": "有効な JSON を入力してください。",
+  "invalid_name": "テーマ名は 1～60 文字で入力してください。",
+  "too_large": "テーマファイルは 32 KB 以下にしてください。",
+  "read_failed": "テーマファイルを読み込めませんでした。"
 }

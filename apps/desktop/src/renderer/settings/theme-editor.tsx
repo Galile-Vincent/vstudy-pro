@@ -1,5 +1,6 @@
 /** Theme authoring edits hex tokens only. Dialog cancellation restores persisted appearance. */
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
+import { ZodError } from 'zod';
 import { type Settings } from '../../shared';
 import { builtinThemes, contrastFailures, importTheme, tokenNames, type ThemePack, type ColorScheme } from '../../shared/themes';
 import { tr } from '../../shared/i18n';
@@ -8,6 +9,20 @@ import { Button } from '../components/ui/button';
 import { ThemePreview } from './theme-preview';
 import { applyAppearance, applyTheme } from './apply-appearance';
 
+function themeError(error: unknown): string {
+  if (error instanceof SyntaxError) return tr('themes:invalid_json');
+  if (error instanceof ZodError) {
+    if (error.issues.some(issue => issue.code === 'unrecognized_keys')) return tr('themes:unknown_field');
+    if (error.issues.some(issue => issue.path[0] === 'id')) return tr('themes:invalid_id');
+    if (error.issues.some(issue => issue.path[0] === 'name')) return tr('themes:invalid_name');
+    return tr('themes:invalid');
+  }
+  const code = error instanceof Error ? error.message : '';
+  return tr(code === 'THEME_RESERVED_ID' ? 'themes:reserved_id' :
+    code === 'THEME_TOO_LARGE' ? 'themes:too_large' :
+    code === 'THEME_LIMIT' ? 'themes:limit' : 'themes:save_failed');
+}
+
 type ThemeActions = { onClose: () => void; onSave: (theme: ThemePack) => Promise<Settings | undefined> };
 
 export function ThemeEditor({theme,settings,onClose,onSave}: ThemeActions & { theme: ThemePack; settings: Settings }) {
@@ -15,6 +30,7 @@ export function ThemeEditor({theme,settings,onClose,onSave}: ThemeActions & { th
   const [draft,setDraft] = useState(theme);
   const [scheme,setScheme] = useState<ColorScheme>('light');
   const [error,setError] = useState('');
+  const errorId = useId();
   const [saving,setSaving] = useState(false);
   useEffect(() => {
     applyTheme({...settings,colorScheme:scheme},draft);
@@ -28,20 +44,20 @@ export function ThemeEditor({theme,settings,onClose,onSave}: ThemeActions & { th
     try {
       const parsed=importTheme(JSON.stringify(draft));
       const saved = await onSave(parsed);
-      if (saved) {restore.current=saved;onClose();} else setError(tr('errors:generic'));
-    } catch { setError(tr('themes:invalid')); }
+      if (saved) {restore.current=saved;onClose();} else setError(tr('themes:save_failed'));
+    } catch (error) { setError(themeError(error)); }
     finally { setSaving(false); }
   };
   return <Dialog open onOpenChange={open => {if (!open) onClose();}}><DialogContent className="theme-editor" style={controlStyle}>
     <DialogTitle>{tr('themes:editor')}</DialogTitle><DialogDescription>{tr('themes:editor_hint')}</DialogDescription>
-    <label className="theme-field">{tr('themes:name')}<input value={draft.name} maxLength={60} onChange={e => setDraft({...draft,name:e.target.value})}/></label>
+    <label className="theme-field">{tr('themes:name')}<input aria-invalid={!!error} aria-describedby={error ? errorId : undefined} value={draft.name} maxLength={60} onChange={e => setDraft({...draft,name:e.target.value})}/></label>
     <div className="theme-editor-schemes">{(['light','dark'] as const).map(s => <button type="button" key={s} aria-pressed={scheme===s} onClick={() => setScheme(s)}>{tr(`themes:${s}`)}</button>)}</div>
     <ThemePreview theme={draft} scheme={scheme}/>
     <div className="theme-color-fields">{tokenNames.map(key => <label key={key}><span>{tr(`themes:token_${key}`)}</span><input type="color" aria-label={tr(`themes:token_${key}`)} value={draft[scheme][key]}
       onChange={e => setDraft({...draft,[scheme]:{...draft[scheme],[key]:e.target.value},orbs:{...draft.orbs,[scheme]:[key==='surface'?e.target.value:draft[scheme].surface,key==='accent-color'?e.target.value:draft[scheme]['accent-color']]}})}/><code>{draft[scheme][key]}</code></label>)}</div>
     <div className="theme-contrast-result" role="status"><p>{tr(warnings.length ? 'themes:contrast_warning' : 'themes:contrast_pass',{count:warnings.length})}</p>
       {warnings.length > 0 && <details><summary>{tr('themes:details')}</summary><ul>{warnings.map(w => <li key={w}>{w}</li>)}</ul></details>}</div>
-    {error && <p role="alert">{error}</p>}
+    {error && <p id={errorId} role="alert">{error}</p>}
     <footer><button type="button" onClick={onClose}>{tr('common:cancel')}</button><button type="button" className="primary" disabled={saving || !draft.name.trim()} onClick={() => void save()}>{tr('themes:save')}</button></footer>
   </DialogContent></Dialog>;
 }
@@ -52,6 +68,7 @@ export function ThemeTransfer({theme,onClose,onSave,existing=[]}: ThemeActions &
   const limited = existing.length >= 30;
   const [json,setJson] = useState(exporting ? JSON.stringify(theme,null,2) : '');
   const [error,setError] = useState('');
+  const errorId = useId();
   const [message,setMessage] = useState('');
   const [saving,setSaving] = useState(false);
   const save = async () => {
@@ -62,17 +79,17 @@ export function ThemeTransfer({theme,onClose,onSave,existing=[]}: ThemeActions &
       if (limited) {setError(tr('themes:limit'));return;}
       if (await onSave(parsed)) onClose(); else setError(tr('themes:save_failed'));
     }
-    catch { setError(tr('themes:invalid')); }
+    catch (error) { setError(themeError(error)); }
     finally { setSaving(false); }
   };
   return <Dialog open onOpenChange={open => {if (!open) onClose();}}><DialogContent className="theme-transfer">
     <DialogTitle>{tr(exporting?'themes:export':'themes:add')}</DialogTitle><DialogDescription>{tr('themes:json_hint')}</DialogDescription>
     {!exporting && <label className="theme-field">{tr('themes:choose_file')}<input type="file" accept=".json,application/json" onChange={e => {
       const file=e.target.files?.[0]; if (!file) return;
-      if (file.size>32768) {setError(tr('themes:invalid')); return;}
-      void file.text().then(value => {setJson(value);setError('');}).catch(() => setError(tr('themes:invalid')));
+      if (file.size>32768) {setError(tr('themes:too_large')); return;}
+      void file.text().then(value => {setJson(value);setError('');}).catch(() => setError(tr('themes:read_failed')));
     }}/></label>}
-    <label className="theme-field">{tr('themes:json')}<textarea aria-label={tr('themes:json')} value={json} readOnly={exporting} maxLength={32768} rows={14} onChange={e => {setJson(e.target.value);setError('');}}/></label>
+    <label className="theme-field">{tr('themes:json')}<textarea aria-invalid={!!error} aria-describedby={error ? errorId : undefined} aria-label={tr('themes:json')} value={json} readOnly={exporting} maxLength={32768} rows={14} onChange={e => {setJson(e.target.value);setError('');}}/></label>
     {limited && <p role="status">{tr('themes:limit')}</p>}
     {overwrite && <Dialog open onOpenChange={open => {if (!open) setOverwrite(undefined);}}>
       <DialogContent><DialogTitle>{tr('themes:overwrite',{name:overwrite.name})}</DialogTitle>
@@ -85,7 +102,7 @@ export function ThemeTransfer({theme,onClose,onSave,existing=[]}: ThemeActions &
         })()}>{tr('themes:save')}</Button>
       </DialogContent>
     </Dialog>}
-    {error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}
+    {error && <p id={errorId} role="alert">{error}</p>}{message && <p role="status">{message}</p>}
     <footer><button type="button" onClick={onClose}>{tr('common:cancel')}</button>{exporting ? <>
       <button type="button" onClick={() => {void navigator.clipboard.writeText(json).then(() => setMessage(tr('themes:copied'))).catch(() => setError(tr('themes:copy_hint')));}}>{tr('themes:copy')}</button>
       <button type="button" onClick={() => {

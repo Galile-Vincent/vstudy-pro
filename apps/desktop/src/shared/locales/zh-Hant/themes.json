@@ -85,5 +85,12 @@
   "deleted_default": "已刪除佈景主題，現已使用 VStudy 預設主題。",
   "save_failed": "無法儲存佈景主題，請重試。",
   "overwrite": "取代「{{name}}」？",
-  "overwrite_copy": "此 ID 的自訂佈景主題已存在，要取代嗎？"
+  "overwrite_copy": "此 ID 的自訂佈景主題已存在，要取代嗎？",
+  "invalid_id": "主題 ID 請使用小寫英文字母、數字及連字號。",
+  "unknown_field": "主題 JSON 含有未知欄位。",
+  "reserved_id": "此 ID 屬於內建主題，請改用自訂 ID。",
+  "invalid_json": "請輸入有效的 JSON。",
+  "invalid_name": "請輸入 1 至 60 字的主題名稱。",
+  "too_large": "主題檔案不得超過 32 KB。",
+  "read_failed": "無法讀取此主題檔案。"
 }
