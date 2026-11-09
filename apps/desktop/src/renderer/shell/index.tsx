@@ -387,9 +387,9 @@ export function AppShell({
             </SidebarMenu>
           </SidebarGroup>
           {sidebar}
-          <SubscriptionMeters compact />
         </SidebarContent>
         <SidebarFooter>
+          <SubscriptionMeters compact />
           <div className="art-reader-profile">
             <span
               className="art-reader-avatar"
