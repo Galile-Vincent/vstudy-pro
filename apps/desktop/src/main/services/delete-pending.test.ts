@@ -7,8 +7,9 @@ vi.mock('node:fs/promises', async importOriginal => {
   const actual = await importOriginal<typeof fs>();
   return {...actual, rename:vi.fn(actual.rename), rm:vi.fn(actual.rm)};
 });
+const platform = Object.getOwnPropertyDescriptor(process,'platform')!;
 const roots: string[] = [];
-afterEach(async () => { vi.restoreAllMocks(); for (const root of roots.splice(0)) await fs.rm(root, {recursive:true,force:true}); });
+afterEach(async () => { Object.defineProperty(process,'platform',platform); vi.restoreAllMocks(); for (const root of roots.splice(0)) await fs.rm(root, {recursive:true,force:true}); });
 async function fixture() {
   const parent = await fs.mkdtemp(join(tmpdir(), 'delete-pending-')); roots.push(parent);
   const root = join(parent, 'profile'); await fs.mkdir(root);
@@ -23,11 +24,33 @@ it('removes interrupted atomic writes of private configuration', async () => {
   expect(await finishPendingDeletion(root,async () => {},vi.fn())).toBe(true);
   await expect(fs.access(join(root,name))).rejects.toThrow();
 });
-it.each(['EPERM', 'EBUSY'])('durably schedules a wipe after %s', async code => {
+it.each(['darwin','win32'].flatMap(platform => ['EPERM','EBUSY'].map(code => ({platform,code}))))(
+  'durably schedules a wipe after $code on $platform', async ({platform,code}) => {
   const {root} = await fixture();
-  vi.spyOn(fs, 'rename').mockRejectedValueOnce(Object.assign(Error(code), {code}));
-  await createDataDeletion(root, async () => {}, async () => {}, () => {})();
+  const target = await fs.realpath(root);
+  Object.defineProperty(process,'platform',{value:platform,configurable:true});
+  const actual = await vi.importActual<typeof fs>('node:fs/promises');
+  const failure = Object.assign(Error(code),{code});
+  const rename = vi.spyOn(fs,'rename'); rename.mockClear();
+  const remove = vi.spyOn(fs,'rm');
+  if (platform === 'win32') {
+    remove.mockImplementation(async (path,options) => {
+      if (String(path) === join(target,'vstudy.sqlite')) throw failure;
+      return actual.rm(path,options);
+    });
+  } else rename.mockRejectedValueOnce(failure);
+  const report = vi.fn(), relaunch = vi.fn();
+  await createDataDeletion(root, async () => {}, report, relaunch)();
   expect(JSON.parse(await fs.readFile(root + '.delete-pending', 'utf8'))).toMatchObject({token:expect.any(String),timestamp:expect.any(Number)});
+  expect(report).toHaveBeenCalledWith(failure,true);
+  expect(relaunch).toHaveBeenCalledOnce();
+  await fs.access(join(root,'vstudy.sqlite'));
+  if (platform === 'win32') expect(rename).not.toHaveBeenCalled();
+  else expect(rename).toHaveBeenCalledOnce();
+  remove.mockImplementation(actual.rm);
+  expect(await finishPendingDeletion(root,async () => {},vi.fn())).toBe(true);
+  await expect(fs.access(join(root,'vstudy.sqlite'))).rejects.toMatchObject({code:'ENOENT'});
+  await expect(fs.access(root+'.delete-pending')).rejects.toMatchObject({code:'ENOENT'});
 });
 it('retries partial deletion after a crash and does not follow owned symlinks', async () => {
   const {root,parent} = await fixture();
