@@ -177,7 +177,7 @@ export function ProviderRow({
               }, true);
             }}
           >
-            <FormField className="min-w-0 flex-1" label={tr('settings:api_key', { provider: providerName[provider.config.id] })}>
+            <FormField className="min-w-0 flex-[1_1_12rem]" label={tr('settings:api_key', { provider: providerName[provider.config.id] })}>
               {control => <Input {...control}
               aria-label={tr('settings:api_key', { provider: providerName[provider.config.id] })}
               type="password"
@@ -242,7 +242,7 @@ export function ProviderRow({
                 );
               }}
             >
-              <FormField className="min-w-0 flex-1" label={tr('common:openai_compatible_base_url')}>
+              <FormField className="min-w-0 flex-[1_1_12rem]" label={tr('common:openai_compatible_base_url')}>
                 {control => <Input {...control}
                 type="url"
                 required

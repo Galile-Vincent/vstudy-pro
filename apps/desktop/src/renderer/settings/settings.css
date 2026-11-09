@@ -253,7 +253,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   margin: 0;
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-4);
+  padding: 0;
   border: 0;
 }
 
@@ -304,12 +304,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   align-items: center;
 }
 
-.settings-dialog .provider-row input {
-  flex: 1 1 12rem;
-  min-width: 0;
-  width: auto;
-  text-align: start;
-}
+
 
 .settings-dialog .provider-row p {
   font-size: var(--type-sm);
