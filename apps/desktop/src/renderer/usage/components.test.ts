@@ -25,7 +25,7 @@ it('renders overall tokens once and exposes exact chart values accessibly',async
   const container=document.createElement('div');const root=createRoot(container);
   const data={summary:{inputTokens:1200,outputTokens:340,costUsd:.012,calls:1,unknownPrices:0,groups:[]},cacheReadTokens:200,cacheWriteTokens:100,reasoningTokens:40,days:[{date:'2026-11-03',inputTokens:1200,outputTokens:340}]};
   await act(async()=>root.render(createElement('div',null,createElement(UsageOverview,{data}),createElement(UsageTrend,{days:data.days}))));
-  expect(container.querySelector('.usage-token-total strong')?.textContent).toBe('1,540');
+  expect(container.querySelector('.usage-token-total')?.children[1]?.textContent).toBe('1,540');
   expect(container.textContent).toContain('Cache read200');expect(container.textContent).toContain('Reasoning40');
   expect(container.querySelector('svg title')?.textContent).toBe('Nov 3, 2026: 1,200 input, 340 output');
   expect(container.querySelector('details table')?.textContent).toContain('1,540');

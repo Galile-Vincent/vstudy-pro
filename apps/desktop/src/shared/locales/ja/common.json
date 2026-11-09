@@ -212,7 +212,7 @@
   "price_unknown": "料金不明",
   "tokens_unavailable": "トークン数を取得できません",
   "daily_tokens": "日別トークン数",
-  "input": "入力、",
+  "input": "入力",
   "output_peak": "出力 · 最大",
   "daily_input_and_output_tokens_exact_values_are_available_in_the_daily_totals_table": "日別の入力と出力トークン数です。正確な値は日別合計の表で確認できます。",
   "output": "出力",

@@ -708,16 +708,6 @@ html[data-input-modality=keyboard] .ai-cli-tool:focus-visible {
   margin: 0;
 }
 
-.settings-pane .usage-dashboard,
-.settings-pane .usage-overview {
-  border: 0;
-}
-
-.settings-pane .usage-dashboard-toolbar,
-.settings-pane .usage-breakdown-heading {
-  flex-wrap: wrap;
-}
-
 .settings-pane .usage-settings .settings-control textarea {
   flex: 1;
   min-width: 0;
@@ -731,37 +721,6 @@ html[data-input-modality=keyboard] .ai-cli-tool:focus-visible {
   gap: var(--space-2);
   flex-wrap: wrap;
   padding: var(--space-3) var(--space-4);
-}
-
-.settings-pane .usage-dashboard-toolbar h3 {
-  font-size: var(--type-md);
-}
-
-.settings-pane .usage-trend {
-  background: var(--glass-tone);
-  border: 0;
-}
-
-.settings-pane .usage-breakdown {
-  background: var(--glass-tone);
-  border: 0;
-}
-
-.settings-pane .usage-breakdown th {
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: var(--type-sm);
-}
-
-.settings-pane .usage-stat-tile {
-  background: var(--glass-tone);
-  border: 0;
-}
-
-.settings-pane .usage-stat-label {
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: var(--type-sm);
 }
 
 .settings-intro p + p {
