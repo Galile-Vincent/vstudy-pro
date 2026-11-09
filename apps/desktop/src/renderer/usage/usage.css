@@ -379,6 +379,9 @@
 .subscription-progress [data-slot=progress-indicator] { background:var(--accent-color); transition:none; }
 .subscription-progress:dir(rtl) { transform:scaleX(-1); }
 .subscription-details:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+@media (prefers-contrast:more) {
+  .subscription-progress { outline:1px solid var(--ink); background:var(--surface); }
+}
 @media (forced-colors:active) {
   .subscription-progress { outline:1px solid CanvasText; background:Canvas; }
   .subscription-progress [data-slot=progress-indicator] { background:Highlight; forced-color-adjust:none; }
