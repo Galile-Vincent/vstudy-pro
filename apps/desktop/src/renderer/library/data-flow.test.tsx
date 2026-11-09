@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
 import { recovery } from './recovery';
 import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
@@ -560,4 +561,31 @@ it('retries focus restoration until the originating folder mounts', async () => 
  pending=false;
  await waitFor(()=>expect(document.activeElement).toBe(screen.getByRole('button',{name:tr('library:openFolder',{name:tr('library:unfiled')})})));
  spy.mockRestore();
+});
+
+it('places each named container above the elements its rules style', async () => {
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[row('Notes')],nextCursor:null}:[]);
+ const {container}=mount();await screen.findByText('Notes');
+ const css=['ui3.css','library.css','library-surface.css']
+  .map(file=>readFileSync(new URL(file,import.meta.url),'utf8')).join('\n');
+ const owners=new Map<string,string[]>();
+ for(const block of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)){
+  for(const declaration of block[2]!.matchAll(/container(?:-name)?\s*:\s*([^;]+)/g)){
+   owners.set(block[1]!.trim(),declaration[1]!.split('/')[0]!.trim().split(/\s+/));
+  }
+ }
+ const covered=new Set<string>();
+ for(const query of css.matchAll(/@container\s+([\w-]+)\s*\([^{}]+\)\s*\{/g)){
+  let depth=1,end=query.index!+query[0].length;
+  const start=end;
+  while(depth&&end<css.length){if(css[end]==='{')depth++;if(css[end]==='}')depth--;end++;}
+  for(const rule of css.slice(start,end-1).matchAll(/([^{}]+)\{/g)){
+   for(const target of container.querySelectorAll(rule[1]!.trim())){
+    const selectors=[...owners].filter(([,names])=>names.includes(query[1]!)).map(([selector])=>selector);
+    expect(selectors.some(selector=>target.parentElement?.closest(selector)),query[1]+': '+rule[1]).toBe(true);
+    covered.add(query[1]!);
+   }
+  }
+ }
+ expect([...covered].sort()).toEqual(['docs','library-page']);
 });
