@@ -258,5 +258,7 @@
   "connect_another_school": "Connect another school",
   "no_due_date": "No due date",
   "refresh_all_schools": "Refresh all schools",
-  "disconnect_school_named": "Disconnect {{school}}"
+  "disconnect_school_named": "Disconnect {{school}}",
+  "pin_course_named": "Pin {{course}}",
+  "unpin_course_named": "Unpin {{course}}"
 }
