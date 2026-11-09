@@ -208,7 +208,7 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/card.tsx",
       "registrySha256": "ef8305b12c3112dab42a4708b41b1ebcc042fa5ab4c20f039da8d45b09ed5059",
-      "patchedSha256": "07c1d9d27f1b9116deeab6a6276e65427628b5e0dbf961a5e0c8b254fad9defb",
+      "patchedSha256": "de41b08c592052e5f7b68b9c38186dd99a7bf89e1812c5579225eb73700fe3d9",
       "patch": "docs/vendor-patches/ui--card.tsx.patch",
       "reason": "Use the local cn helper and the translucent card surface tokens with a hairline border. Extend with token-based variants and native interactive targets.",
       "foundationPatch": "docs/vendor-patches/ui--card-foundation.patch"
@@ -363,12 +363,12 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/empty-state.tsx",
-      "sha256": "060258daaea9c55fbcd7e738ffa0a22692dfee77d82697b5d95de7e2201e218c",
+      "sha256": "169e8fa0a1e1482333e8abac87d2e001bdd072467f821f476c5959f1fccae0f5",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/form-field.tsx",
-      "sha256": "e7cfa8aa232d01ba0b5ef0a2152a80f6f935a87d1d62df2cdefe84cf39ea9325",
+      "sha256": "31ab8070872ffe04fa6ce609485b8c23d62e8aabc759eb20c4c95ebd19c1a283",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -383,22 +383,22 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/list-row.tsx",
-      "sha256": "f3103fabf3dcebce114ce4362f4eadf2fdd11bdedae9e632f946d8018186ad60",
+      "sha256": "d91d84c08e266b1183ce0425cb4885a9e390b8823166caaf099c60bcc2edc691",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
-      "sha256": "5847001f2594fab1a310a4ef549f558a6050dfb2c3e860bffce4e48c2e2a3406",
+      "sha256": "9b2b3b67643108f6fb144492d0b866f56192f7df37d19c57bed2c2c01a2e17c4",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/segmented-tabs.tsx",
-      "sha256": "dd7a7a981ce2d19a8b40b6923bce7d8c442de6405a530e4a9d099b5031701487",
+      "sha256": "21c27992944f96dbb21013ca6ba219f8f8727ef47a94452fdb132172ae8c74ce",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/stat.tsx",
-      "sha256": "3f32ddaff26bf705879492f18b519b1ab8b44a0650f5d3ae61b5705d4b75a0fe",
+      "sha256": "7cc7d02bd0841050eafbe7cc29234fd01ee96d96d0bd3f526c7263d1daf4b664",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
