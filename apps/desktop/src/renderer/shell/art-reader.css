@@ -13,14 +13,9 @@
 .app-shell .shell-sidebar { background:var(--sidebar-surface); padding:var(--space-6) var(--space-4); }
 .app-shell .shell-brand { display:flex; flex-direction:row; align-items:center; gap:var(--space-3); padding:var(--space-3) var(--space-2) var(--space-8); font-size:var(--type-md); letter-spacing:-.02em; }
 .art-reader-brand-mark { width:32px; height:32px; display:grid; place-items:center; border-radius:var(--art-reader-control); color:var(--accent-foreground); background:var(--accent-color); }
-.art-reader-sidebar-label { margin:var(--space-2) var(--space-3) var(--space-3); font-size:var(--type-xs); font-weight:500; color:var(--muted); }
 .shell-sidebar [data-slot=sidebar-content] { gap:var(--space-4); }
 .shell-sidebar [data-slot=sidebar-group] { padding:0; margin-bottom:0; }
-.app-shell .shell-sidebar button[data-slot=sidebar-menu-button] { min-height:36px; border-radius:var(--art-reader-control); }
-.app-shell .shell-sidebar button[aria-current=page] { color:var(--accent-color); background:var(--surface); box-shadow:var(--glass-shadow); }
-.app-shell .shell-sidebar button[aria-current=page]::before { opacity:0; }
 .app-shell .shell-sidebar .library-smart button { min-height:36px; font-size:var(--type-sm); }
-.app-shell .shell-sidebar .sidebar-label { padding-inline:var(--space-3); margin-top:var(--space-6); color:var(--muted); font-size:var(--type-xs); font-weight:500; }
 .app-shell .shell-sidebar .sidebar-empty { margin-inline:var(--space-3); color:var(--muted); }
 .shell-sidebar .folder-tree { margin-top:var(--space-2); }
 .shell-sidebar .folder-node { border-radius:var(--art-reader-control); }
@@ -223,7 +218,6 @@ html[data-theme=contrast] .art-reader-cover::after { display:none; }
 .art-reader-profile > span:nth-child(2) { min-width:0; display:grid; gap:var(--space-1); }
 .art-reader-profile strong { font-size:var(--type-xs); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .art-reader-profile small { color:var(--muted); font-size:var(--type-xs); line-height:1.4; }
-.app-shell .shell-sidebar .sidebar-label { padding-block:var(--space-2); margin-top:var(--space-3); }
 .app-shell .shell-sidebar [data-slot=sidebar-footer] { padding-top:var(--space-2); }
 .app-shell .shell-sidebar .shell-brand { padding-bottom:var(--space-6); }
 

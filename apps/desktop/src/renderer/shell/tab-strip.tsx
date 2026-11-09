@@ -1,3 +1,4 @@
+import { Button } from '../components/ui/button';
 import { useEffect, useRef, useState } from 'react';
 import { Home, BookOpen, FileText, GraduationCap, History, ClipboardCheck, Plus, List, X } from 'lucide-react';
 import { useNavigate, type View } from './index';
@@ -93,44 +94,229 @@ export function TabStrip() {
     ids.splice(target, 0, ids.splice(index, 1)[0]!);
     reorderTabs(ids); setAnnouncement(tr('tabs:reordered', { title: labels[index], position: target + 1 }));
   };
-  return <div ref={root} className={`app-tabs ${tabs.tabs.length === 1 ? 'app-tabs-single' : ''}`}>
-    {tabs.tabs.length > 1 && <div className="app-tabs-scroll" role="tablist" aria-label={tr('tabs:title')}>
+  return <div
+  ref={root}
+  className={`app-tabs ${tabs.tabs.length === 1 ? 'app-tabs-single' : ''}`}
+>
+  {tabs.tabs.length > 1 && (
+    <div
+      className="app-tabs-scroll"
+      role="tablist"
+      aria-label={tr('tabs:title')}
+    >
       {tabs.tabs.map((tab, index) => {
         const Icon = icons[tab.icon];
-        const nativeStatus=native[tab.id] ?? (['moodle','hosted-chat'].includes(tab.history.entries[tab.history.index]?.view ?? '') && tab.id!==tabs.activeId ? 'discarded' : undefined);
-        return <div className="app-tab" key={tab.id} data-active={tab.id === tabs.activeId}
-          onPointerDown={event => { if (event.button === 0) drag.current = { id: tab.id, x: event.clientX }; }}
-          onPointerUp={event => {
-            const source = drag.current; drag.current = null;
-            if (source && source.id !== tab.id && Math.abs(event.clientX - source.x) >= 4) reorder(tabs.tabs.findIndex(item => item.id === source.id), index);
-          }}
-          onAuxClick={event => { if (event.button === 1) { event.preventDefault(); closeTab(tab.id); } }}>
-          <button type="button" role="tab" id={`tab-${tab.id}`} aria-controls="active-tab-panel" aria-selected={tab.id === tabs.activeId} tabIndex={tab.id === tabs.activeId ? 0 : -1}
-            aria-busy={nativeStatus==='loading'} title={nativeStatus==='discarded' ? tr('tabs:discarded') : labels[index]} onClick={() => activateTab(tab.id)} onKeyDown={event => {
-              if (event.key === 'Delete') { event.preventDefault(); closeTab(tab.id); return; }
-              const target = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.tabs.length - 1 : event.key === 'ArrowRight' ? (index + 1) % tabs.tabs.length : event.key === 'ArrowLeft' ? (index - 1 + tabs.tabs.length) % tabs.tabs.length : undefined;
-              if (target === undefined) return;
-              event.preventDefault();
-              if (event.shiftKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) reorder(index, index + (event.key === 'ArrowLeft' ? -1 : 1));
-              else { activateTab(tabs.tabs[target]!.id); document.getElementById(`tab-${tabs.tabs[target]!.id}`)?.focus(); }
-            }}><Icon size={15} aria-hidden="true"/><span>{nativeStatus==='loading' ? '◌ ' : nativeStatus==='discarded' ? '↻ ' : ''}{labels[index]}</span>{nativeStatus==='discarded' && <span className="sr-only">{tr('tabs:discarded')}</span>}</button>
-          <button type="button" tabIndex={-1} className="app-tab-close" aria-label={tr('tabs:close', { title: labels[index] })} onClick={() => closeTab(tab.id)}><X size={13}/></button>
-        </div>;
+        const nativeStatus =
+          native[tab.id] ??
+          (['moodle', 'hosted-chat'].includes(
+            tab.history.entries[tab.history.index]?.view ?? '',
+          ) && tab.id !== tabs.activeId
+            ? 'discarded'
+            : undefined);
+        return (
+          <div
+            className="app-tab"
+            key={tab.id}
+            data-active={tab.id === tabs.activeId}
+            onPointerDown={(event) => {
+              if (event.button === 0) drag.current = { id: tab.id, x: event.clientX };
+            }}
+            onPointerUp={(event) => {
+              const source = drag.current;
+              drag.current = null;
+              if (
+                source &&
+                source.id !== tab.id &&
+                Math.abs(event.clientX - source.x) >= 4
+              )
+                reorder(
+                  tabs.tabs.findIndex((item) => item.id === source.id),
+                  index,
+                );
+            }}
+            onAuxClick={(event) => {
+              if (event.button === 1) {
+                event.preventDefault();
+                closeTab(tab.id);
+              }
+            }}
+          >
+            <Button
+              variant="ghost"
+              type="button"
+              className="h-8 shrink justify-start px-2 font-inherit"
+              role="tab"
+              id={`tab-${tab.id}`}
+              aria-controls="active-tab-panel"
+              aria-selected={tab.id === tabs.activeId}
+              tabIndex={tab.id === tabs.activeId ? 0 : -1}
+              aria-busy={nativeStatus === 'loading'}
+              title={nativeStatus === 'discarded' ? tr('tabs:discarded') : labels[index]}
+              onClick={() => activateTab(tab.id)}
+              onKeyDown={(event) => {
+                if (event.key === 'Delete') {
+                  event.preventDefault();
+                  closeTab(tab.id);
+                  return;
+                }
+                const target =
+                  event.key === 'Home'
+                    ? 0
+                    : event.key === 'End'
+                      ? tabs.tabs.length - 1
+                      : event.key === 'ArrowRight'
+                        ? (index + 1) % tabs.tabs.length
+                        : event.key === 'ArrowLeft'
+                          ? (index - 1 + tabs.tabs.length) % tabs.tabs.length
+                          : undefined;
+                if (target === undefined) return;
+                event.preventDefault();
+                if (
+                  event.shiftKey &&
+                  (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+                )
+                  reorder(index, index + (event.key === 'ArrowLeft' ? -1 : 1));
+                else {
+                  activateTab(tabs.tabs[target]!.id);
+                  document.getElementById(`tab-${tabs.tabs[target]!.id}`)?.focus();
+                }
+              }}
+            >
+              <Icon
+                size={15}
+                aria-hidden="true"
+              />
+              <span>
+                {nativeStatus === 'loading'
+                  ? '◌ '
+                  : nativeStatus === 'discarded'
+                    ? '↻ '
+                    : ''}
+                {labels[index]}
+              </span>
+              {nativeStatus === 'discarded' && (
+                <span className="sr-only">{tr('tabs:discarded')}</span>
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              type="button"
+              tabIndex={-1}
+              size="icon-sm"
+              className="app-tab-close"
+              aria-label={tr('tabs:close', { title: labels[index] })}
+              onClick={() => closeTab(tab.id)}
+            >
+              <X size={13} />
+            </Button>
+          </div>
+        );
       })}
-    </div>}
-    <Popover open={picker} onOpenChange={setPicker}><PopoverTrigger asChild><button type="button" className="app-tabs-add" aria-label={tr('tabs:new')} title={tr('tabs:new')}><Plus size={17}/></button></PopoverTrigger>
-      <PopoverContent className="app-tabs-menu" aria-label={tr('tabs:new')}>
-        {tabs.tabs.length >= MAX_APP_TABS ? <p role="status">{tr('tabs:limit')}</p> : <>
-          {(['home', 'courses', 'library', 'ai-chats'] satisfies View[]).map(view => <button type="button" key={view} onClick={() => { setPicker(false); openTab(view); }}>{tabLabel(view)}</button>)}
+    </div>
+  )}
+  <Popover
+    open={picker}
+    onOpenChange={setPicker}
+  >
+    <PopoverTrigger asChild>
+      <Button
+        variant="ghost"
+        type="button"
+        size="icon-sm"
+        className="app-tabs-add"
+        aria-label={tr('tabs:new')}
+        title={tr('tabs:new')}
+      >
+        <Plus size={17} />
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent
+      className="app-tabs-menu"
+      aria-label={tr('tabs:new')}
+    >
+      {tabs.tabs.length >= MAX_APP_TABS ? (
+        <p role="status">{tr('tabs:limit')}</p>
+      ) : (
+        <>
+          {(['home', 'courses', 'library', 'ai-chats'] satisfies View[]).map((view) => (
+            <Button
+              variant="ghost"
+              type="button"
+              key={view}
+              onClick={() => {
+                setPicker(false);
+                openTab(view);
+              }}
+            >
+              {tabLabel(view)}
+            </Button>
+          ))}
           <small>{tr('tabs:recent')}</small>
-          {recent.map(route => <button type="button" key={route.documentId} onClick={() => { setPicker(false); openTab(route); }}>{route.title}</button>)}
-        </>}
+          {recent.map((route) => (
+            <Button
+              variant="ghost"
+              type="button"
+              key={route.documentId}
+              onClick={() => {
+                setPicker(false);
+                openTab(route);
+              }}
+            >
+              {route.title}
+            </Button>
+          ))}
+        </>
+      )}
+    </PopoverContent>
+  </Popover>
+  {tabs.tabs.length > 1 && (
+    <Popover
+      open={all}
+      onOpenChange={setAll}
+    >
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          type="button"
+          size="icon-sm"
+          aria-label={tr('tabs:all')}
+        >
+          <List size={17} />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="app-tabs-menu">
+        <input
+          type="search"
+          aria-label={tr('tabs:search')}
+          placeholder={tr('tabs:search')}
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+        {tabs.tabs.map(
+          (tab, index) =>
+            labels[index]!.toLocaleLowerCase().includes(search.toLocaleLowerCase()) && (
+              <Button
+                variant="ghost"
+                type="button"
+                key={tab.id}
+                aria-current={tab.id === tabs.activeId ? 'page' : undefined}
+                onClick={() => {
+                  setAll(false);
+                  activateTab(tab.id);
+                }}
+              >
+                {labels[index]}
+              </Button>
+            ),
+        )}
       </PopoverContent>
     </Popover>
-    {tabs.tabs.length > 1 && <Popover open={all} onOpenChange={setAll}><PopoverTrigger asChild><button type="button" aria-label={tr('tabs:all')}><List size={17}/></button></PopoverTrigger><PopoverContent className="app-tabs-menu">
-      <input type="search" aria-label={tr('tabs:search')} placeholder={tr('tabs:search')} value={search} onChange={event => setSearch(event.target.value)}/>
-      {tabs.tabs.map((tab, index) => labels[index]!.toLocaleLowerCase().includes(search.toLocaleLowerCase()) && <button type="button" key={tab.id} aria-current={tab.id === tabs.activeId ? 'page' : undefined} onClick={() => { setAll(false); activateTab(tab.id); }}>{labels[index]}</button>)}
-    </PopoverContent></Popover>}
-    <span className="sr-only" role="status">{announcement}</span>
-  </div>;
+  )}
+  <span
+    className="sr-only"
+    role="status"
+  >
+    {announcement}
+  </span>
+</div>;
 }

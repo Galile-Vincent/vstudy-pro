@@ -13,22 +13,7 @@
 .shell-sidebar [data-slot=sidebar-content] > * { flex-shrink:0; }
 .shell-sidebar [data-slot=sidebar-footer] { padding:var(--space-4) 0 0; }
 .shell-sidebar [data-slot=sidebar-menu] { gap:var(--space-1); }
-.app-shell .shell-sidebar button {
-  display:flex; align-items:center; gap:var(--space-3); text-align:start;
-  background:transparent; border:0; padding:var(--space-2) var(--space-3);
-  width:100%; border-radius:var(--r-sm); color:var(--ink);
-  transition:opacity var(--motion-fast) var(--ease-standard),transform var(--motion-fast) var(--ease-standard);
-}
-.app-shell .shell-sidebar button:hover { background:color-mix(in oklab,var(--ink) 5%,transparent); }
-.app-shell .shell-sidebar button[data-slot=sidebar-menu-button] { position:relative; isolation:isolate; min-height:calc(var(--space-8) + var(--space-1)); height:auto; background:transparent; }
-.shell-sidebar button[data-slot=sidebar-menu-button]::before {
-  content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit;
-  background:color-mix(in oklab,var(--ink) 7%,transparent); opacity:0;
-  transition:opacity var(--motion-base) var(--ease-out-soft);
-}
-.shell-sidebar button[data-slot=sidebar-menu-button]:hover::before { opacity:.6; }
-.app-shell .shell-sidebar button[aria-current=page] { background:transparent; font-weight:600; box-shadow:none; }
-.shell-sidebar button[data-slot=sidebar-menu-button][aria-current=page]::before { opacity:1; }
+.shell-sidebar [data-slot=sidebar-menu-button] { height:calc(var(--space-8) + var(--space-1)); flex-shrink:0; }
 .app-shell .shell-sidebar button:focus-visible,.shell-topbar button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 .shell-sidebar svg,.shell-topbar svg { width:var(--space-4); height:var(--space-4); flex-shrink:0; stroke-width:1.75; }
 .shell-main { flex:1; min-width:0; display:flex; flex-direction:column; background:var(--surface); }
@@ -58,7 +43,6 @@
 ::view-transition-new(vt-sidebar),::view-transition-new(vt-topbar) { animation:shell-frame-in var(--motion-base) var(--ease-out-soft) both; }
 @keyframes shell-frame-in { from { opacity:0; } to { opacity:1; } }
 @media(prefers-reduced-motion:reduce) {
-  .app-shell .shell-sidebar button,.shell-sidebar button[data-slot=sidebar-menu-button]::before { transition:none; }
   ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*) { animation:none; }
 }
 @media(prefers-contrast:more) { .app-shell .shell-sidebar { border-inline-end:1px solid var(--ink); } .app-shell .shell-sidebar button[aria-current=page] { outline:1px solid var(--ink); } }
