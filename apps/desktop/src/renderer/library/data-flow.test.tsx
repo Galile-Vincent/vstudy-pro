@@ -317,3 +317,14 @@ it.each([false,true])('retries a failed row with Enter without nested tab stops 
  act(()=>entry.focus()); fireEvent.keyDown(entry,{key:'Enter'});
  await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('documents:retry',{documentId:'failed'}));
 });
+
+it('does not steal search focus after choosing files repeatedly', async () => {
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[row('inside')],nextCursor:null}:[]);
+ mount(); await screen.findByText('inside');
+ const files=screen.getByRole('button',{name:tr('library:viewFiles')});
+ fireEvent.click(files); fireEvent.click(files);
+ const search=screen.getByRole('textbox',{name:tr('library:search')});
+ act(()=>search.focus()); fireEvent.change(search,{target:{value:'inside'}});
+ await waitFor(()=>expect(state.invoke.mock.calls.some(([c,q])=>c==='library:documents:list' && q.text==='inside')).toBe(true));
+ expect(document.activeElement).toBe(search);
+});

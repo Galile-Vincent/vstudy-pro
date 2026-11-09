@@ -216,7 +216,7 @@ export function LibraryView() {
   const heading = useRef<HTMLHeadingElement>(null);
   const folderFocus = useRef<string | null>(null);
   const selectFolder = (key: string | null) => {
-    folderFocus.current = key ? "heading" : openKey;
+    folderFocus.current = key === openKey ? null : key ? "heading" : openKey;
     setOpenKey(key);
     setActiveRow(undefined);
     setSelected([]);
@@ -226,15 +226,16 @@ export function LibraryView() {
   };
   useLayoutEffect(() => {
     const target = folderFocus.current;
+    folderFocus.current = null;
     if (!target) return;
     if (target === "heading") heading.current?.focus();
     else document.getElementById(`library-folder-${encodeURIComponent(target)}`)?.focus();
-    folderFocus.current = null;
-  }, [openKey, showFolders]);
+  });
   const chooseMode = (next: LibraryMode) => {
     writeMode(next);
     setModeState(next);
     selectFolder(null);
+    folderFocus.current = null;
   };
   useEffect(() => {
     if (openKey && !loading && !cursor && groupedView && !groups.some((g) => g.key === openKey)) selectFolder(null);
