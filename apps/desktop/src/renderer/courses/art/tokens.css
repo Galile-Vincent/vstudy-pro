@@ -3,6 +3,6 @@
   --course-radius: var(--art-reader-radius, 20px);
   --course-control-radius: var(--art-reader-control, 10px);
   --course-glass: var(--art-reader-glass, color-mix(in oklab, var(--glass-tint) var(--glass-opacity), transparent));
-  --course-shadow: var(--art-reader-shadow, 0 0 0 1px color-mix(in oklab, var(--ink) 8%, transparent), 0 12px 24px color-mix(in oklab, var(--shadow-color) 6%, transparent));
+  --course-shadow: var(--glass-shadow);
   --course-ease: cubic-bezier(.2,.8,.2,1);
 }

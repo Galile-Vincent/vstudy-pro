@@ -23,7 +23,7 @@
 .course-folder:active { transform:scale(.985); }
 html[data-input-modality=keyboard] .course-folder:focus-visible,.course-folder:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
 .course-folder-stage { display:grid; place-items:center; aspect-ratio:16/10; background:transparent; }
-.folder-art { width:62%; height:auto; overflow:visible; filter:drop-shadow(0 6px 8px color-mix(in oklab, var(--folder-tone) 22%, transparent)); }
+.folder-art { width:62%; height:auto; overflow:visible; filter:drop-shadow(0 0 2px color-mix(in srgb,var(--shadow-color) 10%,transparent)); }
 .folder-paper { fill:var(--folder-paper); stroke:color-mix(in oklab, var(--ink) 8%, transparent); stroke-width:1; }
 .folder-paper-back { opacity:.7; }
 .folder-edge { fill:none; stroke:color-mix(in oklab, var(--surface) 55%, transparent); stroke-width:1.5; stroke-linecap:round; }
@@ -73,8 +73,8 @@ html[data-input-modality=keyboard] .course-folder:focus-visible,.course-folder:f
 .course-folder { gap:var(--space-1); padding:var(--space-2) var(--space-2) var(--space-3); border-radius:var(--r-lg); align-content:start; }
 .course-folder:hover { transform:none; background:transparent; }
 .course-folder-stage { aspect-ratio:4/3; margin-bottom:var(--space-2); }
-.folder-art { width:76%; filter:drop-shadow(0 2px 2px color-mix(in oklab,var(--shadow-color) 8%,transparent)) drop-shadow(0 10px 14px color-mix(in oklab,var(--folder-tone) 22%,transparent)); transition:transform var(--motion-base) var(--ease-out-soft),filter var(--motion-base) var(--ease-out-soft); }
-.course-folder:is(:hover,:focus-visible) .folder-art { transform:translateY(-3px); filter:drop-shadow(0 3px 3px color-mix(in oklab,var(--shadow-color) 10%,transparent)) drop-shadow(0 16px 20px color-mix(in oklab,var(--folder-tone) 30%,transparent)); }
+.folder-art { width:76%; filter:drop-shadow(0 0 2px color-mix(in srgb,var(--shadow-color) 10%,transparent)); transition:transform var(--motion-base) var(--ease-out-soft),filter var(--motion-base) var(--ease-out-soft); }
+.course-folder:is(:hover,:focus-visible) .folder-art { filter:drop-shadow(0 0 2px color-mix(in srgb,var(--shadow-color) 10%,transparent)) brightness(1.05); }
 .course-folder:active .folder-art { transform:translateY(-1px) scale(.99); }
 .course-folder-name { font-size:var(--type-base); }
 .folder-front { opacity:.94; }
