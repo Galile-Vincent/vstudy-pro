@@ -14,6 +14,7 @@ import { Input } from '../components/ui/input';
 import { contentLanguage } from "../../shared/content-language";
 import { Select } from "../components/select";
 import {
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -74,6 +75,9 @@ function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpe
  const ref=useRef<HTMLButtonElement>(null);const [visible,setVisible]=useState(false);
  return <Tooltip delayDuration={500} open={visible} onOpenChange={next=>{const button=ref.current;const hidden=button?.closest('.library-document')?.querySelectorAll(':scope > div');setVisible(next&&!!button&&(button.scrollWidth>button.clientWidth||Array.from(hidden??[]).some(e=>getComputedStyle(e).display==='none')));}}><TooltipTrigger asChild><Button ref={ref} variant="ghost" className="document-title" tabIndex={-1} lang={contentLanguage(title)} onAuxClick={event=>{if(event.button===1){event.preventDefault();onOpen(event);}}} onClick={onOpen}>{title}</Button></TooltipTrigger><TooltipContent className="document-tooltip"><div>{title}</div><div>{details}</div></TooltipContent></Tooltip>;
 }
+const DocumentRow = memo(function DocumentRow({ render }: {
+  version: string; render: () => React.ReactNode;
+}) { return render(); }, (previous, next) => previous.version === next.version);
 const defaults: LibraryQuery = { sort: "manual", direction: "asc", limit: 50 };
 const compactQuery = "(max-width: 1099px)";
 function useCompactToolbar() {
@@ -105,7 +109,7 @@ export function Snippet({ text }: { text: string }) {
   );
 }
 export function LibraryView() {
-  useTranslation();
+  const { i18n } = useTranslation();
   const [prompt, promptDialog] = useLibraryPrompt();
   const { route, navigate, openTab } = useNavigate(),
     format = useFormat();
@@ -184,6 +188,7 @@ export function LibraryView() {
     [notice, setNotice] = useState("");
   const loadedCount = useRef(0);
   loadedCount.current = items.length;
+  const selectedSet = useMemo(() => new Set(selected), [selected]);
   const selectedIds = useRef(selected);
   selectedIds.current = selected;
   const menuAnchor = useRef<HTMLElement | null>(null);
@@ -278,7 +283,7 @@ export function LibraryView() {
       restoreTop.current = 0;
       previousQuery.current = JSON.stringify(query);
     }
-    setLoading(true);
+    if (!loadedCount.current) setLoading(true);
     setError("");
     void Promise.all([
       desktop.invoke("library:documents:list", {
@@ -407,7 +412,7 @@ export function LibraryView() {
     })));
   };
   const ids =
-    menu && !selected.includes(menu.document.id)
+    menu && !selectedSet.has(menu.document.id)
       ? [menu.document.id]
       : selected;
   const inFlight = useRef(false);
@@ -508,7 +513,8 @@ export function LibraryView() {
     } finally { inFlight.current = false; setBusy(false); }
   };
   const reorder = async (item: Item, delta: number) => {
-    const destination = reorderDestination(items, items.indexOf(item), delta);
+    const current = rowContext.current.items;
+    const destination = reorderDestination(current, current.findIndex(row => row.document.id === item.document.id), delta);
     if (!destination) return;
     await run(() => desktop.invoke("library:documents:move", { documentIds: [item.document.id], ...destination }));
   };
@@ -525,26 +531,38 @@ export function LibraryView() {
     observer.observe(viewport);
     return () => observer.disconnect();
   }, [loading, grid, items.length > 0, showFolders]);
-  const flowing = grid || shown.some(item => item.document.status !== "ready");
+
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const rowHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : rowRem * textScale,
-    columns = grid
-      ? Math.max(1, Math.floor(viewportWidth / 280))
-      : 1,
-    start = Math.min(Math.max(0,shown.length-columns),Math.max(0, Math.floor(top / rowHeight) - 2) * columns),
-    end = Math.min(
-      shown.length,
-      start +
-        Math.ceil((scroller.current?.clientHeight ?? 800) / rowHeight + 5) *
-          columns,
-    );
+  const baseHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : (rowRem || 2.75) * (textScale || 16);
+  const rowHeight = baseHeight;
+  const columns = grid ? Math.max(1, Math.floor(viewportWidth / 280)) : 1;
+  const layout = useMemo(() => {
+    const offsets = [0];
+    const heights: number[] = [];
+    for (let index = 0; index < shown.length; index += columns) {
+      const status = shown.slice(index, index + columns)
+        .some(item => item.document.status !== "ready");
+      const height = rowHeight + (status ? 80 : 0);
+      heights.push(height);
+      offsets.push(offsets[offsets.length - 1]! + height);
+    }
+    return { offsets, heights };
+  }, [shown, columns, rowHeight]);
+  const rowContext = useRef({ shown, items, layout, columns, rowHeight, grid, selected, selectedSet });
+  rowContext.current = { shown, items, layout, columns, rowHeight, grid, selected, selectedSet };
+  const firstLane = Math.max(0, layout.offsets.findIndex(offset => offset > top) - 1);
+  const start = Math.max(0, firstLane - 2) * columns;
+  const bottom = top + (scroller.current?.clientHeight || 800);
+  const lastLane = layout.offsets.findIndex(offset => offset > bottom);
+  const end = Math.min(shown.length,
+    (lastLane < 0 ? layout.heights.length : lastLane + 3) * columns);
   const visibleIndices = Array.from(
-    {length: flowing ? shown.length : end - start},
-    (_, offset) => (flowing ? 0 : start) + offset,
+    {length: end - start},
+    (_, offset) => start + offset,
   );
   const activeIndex = shown.findIndex(item => item.document.id === activeRow);
   const tabRow = visibleIndices.includes(activeIndex) ? activeRow
-    : visibleIndices.map(index => shown[index]!).find(item => selected.includes(item.document.id))?.document.id
+    : visibleIndices.map(index => shown[index]!).find(item => selectedSet.has(item.document.id))?.document.id
       ?? shown[visibleIndices[0] ?? 0]?.document.id;
   const renderedIndices = activeIndex >= 0 && !visibleIndices.includes(activeIndex)
     ? [...visibleIndices, activeIndex].sort((a, b) => a - b) : visibleIndices;
@@ -552,19 +570,18 @@ export function LibraryView() {
     if (!keyboardFocus.current) return;
     const target = document.getElementById(`library-document-${keyboardFocus.current}`);
     target?.focus({preventScroll:true});
-    if (flowing) target?.scrollIntoView?.({block:"nearest"});
     keyboardFocus.current = null;
-  }, [activeRow, start, end, flowing]);
+  }, [activeRow, start, end]);
   useLayoutEffect(()=>{
     const viewport=scroller.current;
     if(!viewport||!selected.length||!bulkHeight)return;
     const index=shown.findIndex(item=>item.document.id===selected[selected.length-1]);
     if(index<0)return;
-    const rowTop=Math.floor(index/columns)*rowHeight;
+    const rowTop=layout.offsets[Math.floor(index/columns)]!;
     const available=Math.max(rowHeight,viewport.clientHeight-bulkHeight-24);
     if(rowTop<viewport.scrollTop)viewport.scrollTop=rowTop;
-    else if(rowTop+rowHeight>viewport.scrollTop+available)viewport.scrollTop=rowTop+rowHeight-available;
-  },[selected,bulkHeight,rowHeight,columns,shown]);
+    else if(rowTop+layout.heights[Math.floor(index/columns)]!>viewport.scrollTop+available)viewport.scrollTop=rowTop+layout.heights[Math.floor(index/columns)]!-available;
+  },[selected,bulkHeight,rowHeight,columns,shown,layout]);
   const viewControls = (
     <div className="library-view-controls">
         <Select
@@ -919,7 +936,7 @@ export function LibraryView() {
         >
           <div
             style={{
-              height: flowing ? undefined : Math.ceil(shown.length / columns) * rowHeight,
+              height: layout.offsets.at(-1),
               display: grid ? "grid" : undefined,
               gridTemplateColumns: grid ? `repeat(${columns}, minmax(0, 1fr))` : undefined,
               gap: grid ? "var(--space-4)" : undefined,
@@ -929,36 +946,43 @@ export function LibraryView() {
             {renderedIndices.map(index => {
               const item = shown[index]!;
               const d = item.document;
-              return (
+              const lane = Math.floor(index / columns);
+              const height = layout.heights[lane]!;
+              const offset = layout.offsets[lane]!;
+              const version = JSON.stringify([
+                item, index, grid, height, offset, columns, tabRow === d.id,
+                selected, query, folders, language, i18n.resolvedLanguage, progress[d.id],
+              ]);
+              return <DocumentRow key={d.id} version={version} render={() => (
                 <div
-                  key={d.id}
                   id={`library-document-${d.id}`}
                   data-index={index}
                   role="listitem"
-                  aria-label={`${d.title}, ${tr(selected.includes(d.id) ? "library:itemSelected" : "library:itemUnselected")}`}
+                  aria-label={`${d.title}, ${tr(selectedSet.has(d.id) ? "library:itemSelected" : "library:itemUnselected")}`}
                   aria-posinset={index + 1}
                   aria-setsize={shown.length}
-                  data-selected={selected.includes(d.id)}
+                  data-selected={selectedSet.has(d.id)}
                   tabIndex={tabRow === d.id ? 0 : -1}
                   onFocus={() => { setActiveRow(d.id);  }}
                   onMouseEnter={() => {  }}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
-                    height: flowing ? "auto" : rowHeight,
-                    minHeight: grid ? rowHeight - 16 : rowHeight,
-                    position: flowing ? "relative" : "absolute",
-                    top: flowing ? undefined : Math.floor(index / columns) * rowHeight,
-                    left: flowing ? undefined : `${((index % columns) * 100) / columns}%`,
-                    width: "100%",
+                    height: height - (grid ? 16 : 0),
+                    minHeight: height - (grid ? 16 : 0),
+                    position: "absolute",
+                    top: offset,
+                    left: `${((index % columns) * 100) / columns}%`,
+                    width: `${100 / columns}%`,
                   }}
                   draggable
                   onDragStart={(e) => {
+                    const {items, selected, selectedSet} = rowContext.current;
                     e.dataTransfer.setData(
                       "application/vstudy-origin",
                       JSON.stringify(
                         items
                           .filter((i) =>
-                            (selected.includes(d.id)
+                            (selectedSet.has(d.id)
                               ? selected
                               : [d.id]
                             ).includes(i.document.id),
@@ -972,7 +996,7 @@ export function LibraryView() {
                     e.dataTransfer.setData(
                       "application/vstudy-documents",
                       JSON.stringify(
-                        selected.includes(d.id) ? selected : [d.id],
+                        selectedSet.has(d.id) ? selected : [d.id],
                       ),
                     );
                   }}
@@ -993,6 +1017,7 @@ export function LibraryView() {
                     );
                   }}
                   onClick={(e) => {
+                    const {shown} = rowContext.current;
                     if (
                       (e.target as HTMLElement).closest("button,input,summary")
                     )
@@ -1015,6 +1040,7 @@ export function LibraryView() {
                   }}
                   onKeyDown={(e) => {
                     if (e.target !== e.currentTarget) return;
+                    const {shown, layout, columns, rowHeight, grid} = rowContext.current;
                     const sideways = grid && ["ArrowLeft", "ArrowRight"].includes(e.key);
                     const page = Math.max(1, Math.floor((scroller.current?.clientHeight ?? 0) / rowHeight));
                     const step = e.key.startsWith("Page") ? page * columns : sideways ? 1 : grid ? columns : 1;
@@ -1041,8 +1067,8 @@ export function LibraryView() {
                       if (!anchor.current) anchor.current = d.id;
                       keyboardFocus.current = shown[next]!.document.id;
                       setActiveRow(shown[next]!.document.id);
-                      if (!flowing && scroller.current) {
-                        scroller.current.scrollTop = Math.floor(next / columns) * rowHeight;
+                      if (scroller.current) {
+                        scroller.current.scrollTop = layout.offsets[Math.floor(next / columns)]!;
                         setTop(scroller.current.scrollTop);
                       }
                       if (next === index) {
@@ -1077,7 +1103,7 @@ export function LibraryView() {
                 >
                   <input type="checkbox" className="sr-only" tabIndex={-1}
                     aria-label={tr('library:selectDocument', {name:d.title})}
-                    checked={selected.includes(d.id)}
+                    checked={selectedSet.has(d.id)}
                     onDoubleClick={event => event.stopPropagation()}
                     onChange={event => {
                       anchor.current = d.id;
@@ -1170,7 +1196,7 @@ export function LibraryView() {
                       aria-label={tr('common:conversion_progress')}/>}
                   </div>}
                 </div>
-              );
+              )} />;
             })}
           </div>
           {cursor && !groupedView && (

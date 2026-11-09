@@ -5,7 +5,8 @@ import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
 import { i18n, tr } from '../../shared/i18n';
-const state=vi.hoisted(()=>({invoke:vi.fn(),route:{view:'library',query:{}}}));
+const state=vi.hoisted(()=>({invoke:vi.fn(),art:vi.fn(),route:{view:'library',query:{}}}));
+vi.mock('../shell/document-art',()=>({DocumentArt:({id}:{id:string})=>{state.art(id);return <span/>;}}));
 vi.mock('../bridge',()=>({desktop:{invoke:state.invoke}}));
 vi.mock('../shell',()=>({useNavigate:()=>({route:state.route,navigate:vi.fn()})}));
 vi.stubGlobal('ResizeObserver',class{observe(){}unobserve(){}disconnect(){}});
@@ -278,4 +279,29 @@ it.each(['delete', 'query', 'refresh'])('bounds selection restoration after %s i
  await waitFor(()=>expect(screen.queryByText('doc0')).toBeNull());
  expect(count()-before).toBeLessThanOrEqual(3);
  expect(document.querySelectorAll('[data-selected=true]')).toHaveLength(0);
+});
+
+it.each([false,true])('windows 5000 documents with a failed item (grid %s)', async grid => {
+ localStorage.setItem('library-grid',String(grid));
+ document.documentElement.style.setProperty('--art-reader-card-height','300');
+ const rows=Array.from({length:5000},(_,i)=>row('doc'+i));
+ rows[1]!.document.status='failed';
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:rows,nextCursor:null}:[]);
+ const {container}=mount(); await screen.findByText('doc0');
+ expect(container.querySelectorAll('.library-document').length).toBeLessThan(80);
+});
+
+it('renders only the changed card on a conversion refresh', async () => {
+ localStorage.setItem('library-grid','true');
+ document.documentElement.style.setProperty('--art-reader-card-height','300');
+ let rows=Array.from({length:200},(_,i)=>row('doc'+i));
+ rows[1]!.document.status='converting';
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'
+  ? {items:structuredClone(rows),nextCursor:null}:[]);
+ mount(); await screen.findByText('doc0');
+ state.art.mockClear();
+ rows=structuredClone(rows); rows[1]!.document.title='Updated';
+ act(()=>window.dispatchEvent(new Event('library-changed')));
+ await screen.findByText('Updated');
+ expect(state.art.mock.calls.map(([id])=>id)).toEqual(['doc1']);
 });
