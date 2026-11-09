@@ -214,5 +214,8 @@
   "original.paste": "ウェブチャットで Ctrl/⌘ V を押して画像を貼り付け、文書名とページを入力してください。",
   "original.unsupported": "画像対応モデルを選択するか、ページの添付を削除してください。",
   "undo_expired": "元に戻せる期限が過ぎました。",
-  "document_missing": "ドキュメントが見つかりません。完全に削除された可能性があります。"
+  "document_missing": "ドキュメントが見つかりません。完全に削除された可能性があります。",
+  "recoveryDeleted": "「{{name}}」を削除しました · 30秒以内に元に戻せます",
+  "recoveryMoved": "「{{name}}」を移動しました · 30秒以内に元に戻せます",
+  "recoveryCount": "{{count}}件のドキュメント"
 }

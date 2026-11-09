@@ -214,5 +214,8 @@
   "original.paste": "在網頁聊天按 Ctrl/⌘ V 貼上圖片，並註明文件名稱與頁碼。",
   "original.unsupported": "請選擇支援圖片的模型，或移除頁面附件後傳送。",
   "undo_expired": "復原期限已過，無法復原文件。",
-  "document_missing": "找不到文件，可能已永久刪除。"
+  "document_missing": "找不到文件，可能已永久刪除。",
+  "recoveryDeleted": "已刪除「{{name}}」· 30 秒內可復原",
+  "recoveryMoved": "已移動「{{name}}」· 30 秒內可復原",
+  "recoveryCount": "{{count}} 份文件"
 }
