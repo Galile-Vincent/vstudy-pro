@@ -1211,3 +1211,17 @@ it('offers Show all when only overdue has more than five items', async () => {
   expect(section.querySelectorAll('.moodle-due-link')).toHaveLength(12);
   expect(getByRole(section, 'button', {name: 'Show less'}).getAttribute('aria-expanded')).toBe('true');
 });
+
+it("D1 exposes week headings and labelled disclosure regions", async () => {
+  const api = createMockMoodleApi();
+  await mount(api, (await api.overview()).courses[0]!.id);
+  const weeks = [...host.querySelectorAll(".moodle-week")];
+  expect(weeks.length).toBeGreaterThan(0);
+  for (const week of weeks) {
+    const heading = getByRole(week as HTMLElement, "heading", { level: 3 });
+    const button = getByRole(heading, "button");
+    const panel = document.getElementById(button.getAttribute("aria-controls")!);
+    expect(panel?.getAttribute("role")).toBe("region");
+    expect(panel?.getAttribute("aria-labelledby")).toBe(heading.id);
+  }
+});
