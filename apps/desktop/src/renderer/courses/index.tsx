@@ -1150,10 +1150,10 @@ function CoursesBody({
       {([overdue, dueSoon, undated] as const).map(
         (items, group) =>
           items.length > 0 && (
-            <Section
-              key={group}
-              title={tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:next_seven_days" : "moodle:no_due_date")}
-            >
+            <section key={group} className="flex flex-col gap-4">
+              <h3 className="font-medium">
+                {tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:next_seven_days" : "moodle:no_due_date")}
+              </h3>
               <ul className="moodle-due-list list-none p-0">
                 {items.slice(0, group === 0 || !allDue ? 5 : undefined).map((d) => {
                   const course = overview.courses.find((c) => c.id === d.courseId);
@@ -1185,10 +1185,10 @@ function CoursesBody({
                   );
                 })}
               </ul>
-            </Section>
+            </section>
           ),
       )}
-      {!error && overdue.length + dueSoon.length + undated.length === 0 && <EmptyState title={tr("moodle:all_caught_up")} />}
+      {!error && overdue.length + dueSoon.length + undated.length === 0 && <p className="text-[var(--muted)]">{tr("moodle:all_caught_up")}</p>}
       {Math.max(dueSoon.length, undated.length) > 5 && (
         <Button variant="ghost" aria-expanded={allDue} onClick={() => setAllDue(!allDue)}>
           {tr(allDue ? "moodle:show_less" : "moodle:show_all")}
@@ -1198,7 +1198,7 @@ function CoursesBody({
   </div>
         ) : (
           !error && (
-            <EmptyState icon={<GraduationCap />} title={tr(
+            <EmptyState headingLevel={2} icon={<GraduationCap />} title={tr(
               overview?.accounts.length
                 ? overview.accounts.some(account => !account.syncedAt)
                   ? "moodle:syncing" : "moodle:no_courses"
