@@ -51,7 +51,8 @@ it.each(['Choose a file', 'Try a sample document'])('shows actionable errors fro
   invoke.mockRejectedValue({ code: 'errors.disk_full', params: {} });
   render(<UploadCard />);
   fireEvent.click(screen.getByRole('button', { name }));
-  expect((await screen.findByRole('alert')).textContent).toBe(i18n.t('errors:disk_full'));
+  await act(async () => {});
+  expect(screen.getByRole('status').textContent).toBe(i18n.t('errors:disk_full'));
 });
 
 it('marks the entire import section during drag and restores it on leave', () => {
@@ -112,4 +113,16 @@ it('imports into Unfiled when the selected folder disappeared', async () => {
   expect(onImported).toHaveBeenCalledOnce();
   expect(changed).toHaveBeenCalledOnce();
   window.removeEventListener('library-changed', changed);
+});
+
+it('keeps one persistent status for partial failures', async () => {
+  invoke.mockResolvedValue([{ ok: true, document: { id: 'doc', title: 'Notes' } },
+    { ok: false, error: 'errors.disk_full' }]);
+  const { container } = render(<UploadCard />);
+  const status = screen.getByRole('status');
+  fireEvent.drop(container.firstChild!, { dataTransfer: { files: [new File([''], 'notes.pdf')] } });
+  await act(async () => {});
+  expect(screen.getAllByRole('status')).toEqual([status]);
+  expect(screen.queryByRole('alert')).toBeNull();
+  expect(status.textContent).not.toBe('Imported');
 });
