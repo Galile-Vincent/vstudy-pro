@@ -98,6 +98,10 @@ describe("Courses", () => {
     expect(host.textContent).toContain('Amplifier lab report');
     expect(host.textContent).not.toContain('No deadlines this week');
   });
+  it("renders exactly one main landmark for the catalog", async () => {
+    await mount(createMockMoodleApi());
+    expect(host.querySelectorAll("main")).toHaveLength(1);
+  });
   it("groups course header actions behind one primary action, refresh and an overflow menu", async () => {
     const api = createMockMoodleApi();
     const courseId = (await api.overview()).courses[0]!.id;

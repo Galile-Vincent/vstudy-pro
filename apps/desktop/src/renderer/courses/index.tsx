@@ -537,7 +537,7 @@ function CoursesBody({
       <p className="moodle-empty-inline">{tr("moodle:no_files")}</p>
     );
   };
-  if (showPlanner) return <PageContainer className="h-full overflow-auto">
+  if (showPlanner) return <PageContainer as="main" className="h-full overflow-auto">
     <Button variant="ghost" ref={plannerBack} className="moodle-back" onClick={() => setShowPlanner(false)}><ArrowLeft />{tr("planner:back")}</Button>
     <Planner courses={overview?.courses ?? []} deadlines={overview?.upcoming ?? []} />
   </PageContainer>;
@@ -558,7 +558,7 @@ function CoursesBody({
   );
   return (
     <div ref={pageRef} className={courseId ? "moodle-page" : "h-full overflow-auto text-[var(--ink)] [&_svg]:size-4 [&_button]:cursor-pointer [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-[var(--focus)]"} data-course={Boolean(detail)}>
-      <PageContainer className={courseId ? "pt-0" : undefined}>
+      <PageContainer as="main" className={courseId ? "pt-0" : undefined}>
         {!detail && !showUpdates && header}
         {(notice || courseId) && <div role="status" aria-live="polite">
           {notice && (
