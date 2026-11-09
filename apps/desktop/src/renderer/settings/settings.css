@@ -179,7 +179,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   border-top: 1px solid var(--glass-tone);
 }
 
-.settings-card > :is(p, div, details, [role=status], [role=alert]):not(.settings-row, .provider-row, .network-event, .analytics-details, .ai-cli-preferences, .row, .appearance-preview) {
+.settings-card > :is(p, div, details, [role=status], [role=alert]):not(.settings-row, .provider-row, .network-event, .row, .appearance-preview) {
   padding: var(--space-3) var(--space-4);
   font-size: var(--type-sm);
   line-height: 1.5;
@@ -187,10 +187,6 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 
 .settings-card[data-danger=true] {
   background: color-mix(in oklab, var(--danger) 7%, transparent);
-}
-
-.settings-danger {
-  color: var(--danger);
 }
 
 .settings-row {
@@ -323,8 +319,6 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   transform: rotate(45deg);
 }
 
-[data-testid=storage-settings] > .settings-intro:first-child,
-.usage-settings > .settings-intro:first-child,
 .settings-pane .agents-settings > .agents-intro:first-child {
   margin-top: calc(var(--space-5) * -1);
 }
@@ -525,73 +519,6 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   font-size: var(--type-sm);
 }
 
-/* Usage pane */
-.settings-pane .usage-settings {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.settings-pane .usage-settings > .settings-group {
-  margin: 0;
-}
-
-.settings-pane .usage-dashboard,
-.settings-pane .usage-overview {
-  border: 0;
-}
-
-.settings-pane .usage-dashboard-toolbar,
-.settings-pane .usage-breakdown-heading {
-  flex-wrap: wrap;
-}
-
-.settings-pane .usage-settings .settings-control textarea {
-  flex: 1;
-  min-width: 0;
-  width: 100%;
-  font: var(--type-sm) var(--font-mono);
-}
-
-.settings-pane .usage-settings .settings-card > .row {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-  padding: var(--space-3) var(--space-4);
-}
-
-.settings-pane .usage-dashboard-toolbar h3 {
-  font-size: var(--type-md);
-}
-
-.settings-pane .usage-trend {
-  background: var(--glass-tone);
-  border: 0;
-}
-
-.settings-pane .usage-breakdown {
-  background: var(--glass-tone);
-  border: 0;
-}
-
-.settings-pane .usage-breakdown th {
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: var(--type-sm);
-}
-
-.settings-pane .usage-stat-tile {
-  background: var(--glass-tone);
-  border: 0;
-}
-
-.settings-pane .usage-stat-label {
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: var(--type-sm);
-}
-
 .settings-intro p + p {
   margin-top: var(--space-2);
 }
@@ -607,59 +534,6 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 }
 
 .storage-bytes { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted); }
-
-/* Privacy: consent detail, CLI privacy choices. Wording lives in analytics-ui and ai-cli. */
-.settings-card > .analytics-details {
-  padding: var(--space-4);
-  gap: var(--space-3);
-  font-size: var(--type-sm);
-  line-height: 1.5;
-}
-
-.settings-pane .analytics-details > p {
-  color: var(--muted);
-}
-
-.settings-pane .analytics-details details > summary {
-  width: fit-content;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.settings-pane .analytics-details ul {
-  list-style: disc;
-  padding-inline-start: var(--space-5);
-  margin-top: var(--space-2);
-  color: var(--muted);
-}
-
-.settings-pane .analytics-details > [data-slot=button],
-.settings-pane .analytics-deletion [data-slot=button] {
-  justify-self: start;
-}
-
-.settings-pane .analytics-id code {
-  font-size: var(--type-xs);
-}
-
-.settings-pane .ai-cli-preferences p,
-.settings-pane .ai-cli-consent {
-  font-size: var(--type-base);
-  line-height: 1.5;
-}
-
-.settings-pane .ai-cli-consent small {
-  font-size: var(--type-sm);
-}
-
-.settings-pane .ai-cli-consent input {
-  accent-color: var(--ink);
-}
-
-.settings-pane .ai-cli-preferences [data-slot=button] {
-  min-height: 0;
-}
 
 .settings-section-select[data-slot=select-trigger] { display:none; }
 

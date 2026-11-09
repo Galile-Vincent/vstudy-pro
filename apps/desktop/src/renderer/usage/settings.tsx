@@ -87,7 +87,7 @@ export function UsageSettings() {
   };
 
   return (
-    <section className="usage-settings" aria-label={tr('common:usage_settings')}>
+    <section className="usage-settings flex flex-col gap-[var(--space-6)]" aria-label={tr('common:usage_settings')}>
       <div className="settings-intro">
         <p>{tr('novice:usage_help')}</p>
         <p>{balanceNote()}</p>
@@ -191,7 +191,7 @@ export function UsageSettings() {
               )}
             </p>
             </details>
-            <div className="row">
+            <div className="flex flex-wrap justify-end gap-[var(--space-2)]">
               <Button variant="default" size="sm" onClick={() => void save()}>
                 {tr('common:save_usage_settings')}
               </Button>

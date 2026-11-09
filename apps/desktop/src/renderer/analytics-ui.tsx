@@ -67,7 +67,7 @@ export function AnalyticsSettings() {
         window.dispatchEvent(new Event('analytics-consent-changed'));
       }).catch(() => setError(true)).finally(() => setBusy(false));
     }}/></SettingRow>
-    <div className="analytics-details"><AnalyticsDisclosure/><details><summary>{tr('analytics:exact')}</summary><ul>{['device','activity','ai','school'].map(key => <li key={key}>{tr(`analytics:collect_${key}`)}</li>)}</ul></details>
+    <div className="analytics-details !p-0 text-[length:var(--type-sm)] leading-normal"><AnalyticsDisclosure/><details><summary>{tr('analytics:exact')}</summary><ul>{['device','activity','ai','school'].map(key => <li key={key}>{tr(`analytics:collect_${key}`)}</li>)}</ul></details>
     <p>{tr('analytics:installation')}</p><div className="analytics-id"><code>{id ?? tr('analytics:unavailable')}</code><Button variant="secondary" disabled={!id} onClick={() => { if (id) void navigator.clipboard.writeText(id).then(() => setCopied(true)).catch(() => setError(true)); }}>{tr('analytics:copy')}</Button></div>
     {copied && <p role="status">{tr('analytics:copied')}</p>}
     {(state?.deletion_pending || deletion) && <p role="status">{tr('analytics:pending')}</p>}
