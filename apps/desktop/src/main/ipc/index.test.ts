@@ -134,6 +134,8 @@ it('wires all update channels, filters push owners, confirms notes and protects 
     snapshot.state={status:'ready',version:'0.4.5'} as typeof snapshot.state;
     await handlers.get('updates:install')!(event as never,{});expect(updates.install).not.toHaveBeenCalled();
     const dialogs = mocks.confirm.mock.calls.length;
+    await handlers.get('updates:download')!(event as never,{});
+    expect(mocks.confirm).toHaveBeenCalledTimes(dialogs);
     let consent: (value:{response:number})=>void = ()=>{};
     mocks.confirm.mockImplementationOnce(()=>new Promise(resolve=>{consent=resolve;}));
     let finish=()=>{};const drain=new Promise<void>(resolve=>{finish=resolve;});

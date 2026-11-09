@@ -110,14 +110,19 @@ export function registerIpc(
     });
     registrar.handle('updates:check', () => updates.check());
     const updateConsent = async (event:IpcMainInvokeEvent, action:'download' | 'install') => {
-      const detail = tr('updates:confirm_detail');
+      const state = updates.snapshot().state;
+      if (action === 'download' && state.status !== 'available') return false;
+      const detail = action === 'download' && state.status === 'available'
+        ? tr('updates:download_detail', {version:state.version,
+          size:state.size ? tr('updates:download_size', {size:(state.size / 1048576).toFixed(1)}) : ''})
+        : tr('updates:confirm_detail');
       const result = await showAttachedMessage({type:'question',message:tr(`updates:confirm_${action}`),
         detail,buttons:[tr('common:cancel'),tr('updates:continue')],
         defaultId:0,cancelId:0}, event.sender);
       return result.response === 1 && !event.sender.isDestroyed();
     };
     registrar.handle('updates:download', async (_request,event) =>
-      await updateConsent(event,'download') ? updates.download() : updates.snapshot());
+      updates.snapshot().state.status === 'available' && await updateConsent(event,'download') ? updates.download() : updates.snapshot());
     registrar.handle('updates:cancel', () => updates.cancelWait());
     let installing = false;
     registrar.handle('updates:install', async (_request,event) => {

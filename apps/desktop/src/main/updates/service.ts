@@ -69,7 +69,7 @@ export class Updates {
     const on = (name: Parameters<Updater['on']>[0], callback: (...args: never[]) => void) => {
       updater.on(name, callback); this.events.push([name, callback]);
     };
-    on('update-available', (info: {version:string}) => this.dispatch({type:'available', version:info.version}));
+    on('update-available', (info: {version:string; files?:{size?:number}[]}) => this.dispatch({type:'available', version:info.version, size:info.files?.[0]?.size}));
     on('update-not-available', () => this.dispatch({type:'current'}));
     on('download-progress', (info: {percent:number}) => this.dispatch({type:'progress', percent:info.percent}));
     on('update-downloaded', (info: {version:string}) => this.dispatch({type:'ready', version:info.version}));

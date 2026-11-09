@@ -28,5 +28,7 @@
   "waiting": "正在等待工作完成",
   "work_active": "仍有工作進行中",
   "not_now": "暫時不要",
-  "restart_now": "立即重新啟動並停止工作"
+  "restart_now": "立即重新啟動並停止工作",
+  "download_detail": "下載 {{version}} 版本{{size}}？",
+  "download_size": "（{{size}} MB）"
 }

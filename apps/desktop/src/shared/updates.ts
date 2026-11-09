@@ -3,7 +3,7 @@ const version = z.string().regex(/^\d+\.\d+\.\d+$/);
 export const updateStateSchema = z.discriminatedUnion('status', [
   z.object({ status: z.literal('idle') }).strict(),
   z.object({ status: z.literal('checking') }).strict(),
-  z.object({ status: z.literal('available'), version,
+  z.object({ status: z.literal('available'), version, size:z.number().positive().optional(),
     releaseUrl: z.string().regex(/^https:\/\/github\.com\/ava-apple\/vstudy-pro\/releases\/tag\/v\d+\.\d+\.\d+$/) }).strict(),
   z.object({ status: z.literal('downloading'), percent: z.number().finite().min(0).max(100) }).strict(),
   z.object({ status: z.literal('ready'), version }).strict(),

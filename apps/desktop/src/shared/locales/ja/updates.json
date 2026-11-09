@@ -28,5 +28,7 @@
   "waiting": "作業の完了を待っています",
   "work_active": "作業がまだ実行中です",
   "not_now": "後で",
-  "restart_now": "作業を停止して今すぐ再起動"
+  "restart_now": "作業を停止して今すぐ再起動",
+  "download_detail": "バージョン {{version}}{{size}} をダウンロードしますか？",
+  "download_size": "（{{size}} MB）"
 }

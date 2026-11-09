@@ -1,5 +1,5 @@
 import { updateStateSchema, type UpdateState } from '../../shared/updates';
-export type UpdateEvent = { type: 'check' } | { type: 'available'; version: string }
+export type UpdateEvent = { type: 'check' } | { type: 'available'; version: string; size?:number | undefined }
   | { type: 'current' } | { type: 'download' } | { type: 'progress'; percent: number }
   | { type: 'ready'; version: string } | { type: 'error'; code: Extract<UpdateState, {status:'error'}>['code'] };
 export function reduceUpdate(state: UpdateState, event: UpdateEvent): UpdateState {
@@ -7,7 +7,7 @@ export function reduceUpdate(state: UpdateState, event: UpdateEvent): UpdateStat
   switch (event.type) {
     case 'check': return ['idle', 'error', 'available'].includes(state.status) ? { status: 'checking' } : state;
     case 'available': return state.status === 'checking' ? updateStateSchema.parse({ status: 'available',
-      version: event.version, releaseUrl: `https://github.com/ava-apple/vstudy-pro/releases/tag/v${event.version}` }) : state;
+      version: event.version, ...(event.size ? {size:event.size} : {}), releaseUrl: `https://github.com/ava-apple/vstudy-pro/releases/tag/v${event.version}` }) : state;
     case 'current': return state.status === 'checking' ? { status: 'idle' } : state;
     case 'download': return state.status === 'available' ? { status: 'downloading', percent: 0 } : state;
     case 'progress': return state.status === 'downloading' && Number.isFinite(event.percent)
