@@ -706,10 +706,8 @@ function CoursesBody({
                     ))}
                   </TabsList>
                   <TabsContent value="content">
-                    <div className="moodle-content-summary">
-                      <section className="moodle-panel">
-                        <div className="moodle-section-heading">
-                          <h2>{tr("moodle:up_next")}</h2>
+                    <div className="grid items-start gap-6 mb-6 min-[1280px]:grid-cols-2">
+                      <Section title={tr("moodle:up_next")} actions={
                           <Button
                             variant="ghost"
                             onClick={() => setTab("deadlines")}
@@ -717,7 +715,7 @@ function CoursesBody({
                             {tr("moodle:view_all")}
                             <ChevronRight />
                           </Button>
-                        </div>
+                        }>
                         {deadlines(
                           detail.deadlines
                             .filter(
@@ -728,11 +726,10 @@ function CoursesBody({
                             .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
                             .slice(0, 1),
                         )}
-                      </section>
-                      <section className="moodle-panel">
-                        <h2>{tr("moodle:latest_updates")}</h2>
+                      </Section>
+                      <Section title={tr("moodle:latest_updates")}>
                         {notifications(3)}
-                      </section>
+                      </Section>
                     </div>
                     {panelStatus('contents','completion','teachers')}
                     {detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}
