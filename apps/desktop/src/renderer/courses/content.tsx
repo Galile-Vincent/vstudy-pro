@@ -1,4 +1,5 @@
 import { CourseFileActions, type DocumentAction, type DocumentOutcome } from '../document-open';
+import { flushSync } from "react-dom";
 import { useMoodleWebview } from './webview';
 import {
   createElement,
@@ -251,6 +252,7 @@ export function CourseContent({
         detail.sections.some(section => section.current) && <Toolbar right={
           <Button variant="ghost" onClick={() => {
             const current = detail.sections.find(section => section.current);
+            if (current?.accessible) flushSync(() => setWeekOpen(current.id, true));
             const heading = document.getElementById(`week-heading-${current?.id}`);
             heading?.focus({ preventScroll: true });
             heading?.scrollIntoView?.({
