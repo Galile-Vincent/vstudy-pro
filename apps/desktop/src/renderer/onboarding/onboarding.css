@@ -57,7 +57,6 @@ html[data-theme-transition=tokens] .product-preview-light { transition:opacity 3
 .onboarding .analytics-sources label:has(:focus-visible) { outline:2px solid var(--focus); outline-offset:2px; }
 .onboarding .analytics-disclosure { gap:var(--space-3); }
 .onboarding .analytics-disclosure p { line-height:1.5; }
-.onboarding .analytics-choices { gap:var(--space-3); }
 .onboarding-walkthrough { padding:var(--space-4); border:1px solid var(--hairline); border-radius:var(--r-md); }
 .onboarding-walkthrough > summary { cursor:pointer; font-weight:500; }
 .onboarding-walkthrough[open] > summary { margin-bottom:var(--space-4); }
