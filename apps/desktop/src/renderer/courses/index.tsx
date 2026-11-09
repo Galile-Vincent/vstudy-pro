@@ -972,26 +972,15 @@ function CoursesBody({
           </div>
         ) : (
           !error && (
-            <div className="moodle-empty">
-              <GraduationCap />
-              <h2>
-                {tr(
-                  overview?.accounts.length
-                    ? overview.accounts.some((account) => !account.syncedAt)
-                      ? "moodle:syncing"
-                      : "moodle:no_courses"
-                    : "moodle:empty_title",
-                )}
-              </h2>
-              {!overview?.accounts.length && (
-                <p>{tr("moodle:empty_description")}</p>
-              )}
-              {!overview?.accounts.length && (
-                <Button onClick={() => setConnect(true)}>
-                  {tr("moodle:connect_school")}
-                </Button>
-              )}
-            </div>
+            <EmptyState icon={<GraduationCap />} title={tr(
+              overview?.accounts.length
+                ? overview.accounts.some(account => !account.syncedAt)
+                  ? "moodle:syncing" : "moodle:no_courses"
+                : "moodle:empty_title",
+            )} description={!overview?.accounts.length ? tr("moodle:empty_description") : undefined}
+              action={!overview?.accounts.length && <Button onClick={() => setConnect(true)}>
+                {tr("moodle:connect_school")}
+              </Button>} />
           )
         )}
         <Dialog open={!!confirmDisconnect} onOpenChange={open => { if (!open) setConfirmDisconnect(undefined); }}>
