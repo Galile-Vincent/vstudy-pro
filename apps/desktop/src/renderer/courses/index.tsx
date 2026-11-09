@@ -205,7 +205,6 @@ function CoursesBody({
     setOverview(next);
     setDetail(course);
     setHomeDetails(summaries);
-    setError(false);
   }, [api, courseId]);
   useEffect(() => {
     let current = true;
@@ -234,6 +233,7 @@ function CoursesBody({
     if (event.courseId && event.courseId !== courseId) return;
     if (!event.courseId) {setProgress(event);setSyncing(event.state === 'loading');}
     if (event.state === 'error') setError(true);
+    else if (event.state === 'idle' && event.completed === event.total) setError(false);
     reorder ||= event.state === 'idle' && event.completed === event.total;
     if (!timer) timer=setTimeout(() => {timer=undefined;const completed=reorder;reorder=false;void refresh(completed).catch(() => setError(true));},50);
     });
