@@ -239,6 +239,7 @@ test('all four staged artifacts assemble with correct update hashes, stable alia
     await writeFile(join(input, names.installer), `installer-${target.key}`);
     await writeFile(join(input, names.archive), `archive-${target.key}`);
     const updateName = target.platform === 'mac' ? names.archive : names.installer;
+    await writeFile(join(input, `${updateName}.blockmap`), 'blockmap');
     const sha512 = createHash('sha512').update(await readFile(join(input, updateName))).digest('base64');
     await writeFile(join(input, target.platform === 'mac' ? 'latest-mac.yml' : 'latest.yml'), JSON.stringify({ version, path: updateName, sha512, files: [{ url: updateName, sha512 }] }));
     await writeFile(join(input, 'signing.json'), JSON.stringify({ schemaVersion: 1, target: target.key, mode: 'unsigned', signed: false, notarized: false }));

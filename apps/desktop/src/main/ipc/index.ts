@@ -49,6 +49,7 @@ import { registerChatIpc } from "./chat";
 
 /** App-owned transport and packaged paths are injected only by the composition root. */
 export interface AppIpcOptions {
+  updates?: import('../updates/service').Updates;
   newsletterConsent?:NewsletterConsentHook;
   moodleRequest?:typeof fetch;
   mcpPaths?:{peerHelper?:string;serverBin:string};
@@ -91,7 +92,32 @@ export function registerIpc(
     const result = await showAttachedMessage({ type: 'question', message: tr("settings:external",{target:target.hostname || target.protocol}), detail: target.protocol === 'mailto:' ? tr('settings:mail_detail',{address:decodeURIComponent(target.pathname),subject:target.searchParams.get('subject') ?? '',length:(target.searchParams.get('body') ?? '').length,url}) : url, buttons: [tr('common:cancel'), tr('common:open')], defaultId: 0, cancelId: 0 }, owner);
     if (result.response === 1 && !owner.isDestroyed()) { recordEgress('external_open', target.protocol === 'mailto:' ? 'Default mail application' : target.origin); await shell.openExternal(url); }
   };
-  registrar.handle('shell:openExternal', async ({url},event)=>{await confirmExternal(event.sender,url);return {ok:true};});
+  const updates = options.updates;
+  const updateOwners = new Set<IpcMainInvokeEvent>();
+  const stopUpdates = updates?.subscribe(snapshot => {
+    for (const event of updateOwners) {
+      if (event.sender.isDestroyed() || !isTrusted(event)) updateOwners.delete(event);
+      else event.sender.send('updates:state', snapshot);
+    }
+  });
+  if (updates) {
+    for (const channel of ['updates:state', 'updates:check', 'updates:download',
+      'updates:install', 'updates:setAuto', 'updates:notes'] as const) implemented.add(channel);
+    registrar.handle('updates:state', (_request, event) => {
+      for (const prior of updateOwners) if (prior.sender === event.sender) updateOwners.delete(prior);
+      updateOwners.add(event); return updates.snapshot();
+    });
+    registrar.handle('updates:check', () => updates.check());
+    registrar.handle('updates:download', () => updates.download());
+    registrar.handle('updates:install', () => updates.install());
+    registrar.handle('updates:setAuto', ({enabled}) => updates.setAuto(enabled));
+    registrar.handle('updates:notes', async (_request, event) => {
+      const state = updates.snapshot().state;
+      if (state.status === 'available') await confirmExternal(event.sender, state.releaseUrl);
+      return {ok:true};
+    });
+  }
+  registrar.handle('shell:openExternal' , async ({url},event)=>{await confirmExternal(event.sender,url);return {ok:true};});
   const webChats=new WebChats(confirmExternal);
   for(const channel of ['web-chat:open','web-chat:state','web-chat:layout','web-chat:action','web-chat:clear','web-chat:hide','web-chat:sync'] as const) implemented.add(channel);
   registrar.handle('web-chat:sync',({tabIds},event)=>webChats.sync(event.sender,tabIds));
@@ -173,5 +199,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { await webChats.dispose(); await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async () => { stopUpdates?.(); updates?.dispose(); await webChats.dispose(); await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
 }
