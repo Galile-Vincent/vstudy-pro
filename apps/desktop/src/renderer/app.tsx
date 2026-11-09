@@ -1,3 +1,4 @@
+import { DeletionNotice } from './deletion-notice';
 import { ChatSessionHost } from './chat-session-host';
 import { MoodleWebviewPane } from './courses/webview-pane';
 import { documentIdSchema } from '../shared/domain';
@@ -72,7 +73,7 @@ function Views() {
 function Application() {
   return (
     <AgentsProvider>
-      <AppShell sidebar={<LibrarySidebar />} status={<AgentStatus />}>
+      <AppShell sidebar={<LibrarySidebar />} status={<><DeletionNotice /><AgentStatus /></>}>
         <ExistingAnalyticsPrompt/><ContextCoach /><ChatSessionHost><ActiveViews /></ChatSessionHost><GlobalSettings /><LearningHelp /><HistoryFinder/><AiCliSetupHost/><AgentConsent /><AgentNavigation />
       </AppShell>
     </AgentsProvider>

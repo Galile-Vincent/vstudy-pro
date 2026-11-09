@@ -14,7 +14,7 @@
   "retry": "重試",
   "offline": "離線模式",
   "delete": "刪除所有資料",
-  "delete_copy": "永久移除本應用程式的文件、對話、儲存的金鑰、應用程式快取及轉換器環境，然後結束程式。資料庫外的原始檔案、CLI 登入與共用的 Python 下載快取會保留。",
+  "delete_copy": "移除本應用程式的文件、對話、已儲存金鑰、快取和轉換環境，然後重新啟動。刪除會在重新啟動時完成；被鎖定的檔案將於下次啟動重試。資料庫外的原始檔案、CLI 登入和共用 Python 下載快取會保留。",
   "confirm": "輸入 DELETE 以確認",
   "waiting": "正在等待鑰匙圈存取…",
   "keychain_failed": "無法存取鑰匙圈。請重試，或使用但不儲存金鑰。",
@@ -117,5 +117,6 @@
   "remove_key_copy": "您需要重新輸入金鑰才能使用此服務。",
   "provider_action": "{{action}} — {{name}}",
   "delete_pending": "部分資料無法移除。應用程式重新啟動時會再次嘗試刪除。",
-  "delete_in_progress": "正在刪除資料。"
+  "delete_in_progress": "正在刪除資料。",
+  "delete_not_scheduled": "無法安排刪除。您的資料仍保留。請重新啟動後再試。{{reason}}"
 }

@@ -4,7 +4,7 @@ const io = vi.hoisted(() => ({rename:vi.fn(),rm:vi.fn(),readdir:vi.fn(),open:vi.
 const workers = vi.hoisted(() => ({suspend:vi.fn(),waitForIdle:vi.fn(),resume:vi.fn()}));
 vi.mock('node:fs/promises', () => io);
 vi.mock('../review/workers', () => ({reviewWorkers:workers}));
-beforeEach(() => {vi.resetAllMocks(); io.lstat.mockResolvedValue({isSymbolicLink:()=>false}); io.open.mockResolvedValue({writeFile:vi.fn(),sync:vi.fn(),close:vi.fn()});});
+beforeEach(() => {vi.resetAllMocks(); io.readdir.mockResolvedValue([]); io.lstat.mockResolvedValue({isSymbolicLink:()=>false}); io.open.mockResolvedValue({writeFile:vi.fn(),sync:vi.fn(),close:vi.fn()});});
 function setup() {
   const stop=vi.fn(), report=vi.fn(), relaunch=vi.fn();
   return {stop,report,relaunch,run:createDataDeletion('/owned',stop,report,relaunch)};
@@ -15,7 +15,7 @@ it.each(['EACCES','EPERM','EBUSY'])('preserves all data on rename failure %s and
   await s.run();
   expect(s.stop).toHaveBeenCalledOnce();
   expect(io.rm).not.toHaveBeenCalled();
-  expect(s.report).toHaveBeenCalledWith(expect.objectContaining({code}));
+  expect(s.report).toHaveBeenCalledWith(expect.objectContaining({code}),true);
   expect(io.open).toHaveBeenCalledWith('/owned.delete-pending','w',0o600);
   expect(s.relaunch).toHaveBeenCalledOnce();
 });
@@ -33,13 +33,13 @@ it('holds admission across concurrent calls and failures', async () => {
   await vi.waitFor(()=>expect(s.stop).toHaveBeenCalledOnce());
   io.rename.mockRejectedValueOnce(new Error('INCOMPLETE'));
   release(); await first; await expect(s.run()).rejects.toThrow('already in progress');
-  expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'INCOMPLETE'}));
+  expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'INCOMPLETE'}),true);
   expect(s.stop).toHaveBeenCalledOnce(); expect(s.relaunch).toHaveBeenCalledOnce();
 });
 it('reports partial stop failure and always relaunches', async () => {
   const s=setup(); s.stop.mockRejectedValueOnce(new Error('stop failed'));
   await s.run(); expect(io.rename).not.toHaveBeenCalled();
-  expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'stop failed'}));
+  expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'stop failed'}),true);
   expect(s.relaunch).toHaveBeenCalledOnce();
 });
 it('retries quarantines next startup, including incomplete cleanup', async () => {
@@ -60,7 +60,19 @@ it.each(['stop','workers'])('bounds a hanging %s and reports before restarting',
     const pending = s.run();
     await vi.advanceTimersByTimeAsync(15_001);
     await pending;
-    expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'Deletion quiesce timed out'}));
+    expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'Deletion quiesce timed out'}),true);
     expect(s.relaunch).toHaveBeenCalledOnce();
   } finally { vi.useRealTimers(); }
+});
+it('retries cleanup and returns a visible failure state', async () => {
+  io.readdir.mockResolvedValue(['owned.deleting-123-12345678-1234-1234-1234-123456789abc']);
+  io.rm.mockRejectedValue(Error('locked'));
+  expect(await cleanupDeletedData('/owned',vi.fn())).toBe(false);
+  expect(io.rm).toHaveBeenCalledWith(expect.any(String),expect.objectContaining({maxRetries:5,retryDelay:200}));
+});
+it('does not promise deferred deletion when the marker cannot be persisted', async () => {
+  io.open.mockRejectedValueOnce(Error('disk full'));
+  const s = setup(); await s.run();
+  expect(s.stop).not.toHaveBeenCalled();
+  expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'disk full'}),false);
 });

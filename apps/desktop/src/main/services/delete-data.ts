@@ -6,17 +6,22 @@ import { randomUUID } from 'node:crypto';
 export function createDataDeletion(
   root: string,
   stop: () => Promise<void>,
-  report: (error: unknown) => Promise<unknown>,
+  report: (error: unknown, scheduled?: boolean) => Promise<unknown>,
   relaunch: () => void,
 ): () => Promise<void> {
   let started = false;
   return async () => {
     if (started) throw Error('Deletion already in progress');
     started = true;
+    let scheduled = false;
     try {
       reviewWorkers.suspend('delete-all');
       await markDeletionPending(root);
-      await quiesce(async () => { await reviewWorkers.waitForIdle(); await stop(); });
+      scheduled = true;
+      await quiesce(async () => {
+        await reviewWorkers.waitForIdle();
+        await stop();
+      });
       if (process.platform === 'win32' || (await lstat(root)).isSymbolicLink()) {
         await realpath(root);
       }
@@ -24,12 +29,13 @@ export function createDataDeletion(
         try {
           await rename(root, `${root}.deleting-${Date.now()}-${randomUUID()}`);
           await rm(root + '.delete-pending', {force:true});
+          await cleanupDeletedData(root, event => { void report(event.error, true); });
         }
-        catch (error) { await markDeletionPending(root); await report(error); }
+        catch (error) { await report(error, scheduled); }
       }
     } catch (error) {
       reviewWorkers.resume('delete-all');
-      await report(error);
+      await report(error, scheduled);
     } finally {
       relaunch();
     }
@@ -38,15 +44,17 @@ export function createDataDeletion(
 
 export async function cleanupDeletedData(
   root: string, log: (event: {phase:string;error:unknown}) => void,
-): Promise<void> {
+): Promise<boolean> {
+  let complete = true;
   try {
     const parent = dirname(root), prefix = `${basename(root)}.deleting-`;
     const entries = await readdir(parent);
     await Promise.all(entries.filter(name => name.startsWith(prefix)).map(async name => {
-      try { await rm(join(parent,name), {recursive:true,force:true}); }
-      catch (error) { log({phase:'delete-cleanup-failed',error}); }
+      try { await rm(join(parent,name), removeOptions); }
+      catch (error) { complete = false; log({phase:'delete-cleanup-failed',error}); }
     }));
-  } catch (error) { log({phase:'delete-cleanup-failed',error}); }
+  } catch (error) { complete = false; log({phase:'delete-cleanup-failed',error}); }
+  return complete;
 }
 
 const removeOptions = {recursive:true, force:true, maxRetries:5, retryDelay:200};
@@ -84,7 +92,10 @@ export async function finishPendingDeletion(
     log({phase:'delete-pending-failed',error}); return false;
   }
   try {
-    const target = await realpath(root);
+    const target = await realpath(root).catch(error => {
+      if (error.code === 'ENOENT') return root;
+      throw error;
+    });
     let partitions: string[] = [];
     try {
       const directory = join(target, 'Partitions');
@@ -94,7 +105,10 @@ export async function finishPendingDeletion(
         if ((await lstat(join(directory,name))).isSymbolicLink()) throw Error('Unsafe session partition');
       }
     } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-    for (const name of await readdir(target)) {
+    for (const name of await readdir(target).catch(error => {
+      if (error.code === 'ENOENT') return [];
+      throw error;
+    })) {
       if (ownedEntry(name)) await rm(join(target, name), removeOptions);
     }
     await clearSessions(partitions);

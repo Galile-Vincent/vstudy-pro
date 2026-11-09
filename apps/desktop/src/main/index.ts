@@ -255,7 +255,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
       current.flushStorageData();
     }
   }, log);
-  void cleanupDeletedData(userData, log);
+  const cleanupFinished = await cleanupDeletedData(userData, log);
   mkdirSync(userData, { recursive: true });
   await rollbackRestoreStartup(userData);
   await recoverRestore(userData);
@@ -314,6 +314,8 @@ if (ownsApplication) void app.whenReady().then(async () => {
     process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {},
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
+  ipcMain.removeHandler('settings:deletionStatus');
+  deletion.handle('settings:deletionStatus', () => ({pending:!deletionFinished || !cleanupFinished}));
   ipcMain.removeHandler('settings:deleteAllData');
   const deleteData = createDataDeletion(userData, async () => {
     deletingData = true;
@@ -329,10 +331,10 @@ if (ownsApplication) void app.whenReady().then(async () => {
     await session.defaultSession.cookies.flushStore();
     store?.close();
     store = undefined;
-  }, async error => {
+  }, async (error, scheduled) => {
     const reason = error instanceof Error ? error.message : String(error);
     log({phase:'delete-quarantine-failed',error});
-    dialog.showErrorBox(tr('settings:delete_title'), tr('settings:delete_failed',{reason}));
+    dialog.showErrorBox(tr('settings:delete_title'), tr(scheduled ? 'settings:delete_failed' : 'settings:delete_not_scheduled',{reason}));
   }, () => { restartOwnedApp(app); });
   let deleteRequested = false;
   deletion.handle('settings:deleteAllData', async (_request, event) => {
@@ -357,9 +359,6 @@ if (ownsApplication) void app.whenReady().then(async () => {
   analytics()?.track('app_performance_sample',{startup_ms:Math.round(performance.now()-analyticsStartup)});
   if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
-  if (!deletionFinished) void dialog.showMessageBox(window!, {
-    type:'warning', message:tr('settings:delete_pending'),
-  }).catch(error => log({phase:'delete-notice-failed',error}));
   startupComplete = true;
   resolveAppReady(true);
 }).catch(async error => {

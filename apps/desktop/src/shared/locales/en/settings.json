@@ -14,7 +14,7 @@
   "retry": "Retry",
   "offline": "Offline mode",
   "delete": "Delete all data",
-  "delete_copy": "Permanently remove this app’s documents, conversations, saved keys, app caches and converter environment, then quit. Original files outside the library, CLI logins and shared Python download caches are kept.",
+  "delete_copy": "Remove this app’s documents, conversations, saved keys, app caches and converter environment, then restart. Removal completes at restart; locked files will be retried on the next start. Original files outside the library, CLI logins and shared Python download caches are kept.",
   "confirm": "Type DELETE to confirm",
   "waiting": "Waiting for Keychain access…",
   "keychain_failed": "Couldn’t access the Keychain. Retry or use without saving keys.",
@@ -117,5 +117,6 @@
   "remove_key_copy": "You will need to enter a key again to use this provider.",
   "provider_action": "{{action}} — {{name}}",
   "delete_pending": "Some data could not be removed. Deletion will retry when the app restarts.",
-  "delete_in_progress": "Deletion is already in progress."
+  "delete_in_progress": "Deletion is already in progress.",
+  "delete_not_scheduled": "Deletion could not be scheduled. Your data remains. Restart and try again. {{reason}}"
 }

@@ -140,6 +140,7 @@ export function createMockBridge(): DesktopApi {
       case "welcome:sampleDocument":
         result = mockMarkdown;
         break;
+      case 'settings:deletionStatus': return {pending:false} as IpcResponse<C>;
       case "settings:get":
         result = settings;
         break;
