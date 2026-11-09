@@ -14,12 +14,12 @@
 .app-shell .shell-brand { display:flex; flex-direction:row; align-items:center; gap:var(--space-3); padding:var(--space-3) var(--space-2) var(--space-8); font-size:var(--type-md); letter-spacing:-.02em; }
 .art-reader-brand-mark { width:32px; height:32px; display:grid; place-items:center; border-radius:var(--art-reader-control); color:var(--accent-foreground); background:var(--accent-color); }
 .art-reader-sidebar-label { margin:var(--space-2) var(--space-3) var(--space-3); font-size:var(--type-xs); font-weight:500; color:var(--muted); }
-.shell-sidebar [data-slot=sidebar-content] { gap:var(--space-2); }
-.shell-sidebar [data-slot=sidebar-group] { padding:0; margin-bottom:var(--space-4); }
-.app-shell .shell-sidebar button[data-slot=sidebar-menu-button] { min-height:44px; border-radius:var(--art-reader-control); }
+.shell-sidebar [data-slot=sidebar-content] { gap:var(--space-4); }
+.shell-sidebar [data-slot=sidebar-group] { padding:0; margin-bottom:0; }
+.app-shell .shell-sidebar button[data-slot=sidebar-menu-button] { min-height:36px; border-radius:var(--art-reader-control); }
 .app-shell .shell-sidebar button[aria-current=page] { color:var(--accent-color); background:var(--surface); box-shadow:var(--glass-shadow); }
 .app-shell .shell-sidebar button[aria-current=page]::before { opacity:0; }
-.app-shell .shell-sidebar .library-smart button { min-height:40px; font-size:var(--type-sm); }
+.app-shell .shell-sidebar .library-smart button { min-height:36px; font-size:var(--type-sm); }
 .app-shell .shell-sidebar .sidebar-label { padding-inline:var(--space-3); margin-top:var(--space-6); color:var(--muted); font-size:var(--type-xs); font-weight:500; }
 .app-shell .shell-sidebar .sidebar-empty { margin-inline:var(--space-3); color:var(--muted); }
 .shell-sidebar .folder-tree { margin-top:var(--space-2); }
