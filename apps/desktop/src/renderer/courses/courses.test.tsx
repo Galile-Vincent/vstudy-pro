@@ -876,7 +876,24 @@ it("C1 confirms the named school before catalog disconnect", async () => {
   expect(disconnect).not.toHaveBeenCalled();
   const dialog = getByRole(document.body, "dialog");
   expect(dialog.textContent).toContain(account.siteName);
-  await act(async () => getByRole(dialog, "button", { name: "Disconnect" }).click());
+  await act(async () => getByRole(dialog, "button", { name: "Disconnect school" }).click());
   expect(disconnect).toHaveBeenCalledExactlyOnceWith(account.id);
+});
+
+it("C3 retains sync failure across cached overview reads", async () => {
+  const api = createMockMoodleApi();
+  let listener: Parameters<NonNullable<MoodleApi["onProgress"]>>[0];
+  api.onProgress = value => { listener = value; return () => {}; };
+  await mount(api);
+  await act(async () => {
+    listener!({ accountId: (await api.overview()).accounts[0]!.id, state: "error", completed: 0, total: 1 });
+    await new Promise(resolve => setTimeout(resolve, 70));
+  });
+  expect(host.querySelector('[role="alert"]')).not.toBeNull();
+  await act(async () => {
+    listener!({ accountId: (await api.overview()).accounts[0]!.id, state: "idle", completed: 1, total: 1 });
+    await new Promise(resolve => setTimeout(resolve, 70));
+  });
+  expect(host.querySelector('[role="alert"]')).toBeNull();
 });
 
