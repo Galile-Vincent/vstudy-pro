@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { z } from 'zod';
-import { studyScopeSchema } from '../../shared/review-artifacts';
+import { MAX_REVIEW_CONCEPTS, studyScopeSchema } from '../../shared/review-artifacts';
 import type { IpcResponse } from '../../shared/ipc';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
@@ -59,13 +59,15 @@ export function ScopePicker({ courseId, selection, onChange, needsSourceSelectio
   const loading = page?.loading ?? (kind === 'documents' && documentsLoading);
   const error = page?.error ?? (kind === 'documents' && documentError);
   return <fieldset className="review-scope">
+    {kind === 'concepts' && selected.length >= MAX_REVIEW_CONCEPTS &&
+      <p role="status">{tr('review:scope_limit', { count: MAX_REVIEW_CONCEPTS })}</p>}
     <legend>{tr('review:scope_title')}</legend>
     <label>{tr('review:scope_kind')}<select value={kind} onChange={event => setKind(event.target.value as ReviewScope['kind'])}>{(['units', 'documents', 'dates', 'concepts', 'weak'] as const).map(value => <option key={value} value={value}>{tr(`review:scope_${value}`)}</option>)}</select></label>
     {kind === 'dates' ? <div className="review-actions"><label>{tr('review:scope_from')}<input type="date" value={fromDate} onChange={event => setFromDate(event.target.value)} /></label><label>{tr('review:scope_to')}<input type="date" value={toDate} onChange={event => setToDate(event.target.value)} /></label><span>{zone}</span><p>{tr('review:scope_dates_help')}</p>{fromDate && toDate && !scope && <p role="status">{tr('review:scope_dates_invalid')}</p>}</div> : kind === 'weak' ? <p>{tr('review:scope_weak_help')}</p> : <>
       {kind === 'documents' && <p>{tr('review:scope_documents_help')}</p>}
       {loading && <p role="status">{tr('review:loading')}</p>}
       {error && <p role="alert">{tr('review:error')} <Button type="button" onClick={() => page ? page.retry() : setReload(value => value + 1)}>{tr('review:retry')}</Button></p>}
-      <div className="review-scope-choices">{choices.map(row => <label key={row.key}><input type="checkbox" checked={selected.includes(row.key)} disabled={!selected.includes(row.key) && selected.length >= 100} onChange={() => toggle(row.key, selected, update)} />{row.label}</label>)}</div>
+      <div className="review-scope-choices">{choices.map(row => <label key={row.key}><input type="checkbox" checked={selected.includes(row.key)} disabled={!selected.includes(row.key) && selected.length >= MAX_REVIEW_CONCEPTS} onChange={() => toggle(row.key, selected, update)} />{row.label}</label>)}</div>
       {!loading && !error && !choices.length && <p>{tr('review:scope_empty')}</p>}
       {page?.cursor && <Button type="button" disabled={page.loading} onClick={page.more}>{tr('review:load_more')}</Button>}
     </>}

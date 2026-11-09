@@ -184,3 +184,22 @@ it('asks for consent at the top of the page before memory records anything', asy
   fireEvent.click(screen.getByRole('button', { name: en.consent_turn_on }));
   await waitFor(() => expect(invoke).toHaveBeenCalledWith('review:prefs:set', { memoryEnabled: true, consentAcknowledged: true }));
 });
+
+it('bounds Review today to 100 concepts from 100+20 mastery pages and explains the remainder', async () => {
+  const all = Array.from({ length: 120 }, (_, i) => concept(i + 1, 'needs_review'));
+  fixture({ masteryPages: [all.slice(0, 100), all.slice(100)] });
+  const respond = invoke.getMockImplementation()!;
+  invoke.mockImplementation(async (channel: string, input: never) => {
+    if (channel === 'providers:list') return [{ config: { id: 'p', enabled: true },
+      availability: { available: true }, models: [{ id: 'm', name: 'Model' }] }];
+    return respond(channel, input);
+  });
+  render(<ReviewView />);
+  await screen.findByText('Concept 120');
+  fireEvent.click(screen.getByRole('button', { name: en.today }));
+  const panel = await screen.findByRole('tabpanel', { name: en.tests });
+  expect(within(panel).getByText('Reviewing 100 of 120 concepts; 20 left for another session')).toBeTruthy();
+  expect(within(panel).getAllByRole('checkbox').filter(box => (box as HTMLInputElement).checked)).toHaveLength(100);
+  await waitFor(() => expect((screen.getByRole('button', { name: en.generate_test }) as HTMLButtonElement).disabled).toBe(false));
+});
+

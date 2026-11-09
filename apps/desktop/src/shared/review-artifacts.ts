@@ -3,10 +3,11 @@ import { z } from 'zod';
 const id=z.string().uuid(), text=z.string().min(1).max(240), hash=z.string().regex(/^[a-f0-9]{64}$/), at=z.string().datetime();
 const date=z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value=>{const parsed=new Date(value);return Number.isFinite(parsed.getTime())&&parsed.toISOString().slice(0,10)===value;});
 const zone=z.string().min(1).max(100).refine(value=>{try{new Intl.DateTimeFormat('en',{timeZone:value});return true;}catch{return false;}});
+export const MAX_REVIEW_CONCEPTS = 100;
 export const studyScopeSchema=z.discriminatedUnion('kind',[
  z.object({kind:z.literal('units'),unitIds:z.array(id).min(1).max(100)}).strict(),
  z.object({kind:z.literal('documents'),documentIds:z.array(id).min(1).max(100)}).strict(),
- z.object({kind:z.literal('concepts'),conceptKeys:z.array(text).min(1).max(100)}).strict(),
+ z.object({kind:z.literal('concepts'),conceptKeys:z.array(text).min(1).max(MAX_REVIEW_CONCEPTS)}).strict(),
  z.object({kind:z.literal('dates'),fromDate:date,toDate:date,timeZone:zone}).strict(),
  z.object({kind:z.literal('weak')}).strict(),
 ]);

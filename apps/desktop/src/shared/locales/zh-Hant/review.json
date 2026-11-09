@@ -149,5 +149,10 @@
   "concept_missed_other": "{{label}}：{{count}} 題值得再看看",
   "assumption_sources_omitted": "為了讓這份複習內容不超過長度上限，部分資料沒有納入。",
   "assumption_excerpt_limited": "只使用了「{{document}}」的開頭部分。",
-  "assumption_undated_units": "沒有日期的單元，依你提問的時間歸類：{{units}}"
+  "assumption_undated_units": "沒有日期的單元，依你提問的時間歸類：{{units}}",
+  "bounded_session_other": "本次複習 {{total}} 個概念中的 {{selected}} 個；剩餘 {{count}} 個留待下次複習",
+  "scope_required": "請選擇有效範圍以產生內容：1–100 個項目或有效日期範圍。",
+  "scope_limit_other": "每次最多選擇 {{count}} 個概念。請先取消勾選，再選擇其他概念。",
+  "bounded_session_one": "本次複習 {{total}} 個概念中的 {{selected}} 個；剩餘 {{count}} 個留待下次複習",
+  "scope_limit_one": "每次最多選擇 {{count}} 個概念。請先取消勾選，再選擇其他概念。"
 }

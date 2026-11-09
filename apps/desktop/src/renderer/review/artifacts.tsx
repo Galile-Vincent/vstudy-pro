@@ -63,8 +63,15 @@ export function ArtifactPanel({courseId,kind,selection}:{courseId:string;kind:'n
  const choices=providers.flatMap(p=>p.config.enabled&&p.availability.available?p.models.map(m=>({key:p.config.id+':'+m.id,label:m.name||m.id})):[]);
  const errorKey=artifact?.errorCode?.includes('needs_source_selection')?'needs_sources':artifact?.errorCode?.match(/budget|admission|price/)?'generation_budget':artifact?.errorCode?.match(/offline|network|provider/)?'generation_offline':artifact?.errorCode?.includes('infeasible')?'generation_infeasible':'generation_failed';
  return <section className="review-artifacts"><h2>{tr(kind==='note'?'review:notes':'review:tests')}</h2>
+ {selection?.totalConcepts !== undefined && selection.totalConcepts > selection.conceptKeys.length &&
+  <p role="status">{tr('review:bounded_session', {
+   count: selection.totalConcepts - selection.conceptKeys.length,
+   selected: selection.conceptKeys.length, total: selection.totalConcepts,
+  })}</p>}
  <ScopePicker courseId={courseId} selection={selection} onChange={setScope} size={size} onSizeChange={setSize} needsSourceSelection={artifact?.errorCode==='review.needs_source_selection'}/>
  <div className="review-actions"><label>{tr('review:generation_model')}<select value={model} onChange={e=>setModel(e.target.value)}>{choices.map((m,index)=><option key={m.key} value={index}>{m.label}</option>)}</select></label><Button disabled={busy||artifact?.status==='generating'||!scope||!choices.length} onClick={()=>void run(()=>generate())}>{tr(kind==='note'?'review:generate_note':'review:generate_test')}</Button></div>
+ {!scope&&<p role="status">{tr('review:scope_required')}</p>}
+ {artifact?.status==='generating'&&<p role="status">{tr('review:stage_generating')}</p>}
  {!choices.length&&<p>{tr('review:choose_provider')} <Button onClick={()=>void loadProviders()}>{tr('review:retry')}</Button></p>}
  {failed&&<p role="alert">{tr('review:error')} <Button onClick={()=>void run(async()=>{if(active.current.artifactId)await recover(active.current.artifactId);else{await loadProviders();page.retry();}})}>{tr('review:retry')}</Button></p>}
  {busy&&<p role="status">{tr('review:loading')}</p>}
