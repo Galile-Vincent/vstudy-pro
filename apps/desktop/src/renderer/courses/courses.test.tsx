@@ -970,3 +970,16 @@ it('keeps focus on a surviving target after the last disconnect', async () => {
   await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
   expect(document.activeElement).toBe(host.querySelector('[data-slot=page-header] button:last-child'));
 });
+
+it('shows one Connect school action only after an empty overview loads', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  let resolve!: (value: typeof overview) => void;
+  api.overview = () => new Promise(done => { resolve = done; });
+  await mount(api);
+  expect(host.querySelector('h1:empty')).toBeNull();
+  expect(host.textContent).not.toContain('Connect school');
+  await act(async () => resolve({...overview, accounts: [], courses: []}));
+  expect(host.querySelectorAll('h1:empty')).toHaveLength(0);
+  expect(getByRole(host, 'button', {name: 'Connect school'})).toBeTruthy();
+});
