@@ -5,35 +5,14 @@
   background: var(--subtle);
   color: var(--ink);
 }
-.moodle-content {
-  max-width: 1320px;
-  margin-inline: auto;
-}
-.moodle-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-6);
-  margin-bottom: var(--space-6);
-}
-.moodle-header h1 {
-  font-size: var(--type-display);
-  margin: var(--space-2) 0;
-  line-height: 1.3;
-}
-.moodle-header p {
-  color: var(--muted);
-  margin: 0;
-}
+
 .moodle-eyebrow {
   font-size: var(--type-xs);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.moodle-header .moodle-eyebrow {
-  color: var(--muted);
-}
+
 .moodle-page svg,
 .moodle-reminder svg,
 .moodle-connect svg {
@@ -51,39 +30,7 @@
   margin-bottom: var(--space-3);
   padding-inline: 0;
 }
-.moodle-accounts {
-  margin-bottom: var(--space-8);
-}
-.moodle-account {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  background: color-mix(in oklab, var(--ink) 4%, var(--surface));
-  border: 0;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--r-md);
-}
-.moodle-account > div:not(.moodle-expired) {
-  display: flex;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-  align-items: center;
-  flex: 1;
-}
-.moodle-account span:not(.moodle-avatar),
-.moodle-account small {
-  color: var(--muted);
-  font-size: var(--type-xs);
-}
-.moodle-avatar {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r-sm);
-  background: var(--subtle);
-}
+
 .moodle-banner,
 .moodle-expired {
   display: flex;
@@ -129,9 +76,7 @@
   overflow-wrap: anywhere;
   margin: 0;
 }
-.moodle-due-section {
-  margin-bottom: var(--space-8);
-}
+
 .moodle-page progress {
   width: 100%;
   display: block;
@@ -568,10 +513,7 @@
   .moodle-page {
     padding: var(--space-4);
   }
-  .moodle-header {
-    align-items: start;
-    flex-direction: column;
-  }
+
   .moodle-hero > div:last-child {
     padding: var(--space-4);
   }
@@ -581,9 +523,7 @@
   .moodle-row-main {
     flex-basis: 50%;
   }
-  .moodle-account > small {
-    width: 100%;
-  }
+
   .moodle-file-row {
     flex-wrap: wrap;
   }
@@ -1235,7 +1175,7 @@
   .moodle-agent .moodle-agent-suggestions button { transition: none; }
 }
 @media (prefers-contrast: more), (forced-colors: active) {
-  .moodle-panel, .moodle-week, .moodle-account, .moodle-banner, .moodle-expired, .moodle-empty, .moodle-connect, .moodle-reminder, .moodle-assistant-panel, .moodle-proposal, .moodle-connect input, .moodle-reminder input, .moodle-agent select, .moodle-agent .moodle-agent-suggestions button {
+  .moodle-panel, .moodle-week, .moodle-banner, .moodle-expired, .moodle-empty, .moodle-connect, .moodle-reminder, .moodle-assistant-panel, .moodle-proposal, .moodle-connect input, .moodle-reminder input, .moodle-agent select, .moodle-agent .moodle-agent-suggestions button  {
     border: 1px solid var(--ink);
   }
 }
