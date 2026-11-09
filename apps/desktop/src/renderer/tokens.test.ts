@@ -29,3 +29,19 @@ describe('surface shadow geometry', () => {
     });
   }
 });
+
+it('keeps opaque-mode hover fills distinct from their base fills', () => {
+  for (const selector of [
+    'html[data-reduced-transparency=true],html[data-theme=contrast]',
+    '@media(prefers-reduced-transparency:reduce)',
+    '@media(prefers-contrast:more)',
+  ]) {
+    const block = css.split(selector).slice(1).map(part => part.split('}')[0]!)
+      .find(part => part.includes('--glass-fill:'))!;
+    const base = block.match(/--glass-fill:([^;]+);/)?.[1];
+    const hover = block.match(/--glass-fill-hover:([^;]+);/)?.[1];
+    expect(base, selector).toBeTruthy();
+    expect(hover, selector).toContain('color-mix(');
+    expect(hover, selector).not.toBe(base);
+  }
+});
