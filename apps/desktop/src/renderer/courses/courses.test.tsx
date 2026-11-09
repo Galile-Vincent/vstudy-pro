@@ -865,3 +865,18 @@ describe("Courses view switch", () => {
     expect(row.querySelectorAll(".course-column-headings")).toHaveLength(2);
   });
 });
+
+
+it("C1 confirms the named school before catalog disconnect", async () => {
+  const api = createMockMoodleApi();
+  const account = (await api.overview()).accounts[0]!;
+  const disconnect = vi.spyOn(api, "disconnect");
+  await mount(api);
+  await act(async () => getByRole(host, "button", { name: "Disconnect school" }).click());
+  expect(disconnect).not.toHaveBeenCalled();
+  const dialog = getByRole(document.body, "dialog");
+  expect(dialog.textContent).toContain(account.siteName);
+  await act(async () => getByRole(dialog, "button", { name: "Disconnect" }).click());
+  expect(disconnect).toHaveBeenCalledExactlyOnceWith(account.id);
+});
+
