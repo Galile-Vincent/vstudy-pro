@@ -1,3 +1,4 @@
+import { useTrailingCommit } from './settings/use-trailing-commit';
 import { MemorySettings } from './review/memory-settings';
 import { AnalyticsSettings } from './analytics-ui';
 import { CliPrivacyPreferences } from './ai-cli/preferences';
@@ -14,6 +15,7 @@ import { errorText } from './status';
 
 export function PrivacySettings() {
   useTranslation();
+  const commits = useTrailingCommit();
   const fmt = useFormat();
   const [events, setEvents] = useState<IpcResponse<'settings:networkActivity'>>([]);
   const idleErrorId = useId();
@@ -44,9 +46,8 @@ export function PrivacySettings() {
       .catch((e) => setError(errorText(e)));
 
   const invalidIdle = !Number.isInteger(Number(idle)) || Number(idle) < 1 || Number(idle) > 60;
-  const saveIdle = () => {
-    const value = Number(idle);
-    if (!loaded || invalidIdle || savedIdle.current === value) return;
+  const saveIdle = (value = Number(idle)) => {
+    if (!loaded || !Number.isInteger(value) || value < 1 || value > 60 || savedIdle.current === value) return;
     savedIdle.current = value;
     idleWrites.current = idleWrites.current.then(async () => {
       const latest = await desktop.invoke('settings:get',{});
@@ -97,9 +98,9 @@ export function PrivacySettings() {
             value={idle}
             aria-invalid={loaded && invalidIdle}
             aria-describedby={loaded && invalidIdle ? idleErrorId : undefined}
-            onChange={e => setIdle(e.target.value)}
-            onBlur={saveIdle}
-            onKeyDown={e => {if (e.key === 'Enter') saveIdle();}}
+            onChange={e => {const value=Number(e.target.value);setIdle(e.target.value);commits.schedule('idle',()=>saveIdle(value));}}
+            onBlur={() => saveIdle()}
+            onKeyDown={e => {if (e.key === 'Enter' || e.key === 'Escape') {commits.flush('idle');saveIdle();}}}
           />
         </SettingsRow>
         <SettingsRow label={tr('settings:converterMode')}>

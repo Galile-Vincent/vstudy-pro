@@ -24,3 +24,14 @@ it('commits idle minutes on blur and associates invalid input errors', async () 
   expect(field.getAttribute('aria-invalid')).toBe('true');
   expect(field.getAttribute('aria-describedby')).toBe(error.id);
 });
+
+it('flushes typed idle minutes on Escape and unmount without blur', async () => {
+  invoke.mockImplementation(async channel => channel === 'settings:networkActivity' ? [] : {converterIdleMinutes:5,converterOffline:false});
+  const view=render(<PrivacySettings/>);
+  const field=await screen.findByRole('spinbutton');
+  await waitFor(()=>expect((field as HTMLInputElement).disabled).toBe(false));
+  fireEvent.change(field,{target:{value:'45'}});
+  fireEvent.keyDown(field,{key:'Escape'}); view.unmount();
+  await waitFor(()=>expect(invoke.mock.calls.filter(([c])=>c==='settings:set')).toHaveLength(1));
+  expect(invoke.mock.calls.find(([c])=>c==='settings:set')?.[1].converterIdleMinutes).toBe(45);
+});

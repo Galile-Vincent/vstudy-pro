@@ -1,4 +1,5 @@
 /** Appearance settings compose complete theme packs with independent reading preferences. */
+import { useTrailingCommit } from './use-trailing-commit';
 import { DocumentSettings } from './documents';
 import { track } from '../analytics';
 import { useEffect, useRef, useState } from 'react';
@@ -18,6 +19,7 @@ import './appearance.css';
 import { ThemePreview } from './theme-preview';
 
 export function AppearanceSection() {
+  const commits = useTrailingCommit();
   const [settings, setSettings] = useState<Settings>();
   const sliderSaved = useRef<Partial<Record<'contrast' | 'glassOpacity',number>>>({});
   const pending = useRef<Promise<void>>(Promise.resolve());
@@ -72,8 +74,8 @@ export function AppearanceSection() {
   };
   const slider = (field: 'contrast' | 'glassOpacity') => <SettingsRow key={field} label={tr(`themes:${field}`)} description={tr(`themes:${field}_hint`)}>
     <label className="theme-slider"><output>{settings[field]}%</output><input type="range" min={field === 'contrast' ? 100 : 50} max={field === 'contrast' ? 150 : 100} step="1"
-      aria-label={tr(`themes:${field}`)} aria-valuetext={`${settings[field]}%`} value={settings[field]} onChange={e => { const value=Number(e.target.value); const next={...settings,[field]:value}; setSettings(next); applyAppearance(next, false); }}
-      onPointerUp={e => commitSlider(field,Number(e.currentTarget.value))} onKeyDown={e => {if (e.key === 'Enter') commitSlider(field,Number(e.currentTarget.value));}} onBlur={e => commitSlider(field,Number(e.currentTarget.value))}/></label>
+      aria-label={tr(`themes:${field}`)} aria-valuetext={`${settings[field]}%`} value={settings[field]} onChange={e => { const value=Number(e.target.value); const next={...settings,[field]:value}; setSettings(next); applyAppearance(next, false); commits.schedule(field,()=>commitSlider(field,value)); }}
+      onPointerUp={e => commitSlider(field,Number(e.currentTarget.value))} onKeyDown={e => {if (e.key === 'Enter' || e.key === 'Escape') commits.flush(field);}} onBlur={e => commitSlider(field,Number(e.currentTarget.value))}/></label>
   </SettingsRow>;
   return <div className="appearance-layout">
     <section className="settings-group" aria-labelledby="color-scheme-label">

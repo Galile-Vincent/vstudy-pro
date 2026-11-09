@@ -43,3 +43,24 @@ it('previews five slider steps but persists only on commit', async () => {
   await waitFor(() => expect(invoke.mock.calls.filter(([c]) => c === 'settings:set')).toHaveLength(1));
   expect(slider.getAttribute('aria-valuetext')).toBe('105%');
 });
+
+it('persists keyboard slider changes when closed without blur', async () => {
+  let settings = settingsSchema.parse({chatSide:'right',lastProviderId:'openai-api',lastModelId:'gpt'});
+  invoke.mockImplementation(async (channel,value) => channel === 'settings:set' ? (settings=value) : settings);
+  const view=render(<AppearanceSection/>);
+  const slider=await screen.findByRole('slider',{name:tr('themes:contrast')});
+  fireEvent.change(slider,{target:{value:'101'}});
+  fireEvent.keyDown(slider,{key:'Escape'});
+  view.unmount();
+  await waitFor(()=>expect(settings.contrast).toBe(101));
+  expect(invoke.mock.calls.filter(([c])=>c==='settings:set')).toHaveLength(1);
+});
+it('debounces keyboard slider changes', async () => {
+  let settings = settingsSchema.parse({chatSide:'right',lastProviderId:'openai-api',lastModelId:'gpt'});
+  invoke.mockImplementation(async (channel,value) => channel === 'settings:set' ? (settings=value) : settings);
+  render(<AppearanceSection/>);
+  const slider=await screen.findByRole('slider',{name:tr('themes:contrast')});
+  for(let value=101;value<=105;value++) fireEvent.change(slider,{target:{value:String(value)}});
+  await waitFor(()=>expect(settings.contrast).toBe(105));
+  expect(invoke.mock.calls.filter(([c])=>c==='settings:set')).toHaveLength(1);
+});
