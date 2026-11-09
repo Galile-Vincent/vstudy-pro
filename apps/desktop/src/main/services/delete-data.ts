@@ -47,10 +47,16 @@ export async function cleanupDeletedData(
 ): Promise<boolean> {
   let complete = true;
   try {
-    const parent = dirname(root), prefix = `${basename(root)}.deleting-`;
+    const parent = dirname(root), prefix = basename(root);
     const entries = await readdir(parent);
-    await Promise.all(entries.filter(name => name.startsWith(prefix)).map(async name => {
-      try { await rm(join(parent,name), removeOptions); }
+    await Promise.all(entries.filter(name => name.startsWith(prefix)
+      && /^\.deleting-\d+-[0-9a-f-]{36}$/.test(name.slice(prefix.length))).map(async name => {
+      try {
+        const candidate = join(parent,name);
+        const stat = await lstat(candidate);
+        if (candidate === root || !stat.isDirectory() || stat.isSymbolicLink()) return;
+        await rm(candidate, removeOptions);
+      }
       catch (error) { complete = false; log({phase:'delete-cleanup-failed',error}); }
     }));
   } catch (error) { complete = false; log({phase:'delete-cleanup-failed',error}); }

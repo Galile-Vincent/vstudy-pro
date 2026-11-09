@@ -4,7 +4,7 @@ const io = vi.hoisted(() => ({rename:vi.fn(),rm:vi.fn(),readdir:vi.fn(),open:vi.
 const workers = vi.hoisted(() => ({suspend:vi.fn(),waitForIdle:vi.fn(),resume:vi.fn()}));
 vi.mock('node:fs/promises', () => io);
 vi.mock('../review/workers', () => ({reviewWorkers:workers}));
-beforeEach(() => {vi.resetAllMocks(); io.readdir.mockResolvedValue([]); io.lstat.mockResolvedValue({isSymbolicLink:()=>false}); io.open.mockResolvedValue({writeFile:vi.fn(),sync:vi.fn(),close:vi.fn()});});
+beforeEach(() => {vi.resetAllMocks(); io.readdir.mockResolvedValue([]); io.lstat.mockResolvedValue({isSymbolicLink:()=>false,isDirectory:()=>true}); io.open.mockResolvedValue({writeFile:vi.fn(),sync:vi.fn(),close:vi.fn()});});
 function setup() {
   const stop=vi.fn(), report=vi.fn(), relaunch=vi.fn();
   return {stop,report,relaunch,run:createDataDeletion('/owned',stop,report,relaunch)};
@@ -43,12 +43,12 @@ it('reports partial stop failure and always relaunches', async () => {
   expect(s.relaunch).toHaveBeenCalledOnce();
 });
 it('retries quarantines next startup, including incomplete cleanup', async () => {
-  io.readdir.mockResolvedValue(['owned.deleting-123','other.deleting-123','owned']);
+  io.readdir.mockResolvedValue(['owned.deleting-123-12345678-1234-1234-1234-123456789abc','other.deleting-123','owned']);
   io.rm.mockRejectedValueOnce(new Error('busy')).mockResolvedValue(undefined);
   const log=vi.fn();
   await cleanupDeletedData('/owned',log); await cleanupDeletedData('/owned',log);
   expect(io.rm).toHaveBeenCalledTimes(2);
-  expect(io.rm).toHaveBeenCalledWith('/owned.deleting-123',expect.objectContaining({recursive:true}));
+  expect(io.rm).toHaveBeenCalledWith('/owned.deleting-123-12345678-1234-1234-1234-123456789abc',expect.objectContaining({recursive:true}));
   expect(log).toHaveBeenCalledWith(expect.objectContaining({phase:'delete-cleanup-failed'}));
 });
 it.each(['stop','workers'])('bounds a hanging %s and reports before restarting', async kind => {
@@ -70,6 +70,14 @@ it('retries cleanup and returns a visible failure state', async () => {
   expect(await cleanupDeletedData('/owned',vi.fn())).toBe(false);
   expect(io.rm).toHaveBeenCalledWith(expect.any(String),expect.objectContaining({maxRetries:5,retryDelay:200}));
 });
+it('ignores loose prefixes, files and symlinked quarantine candidates', async () => {
+  const suffix = '.deleting-123-12345678-1234-1234-1234-123456789abc';
+  io.readdir.mockResolvedValue(['owned.deleting-not-trash', 'owned'+suffix, 'owned'+suffix+'junk']);
+  io.lstat.mockResolvedValue({isDirectory:()=>false,isSymbolicLink:()=>true});
+  await cleanupDeletedData('/owned',vi.fn());
+  expect(io.rm).not.toHaveBeenCalled();
+});
+
 it('does not promise deferred deletion when the marker cannot be persisted', async () => {
   io.open.mockRejectedValueOnce(Error('disk full'));
   const s = setup(); await s.run();
