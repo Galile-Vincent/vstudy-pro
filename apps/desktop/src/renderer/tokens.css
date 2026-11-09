@@ -112,11 +112,11 @@ html[data-reduced-transparency=true] *,html[data-reduced-transparency=true] ::ba
  .home-grid { grid-template-columns:minmax(0,1fr); }
 }
 
-@media(max-width:719px) { .home-page,.library-view { padding:var(--space-3); } .library-title { flex-wrap:wrap; } .filter-panel { max-width:calc(100vw - var(--space-6)); } }
+@media(max-width:719px) { .home-page,.library-view { padding:var(--space-3); } .filter-panel { max-width:calc(100vw - var(--space-6)); } }
 
 .markdown p { position:relative; }
 .model-traits h3 { font-size:var(--type-xs); font-weight:600; margin:0 0 var(--space-1); }
-@media(max-width:599px) { .library-toolbar .library-search { flex-basis:100%; min-height:var(--space-8); } }
+@media(max-width:599px) { .library-toolbar .library-search { flex-basis:100%; min-height:40px; } }
 
 .markdown .section-action,.markdown .paragraph-action { position:static; margin-inline-start:var(--space-2); }
 .markdown p:hover .paragraph-action { opacity:1; pointer-events:auto; }

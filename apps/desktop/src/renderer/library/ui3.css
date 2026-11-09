@@ -43,5 +43,5 @@ html[data-input-modality=pointer] .library-results .document-title:focus { outli
 .library-toolbar :is(button,input,[data-slot=select-trigger]) { font-size:var(--type-base); }
 
 .library-results[data-view=list] .library-document:is(:hover,:focus-within,[data-selected=true]) .document-actions { opacity:1; }
-.library-view .bulk-bar button,.library-title > button { font-size:var(--type-base); }
+.library-view .bulk-bar button { font-size:var(--type-base); }
 .library-view .bulk-bar button { height:auto; min-height:2rem; }
