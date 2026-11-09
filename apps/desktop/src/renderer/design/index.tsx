@@ -208,7 +208,7 @@ export default function DesignGallery() {
           />
           <ListRow title={copy.selected} selected onClick={() => {}} />
           <ListRow title={copy.disabled} disabled onClick={() => {}} />
-          <ListRow title={copy.back} href="#/design" aria-current="page" />
+          <ListRow title={copy.back} href="#/design" />
           <EmptyState
             icon={<span aria-hidden="true">◇</span>}
             title={copy.empty}
