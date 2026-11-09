@@ -373,7 +373,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/foundation.test.tsx",
-      "sha256": "6adef30ec45c907d4632ce26562bfda0b94687d7bad376e65564fc0ecedfe773",
+      "sha256": "4fa2bdfcdb2c3eac51f24e3fd427b267e631aab2b208575d92db464dd9bacad6",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -388,7 +388,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
-      "sha256": "46f2b261c5a26eaf0de0227086d34b128710863278fbd5bdb24d93b2c62c0f3d",
+      "sha256": "35eacf1c365811ea7f786666dba38ef3e1d740144c033b08eae10d7f0bacf607",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {

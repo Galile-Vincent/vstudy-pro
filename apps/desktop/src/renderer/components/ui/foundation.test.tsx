@@ -94,3 +94,9 @@ it('marks a current button without making it a toggle', () => {
   expect(row.getAttribute('aria-current')).toBe('page');
   expect(row.hasAttribute('aria-pressed')).toBe(false);
 });
+
+it('omits a page heading when no title is supplied', () => {
+  render(<PageHeader title={undefined} actions={<button>Refresh</button>} />);
+  expect(screen.queryByRole('heading')).toBeNull();
+  expect(screen.getByRole('button', {name: 'Refresh'})).toBeTruthy();
+});
