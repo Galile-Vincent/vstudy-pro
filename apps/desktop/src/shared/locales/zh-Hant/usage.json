@@ -36,5 +36,8 @@
   "quota_unknown": "未知",
   "quota_resets": "重設時間",
   "quota_updated": "更新時間",
-  "quota_keychain": "允許在本次應用程式工作階段讀取 macOS 鑰匙圈中的 Claude Code 憑證。僅傳送至 api.anthropic.com 以讀取用量。"
+  "quota_keychain": "允許在本次應用程式工作階段讀取 macOS 鑰匙圈中的 Claude Code 憑證。僅傳送至 api.anthropic.com 以讀取用量。",
+  "quota_summary": "用量",
+  "quota_expand": "展開訂閱用量",
+  "quota_collapse": "收合訂閱用量"
 }

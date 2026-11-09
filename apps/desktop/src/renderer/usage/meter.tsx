@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import { useEffect, useState, useRef, type SyntheticEvent } from 'react';
 import type { Conversation, Settings, UsageRecord, UsageSummary } from '../../shared';
+import { Progress } from '../components/ui/progress';
 import { desktop } from '../bridge';
 import { money, compactTokens } from './chip';
 import { budgetState } from './budget';
@@ -219,5 +220,5 @@ export function useBudgetGuard(
 }
 
 export function SubscriptionWindowMeter({ label, usedPercent }: { label: string; usedPercent: number }) {
-  return <div className="subscription-window"><span><span className="subscription-label">{label}</span><small>{Math.round(usedPercent)}%</small></span><progress aria-label={label} value={usedPercent} max={100} /></div>;
+  return <div className="subscription-window"><span><span className="subscription-label">{label}</span><small>{Math.round(usedPercent)}%</small></span><Progress className="subscription-progress" aria-label={label} aria-valuenow={usedPercent} value={usedPercent} /></div>;
 }

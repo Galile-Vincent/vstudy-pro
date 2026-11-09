@@ -36,5 +36,8 @@
   "quota_unknown": "Unknown",
   "quota_resets": "Resets",
   "quota_updated": "Updated",
-  "quota_keychain": "Allow reading Claude Code credentials from macOS Keychain for this app session. Only sent to api.anthropic.com to read usage."
+  "quota_keychain": "Allow reading Claude Code credentials from macOS Keychain for this app session. Only sent to api.anthropic.com to read usage.",
+  "quota_summary": "Usage",
+  "quota_expand": "Expand subscription usage",
+  "quota_collapse": "Collapse subscription usage"
 }

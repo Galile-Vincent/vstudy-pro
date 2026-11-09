@@ -1,19 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RefreshCw } from 'lucide-react';
+import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { tr } from '../../shared/i18n';
 import type { SubscriptionUsage } from '../../shared/subscription-usage';
 import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
+import { Progress } from '../components/ui/progress';
 import { SubscriptionWindowMeter } from './meter';
 import './usage.css';
 
 const providerName = (provider: SubscriptionUsage['provider']) => provider === 'claude' ? 'Claude' : 'Codex';
 
+const expandedKey = 'vstudy-subscription-meters-expanded';
 let keychainAllowed = false;
 
 export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
   const { i18n } = useTranslation();
+  const regionId = useId();
+  const [expanded, setExpanded] = useState(() => {
+    try { return localStorage.getItem(expandedKey) === 'true'; } catch { return false; }
+  });
+  const toggle = () => {
+    const next = !expanded;
+    setExpanded(next);
+    try { localStorage.setItem(expandedKey, String(next)); } catch { /* Storage may be disabled. */ }
+  };
   const [rows, setRows] = useState<SubscriptionUsage[]>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -31,7 +42,20 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
     window.addEventListener('subscription-refresh', refresh);
     return () => { active = false; clearInterval(interval); window.removeEventListener('subscription-refresh', refresh); };
   }, []);
+  const highest = error ? undefined : rows?.filter(row => row.status === 'ready')
+    .flatMap(row => row.windows.map(window => ({ provider: row.provider, percent: window.usedPercent })))
+    .reduce<{ provider: SubscriptionUsage['provider']; percent: number } | undefined>((best, window) => !best || window.percent > best.percent ? window : best, undefined);
+  const summaryLabel = highest ? providerName(highest.provider) : tr('usage:quota_summary');
   return <section className="subscription-meters" data-compact={compact} aria-label={tr('usage:subscription_limits')} aria-busy={loading}>
+    {compact && <div className="subscription-summary">
+      <span className="subscription-summary-label">{summaryLabel}</span>
+      <span className="subscription-summary-percent">{highest ? `${Math.round(highest.percent)}%` : '—'}</span>
+      <Progress className="subscription-progress" value={highest?.percent ?? 0} aria-label={summaryLabel} aria-valuenow={highest?.percent} aria-valuetext={highest ? `${Math.round(highest.percent)}%` : tr('usage:quota_unknown')} />
+      <Button variant="ghost" size="icon" aria-expanded={expanded} aria-controls={regionId} aria-label={tr(expanded ? 'usage:quota_collapse' : 'usage:quota_expand')} onClick={toggle}>
+        {expanded ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
+      </Button>
+    </div>}
+    <div id={regionId} role={compact ? 'region' : undefined} aria-label={compact ? tr('usage:subscription_limits') : undefined} hidden={compact && !expanded} className={compact ? 'subscription-details' : undefined} tabIndex={compact ? 0 : undefined}>
     <header><strong>{tr('usage:subscription_limits')}</strong><Button variant="ghost" size="icon" disabled={loading} aria-label={tr('common:refresh_usage')} onClick={() => window.dispatchEvent(new Event('subscription-refresh'))}><RefreshCw size={14} aria-hidden="true"/></Button></header>
     {error ? <small role="status">{tr('usage:quota_unavailable')}</small> : !rows ? <small role="status">{tr('usage:usage_loading')}</small> : rows.map(row => <div key={row.provider} className="subscription-provider">
       <div className="subscription-provider-name">{providerName(row.provider)}{row.status !== 'ready' && <small>{tr(`usage:quota_${row.status}`)}</small>}</div>
@@ -49,5 +73,6 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
       setLoading(true);
       void desktop.invoke('usage:subscriptions', { allowClaudeKeychain, refresh: true }).then(setRows).catch(() => setError(true)).finally(() => setLoading(false));
     }}/>{tr('usage:quota_keychain')}</label>}
+    </div>
   </section>;
 }
