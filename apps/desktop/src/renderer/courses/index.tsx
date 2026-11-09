@@ -590,7 +590,7 @@ function CoursesBody({
           <div className="flex flex-col gap-2">
             {overview.accounts.map((account) => (
               <div key={account.id} className="flex flex-wrap items-center gap-2">
-                <ListRow className="min-w-0 basis-full flex-1 min-[1200px]:basis-auto [&_.ui-row-target]:break-words" title={account.displayName}
+                <ListRow className="min-w-0 flex-[1_1_100%] min-[1200px]:flex-[1_1_12rem] [&_.ui-row-target]:break-words" title={account.displayName}
                   subtitle={`${account.siteName} · ${new URL(account.siteUrl).host}`} />
                 <Button variant="ghost" onClick={() => setConnect(true)}>
                   <GraduationCap />{tr("moodle:connect_another_school")}
