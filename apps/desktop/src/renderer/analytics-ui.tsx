@@ -6,6 +6,7 @@ import { WEBSITE_URL } from '../shared/website';
 import { tr } from '../shared/i18n';
 import { desktop } from './bridge';
 import { Button } from './components/ui/button';
+import { ListRow, Toolbar } from './components/ui';
 import { Switch } from './components/ui/switch';
 import { SettingsGroup, SettingsRow } from './settings/layout';
 import './analytics.css';
@@ -19,10 +20,30 @@ export function AnalyticsDisclosure() {
   return <div className="analytics-disclosure"><p>{tr('analytics:intro')}</p><details><summary>{tr('analytics:details_toggle')}</summary><p>{tr('analytics:summary')}</p><p>{tr('analytics:excluded')}</p><p>{tr('analytics:pseudonymous')}</p></details><PolicyLinks/></div>;
 }
 export function ConsentChoice({ onChoose, busy = false }: { onChoose: (enabled: boolean) => void; busy?: boolean }) {
-  return <div className="analytics-choices">{[false,true].map(enabled => <Button key={String(enabled)} variant="secondary" disabled={busy} onClick={() => onChoose(enabled)}>{tr(enabled ? 'analytics:share' : 'analytics:decline')}</Button>)}</div>;
+  return (
+    <Toolbar
+      center={[false, true].map(enabled => (
+        <Button
+          key={String(enabled)}
+          variant="secondary"
+          className="h-auto min-h-[var(--control-height)] flex-1 basis-44 whitespace-normal"
+          disabled={busy}
+          onClick={() => onChoose(enabled)}
+        >
+          {tr(enabled ? 'analytics:share' : 'analytics:decline')}
+        </Button>
+      ))}
+    />
+  );
 }
 export function ConsentSaved({ enabled, onOpenPrivacy, busy = false }: { enabled: boolean; onOpenPrivacy: () => void; busy?: boolean }) {
-  return <div className="analytics-saved"><p><strong>{tr('analytics:saved_state', { state: tr(enabled ? 'analytics:state_on' : 'analytics:state_off') })}</strong></p><p>{tr('analytics:saved_hint')}</p><Button variant="link" disabled={busy} onClick={onOpenPrivacy}>{tr('analytics:open_privacy')}</Button></div>;
+  return (
+    <ListRow
+      title={tr('analytics:saved_state', { state: tr(enabled ? 'analytics:state_on' : 'analytics:state_off') })}
+      subtitle={tr('analytics:saved_hint')}
+      actions={<Button variant="link" disabled={busy} onClick={onOpenPrivacy}>{tr('analytics:open_privacy')}</Button>}
+    />
+  );
 }
 export async function completeAnalyticsOnboarding(enabled: boolean, input: import('../shared/analytics').Onboarding) {
   await desktop.invoke('analytics:setConsent', { enabled });

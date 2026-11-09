@@ -55,7 +55,8 @@ html[data-theme-transition=tokens] .product-preview-light { transition:opacity 3
 .onboarding .analytics-sources label { min-height:48px; padding:var(--space-3); }
 .onboarding .analytics-sources label:has(:checked) { background:var(--ob-tone-strong); }
 .onboarding .analytics-sources label:has(:focus-visible) { outline:2px solid var(--focus); outline-offset:2px; }
-.onboarding .analytics-disclosure { gap:var(--space-4); line-height:1.65; }
+.onboarding .analytics-disclosure { gap:var(--space-3); }
+.onboarding .analytics-disclosure p { line-height:1.5; }
 .onboarding .analytics-choices { gap:var(--space-3); }
 .onboarding-walkthrough { padding:var(--space-4); border:1px solid var(--hairline); border-radius:var(--r-md); }
 .onboarding-walkthrough > summary { cursor:pointer; font-weight:500; }
