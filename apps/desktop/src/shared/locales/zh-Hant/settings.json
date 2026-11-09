@@ -1,4 +1,5 @@
 {
+  "app_version": "v{{version}}",
   "api_key": "{{provider}} API 金鑰",
   "privacy": "隱私",
   "enable_cli": "要使用你的 {{provider}} 登入嗎？",

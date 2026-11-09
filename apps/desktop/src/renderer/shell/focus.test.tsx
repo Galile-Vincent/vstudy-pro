@@ -68,3 +68,11 @@ it('restores Welcome entry focus only after a suspended return route commits',as
   await act(()=>vi.advanceTimersByTime(50));
   expect(document.activeElement?.id).toBe('welcome-entry');
 });
+
+it('badges the sidebar brand while keeping the profile fallback unbadged', async () => {
+  await mount();
+  expect(host.querySelector('.shell-brand .beta-badge')?.textContent).toBe('beta');
+  expect(host.querySelector('.shell-brand .sr-only')?.textContent?.trim()).toBe('beta');
+  expect(host.querySelector('.art-reader-avatar .vstudy-brand')).not.toBeNull();
+  expect(host.querySelector('.art-reader-avatar .beta-badge')).toBeNull();
+});

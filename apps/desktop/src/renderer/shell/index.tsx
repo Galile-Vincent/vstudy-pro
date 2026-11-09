@@ -204,7 +204,7 @@ export function AppShell({
           className="shell-sidebar"
           aria-label={tr("common:document_library")}
         >
-          <SidebarHeader className="shell-brand"><span className="art-reader-brand-mark" aria-hidden="true"><Brand/></span><span>{tr("library:brand")}</span></SidebarHeader><SidebarContent>
+          <SidebarHeader className="shell-brand"><span className="art-reader-brand-mark" aria-hidden="true"><Brand beta/></span><span>{tr("library:brand")}<span className="sr-only"> {tr("library:beta")}</span></span></SidebarHeader><SidebarContent>
           <SidebarGroup><p className="art-reader-sidebar-label">{tr("art-reader:workspace")}</p><SidebarMenu>
             <SidebarMenuItem><SidebarMenuButton
               aria-current={route.view === "home" ? "page" : undefined}

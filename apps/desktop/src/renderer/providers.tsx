@@ -1,3 +1,4 @@
+import { AppVersion } from './components/app-version';
 import { aiCliSetupEvent } from './ai-cli/entry';
 import { AiCliInventory } from './ai-cli/inventory';
 import { StorageSettings } from "./settings/storage";
@@ -164,6 +165,7 @@ export function ProviderSettings({
                           </Button>
                         </SettingsRow>
                       </SettingsGroup>
+                      <AppVersion/>
                     </>
                   ) : id === 'appearance' ? (
                     <AppearanceSection />
