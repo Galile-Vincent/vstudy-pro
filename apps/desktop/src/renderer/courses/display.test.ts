@@ -72,3 +72,11 @@ it("D2 selects class labels by locale with an available-text fallback", async ()
   expect(displayClass(value, "ja")).toBe("資訊二乙");
   expect(displayClass({...value, classLabel: {zh: null, en: "CS"}}, "ja")).toBe("CS");
 });
+
+it.each(["zh-CN", "en", "ja", "fr"])("D2 falls back across both title labels in %s", async locale => {
+  const {identity} = (await createMockMoodleApi().overview()).courses[0]!;
+  expect(displayTitle({...identity, title: {zh: "中文", en: ""}}, locale)).toBe("中文");
+  expect(displayTitle({...identity, title: {zh: "", en: "English"}}, locale)).toBe("English");
+  expect(displayTitle({...identity, title: {zh: "", en: ""}}, locale, "Raw")).toBe("Raw");
+  expect(displayTitle({...identity, title: {zh: "", en: ""}}, locale)).toBe("");
+});
