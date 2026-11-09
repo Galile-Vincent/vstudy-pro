@@ -234,6 +234,13 @@ export const Thread: FC<ThreadProps> = ({
   );
 };
 
+
+function focusComposer(event: React.MouseEvent<HTMLElement>) {
+  if (event.defaultPrevented || document.activeElement !== event.currentTarget) return;
+  event.currentTarget.closest('.aui-thread-root')
+    ?.querySelector<HTMLTextAreaElement>('.aui-composer-input')?.focus();
+}
+
 const ThreadRoot: FC<{ autoFocus: boolean }> = ({ autoFocus }) => {
   useTranslation();
   const { Announcement, ThreadNotice, Welcome = ThreadWelcome } = useContext(ThreadComponentsContext);
@@ -636,7 +643,10 @@ const ComposerAction: FC = () => {
             !shouldShowComposerResume(s)
           }
         >
-          <ComposerPrimitive.Send onClick={bindings?.onSubmitCapture} disabled={bindings?.disabled} asChild>
+          <ComposerPrimitive.Send onClick={event => {
+            bindings?.onSubmitCapture?.(event);
+            if (!event.defaultPrevented) focusComposer(event);
+          }} disabled={bindings?.disabled} asChild>
             <TooltipIconButton
               tooltip={tr('common:send_message')}
               side="bottom"
@@ -672,7 +682,7 @@ const ComposerAction: FC = () => {
               s.composer.submission !== undefined)
           }
         >
-          <ComposerPrimitive.Cancel onClick={e => { const input = e.currentTarget.closest(".aui-thread-root")?.querySelector<HTMLTextAreaElement>(".aui-composer-input"); requestAnimationFrame(() => input?.focus()); }} asChild>
+          <ComposerPrimitive.Cancel onClick={focusComposer} asChild>
             <Button
               type="button"
               variant="default"
@@ -696,7 +706,7 @@ const MessageError: FC = () => {
     <MessagePrimitive.Error>
       <ErrorPrimitive.Root className="aui-message-error-root border-destructive bg-destructive/10 text-destructive dark:bg-destructive/5 mt-2 rounded-md border p-3 text-sm dark:text-red-200">
         <span className="aui-message-error-message">{typeof error === 'string' ? error : tr('library:chat_error')}</span>
-        <ActionBarPrimitive.Reload asChild><Button type="button" variant="outline" size="sm">{tr('common:retry')}</Button></ActionBarPrimitive.Reload>
+        <ActionBarPrimitive.Reload onClick={focusComposer} asChild><Button type="button" variant="outline" size="sm">{tr('common:retry')}</Button></ActionBarPrimitive.Reload>
       </ErrorPrimitive.Root>
     </MessagePrimitive.Error>
   );
@@ -840,7 +850,7 @@ const AssistantActionBar: FC = () => {
           </TooltipIconButton>
         </ActionBarPrimitive.FeedbackNegative>
       </AuiIf>
-      <ActionBarPrimitive.Reload asChild>
+      <ActionBarPrimitive.Reload onClick={focusComposer} asChild>
         <TooltipIconButton tooltip={tr('common:regenerate')}>
           <RefreshCwIcon />
         </TooltipIconButton>

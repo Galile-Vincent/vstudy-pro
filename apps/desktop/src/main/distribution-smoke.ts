@@ -111,6 +111,11 @@ async function mcpProbe(window: BrowserWindow, enabled: boolean) {
 
 /** Report native window, renderer, SQLite durability, and converter probe results, then exit with an explicit status. */
 export async function runDistributionSmoke(window: BrowserWindow, store: Store, root: string): Promise<void> {
+  const updateConfig = await readFile(join(process.resourcesPath, 'app-update.yml'), 'utf8');
+  if (!/^provider: generic$/m.test(updateConfig) ||
+    !/^url: ['"]?https:\/\/github.com\/ava-apple\/vstudy-pro\/releases\/latest\/download['"]?$/m.test(updateConfig)) {
+    throw new Error('Packaged update feed is missing or incorrect');
+  }
   const report: Record<string, unknown> = {
     schemaVersion: 1, ok: false, exitCode: 1, platform: process.platform, arch: process.arch,
     appName: app.getName(), appVersion: app.getVersion(), runtime: process.versions, userData: app.getPath('userData'),

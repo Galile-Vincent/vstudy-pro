@@ -6,53 +6,18 @@
     "backdrop": 0,
     "surface-class": 2
   },
-  "courses/art/surfaces.css": {
-    "shadow": 4,
-    "radius": 2,
-    "color": 0,
-    "backdrop": 0,
-    "surface-class": 9
-  },
-  "courses/course-head.css": {
-    "shadow": 0,
-    "radius": 0,
-    "color": 0,
-    "backdrop": 0,
-    "surface-class": 1
-  },
   "courses/courses.css": {
     "shadow": 0,
     "radius": 0,
     "color": 0,
     "backdrop": 0,
-    "surface-class": 30
-  },
-  "courses/home.css": {
-    "shadow": 1,
-    "radius": 0,
-    "color": 0,
-    "backdrop": 0,
-    "surface-class": 24
-  },
-  "courses/planner.css": {
-    "shadow": 0,
-    "radius": 0,
-    "color": 0,
-    "backdrop": 0,
-    "surface-class": 3
+    "surface-class": 25
   },
   "courses/updates.css": {
     "shadow": 0,
     "radius": 1,
     "color": 0,
     "backdrop": 0,
-    "surface-class": 0
-  },
-  "courses/webview.css": {
-    "shadow": 0,
-    "radius": 0,
-    "color": 0,
-    "backdrop": 1,
     "surface-class": 0
   },
   "document-original.css": {
@@ -64,7 +29,7 @@
   },
   "exams/exams.css": {
     "shadow": 1,
-    "radius": 1,
+    "radius": 0,
     "color": 0,
     "backdrop": 0,
     "surface-class": 0

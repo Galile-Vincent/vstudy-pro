@@ -4,11 +4,12 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { IpcResponse } from '../../shared/ipc';
 import { studyTestSchema } from '../../shared/review-artifacts';
+import { resetDraftQueues } from './draft-queue';
 import { TestPlayer } from './test-player';
 const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock('../bridge', () => ({ desktop: { invoke } }));
 vi.mock('../../shared/i18n', () => ({ tr: (key: string) => key }));
-afterEach(() => { cleanup(); vi.resetAllMocks(); });
+afterEach(() => { cleanup(); vi.resetAllMocks(); resetDraftQueues(); });
 const source = { documentId: '10000000-0000-4000-8000-000000000001', version: 'original' as const, excerptHash: 'a'.repeat(64), quote: 'Source passage' };
 const fixtureArtifact = { id: 'artifact', title: 'Practice', test: { version: 1, items: [
  { id: 'a', conceptKey: 'chain', type: 'mcq', stem: 'First question', options: ['A', 'B'], answer: 1, explanation: 'First explanation', source, optionRationales: ['Why A', 'Why B'], nextStep: 'Try another example' },
@@ -91,11 +92,11 @@ it('resumes saved answers and committed feedback via get after remount',async()=
   return {id:'saved',artifactId:'artifact',phase:'answering',answers:{a:1,b:'draft'},results:fullTest.items.map((item,i)=>({itemId:item.id,conceptKey:item.conceptKey,correct:i===0,reportedBad:false,...(i===0?{feedback:item}:{correct:null})}))};
  });
  render(<TestPlayer artifact={artifact} onRetake={vi.fn()}/>);
- await screen.findByText('First explanation');
- expect(invoke).toHaveBeenCalledWith('review:attempt:get',{attemptId:'saved'});
- fireEvent.click(screen.getByRole('button',{name:'review:next_item'}));
  expect((await screen.findByRole('textbox') as HTMLInputElement).value).toBe('draft');
+ expect(invoke).toHaveBeenCalledWith('review:attempt:get',{attemptId:'saved'});
  expect(screen.queryByText('Second explanation')).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'review:previous_item'}));
+ expect(await screen.findByText('First explanation')).toBeTruthy();
 });
 it('notifies the parent only after review confirmation succeeds', async () => {
  fixture();

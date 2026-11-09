@@ -5,15 +5,15 @@ import { useTranslation } from 'react-i18next';
 import type { MoodleAccount, MoodleSchool, MoodleSiteCheck } from '../../shared/moodle';
 import { tr } from '../../shared/i18n';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
+import { Input, FormField } from '../components/ui';
 import { countryNames, fuzzySiteMatch, schoolMonogram, schoolSearchText, sortedSchools } from './school-search';
 import './schools.css';
 
 type Choice = {url:string;name:string;search:string;group:'connected'|'recent'|'directory';icon?:string;country?:string};
 /** Connected schools precede recent choices, then bundled directory entries, without duplicate URLs. */
-export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind}: {
+export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind,error}: {
   schools:MoodleSchool[];recent:MoodleSiteCheck[];accounts:MoodleAccount[];input:string;
-  onInput:(value:string)=>void;busy:boolean;onFind:(url:string)=>void;
+  error?:string|undefined;onInput:(value:string)=>void;busy:boolean;onFind:(url:string)=>void;
 }) {
   const {i18n} = useTranslation('schools');
   const [active,setActive] = useState(-1);
@@ -34,11 +34,13 @@ export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind}
   const results = choices.filter(choice => fuzzySiteMatch(input,choice.search));
   const selected = results[active];
   const urlLike = /^https:\/\/[^\s]+$/i.test(input.trim()) || /^(?:https:\/\/)?[^\s/?#]+\.[^\s]+$/i.test(input.trim());
+  const fieldError = /^http:\/\//i.test(input) ? tr("schools:https_required")
+    : /^(?!https?:)[a-z][a-z0-9+.-]*:\/\//i.test(input) || /[?&](?:qrlogin|qrloginkey|token|wstoken)=/i.test(input)
+      ? tr("schools:qr_unsupported") : error;
   return <>
     <form className="moodle-connect-form" onSubmit={event => {event.preventDefault();if (!busy) {if (selected) onFind(selected.url); else if (urlLike) onFind(input);else if (results[0]) onFind(results[0].url);}}}>
-      <label htmlFor="moodle-site">{tr('schools:search_label')}</label>
-      <Input ref={inputRef} id="moodle-site" value={input} autoComplete="off" autoCapitalize="none" spellCheck={false}
-        placeholder={tr('schools:search_placeholder')} disabled={busy} aria-describedby="moodle-url-hint moodle-search-count"
+      <FormField error={fieldError} controlId="moodle-site" label={tr('schools:search_label')} describedBy="moodle-url-hint moodle-search-count" children={field => <Input {...field} ref={inputRef} value={input} autoComplete="off" autoCapitalize="none" spellCheck={false}
+        placeholder={tr('schools:search_placeholder')} disabled={busy}
         role="combobox" aria-autocomplete="list" aria-expanded={results.length > 0} aria-controls="moodle-school-results"
         aria-activedescendant={selected ? `moodle-school-${active}` : undefined}
         onChange={event => {onInput(event.target.value);setActive(-1);}}
@@ -48,12 +50,10 @@ export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind}
             const next = event.key === 'Home' ? 0 : event.key === 'End' ? results.length-1 : active < 0 ? (event.key === 'ArrowDown' ? 0 : results.length-1) : (active + (event.key === 'ArrowDown' ? 1 : -1) + results.length) % results.length;
             setActive(next);document.getElementById(`moodle-school-${next}`)?.scrollIntoView?.({block:'nearest'});
           } else if (event.key === 'Escape' && active !== -1) {event.preventDefault();event.stopPropagation();setActive(-1);}
-        }} />
+        }} />} />
       <small id="moodle-url-hint">{tr('schools:privacy_hint')}</small>
       <Button type="submit" disabled={(!urlLike && !results.length) || busy}>{busy ? <LoaderCircle className="moodle-spin" /> : <ArrowRight />}{tr(busy ? 'moodle:checking_site' : 'moodle:check_site')}</Button>
     </form>
-    {/^http:\/\//i.test(input) && <p role="alert">{tr('schools:https_required')}</p>}
-    {/^(?!https?:)[a-z][a-z0-9+.-]*:\/\//i.test(input) || /[?&](?:qrlogin|qrloginkey|token|wstoken)=/i.test(input) ? <p role="alert">{tr('schools:qr_unsupported')}</p> : null}
     <small id="moodle-search-count" role="status" aria-live="polite">{tr('schools:result_count',{count:results.length})}</small>
     <div id="moodle-school-results" className="moodle-school-results" role="listbox" aria-label={tr('schools:results')}>
       {(['connected','recent','directory'] as const).map(group => results.some(choice => choice.group === group) && <div key={group} role="group" aria-label={tr(`schools:${group}`)} className="moodle-site-list">

@@ -17,12 +17,12 @@ export function WebChatHub() {
   const tab:Tab='desktop';
   const choose=(next:Tab)=>{if(next!=='desktop')openTab({view:'hosted-chat',provider:next,title:tr(`web-chat:${next}`)});};
   const label=(value:Tab)=>tr(`web-chat:${value}`);
-  return <section className="web-chat-hub" aria-label={tr('web-chat:title')}>
+  return <main className="web-chat-hub" aria-label={tr('web-chat:title')}>
     <header className="web-chat-header"><div><h1>{tr('web-chat:title')}</h1><p>{tr('web-chat:subtitle')}</p></div>
       <div className="web-chat-tabs" role="group" aria-label={tr('web-chat:choose')}>{tabs.map(value=><button key={value} id={`web-chat-tab-${value}`} aria-pressed={value===tab} onClick={()=>choose(value)}>{label(value)}</button>)}</div>
     </header>
     <div className="web-chat-desktop"><DesktopChat active/></div>
-  </section>;
+  </main>;
 }
 export function HostedChat({provider,compact=false}:{provider:WebChatProvider;compact?:boolean}) {
   const {activeTabId,tabs,updateNativePresentation}=useNavigate();

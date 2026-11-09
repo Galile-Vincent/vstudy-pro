@@ -256,3 +256,8 @@ Follow [CONTRIBUTING](../CONTRIBUTING.md) for changes, translation synchronizati
 - Live-school features depend on the school's Moodle mobile service and permissions. Public HTTPS is required; LAN-only sites, self-signed TLS, and QR credential exchange are unsupported.
 - Local storage has no device sync. API and CLI models need their own access and may incur charges.
 - The reader offers optional AI re-parsing after conversion. Review the model, range, and estimate before confirming; the panel has no guaranteed spending cap. See [AI parsing status](AI_PARSE.md).
+
+App update checks GET the fixed GitHub release `latest-mac.yml` / `latest.yml` feed,
+without identifiers or user content. Automatic checks default on; disable them in
+Settings > General. Downloads require a click and fetch release assets via GitHub
+and its CDN. See [update privacy](PRIVACY.md) and [updates](UPDATES.md).
