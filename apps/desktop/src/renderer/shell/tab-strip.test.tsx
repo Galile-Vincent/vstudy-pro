@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import {act,cleanup,render,fireEvent} from '@testing-library/react';
-import {afterEach,expect,it,vi} from 'vitest';
+import {beforeEach,afterEach,expect,it,vi} from 'vitest';
 import {TabStrip} from './tab-strip';
 const fixture=vi.hoisted(()=>({navigation:{} as Record<string,unknown>,invoke:vi.fn()}));
 vi.mock('./index',()=>({useNavigate:()=>fixture.navigation}));
 vi.mock('../bridge',()=>({desktop:{invoke:fixture.invoke}}));
-afterEach(()=>{cleanup();vi.useRealTimers();});
+beforeEach(() => vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} }));
+afterEach(()=>{cleanup();vi.useRealTimers();vi.unstubAllGlobals();});
 it('does not send a stale destructive chat sync after awaiting Moodle',async()=>{
  vi.useFakeTimers();let release!:(value:unknown)=>void;
  const pending=new Promise(resolve=>{release=resolve;});

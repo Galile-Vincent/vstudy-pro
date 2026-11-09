@@ -58,7 +58,13 @@ export function TabStrip() {
   const root = useRef<HTMLDivElement>(null);
   const drag = useRef<{ id: string; x: number } | null>(null);
   const labels = tabs.tabs.map(tab => tab.title || tabLabel(tab.history.entries[tab.history.index]!.view));
-  useEffect(() => { root.current?.querySelector('[aria-selected="true"]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' }); }, [tabs.activeId, tabs.tabs.length]);
+  useEffect(() => {
+    const reveal = () => root.current?.querySelector('.app-tab[data-active=true]')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    reveal();
+    const observer = new ResizeObserver(reveal);
+    if (root.current) observer.observe(root.current);
+    return () => observer.disconnect();
+  }, [tabs.activeId, tabs.tabs.length]);
   useEffect(() => {
     const keyboard = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.repeat || event.isComposing || event.altKey || hasNavigationOverlay()) return;
