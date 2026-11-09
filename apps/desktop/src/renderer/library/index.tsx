@@ -498,6 +498,7 @@ export function LibraryView() {
     observer.observe(viewport);
     return () => observer.disconnect();
   }, [loading, grid, items.length > 0, showFolders]);
+  const flowing = grid || shown.some(item => item.document.status !== "ready");
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
   const rowHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : rowRem * textScale,
     columns = grid
@@ -874,13 +875,16 @@ export function LibraryView() {
         >
           <div
             style={{
-              height: Math.ceil(shown.length / columns) * rowHeight,
+              height: flowing ? undefined : Math.ceil(shown.length / columns) * rowHeight,
+              display: grid ? "grid" : undefined,
+              gridTemplateColumns: grid ? `repeat(${columns}, minmax(0, 1fr))` : undefined,
+              gap: grid ? "var(--space-4)" : undefined,
               position: "relative",
             }}
           >
-            {shown.slice(start, end).map((item, offset) => {
+            {shown.slice(flowing ? 0 : start, flowing ? undefined : end).map((item, offset) => {
               const d = item.document,
-                index = start + offset;
+                index = (flowing ? 0 : start) + offset;
               return (
                 <div
                   key={d.id}
@@ -895,11 +899,12 @@ export function LibraryView() {
                   onMouseEnter={() => {  }}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
-                    height: grid ? rowHeight - 16 : rowHeight,
-                    position: "absolute",
-                    top: Math.floor(index / columns) * rowHeight,
-                    left: `${((index % columns) * 100) / columns}%`,
-                    width: grid ? `calc(${100 / columns}% - var(--space-4))` : "100%",
+                    height: flowing ? "auto" : rowHeight,
+                    minHeight: grid ? rowHeight - 16 : rowHeight,
+                    position: flowing ? "relative" : "absolute",
+                    top: flowing ? undefined : Math.floor(index / columns) * rowHeight,
+                    left: flowing ? undefined : `${((index % columns) * 100) / columns}%`,
+                    width: "100%",
                   }}
                   draggable
                   onDragStart={(e) => {
@@ -1042,7 +1047,7 @@ export function LibraryView() {
                         {item.pageCount != null && <span>{tr("library:pages", {count:item.pageCount, formatted:format.number(item.pageCount)})}</span>}
                         <span>{formatSize(item.sizeBytes, document.documentElement.lang)}</span>
                         <span>{format.date(d.createdAt)}</span>
-                        {d.status !== 'ready' && <span className="status-badge" data-status={d.status}>{d.status === 'failed' ? <AlertTriangle/> : <LoaderCircle/>}{tr(`library:${d.status}`)}</span>}
+
                       </div>
                       {item.snippet && (
                         <p className="search-snippet">
@@ -1055,26 +1060,7 @@ export function LibraryView() {
                             {t.name}
                           </span>
                         ))}
-                        {d.status === "failed" && (
-                          <Button variant="outline"
-                            onClick={() =>
-                              void run(() =>
-                                desktop.invoke("documents:retry", {
-                                  documentId: d.id,
-                                }),
-                              )
-                            }
-                          >
-                            {tr("library:retry")}
-                          </Button>
-                        )}
-                        {d.status === "converting" && (
-                          <progress
-                            value={progress[d.id]?.page}
-                            max={progress[d.id]?.total}
-                            aria-label={tr("common:conversion_progress")}
-                          />
-                        )}
+
                       </div>
                     </div>
                     <Button variant="outline"
@@ -1112,9 +1098,22 @@ export function LibraryView() {
                   <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge variant="outline" key={t.id}>{t.name}</Badge>)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>
                   <div className="document-folder" title={placeOf(item)}>{placeOf(item)}</div>
                   <div className="document-size">{item.pageCount!=null&&<>{tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)})} · </>}{item.sizeBytes===null?tr("library:unknown_size"):new Intl.NumberFormat(document.documentElement.lang,{style:"unit",unit:"kilobyte",unitDisplay:"short",maximumFractionDigits:1}).format(item.sizeBytes/1000)}</div>
-                  <div className="document-added">{d.status==='failed'?<Button variant="ghost" size="sm" onClick={()=>void run(()=>desktop.invoke('documents:retry',{documentId:d.id}))}>{tr('library:retry')}</Button>:d.status==='converting'?<progress value={progress[d.id]?.page} max={progress[d.id]?.total} aria-label={tr('common:conversion_progress')}/>:format.date(d.createdAt)}</div>
+                  <div className="document-added">{format.date(d.createdAt)}</div>
                   <div className="document-type"><Badge variant="secondary">{d.sourceName.split('.').pop()?.toUpperCase()}</Badge></div>
                   <Button variant="ghost" size="icon-sm" className="document-actions" aria-label={tr('library:actions',{name:d.title})} tabIndex={-1} onClick={e=>{menuAnchor.current=e.currentTarget;setMenu(item);}}><MoreHorizontal/></Button></>}
+                  {d.status !== 'ready' && <div className="document-status">
+                    <span className="status-badge" data-status={d.status}>
+                      {d.status === 'failed' ? <AlertTriangle/> : <LoaderCircle/>}
+                      {tr(`library:${d.status}`)}
+                    </span>
+                    {d.status === 'failed' && <Button variant="outline"
+                      onClick={() => void run(() => desktop.invoke('documents:retry', {documentId:d.id}))}>
+                      {tr('library:retry')}
+                    </Button>}
+                    {d.status === 'converting' && <progress
+                      value={progress[d.id]?.page} max={progress[d.id]?.total}
+                      aria-label={tr('common:conversion_progress')}/>}
+                  </div>}
                 </div>
               );
             })}

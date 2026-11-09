@@ -169,3 +169,17 @@ it('translates an existing recovery when the language changes',async()=>{
  expect(document.querySelector('.library-toast')?.textContent).toContain('を削除しました');
  await act(async()=>{await i18n.changeLanguage('en');});
 });
+
+
+it.each([false, true])('keeps recovery outside optional metadata (grid %s)', async grid => {
+ localStorage.setItem('library-grid', String(grid));
+ document.documentElement.style.setProperty('--art-reader-card-height', '300');
+ const failed = row('Broken notes'); failed.document.status = 'failed';
+ state.invoke.mockImplementation(async c => c === 'library:documents:list'
+  ? {items: [failed], nextCursor: null} : []);
+ mount(); await screen.findByText('Broken notes', {selector: 'button'});
+ const retry = screen.getByRole('button', {name: tr('library:retry')});
+ expect(retry.closest('.document-status')).toBeTruthy();
+ expect(retry.closest('.document-meta,.document-added')).toBeNull();
+ expect(retry.closest<HTMLElement>('.library-document')!.style.height).toBe('auto');
+});
