@@ -398,7 +398,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/stat.tsx",
-      "sha256": "7cc7d02bd0841050eafbe7cc29234fd01ee96d96d0bd3f526c7263d1daf4b664",
+      "sha256": "000ac2111392c8258f94b8ad84cb6291466ff7cad4f4ff1031105b8ac8189024",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
