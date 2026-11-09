@@ -1,6 +1,6 @@
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
-import { PageContainer, PageHeader, Section, ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
+import { Card, PageContainer, PageHeader, Section, ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
 import { Brand } from '../components/brand';
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
@@ -885,7 +885,9 @@ function CoursesBody({
                 {termFilters.map(filter => <TabsContent key={filter} value={filter}>
                   {!overview.courses.some(course => matchesTerm(course,filter)) && <EmptyState title={tr("moodle:no_term_courses")} />}
                   {pinsVisible && orderedCourses.some(item => item.pinned && matchesTerm(item.course,filter)) && <div className="course-group-label"><h3>{tr("moodle:pinned_courses")}</h3></div>}
-                  <ul className="moodle-grid" data-view={view} role="list">
+                  <ul className={view === "cards"
+                    ? "moodle-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,22rem),1fr))] gap-3 p-0 list-none"
+                    : "moodle-grid flex flex-col p-0 list-none"} data-view={view} role="list">
                     {orderedCourses.filter(item => matchesTerm(item.course,filter)).map(({course,pinned},index,items) => {
                       const attention = courseAttention(course.id, overview.upcoming, updates);
                       const name = displayTitle(course.identity,lang,course.fullName);
@@ -895,6 +897,7 @@ function CoursesBody({
                       const tooltip = [course.fullName, attention.overdue ? tr('moodle:course_overdue_tooltip',{count:attention.overdue}) : '', attention.unread ? tr('moodle:course_unread_tooltip',{count:attention.unread}) : ''].filter(Boolean).join('\n');
                       const urgent = !!attention.next && Date.parse(attention.next.dueAt)-Date.now()<86400000;
                       return <li key={course.id} className="moodle-course-card min-w-0" title={course.fullName} data-course-id={course.id} data-pinned={pinned} data-group-start={pinsVisible && !pinned && index>0 && items[index-1]!.pinned}>
+                        <Card variant="flat" className={view === "cards" ? "py-3" : "bg-transparent py-0"}>
                         <ListRow className="w-full min-h-14 gap-3"
                           title={<button className="course-open block w-full text-start whitespace-normal break-words" type="button" title={tooltip} aria-labelledby={labels.join(' ')} aria-describedby={`${prefix}-raw`} onAuxClick={event => {if(event.button === 1) {event.preventDefault();navigation?.openTab({view:"courses",courseId:course.id,title:name});}}} onClick={event => event.metaKey || event.ctrlKey ? navigation?.openTab({view:"courses",courseId:course.id,title:name}) : onCourse(course.id)}><span className="course-title" id={`${prefix}-title`}>{name}</span></button>}
                           subtitle={(teacher || attention.next) && <p className="course-meta flex flex-wrap items-baseline gap-x-2 text-sm">
@@ -932,6 +935,7 @@ function CoursesBody({
                         <span id={`${prefix}-raw`} className="sr-only">{course.fullName}{course.identity.lifecycle === 'unknown' && ` · ${tr('moodle:dates_unavailable')}`}</span>
                         </div>}
                         />
+                        </Card>
                       </li>;
 
                     })}
