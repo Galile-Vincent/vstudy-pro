@@ -68,3 +68,7 @@ Add a component when multiple pages repeat the same structure. Keep its API smal
 Run `pnpm dev` and open `#/design` in development. The gallery controls scheme, theme pack, material and contrast without saving settings. Production excludes this route and its code.
 
 Run `pnpm --filter @vstudy/desktop ui:check` or desktop lint. The ratchet scans CSS and TSX outside the shared libraries and tokens. It rejects increases in fixed shadows, pixel radii, hex or RGB colors, untokenized backdrop filters and feature surface classes. Token shadows, none and simple focus rings are allowed. Run `pnpm --filter @vstudy/desktop ui:check --update-baseline` after removing violations. Updates refuse increases. Run `pnpm --filter @vstudy/desktop ui:test` for the fixture tests.
+
+Library uses `library-page` on the page for toolbar and folder layout queries.
+The nested `library-results` container measures the scroll viewport for document
+columns; these queries apply only to descendants of the results container.

@@ -20,7 +20,7 @@
 
 
 .document-course-inline { display:none; }
-@container docs (width < 52rem) { .document-course-inline { display:block; color:var(--muted); font-size:var(--type-xs); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } }
+@container library-results (width < 52rem) { .document-course-inline { display:block; color:var(--muted); font-size:var(--type-xs); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } }
 
 .library-view-controls { display:flex; flex:none; align-items:center; gap:var(--space-2); }
 .filter-view { display:grid; gap:var(--space-2); }

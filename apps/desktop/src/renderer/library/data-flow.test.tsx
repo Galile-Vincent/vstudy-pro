@@ -584,6 +584,7 @@ it('places each named container above the elements its rules style', async () =>
  }
  const covered=new Set<string>();
  for(const query of css.matchAll(/@container\s+([\w-]+)\s*\([^{}]+\)\s*\{/g)){
+  expect([...owners.values()].some(names => names.includes(query[1]!))).toBe(true);
   let depth=1,end=query.index!+query[0].length;
   const start=end;
   while(depth&&end<css.length){if(css[end]==='{')depth++;if(css[end]==='}')depth--;end++;}
@@ -595,7 +596,7 @@ it('places each named container above the elements its rules style', async () =>
    }
   }
  }
- expect([...covered].sort()).toEqual(['docs','library-page']);
+ expect([...covered].sort()).toEqual(['library-page','library-results']);
 });
 
 it.each([null, 'false', 'true'])('uses list by default and retains saved grid preference %s', async preference => {
