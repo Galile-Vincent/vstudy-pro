@@ -37,6 +37,7 @@ import { documentCitationSchema } from "../shared";
 import { DocumentReference } from "./components/assistant-ui/elements/document-reference";
 import { DocumentSource, DocumentTool, jumpToCitation } from './document-elements';
 import { createChatAdapter } from "./chat-adapter";
+import { followUpSuggestions } from "./chat-suggestions";
 import { type Providers } from "./providers";
 
 export function Chat({
@@ -136,9 +137,8 @@ export function Chat({
   );
 
   const speech = useMemo(() => typeof window !== 'undefined' && 'speechSynthesis' in window ? new WebSpeechSynthesisAdapter() : undefined, []);
-  const suggestion = useMemo(() => ({generate: async () => [{prompt:tr('common:which_passages_support_this_answer')},{prompt:tr('common:explain_this_more_simply')}]}), []);
   const runtimeOptions = {
-    adapters: { suggestion, ...(speech ? {speech} : {}) },
+    adapters: { suggestion: followUpSuggestions, ...(speech ? {speech} : {}) },
     initialMessages: chatHistoryMessages(history),
   };
   const session=useChatSession(conversation.id,navigation?.activeTabId ?? conversation.id,connection,runtimeOptions);
@@ -158,7 +158,7 @@ export function Chat({
   const renderChat = (runtime: ReturnType<typeof useLocalRuntime>) => {
     const extensions = {
       documentContext, onClearDocumentContext, selection, onClearSelection, usage, budget, unavailable, onUsage, onSettings, isCourse: conversation.scope === "course", isGeneral: conversation.scope === "general",
-      picker: <><ChatTutorModeControl mode={tutorMode} onChange={setTutorMode} unavailable={unavailable} onAnswer={() => budget.guardSend(tr('chat:answer_directly_request'), () => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); })}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /></>,
+      picker: <><ChatTutorModeControl mode={tutorMode} onChange={setTutorMode} unavailable={unavailable} onAnswer={() => budget.guardSend(tr('chat:answer_directly_request'), () => { if (!runtime.thread.getState().isRunning) runtime.thread.append({role:"user",content:[{type:"text",text:tr('chat:answer_directly_request')}],metadata:{custom:{tutorMode:"direct"}}}); })}/><ModelControls providers={providers} model={model} onModel={onModel} onSettings={onSettings} onProvidersChanged={onProvidersChanged} values={options} onChange={next => { setOptions(next); void desktop.invoke('conversations:options', { conversationId: conversation.id, options: next }).catch(() => {}); }} /><ModelSwitchNote/></>,
       documentPageCount, documentTitle, models: providers.flatMap(p => p.models), selections: selections.current, statuses, subscription: conversation.providerId.endsWith('-cli'),
     };
     return <AssistantRuntimeProvider runtime={runtime}><ChatRuntimeEffects runtime={runtime} promptRequest={promptRequest} restoredDraft={restoredDraft} onDraft={value=>{composerDraft.current=value;onDraft(value);}}/><DocumentChatContext.Provider value={extensions}>
@@ -207,6 +207,11 @@ function ComposerBanner() {
   const {usage,budget} = useDocumentChat();
   return <><MemoryConsentCard /><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert" title={tr('common:the_estimate_allows_1_024_output_tokens_actual_usage_can_be_higher')}><span>{budget.reason}</span><div className="usage-warning-actions"><Button type="button" variant="outline" size="sm" onClick={budget.approve}>{tr('common:send_anyway')}</Button><Button type="button" variant="ghost" size="sm" onClick={budget.dismiss}>{tr('common:cancel')}</Button></div></div>}</>;
 }
+function ModelSwitchNote() {
+  useTranslation();
+  const started = useAuiState(s => s.thread.messages.length > 0);
+  return started ? <span className="muted min-w-0 text-xs">{tr('chat:model_switch_note')}</span> : null;
+}
 function ComposerModel() {
   useTranslation(); return useDocumentChat().picker; }
 function MessageSelection() {
@@ -233,8 +238,8 @@ function useComposerBindings() {
   useTranslation(); const {budget,unavailable} = useDocumentChat(); return { onSubmitCapture: budget.guard, disabled: unavailable }; }
 function DocumentWelcome() {
   const aui = useAui();
-  const { selection, documentTitle } = useDocumentChat();
-  return <ReaderWelcome title={documentTitle} hasSelection={!!selection} onQuestion={prompt => aui.composer().setText(prompt)}/>;
+  const { selection, documentTitle, isGeneral } = useDocumentChat();
+  return <ReaderWelcome title={documentTitle} hasSelection={!!selection} general={isGeneral} onQuestion={prompt => aui.composer().setText(prompt)}/>;
 }
 function DocumentNotice() {
   const { unavailable } = useDocumentChat();
@@ -253,7 +258,9 @@ export function ChatComposerInput() {
   const clear = () => { composing.current = false; clearTimeout(expiry.current); };
   const refresh = () => { composing.current = true; clearTimeout(expiry.current); expiry.current = setTimeout(clear,1500); };
   useEffect(() => () => clearTimeout(expiry.current), []);
-  return <ComposerPrimitive.Input ref={input} className="aui-composer-input" aria-label={context?.isCourse ? tr('moodle:ask_course') : tr('common:ask_about_your_document')} placeholder={context?.isCourse ? tr('moodle:ask_course') : tr('common:ask_document_placeholder')} rows={2}
+  const label = context?.isCourse ? tr('moodle:ask_course') : context?.isGeneral ? tr('history:general_ask_label') : tr('common:ask_about_your_document');
+  const placeholder = context?.isCourse ? tr('moodle:ask_course') : context?.isGeneral ? tr('history:general_ask_placeholder') : tr('common:ask_document_placeholder');
+  return <ComposerPrimitive.Input ref={input} className="aui-composer-input" aria-label={label} placeholder={placeholder} rows={2}
     onCompositionStart={refresh}
     onCompositionUpdate={refresh}
     onBlur={clear}

@@ -46,7 +46,7 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/follow-up-suggestions.aui.tsx",
       "registrySha256": "f0db1e9cfc5f648adeb57c8ac61fbeca4ebbb4d55267a9c107709af01b73abb4",
-      "patchedSha256": "b93a21927710d2ef57fadc3493e0aa41a4b4d99948b83fc4e46ccf658497a747",
+      "patchedSha256": "74d54b8a4578c90049432898613ba9b10095660bdf001b31ddae08f85638a373",
       "patch": "docs/vendor-patches/assistant-ui--elements--follow-up-suggestions.aui.tsx.patch",
       "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
     },
@@ -153,9 +153,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-group.aui.tsx",
       "registrySha256": "757caf28ee232d4f500c8af7d6837fe7d6d2b144774a6a0bcdaff8c0c517bd9e",
-      "patchedSha256": "04b1ddf84898ac0b96340a7a5eb698060e60245c6f342a55143b3e49d4aa4363",
+      "patchedSha256": "e817fa2741b7e75e6343b92e2baafa7ed06f64a5f27b2af72a59209b7090f84d",
       "patch": "docs/vendor-patches/assistant-ui--elements--tool-group.aui.tsx.patch",
-      "reason": "Use tonal tool groups and semantic theme colors while retaining existing interactions."
+      "reason": "Use tonal tool groups and semantic theme colors, and translate the tool-call count, while retaining existing interactions."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tooltip-icon-button.tsx",

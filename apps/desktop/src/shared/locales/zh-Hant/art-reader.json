@@ -18,5 +18,12 @@
   "setup": "設定 AI",
   "without_ai": "先不使用 AI",
   "local": "你的個人學習空間",
-  "tip": "閱讀小提示"
+  "tip": "閱讀小提示",
+  "general_welcome_body": "任何學習上的問題都可以問：規劃進度、練習，或理解一個主題。",
+  "general_plan": "規劃讀書時段",
+  "general_explain": "解釋一個概念",
+  "general_quiz": "考考我",
+  "prompt_general_plan": "請幫我規劃一段專注的讀書時間。請先問我正在學什麼、有多少時間。",
+  "prompt_general_explain": "請用淺顯的生活例子解釋我正在學的一個概念。請先問我是哪個概念。",
+  "prompt_general_quiz": "請就我正在學的主題考考我。請先問我是什麼主題，之後一次只問一題。"
 }

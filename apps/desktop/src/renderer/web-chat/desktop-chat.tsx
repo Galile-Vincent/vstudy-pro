@@ -29,13 +29,31 @@ export function DesktopChat({active,launcher,toolbarSlot}:{active:boolean;launch
     try {const id=restored?.conversationId ?? localStorage.getItem('vstudy-web-chat-conversation');if(id) void desktop.invoke('chats:get',{conversationId:id as Conversation['id']}).then(async c=>{if(c?.scope==='general'){const page=await desktop.invoke('messages:page',{conversationId:c.id,limit:80});if(live){setConversation(c);setMessages(page.items);setCursor(page.nextCursor);}}}).catch(()=>{if(live)setFailed(true);});}catch{/* Optional persistence. */}
     return()=>{live=false;};
   },[]);
+  const create=async(providerId:Conversation['providerId'],modelId:string,keepDraft=false)=>{
+    setBusy(true);setFailed(false);
+    try {const next=await desktop.invoke('conversations:create',{scope:'general',providerId,modelId});setConversation(next);setMessages([]);setCursor(null);if(!keepDraft)setDraft('');try{localStorage.setItem('vstudy-web-chat-conversation',next.id);}catch{/* Optional persistence. */}}catch{setFailed(true);}finally{setBusy(false);}
+  };
   const start=async()=>{
     const provider=providers.find(p=>p.config.enabled && p.availability.available && p.models.length && p.config.id.endsWith('-cli')) ?? providers.find(p=>p.config.enabled && p.availability.available && p.models.length);
     if(!provider){settings();return;}
-    setBusy(true);setFailed(false);
-    try {const next=await desktop.invoke('conversations:create',{scope:'general',providerId:provider.config.id,modelId:provider.models[0]!.id});setConversation(next);setMessages([]);setCursor(null);setDraft('');try{localStorage.setItem('vstudy-web-chat-conversation',next.id);}catch{/* Optional persistence. */}}catch{setFailed(true);}finally{setBusy(false);}
+    await create(provider.config.id,provider.models[0]!.id);
   };
-  const model=async(value:string)=>{if(!conversation)return;const slash=value.indexOf('/');try{setConversation(await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId:value.slice(0,slash) as Conversation['providerId'],modelId:value.slice(slash+1)}));}catch{setFailed(true);}};
+  const switching=useRef(false);
+  const model=async(value:string)=>{
+    if(!conversation||switching.current)return;
+    switching.current=true;
+    const slash=value.indexOf('/'),providerId=value.slice(0,slash) as Conversation['providerId'],modelId=value.slice(slash+1);
+    const hasMessages=async()=>(await desktop.invoke('messages:page',{conversationId:conversation.id,limit:1})).items.length>0;
+    try {
+      if(await hasMessages()){await create(providerId,modelId,true);return;}
+      try {setConversation(await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId,modelId}));}
+      catch(error) {
+        if(!await hasMessages())throw error;
+        await create(providerId,modelId,true);
+      }
+    } catch {setFailed(true);}
+    finally {switching.current=false;}
+  };
   const toolbar=<Toolbar className="gap-[var(--space-4)]" left={launcher} right={conversation && <Button variant="ghost" disabled={busy} onClick={()=>void start()}><Plus/>{tr('web-chat:new')}</Button>}/>;
   return <div className="web-chat-local chat-pane">{toolbarSlot===undefined ? toolbar : toolbarSlot && createPortal(toolbar,toolbarSlot)}
     {failed && <p role="alert">{tr('web-chat:desktop_error')}</p>}

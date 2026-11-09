@@ -9,5 +9,8 @@
   "answer_directly_request": "直接告訴我上一題的答案。",
   "answer_directly_running": "請等目前的回覆結束後，再要求直接回答。",
   "answer_directly_empty": "請先提出問題。「直接回答」是針對你上一個問題。",
-  "answer_directly_unavailable": "此對話的模型目前無法使用，請先選擇可用的模型。"
+  "answer_directly_unavailable": "此對話的模型目前無法使用，請先選擇可用的模型。",
+  "model_switch_note": "切換模型會開啟新的對話",
+  "tool_calls_one": "{{count}} 次工具呼叫",
+  "tool_calls_other": "{{count}} 次工具呼叫"
 }

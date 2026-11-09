@@ -1,6 +1,18 @@
 --- a/apps/desktop/src/renderer/components/assistant-ui/elements/follow-up-suggestions.aui.tsx
 +++ b/apps/desktop/src/renderer/components/assistant-ui/elements/follow-up-suggestions.aui.tsx
-@@ -48,11 +48,11 @@
+@@ -2,8 +2,11 @@
+ 
+ import { AuiIf, useAuiState, ThreadPrimitive } from "@assistant-ui/react";
+ import { useCallback, useEffect, useRef, useState, type FC } from "react";
++import { useTranslation } from "react-i18next";
++import { localizeSuggestion } from "../../../chat-suggestions";
+ 
+ const FollowupSuggestionsRow: FC = () => {
++  useTranslation();
+   const suggestions = useAuiState((s) => s.thread.suggestions);
+   const scrollRef = useRef<HTMLDivElement>(null);
+   const rtlRef = useRef<boolean | null>(null);
+@@ -48,15 +51,15 @@
        className="aui-thread-followup-suggestions -my-1 w-full [scrollbar-width:none] overflow-x-auto py-1 [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
        style={{ maskImage, WebkitMaskImage: maskImage }}
      >
@@ -10,11 +22,17 @@
            <ThreadPrimitive.Suggestion
              key={idx}
 -            className="aui-thread-followup-suggestion border-foreground/10 hover:bg-foreground/[0.03] hover:border-foreground/25 rounded-md border px-2.5 py-1 text-sm whitespace-nowrap transition-colors ease-in motion-reduce:transition-none"
+-            prompt={suggestion.prompt}
 +            className="aui-thread-followup-suggestion border-foreground/10 hover:bg-foreground/[0.03] hover:border-foreground/25 rounded-md border px-2.5 py-1 text-sm whitespace-normal break-words transition-colors ease-in motion-reduce:transition-none"
-             prompt={suggestion.prompt}
++            prompt={localizeSuggestion(suggestion.prompt)}
              send
            >
-@@ -74,6 +74,7 @@
+-            {suggestion.title ?? suggestion.prompt}
++            {localizeSuggestion(suggestion.title ?? suggestion.prompt)}
+             {suggestion.label && (
+               <span className="aui-thread-followup-suggestion-label text-muted-foreground ms-1">
+                 {suggestion.label}
+@@ -74,6 +77,7 @@
      condition={(s) =>
        !s.thread.isEmpty &&
        !s.thread.isRunning &&
