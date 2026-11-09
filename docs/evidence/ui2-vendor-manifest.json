@@ -388,7 +388,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
-      "sha256": "46f2b261c5a26eaf0de0227086d34b128710863278fbd5bdb24d93b2c62c0f3d",
+      "sha256": "d4f1d911379c8837bb78b27515a4badc4d311af17e742e9cd84aec3b03734a1b",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
