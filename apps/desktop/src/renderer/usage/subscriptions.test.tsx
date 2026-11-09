@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { SubscriptionWindowMeter } from './meter';
 import { SubscriptionMeters } from './subscriptions';
 import { desktop } from '../bridge';
 import type { SubscriptionUsage } from '../../shared/subscription-usage';
@@ -112,4 +113,13 @@ it('only adds a details tab stop while the expanded content overflows', async ()
   expect(details.getAttribute('tabindex')).toBeNull();
   unmount();
   expect(disconnect).toHaveBeenCalled();
+});
+
+it('preserves the full text of truncated summary and window labels', async () => {
+  const label = 'A very long subscription provider and weekly usage window label';
+  render(<><SubscriptionMeters compact /><SubscriptionWindowMeter label={label} usedPercent={30} /></>);
+  await screen.findByText('Codex · 5h', { selector: '.subscription-summary-label' });
+  expect(screen.getByText('Codex · 5h').getAttribute('title')).toBe('Codex · 5h');
+  expect(screen.getByText(label).getAttribute('title')).toBe(label);
+  expect(screen.getByRole('progressbar', { name: label })).toBeTruthy();
 });

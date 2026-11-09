@@ -369,11 +369,45 @@
 .subscription-consent { display:flex; align-items:flex-start; gap:8px; margin-top:12px; }
 
 .subscription-meters[data-compact=true] { padding:0; }
-.subscription-summary { display:flex; align-items:center; gap:var(--space-2); min-block-size:calc(var(--space-8) + var(--space-1)); padding-inline:var(--space-2); font-size:var(--type-xs); }
-.subscription-summary-label { min-inline-size:0; max-inline-size:35%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.subscription-summary {
+  display:grid;
+  grid-template-columns:minmax(4rem,1fr) auto var(--space-8);
+  align-items:center;
+  column-gap:var(--space-2);
+  row-gap:var(--space-1);
+  padding-block-end:var(--space-1);
+  min-block-size:calc(var(--space-8) + var(--space-1));
+  padding-inline:var(--space-2);
+  font-size:var(--type-xs);
+}
+.subscription-summary-label {
+  min-inline-size:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
 .subscription-summary-percent { flex:none; font-variant-numeric:tabular-nums; }
-.subscription-summary > .subscription-progress { flex:1; min-inline-size:var(--space-4); }
-.subscription-summary > button { flex:none; inline-size:var(--space-8); min-inline-size:var(--space-8); block-size:var(--space-8); padding:var(--space-1); }
+.subscription-summary > .subscription-progress {
+  grid-row:2;
+  grid-column:1 / -1;
+  min-inline-size:4rem;
+}
+.subscription-summary:has(.subscription-summary-unavailable) > .subscription-progress {
+  grid-column:1;
+}
+.subscription-summary-unavailable {
+  grid-row:2;
+  grid-column:2 / -1;
+  white-space:nowrap;
+}
+.subscription-summary > button {
+  grid-row:1;
+  grid-column:3;
+  inline-size:var(--space-8);
+  min-inline-size:var(--space-8);
+  block-size:var(--space-8);
+  padding:var(--space-1);
+}
 .subscription-details { max-block-size:calc(45dvh - var(--space-8) - var(--space-1)); overflow:auto; overscroll-behavior:contain; padding:var(--space-2); }
 .subscription-progress { block-size:var(--space-1); background:var(--line); }
 .subscription-progress [data-slot=progress-indicator] { background:var(--accent-color); transition:none; }

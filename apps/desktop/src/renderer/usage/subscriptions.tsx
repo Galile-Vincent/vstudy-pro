@@ -76,17 +76,36 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
   }) : tr('usage:quota_unknown');
   return <section className="subscription-meters" data-compact={compact} aria-label={tr('usage:subscription_limits')} aria-busy={loading}>
     {compact && <div className="subscription-summary">
-      <span className="subscription-summary-label">{summaryLabel}</span>
+      <span className="subscription-summary-label" title={summaryLabel}>{summaryLabel}</span>
       <span className="subscription-summary-percent">{highest ? `${Math.round(highest.usedPercent)}%` : '—'}</span>
-      <Progress className="subscription-progress" value={highest?.usedPercent ?? 0} aria-label={summaryLabel} aria-valuenow={highest?.usedPercent} aria-valuetext={summaryValue} />
+      <Progress
+        className="subscription-progress"
+        value={highest?.usedPercent ?? 0}
+        aria-label={summaryLabel}
+        aria-valuenow={highest?.usedPercent}
+        aria-valuetext={summaryValue}
+      />
       {(error || unavailable > 0) && <small className="subscription-summary-unavailable">
         {error ? tr('usage:quota_unavailable') : tr('usage:quota_unavailable_count', { count: unavailable })}
       </small>}
-      <Button variant="ghost" size="icon" aria-expanded={expanded} aria-controls={regionId} aria-label={tr(expanded ? 'usage:quota_collapse' : 'usage:quota_expand')} onClick={toggle}>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-expanded={expanded}
+        aria-controls={regionId}
+        aria-label={tr(expanded ? 'usage:quota_collapse' : 'usage:quota_expand')}
+        onClick={toggle}
+      >
         {expanded ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
       </Button>
     </div>}
-    <div id={regionId} ref={detailsRef} hidden={compact && !expanded} className={compact ? 'subscription-details' : undefined} tabIndex={compact && expanded && overflowing ? 0 : undefined}>
+    <div
+      id={regionId}
+      ref={detailsRef}
+      hidden={compact && !expanded}
+      className={compact ? 'subscription-details' : undefined}
+      tabIndex={compact && expanded && overflowing ? 0 : undefined}
+    >
     <header><strong>{tr('usage:subscription_limits')}</strong><Button variant="ghost" size="icon" disabled={loading} aria-label={tr('common:refresh_usage')} onClick={() => window.dispatchEvent(new Event('subscription-refresh'))}><RefreshCw size={14} aria-hidden="true"/></Button></header>
     {error ? <small role="status">{tr('usage:quota_unavailable')}</small> : !rows ? <small role="status">{tr('usage:usage_loading')}</small> : rows.map(row => <div key={row.provider} className="subscription-provider">
       <div className="subscription-provider-name">{providerName(row.provider)}{row.status !== 'ready' && <small>{tr(`usage:quota_${row.status}`)}</small>}</div>
