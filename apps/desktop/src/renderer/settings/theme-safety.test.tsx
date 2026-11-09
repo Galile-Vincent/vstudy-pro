@@ -7,6 +7,7 @@ import { i18n, tr } from '../../shared/i18n';
 import { AppearanceSection } from './appearance';
 const invoke = vi.hoisted(() => vi.fn());
 vi.mock('../bridge', () => ({ desktop: { invoke } }));
+vi.mock('./apply-appearance', () => ({ applyAppearance: vi.fn() }));
 vi.mock('../analytics', () => ({ track: vi.fn() }));
 vi.mock('./documents', () => ({ DocumentSettings: () => null }));
 beforeEach(async () => { await i18n.changeLanguage('en'); });
@@ -27,4 +28,18 @@ it('requires confirmation before deleting an active custom theme', async () => {
   fireEvent.click(screen.getByRole('button', {name:tr('common:delete')}));
   await waitFor(() => expect(settings.customThemes).toHaveLength(0));
   expect(settings.themeId).toBe('vstudy');
+});
+it('previews five slider steps but persists only on commit', async () => {
+  const settings = settingsSchema.parse({chatSide:'right',lastProviderId:'openai-api',lastModelId:'gpt'});
+  invoke.mockImplementation(async (channel,value) => channel === 'settings:get' ? settings : value);
+  render(<AppearanceSection />);
+  const slider = await screen.findByRole('slider',{name:tr('themes:contrast')});
+  for (let value=101;value<=105;value++) {
+    fireEvent.change(slider,{target:{value:String(value)}});
+    fireEvent.keyUp(slider,{key:'ArrowRight'});
+  }
+  expect(invoke.mock.calls.filter(([c]) => c === 'settings:set')).toHaveLength(0);
+  fireEvent.blur(slider);
+  await waitFor(() => expect(invoke.mock.calls.filter(([c]) => c === 'settings:set')).toHaveLength(1));
+  expect(slider.getAttribute('aria-valuetext')).toBe('105%');
 });

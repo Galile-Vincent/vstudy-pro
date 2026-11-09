@@ -19,6 +19,7 @@ import { ThemePreview } from './theme-preview';
 
 export function AppearanceSection() {
   const [settings, setSettings] = useState<Settings>();
+  const sliderSaved = useRef<Partial<Record<'contrast' | 'glassOpacity',number>>>({});
   const pending = useRef<Promise<void>>(Promise.resolve());
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState<ThemePack>();
@@ -26,7 +27,7 @@ export function AppearanceSection() {
   const [editor, setEditor] = useState<ThemePack>();
   const [transfer, setTransfer] = useState<ThemePack | 'import'>();
   useEffect(() => {
-    void desktop.invoke('settings:get', {}).then(setSettings).catch(() => setError(tr('errors:generic')));
+    void desktop.invoke('settings:get', {}).then(value => {setSettings(value);sliderSaved.current={contrast:value.contrast,glassOpacity:value.glassOpacity};}).catch(() => setError(tr('errors:generic')));
   }, []);
 
   const update = (patch: Partial<Settings>) => {
@@ -63,10 +64,16 @@ export function AppearanceSection() {
   if (!settings) return error ? <p role="alert">{error}</p> : <p role="status">{tr('themes:loading')}</p>;
   const theme = resolveTheme(settings);
   const packs = [...builtinThemes,...settings.customThemes];
+  const commitSlider = (field: 'contrast' | 'glassOpacity', value: number) => {
+    if (sliderSaved.current[field] === value) return;
+    const previous = sliderSaved.current[field] ?? settings[field];
+    sliderSaved.current[field] = value;
+    void update({[field]:value}).then(saved => {if (!saved) sliderSaved.current[field] = previous;});
+  };
   const slider = (field: 'contrast' | 'glassOpacity') => <SettingsRow key={field} label={tr(`themes:${field}`)} description={tr(`themes:${field}_hint`)}>
     <label className="theme-slider"><output>{settings[field]}%</output><input type="range" min={field === 'contrast' ? 100 : 50} max={field === 'contrast' ? 150 : 100} step="1"
-      aria-label={tr(`themes:${field}`)} value={settings[field]} onChange={e => { const value=Number(e.target.value); const next={...settings,[field]:value}; setSettings(next); applyAppearance(next, false); }}
-      onPointerUp={e => void update({[field]:Number(e.currentTarget.value)})} onKeyUp={e => void update({[field]:Number(e.currentTarget.value)})} onBlur={e => void update({[field]:Number(e.currentTarget.value)})}/></label>
+      aria-label={tr(`themes:${field}`)} aria-valuetext={`${settings[field]}%`} value={settings[field]} onChange={e => { const value=Number(e.target.value); const next={...settings,[field]:value}; setSettings(next); applyAppearance(next, false); }}
+      onPointerUp={e => commitSlider(field,Number(e.currentTarget.value))} onKeyDown={e => {if (e.key === 'Enter') commitSlider(field,Number(e.currentTarget.value));}} onBlur={e => commitSlider(field,Number(e.currentTarget.value))}/></label>
   </SettingsRow>;
   return <div className="appearance-layout">
     <section className="settings-group" aria-labelledby="color-scheme-label">
