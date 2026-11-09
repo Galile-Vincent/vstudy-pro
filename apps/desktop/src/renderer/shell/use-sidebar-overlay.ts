@@ -69,6 +69,9 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
     if (!overlay || !visible) return;
     const escape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
+      const active = document.activeElement;
+      if (!(active instanceof HTMLElement) || !active.closest('.shell-sidebar')) return;
+      if (active.closest('input, textarea, select, [contenteditable], [role=menu], [role=dialog]')) return;
       event.preventDefault();
       close();
       const toggles = document.querySelectorAll<HTMLElement>(
