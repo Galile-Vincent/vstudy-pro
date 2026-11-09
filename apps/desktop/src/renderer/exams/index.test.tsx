@@ -165,7 +165,7 @@ it("reopens saved results with source documents, score, duration and per-type ac
   setup(true);
   render(<ExamsView />);
   fireEvent.click(screen.getByRole("button", { name: "exams:history" }));
-  fireEvent.click(await screen.findByRole("button", { name: "Practice" }));
+  fireEvent.click(await screen.findByRole("button", { name: /Practice/ }));
   expect(await screen.findByText("exams:results")).toBeTruthy();
   expect(screen.getAllByText(/exams:score_summary/).length).toBeGreaterThan(0);
   expect(screen.getAllByText(/exams:duration/).length).toBeGreaterThan(0);
@@ -181,7 +181,7 @@ it("shows answer comparisons, explanations and an AI action on the results page"
   setup(true);
   render(<ExamsView />);
   fireEvent.click(screen.getByRole("button", { name: "exams:history" }));
-  fireEvent.click(await screen.findByRole("button", { name: "Practice" }));
+  fireEvent.click(await screen.findByRole("button", { name: /Practice/ }));
   expect(await screen.findByText("exams:results")).toBeTruthy();
   expect(screen.getByText("100")).toBeTruthy();
   expect(screen.getByText("exams:correct")).toBeTruthy();
@@ -286,7 +286,7 @@ it("shows an incorrect answer beside the expected answer on results", async () =
   });
   render(<ExamsView />);
   fireEvent.click(screen.getByRole("button", { name: "exams:history" }));
-  fireEvent.click(await screen.findByRole("button", { name: "Practice" }));
+  fireEvent.click(await screen.findByRole("button", { name: /Practice/ }));
   expect(await screen.findByText("exams:incorrect")).toBeTruthy();
   expect(screen.getByText("Second")).toBeTruthy();
   expect(screen.getByText("First · Third")).toBeTruthy();

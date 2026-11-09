@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { ArrowUpRight, Clock3, FileText, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
+import { Badge, Button, ListRow } from "../components/ui";
 import { useExamFormat } from "./format";
 import {
   Dialog,
@@ -32,30 +31,18 @@ export function ExamHistory({
   const [deleting, setDeleting] = useState<Row | null>(null);
   return (
     <>
-      <ul className="exam-history">
-        {items.map(({ artifact, attempt }) => {
-          const graded = attempt && attempt.phase !== "answering",
+      <ul className="exam-history grid gap-[var(--space-2)]">
+        {items.map((row) => {
+          const { artifact, attempt } = row,
+            graded = attempt && attempt.phase !== "answering",
             correct = attempt?.results.filter((r) => r.correct).length ?? 0,
             total = attempt?.results.length ?? 0;
           return (
             <li key={artifact.id}>
-              <div className="exam-history-main">
-                <h3>
-                  <Button
-                    variant="ghost"
-                    className="exam-history-title"
-                    disabled={busy}
-                    onClick={() => onOpen(artifact.id)}
-                  >
-                    {artifact.title}
-                  </Button>
-                </h3>
-                <time dateTime={artifact.createdAt}>
-                  {format.dateTime(artifact.createdAt)}
-                </time>
-                <p className="exam-history-sources">
-                  <FileText size={15} aria-hidden="true" />
-                  <span>
+              <ListRow
+                title={artifact.title}
+                subtitle={
+                  <>
                     {artifact.resolvedScope.documentIds
                       .map(
                         (id) =>
@@ -63,73 +50,55 @@ export function ExamHistory({
                           documentTitle(id),
                       )
                       .join(" · ")}
-                  </span>
-                </p>
-              </div>
-              <div className="exam-history-metrics">
-                {graded ? (
-                  <>
-                    <strong>
-                      {format.percent(correct / Math.max(1, total))}
-                    </strong>
-                    <span>{tr("exams:score_summary", { correct, total })}</span>
-                    <span className="exam-duration">
-                      <Clock3 size={14} aria-hidden="true" />
+                    {" · "}
+                    <time dateTime={artifact.createdAt}>
+                      {format.dateTime(artifact.createdAt)}
+                    </time>
+                  </>
+                }
+                meta={
+                  graded ? (
+                    <span className="block">
+                      <strong className="block text-[length:var(--type-lg)] font-medium text-[var(--ink)]">
+                        {format.percent(correct / Math.max(1, total))}
+                      </strong>
+                      {tr("exams:score_summary", { correct, total })} ·{" "}
                       {tr("exams:duration", {
-                        minutes: Math.max(
-                          0,
-                          Math.round(
-                            (Date.parse(
-                              attempt.committedAt ?? attempt.startedAt,
-                            ) -
-                              Date.parse(attempt.startedAt)) /
-                              60000,
-                          ),
+                        minutes: format.minutes(
+                          attempt.startedAt,
+                          attempt.committedAt ?? attempt.startedAt,
                         ),
                       })}
                     </span>
-                  </>
-                ) : (
-                  <Badge variant="secondary">
-                    {tr(
-                      attempt
-                        ? "exams:in_progress"
-                        : `review:artifact_${artifact.status}`,
-                    )}
-                  </Badge>
-                )}
-              </div>
-              <div className="exam-history-actions">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  disabled={busy}
-                  onClick={() => onOpen(artifact.id)}
-                  aria-label={tr("exams:reopen_named", {
-                    title: artifact.title,
-                  })}
-                >
-                  {tr("exams:reopen")}
-                  <ArrowUpRight aria-hidden="true" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  disabled={busy}
-                  onClick={() => {
-                    setDeleteFailed(false);
-                    setDeleting(
-                      items.find((row) => row.artifact.id === artifact.id) ??
-                        null,
-                    );
-                  }}
-                  aria-label={tr("exams:delete_named", {
-                    title: artifact.title,
-                  })}
-                >
-                  <Trash2 aria-hidden="true" />
-                </Button>
-              </div>
+                  ) : (
+                    <Badge variant="secondary">
+                      {tr(
+                        attempt
+                          ? "exams:in_progress"
+                          : `review:artifact_${artifact.status}`,
+                      )}
+                    </Badge>
+                  )
+                }
+                disabled={busy}
+                onClick={() => onOpen(artifact.id)}
+                actions={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    disabled={busy}
+                    onClick={() => {
+                      setDeleteFailed(false);
+                      setDeleting(row);
+                    }}
+                    aria-label={tr("exams:delete_named", {
+                      title: artifact.title,
+                    })}
+                  >
+                    <Trash2 aria-hidden="true" />
+                  </Button>
+                }
+              />
             </li>
           );
         })}

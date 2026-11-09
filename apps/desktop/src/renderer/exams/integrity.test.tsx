@@ -63,7 +63,7 @@ it('goes back to setup, not history, after opening an exam from history', async 
  bridge();
  render(<ExamsView />);
  fireEvent.click(screen.getByRole('button', { name: 'exams:history' }));
- fireEvent.click(await screen.findByRole('button', { name: 'exams:reopen_named' }));
+ fireEvent.click(await screen.findByRole('button', { name: /Practice/ }));
  await screen.findByRole('heading', { name: 'Question 1' });
  fireEvent.click(screen.getByRole('button', { name: 'exams:back' }));
  expect(await screen.findByText('exams:sources')).toBeTruthy();
@@ -75,12 +75,12 @@ it('keeps an unsent draft across a History round trip', async () => {
  const server = bridge();
  render(<ExamsView />);
  fireEvent.click(screen.getByRole('button', { name: 'exams:history' }));
- fireEvent.click(await screen.findByRole('button', { name: 'exams:reopen_named' }));
+ fireEvent.click(await screen.findByRole('button', { name: /Practice/ }));
  fireEvent.click(await screen.findByLabelText(/Beta/));
  fireEvent.click(screen.getByRole('button', { name: 'exams:back' }));
  await waitFor(() => expect(server.state.drafts.q1).toBe(1));
  fireEvent.click(screen.getByRole('button', { name: 'exams:history' }));
- fireEvent.click(await screen.findByRole('button', { name: 'exams:reopen_named' }));
+ fireEvent.click(await screen.findByRole('button', { name: /Practice/ }));
  expect(((await screen.findByLabelText(/Beta/)) as HTMLInputElement).checked).toBe(true);
  expect(server.called('review:attempt:commit')).toHaveLength(0);
 });
@@ -96,4 +96,13 @@ it('keeps the title, progress and leave action in one toolbar and the commit not
  expect(toolbar.contains(screen.getByRole('button', { name: 'exams:back' }))).toBe(true);
  const footer = screen.getByRole('button', { name: 'review:answer_next' }).closest('footer')!;
  expect(footer.textContent).toContain('review:commit_notice');
+});
+
+it('gives each history row one open target with delete outside it', async () => {
+ bridge();
+ render(<ExamsView />);
+ fireEvent.click(screen.getByRole('button', { name: 'exams:history' }));
+ const open = await screen.findByRole('button', { name: /Practice/ });
+ expect(screen.getAllByRole('button', { name: /Practice/ })).toHaveLength(1);
+ expect(open.contains(screen.getByRole('button', { name: 'exams:delete_named' }))).toBe(false);
 });

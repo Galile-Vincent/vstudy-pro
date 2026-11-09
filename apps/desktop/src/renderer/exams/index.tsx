@@ -403,11 +403,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
         </>
       )}
       {!artifact && mode === "history" && (
-        <section
-          className="exam-history-section"
-          aria-label={tr("exams:history")}
-        >
-          <h2>{tr("exams:history")}</h2>
+        <Section title={tr("exams:history")}>
           {history.loading && <p role="status">{tr("review:loading")}</p>}
           {history.error && (
             <p role="alert">
@@ -452,7 +448,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
           {history.cursor && (
             <Button onClick={history.more}>{tr("review:load_more")}</Button>
           )}
-        </section>
+        </Section>
       )}
       <p className="text-[length:var(--type-sm)] text-[var(--muted)]">
         {tr("review:validation_notice")} · {tr("exams:grading_notice")}

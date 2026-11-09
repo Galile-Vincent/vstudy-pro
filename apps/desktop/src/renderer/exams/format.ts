@@ -12,6 +12,8 @@ export function useExamFormat() {
   return {
     dateTime: (value: string) =>
       format.date(value, { dateStyle: "medium", timeStyle: "short" }),
+    minutes: (from: string, to: string) =>
+      Math.max(0, Math.round((Date.parse(to) - Date.parse(from)) / 60000)),
     percent: (ratio: number) => percentFormat.format(ratio),
     percentParts: (ratio: number) => percentFormat.formatToParts(ratio),
   };
