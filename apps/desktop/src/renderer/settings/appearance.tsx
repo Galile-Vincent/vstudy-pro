@@ -1,4 +1,5 @@
 /** Appearance settings compose complete theme packs with independent reading preferences. */
+import { errorText } from '../status';
 import { useTrailingCommit } from './use-trailing-commit';
 import { DocumentSettings } from './documents';
 import { track } from '../analytics';
@@ -26,6 +27,14 @@ export function AppearanceSection() {
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState<ThemePack>();
   const [message, setMessage] = useState('');
+  const schemeRef = useRef<HTMLButtonElement>(null);
+  const focusAfterDelete = useRef(false);
+  useEffect(() => {
+    if (!deleting && focusAfterDelete.current) {
+      focusAfterDelete.current = false;
+      schemeRef.current?.focus();
+    }
+  }, [deleting]);
   const [editor, setEditor] = useState<ThemePack>();
   const [transfer, setTransfer] = useState<ThemePack | 'import'>();
   useEffect(() => {
@@ -33,6 +42,7 @@ export function AppearanceSection() {
   }, []);
 
   const update = (patch: Partial<Settings>) => {
+    setMessage('');
     const operation = pending.current.then(async () => {
       try {
         const latest = await desktop.invoke('settings:get', {});
@@ -42,7 +52,7 @@ export function AppearanceSection() {
         setSettings(next);
         setError('');
         return next;
-      } catch { setError(tr('errors:generic')); return undefined; }
+      } catch (error) { setError(errorText(error)); return undefined; }
     });
     pending.current = operation.then(() => undefined);
     return operation;
@@ -81,7 +91,7 @@ export function AppearanceSection() {
     <section className="settings-group" aria-labelledby="color-scheme-label">
       <h3 id="color-scheme-label">{tr('themes:scheme')}</h3>
       <div className="scheme-grid">
-        {(['system','light','dark'] as const).map(scheme => <button type="button" key={scheme} className="scheme-card"
+        {(['system','light','dark'] as const).map(scheme => <button type="button" key={scheme} className="scheme-card" ref={scheme === 'system' ? schemeRef : undefined}
           aria-pressed={settings.colorScheme === scheme} onClick={() => void update({colorScheme:scheme})}>
           <ThemePreview theme={theme} scheme={scheme}/>
           <span className="scheme-card-label">{tr(`themes:${scheme}`)}<span className="scheme-card-check" aria-hidden="true">{settings.colorScheme === scheme && <Check/>}</span></span>
@@ -117,7 +127,7 @@ export function AppearanceSection() {
             {settings.themeId === pack.id && <Check className="theme-check" aria-hidden="true"/>}
           </button>
           <div className="theme-card-tools">
-            {settings.customThemes.some(t => t.id === pack.id) && <button type="button" aria-label={tr('themes:delete_named',{name:pack.name})} onClick={() => setDeleting(pack)}><Trash2/></button>}
+            {settings.customThemes.some(t => t.id === pack.id) && <button type="button" aria-label={tr('themes:delete_named',{name:pack.name})} onClick={() => {setError('');setMessage('');setDeleting(pack);}}><Trash2/></button>}
             {settings.customThemes.some(t => t.id === pack.id) && <button type="button" aria-label={tr('themes:edit_named',{name:pack.name})} onClick={() => setEditor(pack)}><Pencil/></button>}
             <button type="button" aria-label={tr('themes:export_named',{name:pack.name})} onClick={() => setTransfer({...pack,id:`custom-${crypto.randomUUID()}`})}><Copy/></button>
           </div>
@@ -142,16 +152,17 @@ export function AppearanceSection() {
     {deleting && <Dialog open onOpenChange={open => {if (!open) setDeleting(undefined);}}>
       <DialogContent><DialogTitle>{tr('themes:delete_named',{name:deleting.name})}</DialogTitle>
         <DialogDescription>{tr('themes:delete_copy',{name:deleting.name})}</DialogDescription>
-        <Button variant="secondary" onClick={() => setDeleting(undefined)}>{tr('common:cancel')}</Button>
+        {error && <p role="alert">{error}</p>}
+        <Button variant="secondary" onClick={() => {setError('');setDeleting(undefined);}}>{tr('common:cancel')}</Button>
         <Button variant="destructive" onClick={() => void (async () => {
           const active = settings.themeId === deleting.id;
           const saved = await update({customThemes:settings.customThemes.filter(t => t.id !== deleting.id),
             ...(active ? {themeId:'vstudy'} : {})});
-          if (saved) {setDeleting(undefined);if (active) setMessage(tr('themes:deleted_default'));}
+          if (saved) {focusAfterDelete.current=true;setDeleting(undefined);if (active) setMessage(tr('themes:deleted_default'));}
         })()}>{tr('common:delete')}</Button>
       </DialogContent>
     </Dialog>}
-    {error && <p role="alert">{error}</p>}
+    {error && !deleting && <p role="alert">{error}</p>}
     {editor && <ThemeEditor theme={editor} settings={settings} onClose={() => setEditor(undefined)} onSave={saveTheme}/>}
     {transfer && <ThemeTransfer theme={transfer} existing={settings.customThemes} onClose={() => setTransfer(undefined)} onSave={theme => saveTheme(theme, false)}/>}
   </div>;

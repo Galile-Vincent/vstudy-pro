@@ -71,3 +71,16 @@ it('includes visible Retry text in the save key accessible name', async () => {
   expect(screen.getByRole('button',{name:'Retry — Anthropic'}).textContent).toBe('Retry');
  } finally {cleanup();}
 });
+
+it('keeps failed key removal actionable with an error inside confirmation', async () => {
+ const {desktop}=await import('./bridge');
+ vi.mocked(desktop.invoke).mockImplementation(async channel=>{if(channel==='secrets:has')return {hasKey:true} as never;throw new Error('failed');});
+ try {
+  render(<ProviderRow provider={{config:{kind:'api',id:'openai-api',enabled:true},availability:{available:true},models:[]}} onRefresh={async()=>{}}/>);
+  fireEvent.click(await screen.findByRole('button',{name:'Remove — OpenAI'}));
+  fireEvent.click(screen.getByRole('button',{name:'Remove'}));
+  const {within}=await import('@testing-library/react');
+  await within(screen.getByRole('dialog')).findByRole('alert');
+  expect((screen.getByRole('button',{name:'Remove'}) as HTMLButtonElement).disabled).toBe(false);
+ } finally {cleanup();}
+});

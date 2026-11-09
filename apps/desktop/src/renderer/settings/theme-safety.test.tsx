@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { settingsSchema } from '../../shared';
 import { builtinThemes } from '../../shared/themes';
 import { i18n, tr } from '../../shared/i18n';
@@ -63,4 +63,20 @@ it('debounces keyboard slider changes', async () => {
   for(let value=101;value<=105;value++) fireEvent.change(slider,{target:{value:String(value)}});
   await waitFor(()=>expect(settings.contrast).toBe(105));
   expect(invoke.mock.calls.filter(([c])=>c==='settings:set')).toHaveLength(1);
+});
+
+it('shows a specific deletion failure inside confirmation and returns focus after retry', async () => {
+  let settings=settingsSchema.parse({chatSide:'right',lastProviderId:'openai-api',lastModelId:'gpt',themeId:'custom-one',customThemes:[{...builtinThemes[0],id:'custom-one',name:'My theme'}]});
+  let fail=true;
+  invoke.mockImplementation(async (channel,value)=>{
+    if(channel==='settings:set') {if(fail)throw new Error('VSTUDY_STATUS:{"code":"storage.permission","params":{}}');settings=value;}
+    return settings;
+  });
+  render(<AppearanceSection/>);
+  fireEvent.click(await screen.findByRole('button',{name:/Delete My theme/}));
+  fireEvent.click(screen.getByRole('button',{name:tr('common:delete')}));
+  expect((await within(screen.getByRole('dialog')).findByRole('alert')).textContent).toBe(tr('storage:permission'));
+  fail=false;fireEvent.click(screen.getByRole('button',{name:tr('common:delete')}));
+  await waitFor(()=>expect(screen.queryByRole('dialog')).toBeNull());
+  await waitFor(()=>expect(document.activeElement?.textContent).toBe(tr('themes:system')));
 });

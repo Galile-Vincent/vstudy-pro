@@ -24,6 +24,7 @@ export function ProviderRow({
 }) {
   useTranslation();
   const [removing,setRemoving] = useState(false);
+  const [removeError,setRemoveError] = useState('');
   const [hasKey, setHasKey] = useState(false);
   const [key, setKey] = useState('');
   const [baseUrl, setBaseUrl] = useState(
@@ -223,7 +224,7 @@ export function ProviderRow({
                 size="sm"
                 type="button"
                 disabled={busy}
-                onClick={() => setRemoving(true)}
+                onClick={() => {setRemoveError('');setRemoving(true);}}
               >
                 {tr('common:remove')}
               </Button>
@@ -264,10 +265,14 @@ export function ProviderRow({
       <Dialog open={removing} onOpenChange={value => {if (!busy) setRemoving(value);}}>
         <DialogContent><DialogTitle>{tr('settings:remove_key_title',{name:providerName[provider.config.id]})}</DialogTitle>
           <DialogDescription>{tr('settings:remove_key_copy')}</DialogDescription>
+          {removeError && <p role="alert">{removeError}</p>}
           <Button variant="secondary" disabled={busy} onClick={() => setRemoving(false)}>{tr('common:cancel')}</Button>
           <Button variant="destructive" disabled={busy} onClick={() => void perform(async () => {
-            await desktop.invoke('secrets:delete',{providerId:provider.config.id});
-            setHasKey(false);setRemoving(false);
+            setRemoveError('');
+            try {
+              await desktop.invoke('secrets:delete',{providerId:provider.config.id});
+              setHasKey(false);setRemoving(false);
+            } catch (error) { setRemoveError(errorText(error)); }
           })}>{tr('common:remove')}</Button>
         </DialogContent>
       </Dialog>
