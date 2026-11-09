@@ -155,181 +155,6 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   max-width: 62ch;
 }
 
-.settings-group h3,
-.agents-section > h3 {
-  font-size: var(--type-md);
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--ink);
-  margin: 0 0 var(--space-2);
-}
-
-/* Groups: a soft tonal fill, no frame; rows keep a very faint divider. */
-.settings-card {
-  border: 0;
-  border-radius: var(--r-md);
-  background: var(--glass-tone);
-  box-shadow: none;
-  overflow: hidden;
-  min-width: 0;
-  .settings-disclosure-body & {
-    margin-inline:calc(var(--space-4) * -1);
-    border:0;
-    border-top:1px solid var(--glass-tone);
-    border-radius:0;
-    background:transparent;
-  }
-  .settings-disclosure-body > .settings-group:last-child & { border-radius:0 0 var(--r-md) var(--r-md); }
-}
-
-.settings-card > * + * {
-  border-top: 1px solid var(--glass-tone);
-}
-
-.settings-card > :is(p, div, details, [role=status], [role=alert]):not(.settings-row, .provider-row, .network-event, .row, .appearance-preview) {
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--type-sm);
-  line-height: 1.5;
-}
-
-.settings-card[data-danger=true] {
-  background: color-mix(in oklab, var(--danger) 7%, transparent);
-}
-
-.settings-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2) var(--space-6);
-  padding: var(--space-3) var(--space-4);
-  min-height: 52px;
-  min-width: 0;
-}
-
-.settings-row[data-layout=stack] {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.settings-row[data-layout=stack] .settings-control {
-  margin-inline-start: 0;
-  width: 100%;
-  flex: none;
-  justify-content: flex-start;
-}
-
-.settings-label {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: var(--type-base);
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--ink);
-}
-
-.settings-label p {
-  margin-top: 2px;
-  font-size: var(--type-sm);
-  font-weight: 400;
-  color: var(--muted);
-  line-height: 1.5;
-}
-
-.settings-control {
-  flex: 0 0 auto;
-  min-width: 0;
-  max-width: 100%;
-  margin-inline-start: auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.settings-control input:not([type=checkbox], [type=radio], [type=range]),
-.settings-control textarea,
-.settings-control [data-slot=select-trigger] {
-  border: 0;
-  outline: none;
-  background: var(--surface);
-  border-radius: var(--r-sm);
-  font-size: var(--type-base);
-  color: var(--ink);
-  box-shadow: none;
-  transition: border-color var(--motion-fast) var(--ease-standard);
-}
-
-.settings-control input:not([type=checkbox], [type=radio], [type=range]),
-.settings-control textarea {
-  padding: var(--space-2) var(--space-3);
-}
-
-.settings-control :is(input:not([type=checkbox], [type=radio], [type=range]), textarea, [data-slot=select-trigger]):hover:not(:disabled) {
-  background: var(--surface);
-  box-shadow: var(--glass-depth);
-}
-
-html[data-input-modality=keyboard] .settings-control :is(input, textarea, [data-slot=select-trigger], summary):focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-.settings-control input {
-  width: 8rem;
-  max-width: 100%;
-}
-
-.settings-control input[type=number] {
-  text-align: end;
-  font-variant-numeric: tabular-nums;
-}
-
-.settings-control [data-slot=select-trigger] {
-  width: 16rem;
-  max-width: 100%;
-}
-
-.settings-control [data-slot=switch][data-state=unchecked] {
-  border-color: var(--line);
-}
-
-.settings-control [data-slot=toggle-group] {
-  flex-wrap: nowrap;
-  max-width: 100%;
-  border: 0;
-  background: var(--glass-tone-strong);
-  border-radius: var(--r-pill);
-  padding: 2px;
-  gap: 2px;
-}
-
-.settings-control [data-slot=toggle-group-item] {
-  border: 0;
-  border-radius: var(--r-pill);
-  font-size: var(--type-sm);
-  white-space: nowrap;
-  padding-inline: var(--space-3);
-  min-height: 1.75rem;
-  height: auto;
-  color: var(--muted);
-  box-shadow: none;
-  transition: background-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
-}
-
-.settings-control [data-slot=toggle-group-item][data-state=on] {
-  background: var(--surface);
-  color: var(--ink);
-  font-weight: 600;
-  box-shadow: var(--glass-shadow);
-}
-
-.settings-control [data-slot=toggle-group-item]:hover:not([data-state=on]) {
-  color: var(--ink);
-  background: color-mix(in oklab, var(--ink) 6%, transparent);
-}
-
-
 .settings-disclosure {
   border: 0;
   border-radius: var(--r-md);
@@ -379,7 +204,6 @@ html[data-input-modality=keyboard] .settings-control :is(input, textarea, [data-
   line-height: 1.5;
 }
 
-.settings-disclosure-body:has(> .settings-group:last-child) { padding-bottom:0; }
 
 .settings-pane details:not(.settings-disclosure) > summary {
   display: flex;
@@ -414,21 +238,6 @@ html[data-input-modality=keyboard] .settings-control :is(input, textarea, [data-
   margin-top: calc(var(--space-5) * -1);
 }
 
-.ai-cli-tool-actions {
-  justify-content: flex-start;
-  flex-wrap: wrap;
-}
-
-.ai-cli-tool-actions .ai-cli-inventory-entry {
-  width: auto;
-  font-weight: 500;
-}
-
-.ai-cli-tool-actions [data-slot=button] svg {
-  width: 14px;
-  height: 14px;
-}
-
 /* Setup guide inside its disclosure: the summary is the title. */
 .settings-disclosure .ai-setup-guide {
   padding: 0;
@@ -446,30 +255,6 @@ html[data-input-modality=keyboard] .settings-control :is(input, textarea, [data-
   gap: var(--space-3);
   padding: var(--space-4);
   border: 0;
-}
-
-.settings-dialog .settings-card > .provider-row + .provider-row {
-  border-top: 1px solid var(--glass-tone);
-}
-
-.provider-row .row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-  font-size: var(--type-base);
-}
-
-.provider-row .row strong {
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.provider-row .provider-title {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
 }
 
 .provider-row .provider-actions {
@@ -614,16 +399,6 @@ html[data-input-modality=keyboard] .settings-control :is(input, textarea, [data-
   margin-top: var(--space-2);
 }
 
-.settings-card > details > summary {
-  cursor: pointer;
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.settings-card > details .settings-row {
-  padding-inline: 0;
-}
-
 .storage-bytes { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted); }
 
 .settings-section-select[data-slot=select-trigger] { display:none; }
@@ -637,38 +412,19 @@ html[data-input-modality=keyboard] .settings-control :is(input, textarea, [data-
   .settings-pane { padding:var(--space-4) var(--space-4) var(--space-6); }
 }
 
-@container settings-pane (max-width: 34rem) {
-  .settings-row {
-    flex-wrap: wrap;
-  }
-}
-
 @media (prefers-contrast: more), (forced-colors: active) {
-  .settings-card,
   .settings-disclosure,
-  .settings-control [data-slot=toggle-group],
   .settings-pane :is(input:not([type=checkbox], [type=radio], [type=range]), textarea, [data-slot=select-trigger]) {
     border: 1px solid var(--hairline);
   }
   .settings-header { border-bottom: 1px solid var(--hairline); }
   .settings-tabs[data-slot=tabs-list] { border-inline-end: 1px solid var(--hairline); }
-  .settings-card > * + * {
-    border-top-color: var(--hairline);
-  }
-  .settings-card[data-danger=true] {
-    border-color: var(--danger);
-  }
   .settings-pane {
     mask-image: none;
   }
 }
 
 @media (forced-colors: active) {
-  .settings-control [data-slot=toggle-group-item][data-state=on] {
-    forced-color-adjust: none;
-    background: Highlight;
-    color: HighlightText;
-  }
   .provider-status-dot {
     forced-color-adjust: none;
     background: CanvasText;
@@ -681,5 +437,5 @@ html[data-input-modality=keyboard] .settings-control :is(input, textarea, [data-
   }
 }
 
-html:is([data-theme=contrast],[data-contrast=more]) :is(.settings-card,.settings-row,.settings-disclosure) { outline:1px solid var(--hairline); outline-offset:0; }
+html:is([data-theme=contrast],[data-contrast=more]) .settings-disclosure { outline:1px solid var(--hairline); outline-offset:0; }
 html:is([data-theme=contrast],[data-contrast=more]) .settings-pane { mask-image:none; }

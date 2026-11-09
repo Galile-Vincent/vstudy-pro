@@ -101,7 +101,7 @@ export function AppearanceSection() {
       {slider('contrast')}
     </Card>
     <Section level={3} title={tr('settings:text_reading')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-      {(['uiScale','density','readerFont','readerSize'] as const).map(field => <SettingRow htmlFor={`appearance-${field}`} key={field} label={tr(`settings:${field}`)}>
+      {(['uiScale','density','readerFont','readerSize'] as const).map(field => <SettingRow {...(field === 'readerFont' ? {htmlFor:'appearance-reader-font'} : {})} key={field} label={tr(`settings:${field}`)}>
         {field === 'readerFont' ? <Select id="appearance-reader-font" aria-label={tr('settings:readerFont')} value={settings.readerFont} onChange={e => void update({readerFont:e.target.value as Settings['readerFont']})}>
           {['system','serif','mono'].map(v => <option key={v} value={v}>{tr(`settings:${v}`)}</option>)}
         </Select> : field === 'uiScale' ? toggles(field,[100,125,150,200]) : field === 'density' ? toggles(field,['comfortable','compact']) : toggles(field,['s','m','l','xl'])}
