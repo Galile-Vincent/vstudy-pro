@@ -23,3 +23,7 @@ export function acquireOwnership(app: OwnershipApp, window: () => OwnedWindow | 
   });
   return true;
 }
+
+export function relaunchArguments(argv: string[] = process.argv): string[] {
+  return argv.slice(1).filter(arg => arg !== '--mcp-background');
+}

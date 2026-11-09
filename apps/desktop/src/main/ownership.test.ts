@@ -26,3 +26,9 @@ it('keeps MCP background launches hidden and restores a closed owner for ordinar
   second?.(undefined,['VStudy Pro']);
   expect(restored).toBe(1);
 });
+
+it('filters background startup while preserving the explicit data directory', async () => {
+  const { relaunchArguments } = await import('./ownership');
+  expect(relaunchArguments(['electron','app','--mcp-background','--user-data-dir=/owned']))
+    .toEqual(['app','--user-data-dir=/owned']);
+});
