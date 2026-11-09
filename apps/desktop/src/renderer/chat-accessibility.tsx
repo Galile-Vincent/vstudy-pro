@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAuiState } from '@assistant-ui/react';
-import { useState, useRef, useLayoutEffect, type FC } from 'react';
+import { useState, useRef, useLayoutEffect, useEffect, type FC } from 'react';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { plainText } from '../shared/plain-text';
 import { copyAnswer } from './copy-answer';
@@ -24,7 +24,7 @@ export function ChatAnnouncement() {
     const plain = plainText(text, documentCitationSchema.array().safeParse(last.metadata.custom.citations).data ?? []);
     return `${tr(last.status?.type === 'incomplete' ? last.status.reason === 'error' ? 'common:answer_error' : 'common:answer_stopped' : 'common:answer_complete')}: ${announcementExcerpt(plain)}`;
   });
-  return <span data-testid="chat-announcement" role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</span>;
+  return <><ToolAnnouncement/><span data-testid="chat-announcement" role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</span></>;
 }
 
 export const CopyAnswerButton: FC = () => {
@@ -40,3 +40,37 @@ export const CopyAnswerButton: FC = () => {
   }}>{copied ? <CheckIcon /> : <CopyIcon />}</TooltipIconButton>;
 };
 
+
+export function ToolAnnouncement() {
+  useTranslation();
+  const running = useAuiState(state => state.thread.isRunning);
+  const message = useAuiState(state => state.thread.messages.at(-1));
+  const tracked = useRef<{id: string | undefined; active: boolean; seen: Map<string, string>} | null>(null);
+  const sequence = useRef(0);
+  const [entries, setEntries] = useState<{id: number; text: string}[]>([]);
+  useEffect(() => {
+    const initial = tracked.current === null;
+    if (!tracked.current || tracked.current.id !== message?.id) {
+      tracked.current = {id: message?.id, active: false, seen: new Map()};
+    }
+    const current = tracked.current;
+    if (running) current.active = true;
+    const announcements: {id: number; text: string}[] = [];
+    if (message?.role === 'assistant') for (const part of message.content) {
+      if (part.type !== 'tool-call') continue;
+      const status = part.isError ? 'failed' : part.result !== undefined ? 'finished'
+        : message.status?.type === 'incomplete'
+          ? message.status.reason === 'cancelled' ? 'cancelled' : 'failed'
+        : message.status?.type === 'running' ? 'started' : 'waiting';
+      const previous = current.seen.get(part.toolCallId);
+      current.seen.set(part.toolCallId, status);
+      if (initial || !current.active || previous === status) continue;
+      announcements.push({id: sequence.current++, text: tr(`common:tool_${status}`, {tool: part.toolName})});
+    }
+    if (announcements.length) setEntries(entries => [...entries, ...announcements].slice(-5));
+  }, [message, running]);
+  return <div data-testid="tool-announcement" role="log" aria-live="polite"
+    aria-relevant="additions" className="sr-only">
+    {entries.map(entry => <div key={entry.id}>{entry.text}</div>)}
+  </div>;
+}

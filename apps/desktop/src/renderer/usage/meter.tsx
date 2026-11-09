@@ -156,6 +156,7 @@ export function useBudgetGuard(
     pending.current = null;
     if (send) { send(); return; }
     allow.current = true;
+    form.current?.querySelector<HTMLTextAreaElement>('textarea')?.focus({preventScroll: true});
     form.current?.requestSubmit();
   };
 

@@ -1,3 +1,7 @@
+import { useLayoutEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { tr } from '../shared/i18n';
+import './chat-overflow.css';
 import { useAuiState } from '@assistant-ui/react';
 import { MarkdownText as VendorMarkdown } from './components/assistant-ui/elements/markdown-text';
 import { useMarkdownPlugins } from './markdown-plugins';
@@ -11,7 +15,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
 const components = {
  a: ({href,children}: React.ComponentProps<'a'>) => href?.startsWith('#vstudy-cite-') ? <DocumentCitationLink id={href.slice(13)}>{children}</DocumentCitationLink> : <a href={href} onClick={event=>{event.preventDefault();if(href)void desktop.invoke('shell:openExternal',{url:href});}}>{children}</a>,
- pre: ({children,...props}: React.ComponentProps<'pre'>) => <pre {...props} tabIndex={0}>{children}</pre>,
+ pre: CodeBlock,
 };
 export function MarkdownText() {
  const text = useAuiState(s=>s.message.content.filter(p=>p.type==='text').map(p=>p.text).join(''));
@@ -19,4 +23,23 @@ export function MarkdownText() {
  const refs = documentCitationSchema.array().safeParse(raw).data??[];
  const plugins = useMarkdownPlugins(text);
  return <VendorMarkdown components={components} markdownProps={{remarkPlugins:[remarkGfm,...plugins.remark],rehypePlugins:[[rehypeSanitize,schema],...plugins.rehype],skipHtml:true,smooth:false,containerProps:{lang:contentLanguage(text)},preprocess:value=>value.replace(/\[\[cite:(s\d+)\]\]/g,(marker,id:string)=>refs.some(c=>c.id===id)?`[source](#vstudy-cite-${id})`:marker),urlTransform:url=>/^#vstudy-cite-s\d+$/.test(url)||externalUrlSchema.safeParse(url).success?url:''}}/>;
+}
+
+export function CodeBlock({children, ...props}: React.ComponentProps<'pre'>) {
+  useTranslation();
+  const ref = useRef<HTMLPreElement>(null);
+  const [overflow, setOverflow] = useState(false);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const measure = () => setOverflow(element.scrollWidth > element.clientWidth);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [children]);
+  return <pre {...props} ref={ref} style={{...props.style, overflowX: 'auto', maxWidth: '100%'}}
+    role={overflow ? 'region' : undefined}
+    tabIndex={overflow ? 0 : undefined}
+    aria-label={overflow ? tr('common:scrollable_code') : undefined}>{children}</pre>;
 }
