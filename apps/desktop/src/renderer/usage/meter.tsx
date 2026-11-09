@@ -219,5 +219,5 @@ export function useBudgetGuard(
 }
 
 export function SubscriptionWindowMeter({ label, usedPercent }: { label: string; usedPercent: number }) {
-  return <div className="subscription-window"><span>{label}<small>{Math.round(usedPercent)}%</small></span><progress aria-label={label} value={usedPercent} max={100} /></div>;
+  return <div className="subscription-window"><span><span className="subscription-label">{label}</span><small>{Math.round(usedPercent)}%</small></span><progress aria-label={label} value={usedPercent} max={100} /></div>;
 }
