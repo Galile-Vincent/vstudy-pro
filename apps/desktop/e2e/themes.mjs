@@ -1,3 +1,4 @@
+import { seedRoute } from './helpers/tab-route.mjs';
 /** Real Electron theme acceptance and evidence. Moodle cards use deterministic IPC fixtures. */
 import { _electron as electron } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
@@ -39,8 +40,10 @@ try {
     await page.evaluate(async({view,themeId,colorScheme,id})=>{
       const s=await window.desktop.invoke('settings:get',{});
       await window.desktop.invoke('settings:set',{...s,themeId,colorScheme});
+      window.localStorage.setItem('library-mode','files');
       window.localStorage.setItem('vstudy-route',JSON.stringify({view,documentId:id}));
     },{view,themeId,colorScheme,id:doc.id});
+    await seedRoute(page,{view,documentId:doc.id});
     await page.reload();
     await page.waitForFunction(({themeId,colorScheme})=>window.document.documentElement.dataset.theme===themeId&&window.document.documentElement.dataset.scheme===colorScheme,{themeId,colorScheme});
     await page.emulateMedia({reducedMotion:'reduce'});
@@ -88,6 +91,8 @@ try {
     const axe=await new AxeBuilder({page}).setLegacyMode(true).include('.appearance-layout').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
     assert.deepEqual(axe.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})),[],`${themeId}/${scheme} appearance accessibility`);
     await page.keyboard.press('Escape');
+    await page.locator('.settings-dialog').waitFor({state:'detached'});
+    await page.waitForTimeout(300);
   }
   await appearance();
   await page.getByRole('button',{name:'Ocean',exact:true}).focus();
@@ -127,7 +132,7 @@ try {
   await transfer.getByLabel('Theme JSON',{exact:true}).fill(JSON.stringify(exported));
   await transfer.getByRole('button',{name:'Import theme',exact:true}).click();
   await transfer.waitFor({state:'hidden'});
-  await page.getByRole('button',{name:'Imported Ocean',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Imported Ocean',exact:true}).click();
   const slider=page.getByRole('slider',{name:'Contrast',exact:true});
   await slider.focus();await slider.press('ArrowRight');
   await page.waitForFunction(async()=>(await window.desktop.invoke('settings:get',{})).contrast===101);

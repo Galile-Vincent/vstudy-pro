@@ -197,7 +197,7 @@ try {
     await form
       .getByRole("textbox", { name: "API key", exact: true })
       .fill("preview-only-key");
-    await form.getByRole("button", { name: "Save key", exact: true }).click();
+    await form.getByRole("button", { name: "Save key — Anthropic", exact: true }).click();
     await form.waitFor({ state: "hidden" });
   }
   if (!mock) {
@@ -254,7 +254,7 @@ try {
     await page.getByRole('dialog').locator('summary').filter({hasText:'More options'}).click();
     const keyForm = page.locator('.provider-row').filter({hasText:'OpenAI compatible'});
     await keyForm.getByLabel('OpenAI compatible API key',{exact:true}).fill('local-test-key');
-    await keyForm.getByRole('button',{name:'Save key',exact:true}).click();
+    await keyForm.getByRole('button',{name:'Save key — OpenAI compatible',exact:true}).click();
     await page.getByRole('button',{name:'Close settings',exact:true}).click();
     assert.equal(await page.evaluate(async () => (await window.desktop.invoke("providers:list", {})).find(p => p.config.id === "openai-compatible").config.enabled), true, "saving compatible key enables provider");
   }

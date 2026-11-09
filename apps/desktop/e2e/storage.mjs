@@ -1,3 +1,4 @@
+import { seedRoute } from './helpers/tab-route.mjs';
 /** Verify storage controls in one isolated Electron instance, including a real restart restore. */
 import { waitForDocumentStatus } from './helpers/document-status.mjs';
 import { _electron as electron } from 'playwright';
@@ -20,10 +21,11 @@ async function launch(){
 }
 async function openSettings(page,language){
   await page.evaluate(async language=>{const settings=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...settings,language,onboardingCompleted:true,welcomeSeen:true});window.localStorage.setItem('vstudy-route',JSON.stringify({view:'workspace'}));},language);
+  await seedRoute(page,{view:'workspace'});
   await page.reload();await page.getByTestId('bridge-status').waitFor({state:'attached'});
   await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));
   const strings=JSON.parse(await readFile(`src/shared/locales/${language}/storage.json`,'utf8'));
-  await page.getByRole('tab',{name:strings.title,exact:true}).click();await page.getByTestId('storage-settings').locator('output').first().waitFor();return strings;
+  await page.getByRole('tab',{name:strings.title,exact:true}).click();await page.getByTestId('storage-settings').locator('.storage-bytes').first().waitFor();return strings;
 }
 try {
   let page=await launch();
@@ -35,7 +37,7 @@ try {
   for(const language of ['en','zh-Hant','ja'])for(const theme of ['light','dark']){
     await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setSize(1200,900));
     const localized=await openSettings(page,language);
-    const panel=page.getByTestId('storage-settings');assert.equal(await panel.locator('output').count(),7);
+    const panel=page.getByTestId('storage-settings');assert.equal(await panel.locator('.storage-bytes').count(),7);
     const axe=await new AxeBuilder({page}).setLegacyMode(true).include('.settings-dialog').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
     results.push({language,theme,violations:axe.violations});
     await page.screenshot({path:join(evidence,`${language}-${theme}.png`),animations:'disabled'});
