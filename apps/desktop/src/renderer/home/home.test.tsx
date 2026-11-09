@@ -58,6 +58,7 @@ it('uses one Resume action and at most five recent rows without a nested main', 
   const resume = dom.querySelector('button[aria-label]')!;
   expect(getByRole(dom, 'button', { name: new RegExp(`^${resume.textContent!.trim()}`) })).toBe(resume);
   expect(markup.match(/data-slot="list-row"/g)).toHaveLength(5);
+  expect(getRoles(dom).button).toHaveLength(8);
   expect(markup).toContain('Resume');
   expect(markup).not.toContain('Notes 6');
   expect(markup).not.toContain('art-reader-kicker');

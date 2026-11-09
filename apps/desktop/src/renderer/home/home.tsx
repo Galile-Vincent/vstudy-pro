@@ -234,7 +234,7 @@ export function Home({
   );
   const displayName = name ?? settings?.displayName;
   return (
-    <PageContainer className="home-page" role="main">
+    <PageContainer role={undefined} className="home-page">
       <div className="home-content">
         <PageHeader
           leading={<Brand />}
@@ -287,16 +287,6 @@ export function Home({
                     const snippet = recent.lastChat && (
                       <span className="line-clamp-2">{plainText(recent.lastChat)}</span>
                     );
-                    const action = (
-                      <Button
-                        variant={index === 0 ? 'default' : 'ghost'}
-                        aria-label={tr('home:resume_title', { title })}
-                        onClick={() => navigate('workspace', recent.document.id)}
-                      >
-                        {index === 0 ? tr('home:resume') : tr('home:continue')}
-                        <ArrowUpRight size={16} aria-hidden="true" />
-                      </Button>
-                    );
                     return index === 0 ? (
                       <SurfaceCard
                         key={recent.document.id}
@@ -310,7 +300,13 @@ export function Home({
                           </h3>
                           <p className="text-[var(--muted)]">{snippet}</p>
                         </div>
-                        {action}
+                        <Button
+                          aria-label={tr('home:resume_title', { title })}
+                          onClick={() => navigate('workspace', recent.document.id)}
+                        >
+                          {tr('home:resume')}
+                          <ArrowUpRight size={16} aria-hidden="true" />
+                        </Button>
                       </SurfaceCard>
                     ) : (
                       <ListRow
@@ -322,7 +318,6 @@ export function Home({
                           </span>
                         }
                         subtitle={snippet}
-                        actions={action}
                         onClick={() => navigate('workspace', recent.document.id)}
                       />
                     );
