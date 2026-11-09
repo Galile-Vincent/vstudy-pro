@@ -11,6 +11,12 @@ import { displayTitle } from "../../shared/moodle-course-display";
 import type { MoodleApi } from "./api";
 import type { MoodleAgentAction } from "../../shared/moodle";
 
+const navigationMock = vi.hoisted(() => ({ value: null as null | {openTab: ReturnType<typeof vi.fn>} }));
+vi.mock('../shell', async importOriginal => ({
+  ...await importOriginal<typeof import('../shell')>(),
+  useOptionalNavigation: () => navigationMock.value,
+}));
+
 vi.stubGlobal(
   "ResizeObserver",
   class {
@@ -25,6 +31,7 @@ let host: HTMLDivElement;
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
 beforeEach(async () => {
+  navigationMock.value = null;
   vi.stubGlobal("matchMedia",vi.fn(() => ({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()})));
   await i18n.changeLanguage("en");
   host = document.createElement("div");
@@ -912,6 +919,8 @@ it("C4 moves focus into Planner and restores its invoking button", async () => {
   expect(document.activeElement).toBe(host.querySelector(".planner-entry"));
 });
 it("C2 gives the sibling new-tab icon a course-specific name", async () => {
+  const openTab = vi.fn();
+  navigationMock.value = {openTab};
   await mount(createMockMoodleApi());
   const row = host.querySelector(".moodle-course-card")!;
   const action = getByRole(row as HTMLElement, "button", {
@@ -919,6 +928,23 @@ it("C2 gives the sibling new-tab icon a course-specific name", async () => {
   });
   expect(action.querySelector("svg")).not.toBeNull();
   expect(action.closest(".course-open")).toBeNull();
+  await act(async () => action.click());
+  const expected = openTab.mock.calls[0];
+  const title = row.querySelector('.course-open')!;
+  for (const modifier of [{ctrlKey: true}, {metaKey: true}]) {
+    await act(async () => title.dispatchEvent(new MouseEvent('click', {bubbles: true, ...modifier})));
+    expect(openTab.mock.calls.at(-1)).toEqual(expected);
+  }
+  await act(async () => title.dispatchEvent(new MouseEvent('auxclick', {bubbles: true, button: 1})));
+  expect(openTab.mock.calls.at(-1)).toEqual(expected);
+  expect(openTab).toHaveBeenCalledTimes(4);
+});
+
+it('hides unavailable new-tab controls and the duplicate menu', async () => {
+  await mount(createMockMoodleApi());
+  const row = host.querySelector('.moodle-course-card')!;
+  expect(row.querySelector('[aria-label*=new]')).toBeNull();
+  expect(row.querySelector('[aria-haspopup=menu]')).toBeNull();
 });
 
 

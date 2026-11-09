@@ -25,7 +25,6 @@ import {
   Inbox,
   AlarmClock,
   Mail,
-  MoreHorizontal,
   Pin,
   RefreshCw,
   Unplug,
@@ -48,9 +47,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
 import { Skeleton } from "../components/ui/skeleton";
 import { useMoodleApi, type MoodleApi } from "./api";
 import { Reminder } from "./reminder";
@@ -1050,7 +1046,7 @@ function CoursesBody({
                           }
                           actions={
                             <div className="flex items-center gap-1">
-                              <Button
+                              {navigation?.openTab && <Button
                                 variant="ghost"
                                 size="icon"
                                 className="relative z-1"
@@ -1065,34 +1061,7 @@ function CoursesBody({
                                 }
                               >
                                 <ArrowUpRight aria-hidden="true" />
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="relative z-1"
-                                    aria-label={tr("moodle:catalog_course_actions", {
-                                      course: name,
-                                    })}
-                                  >
-                                    <MoreHorizontal aria-hidden="true" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  <DropdownMenuItem
-                                    onSelect={() =>
-                                      navigation?.openTab({
-                                        view: "courses",
-                                        courseId: course.id,
-                                        title: name,
-                                      })
-                                    }
-                                  >
-                                    {tr("moodle:open_course_tab", { course: name })}
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                              </Button>}
                               <div
                                 className="course-counts flex items-center gap-2"
                                 aria-hidden="true"
