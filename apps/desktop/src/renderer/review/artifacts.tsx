@@ -475,6 +475,7 @@ export function ArtifactPanel({
   );
 }
 function ResolvedScope({ artifact }: { artifact: Artifact }) {
+  const format = useFormat();
   const scope = artifact.resolvedScope;
   const units = useReviewPage(
     useCallback(
@@ -516,7 +517,7 @@ function ResolvedScope({ artifact }: { artifact: Artifact }) {
       </p>
       {scope.from && (
         <p>
-          <time>{scope.from}</time> → <time>{scope.to}</time> ({scope.timeZone})
+          <time dateTime={scope.from}>{format.date(scope.from, { timeZone: scope.timeZone })}</time> → <time dateTime={scope.to ?? undefined}>{scope.to && format.date(scope.to, { timeZone: scope.timeZone })}</time> ({scope.timeZone})
         </p>
       )}
       <ul>

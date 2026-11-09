@@ -5,6 +5,7 @@ import type { Conversation } from "../../shared/domain";
 import type { IpcResponse } from "../../shared/ipc";
 import { MAX_REVIEW_CONCEPTS } from "../../shared/review-artifacts";
 import { tr } from "../../shared/i18n";
+import { useFormat } from "../i18n";
 import { desktop } from "../bridge";
 import { useNavigate } from "../shell";
 import {
@@ -613,6 +614,7 @@ function Recent({
   );
   const [edit, setEdit] = useState<string | null>(null),
     [text, setText] = useState("");
+  const format = useFormat();
   const paused = page.items.filter((job) => job.errorCode === "budget");
   return (
     <section>
@@ -640,9 +642,7 @@ function Recent({
         {page.items.map((job) => (
           <li key={job.id}>
             <time dateTime={job.occurredAt}>
-              {new Date(job.occurredAt).toLocaleDateString(
-                document.documentElement.lang || "en",
-              )}
+              {format.date(job.occurredAt)}
             </time>
             <span className="review-chip">
               {course?.title ?? tr("review:unsorted")}

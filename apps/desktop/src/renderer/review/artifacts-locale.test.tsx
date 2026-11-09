@@ -59,3 +59,15 @@ it.each(['en', 'zh-Hant', 'ja'])('formats saved artifact dates in app language %
     new Intl.DateTimeFormat(language).format(new Date(artifact.createdAt)),
   );
 });
+it.each(['en', 'zh-Hant', 'ja'])('formats resolved dates in app language %s', async language => {
+  await i18n.changeLanguage(language); setup('en');
+  const respond = invoke.getMockImplementation()!;
+  invoke.mockImplementation(async (channel: string) => channel === 'review:artifact:get'
+    ? { ...artifact, resolvedScope: { ...artifact.resolvedScope, from: artifact.createdAt, to: '2026-11-07T00:00:00Z' } }
+    : respond(channel));
+  render(<ArtifactPanel courseId="course" kind="note" selection={null} />);
+  fireEvent.click(await screen.findByRole('button', { name: 'A note' }));
+  await waitFor(() => expect(document.querySelector('.review-resolved time')?.textContent).toBe(
+    new Intl.DateTimeFormat(language, { timeZone: 'Asia/Taipei' }).format(new Date(artifact.createdAt)),
+  ));
+});
