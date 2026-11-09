@@ -23,7 +23,7 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
       probeShell.remove();
       setOverlay(next);
       const top = Math.max(0, ...Array.from(
-        document.querySelectorAll<HTMLElement>('.app-tabs, .shell-topbar'),
+        document.querySelectorAll<HTMLElement>('.app-tabs, .shell-topbar, .workspace .app-header'),
       ).filter(element => element.getClientRects().length)
         .map(element => element.getBoundingClientRect().bottom));
       sidebar?.style.setProperty('--sidebar-overlay-top', `${top}px`);
@@ -61,8 +61,19 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
       );
       (toggle ?? document.querySelector<HTMLElement>('[role=tab][aria-selected=true]'))?.focus();
     };
+    const outside = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest('.shell-sidebar, .shell-toggle, .workspace .app-header')) return;
+      if (target.closest('[data-radix-popper-content-wrapper], [role=dialog]')) return;
+      close();
+    };
+    window.addEventListener('pointerdown', outside);
     window.addEventListener('keydown', escape);
-    return () => window.removeEventListener('keydown', escape);
+    return () => {
+      window.removeEventListener('keydown', escape);
+      window.removeEventListener('pointerdown', outside);
+    };
   }, [overlay, visible, close]);
   return overlay;
 }
