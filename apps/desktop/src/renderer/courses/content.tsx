@@ -118,6 +118,7 @@ export function SafeCourseHtml({ html, onLink }: { html: string; onLink?: ((url:
           </a>
         );
     }
+    if (/^H[1-6]$/.test(node.tagName)) return createElement("p", {key}, children);
     return allowed.has(node.tagName)
       ? createElement(node.tagName.toLowerCase(), { key }, children)
       : children;
