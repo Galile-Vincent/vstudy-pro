@@ -1,11 +1,11 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { createDataDeletion, finishPendingDeletion, markDeletionPending } from './delete-data';
 vi.mock('node:fs/promises', async importOriginal => {
   const actual = await importOriginal<typeof fs>();
-  return {...actual, rename:vi.fn(actual.rename), rm:vi.fn(actual.rm)};
+  return {...actual, rename:vi.fn(actual.rename), rm:vi.fn(actual.rm), open:vi.fn(actual.open), realpath:vi.fn(actual.realpath)};
 });
 const platform = Object.getOwnPropertyDescriptor(process,'platform')!;
 const roots: string[] = [];
@@ -30,6 +30,13 @@ it.each(['darwin','win32'].flatMap(platform => ['EPERM','EBUSY'].map(code => ({p
   const target = await fs.realpath(root);
   Object.defineProperty(process,'platform',{value:platform,configurable:true});
   const actual = await vi.importActual<typeof fs>('node:fs/promises');
+  // Changing process.platform does not give Windows POSIX directory handles.
+  // Inject only that capability; marker creation, file fsync and deletion stay real.
+  const directory = {sync:vi.fn().mockResolvedValue(undefined), close:vi.fn().mockResolvedValue(undefined)};
+  const open = vi.spyOn(fs,'open').mockImplementation(async (path,flags,mode) => {
+    if (String(path) === dirname(root) && flags === 'r') return directory as unknown as fs.FileHandle;
+    return actual.open(path,flags,mode);
+  });
   const failure = Object.assign(Error(code),{code});
   const rename = vi.spyOn(fs,'rename'); rename.mockClear();
   const remove = vi.spyOn(fs,'rm');
@@ -42,7 +49,12 @@ it.each(['darwin','win32'].flatMap(platform => ['EPERM','EBUSY'].map(code => ({p
   const report = vi.fn(), relaunch = vi.fn();
   await createDataDeletion(root, async () => {}, report, relaunch)();
   expect(JSON.parse(await fs.readFile(root + '.delete-pending', 'utf8'))).toMatchObject({token:expect.any(String),timestamp:expect.any(Number)});
-  expect(report).toHaveBeenCalledWith(failure,true);
+  expect(report).toHaveBeenCalledExactlyOnceWith(failure,true);
+  if (platform === 'darwin') {
+    expect(open).toHaveBeenCalledWith(dirname(root),'r');
+    expect(directory.sync).toHaveBeenCalledOnce();
+    expect(directory.close).toHaveBeenCalledOnce();
+  } else expect(directory.sync).not.toHaveBeenCalled();
   expect(relaunch).toHaveBeenCalledOnce();
   await fs.access(join(root,'vstudy.sqlite'));
   if (platform === 'win32') expect(rename).not.toHaveBeenCalled();
@@ -171,4 +183,58 @@ it('retries marker removal after a transient lock', async () => {
   });
   expect(await finishPendingDeletion(root,vi.fn(),vi.fn())).toBe(true);
   expect(attempts).toBe(2);
+});
+
+it.each(['darwin','win32'])('handles Windows directory-open semantics on %s', async platform => {
+  const {root} = await fixture();
+  const actual = await vi.importActual<typeof fs>('node:fs/promises');
+  Object.defineProperty(process,'platform',{value:platform,configurable:true});
+  const failure = Object.assign(Error('Windows cannot open a directory for fsync'),{code:'EPERM'});
+  const open = vi.spyOn(fs,'open').mockImplementation(async (path,flags,mode) => {
+    if (String(path) === dirname(root) && flags === 'r') throw failure;
+    return actual.open(path,flags,mode);
+  });
+  const rename = vi.spyOn(fs,'rename'); rename.mockClear();
+  const stop = vi.fn(), report = vi.fn(), relaunch = vi.fn();
+  await createDataDeletion(root,stop,report,relaunch)();
+  await expect(fs.access(root+'.delete-pending')).rejects.toMatchObject({code:'ENOENT'});
+  expect(rename).not.toHaveBeenCalled();
+  if (platform === 'darwin') {
+    expect(report).toHaveBeenCalledExactlyOnceWith(failure,false);
+    expect(stop).not.toHaveBeenCalled();
+    expect(relaunch).not.toHaveBeenCalled();
+    await fs.access(join(root,'vstudy.sqlite'));
+  } else {
+    expect(open).not.toHaveBeenCalledWith(dirname(root),'r');
+    expect(report).not.toHaveBeenCalled();
+    expect(stop).toHaveBeenCalledOnce();
+    expect(relaunch).toHaveBeenCalledOnce();
+    await expect(fs.access(join(root,'vstudy.sqlite'))).rejects.toMatchObject({code:'ENOENT'});
+  }
+});
+
+it('keeps the marker at the requested root when realpath expands a short-path alias', async () => {
+  const {root,parent} = await fixture();
+  const target = join(parent,'canonical-profile');
+  const actual = await vi.importActual<typeof fs>('node:fs/promises');
+  await actual.rename(root,target);
+  await fs.symlink(target,root,'junction');
+  const resolve = vi.spyOn(fs,'realpath').mockResolvedValue(target);
+  Object.defineProperty(process,'platform',{value:'win32',configurable:true});
+  const failure = Object.assign(Error('locked'),{code:'EBUSY'});
+  const remove = vi.spyOn(fs,'rm').mockImplementation(async (path,options) => {
+    if (String(path) === join(target,'vstudy.sqlite')) throw failure;
+    return actual.rm(path,options);
+  });
+  const report = vi.fn(), relaunch = vi.fn();
+  await createDataDeletion(root,vi.fn(),report,relaunch)();
+  expect(resolve).toHaveBeenCalledWith(root);
+  expect(report).toHaveBeenCalledExactlyOnceWith(failure,true);
+  expect(relaunch).toHaveBeenCalledOnce();
+  expect(JSON.parse(await fs.readFile(root+'.delete-pending','utf8'))).toMatchObject({token:expect.any(String)});
+  await expect(fs.access(target+'.delete-pending')).rejects.toMatchObject({code:'ENOENT'});
+  remove.mockImplementation(actual.rm);
+  expect(await finishPendingDeletion(root,vi.fn(),vi.fn())).toBe(true);
+  await expect(fs.access(join(target,'vstudy.sqlite'))).rejects.toMatchObject({code:'ENOENT'});
+  await expect(fs.access(root+'.delete-pending')).rejects.toMatchObject({code:'ENOENT'});
 });
