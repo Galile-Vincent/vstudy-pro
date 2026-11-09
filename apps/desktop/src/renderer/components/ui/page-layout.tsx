@@ -92,9 +92,11 @@ export function Toolbar({
   );
 }
 
-export function PageContainer({ className, ...props }: ComponentProps<'div'>) {
+export function PageContainer({
+  as: Component = 'div', className, ...props
+}: ComponentProps<'div'> & { as?: 'div' | 'main' }) {
   return (
-    <div
+    <Component
       {...props}
       data-slot="page-container"
       className={cn(
