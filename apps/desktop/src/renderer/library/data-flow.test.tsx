@@ -256,3 +256,26 @@ it('exposes Space and range selection through labelled checkboxes', async () => 
  fireEvent.click(within(first).getByRole('checkbox'));
  expect(within(first).getByRole('checkbox', {checked:false})).toBeTruthy();
 });
+
+it.each(['delete', 'query', 'refresh'])('bounds selection restoration after %s in 5000 rows', async action => {
+ let departed = false;
+ const rows = Array.from({length:5000}, (_, i) => row('doc' + i));
+ state.invoke.mockImplementation(async (c, q) => {
+  if(c === 'library:documents:softDelete') { departed = true; return {}; }
+  if(c !== 'library:documents:list') return [];
+  const filtered = rows.filter(r => !(departed || q.text) || r.document.id !== 'doc0');
+  const offset = q.cursor?.sortValue ?? 0;
+  return {items:filtered.slice(offset, offset+50), nextCursor:offset+50<filtered.length
+   ? {id:'cursor',sortValue:offset+50}:null};
+ });
+ mount(); fireEvent.click((await screen.findByText('doc0')).closest('.library-document')!);
+ const count = () => state.invoke.mock.calls.filter(([c]) => c === 'library:documents:list').length;
+ const before = count();
+ if(action === 'delete') fireEvent.click(screen.getByRole('button',{name:tr('library:delete')}));
+ else if(action === 'query') fireEvent.change(screen.getByRole('textbox',{name:tr('library:search')}),{target:{value:'exclude'}});
+ else { departed=true; act(()=>window.dispatchEvent(new Event('library-changed'))); }
+ await waitFor(()=>expect(count()).toBeGreaterThan(before));
+ await waitFor(()=>expect(screen.queryByText('doc0')).toBeNull());
+ expect(count()-before).toBeLessThanOrEqual(3);
+ expect(document.querySelectorAll('[data-selected=true]')).toHaveLength(0);
+});

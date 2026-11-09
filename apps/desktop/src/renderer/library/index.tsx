@@ -182,6 +182,8 @@ export function LibraryView() {
     [folders, setFolders] = useState<Folder[]>([]),
     [tags, setTags] = useState<IpcResponse<"library:tags:list">>([]),
     [notice, setNotice] = useState("");
+  const loadedCount = useRef(0);
+  loadedCount.current = items.length;
   const selectedIds = useRef(selected);
   selectedIds.current = selected;
   const menuAnchor = useRef<HTMLElement | null>(null);
@@ -267,16 +269,22 @@ export function LibraryView() {
     );
     const id = ++generation.current;
     fetching.current = false;
-    if (previousQuery.current === JSON.stringify(query)) {
+    const sameQuery = previousQuery.current === JSON.stringify(query);
+    if (sameQuery) {
       restoreTop.current = scroller.current?.scrollTop ?? restoreTop.current;
     } else {
+      setSelected([]);
+      selectedIds.current = [];
       restoreTop.current = 0;
       previousQuery.current = JSON.stringify(query);
     }
     setLoading(true);
     setError("");
     void Promise.all([
-      desktop.invoke("library:documents:list", { ...query, cursor: undefined }),
+      desktop.invoke("library:documents:list", {
+        ...query, cursor: undefined,
+        limit: sameQuery ? Math.min(100, Math.max(query.limit, loadedCount.current)) : query.limit,
+      }),
       desktop.invoke("library:tree", {}),
       desktop.invoke("library:tags:list", {}),
     ])
@@ -292,11 +300,12 @@ export function LibraryView() {
               ),
             )
           : 1;
+        let extraPages = 0;
         while (
-          page.nextCursor &&
-          ((rows.length * 64) / multiplier < restoreTop.current + 800 ||
-            selectedIds.current.some(id => !rows.some(item => item.document.id === id)))
+          revision === 0 && sameQuery && extraPages < 2 && page.nextCursor &&
+          (rows.length * 64) / multiplier < restoreTop.current + 800
         ) {
+          extraPages++;
           const next = await desktop.invoke("library:documents:list", {
             ...query,
             cursor: page.nextCursor,
@@ -306,7 +315,8 @@ export function LibraryView() {
           page.nextCursor = next.nextCursor;
         }
         setItems(rows);
-        setSelected(current => current.filter(id => rows.some(item => item.document.id === id)));
+        const available = new Set(rows.map(item => item.document.id));
+        setSelected(current => current.filter(id => available.has(id)));
         setCursor(page.nextCursor ?? undefined);
         setFolders(f);
         setTags(t);
@@ -416,6 +426,8 @@ export function LibraryView() {
           await desktop.invoke("library:documents:softDelete", { documentId });
           deleted++;
           restored.push(documentId);
+          selectedIds.current = selectedIds.current.filter(id => id !== documentId);
+          setSelected(selectedIds.current);
         } catch (error) {
           const title = items.find(item => item.document.id === documentId)?.document.title ?? documentId;
           failures.push(`${title}: ${errorText(error)}`);
@@ -466,6 +478,8 @@ export function LibraryView() {
         });
         moved++;
         restored.push(item);
+        selectedIds.current = selectedIds.current.filter(id => id !== item.document.id);
+        setSelected(selectedIds.current);
       } catch (error) {
         remaining.push(item);
         failures.push(`${item.document.title}: ${errorText(error)}`);
