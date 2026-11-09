@@ -17,6 +17,8 @@ import {
   EmptyState,
   Stat,
   FormField,
+  SettingRow,
+  SegmentedControl,
   Tabs,
   TabsContent,
   SegmentedTabsList,
@@ -30,6 +32,10 @@ import {
 } from '../components/ui';
 
 const copy = {
+  converter: 'Converter mode',
+  converterHint: 'Choose how converters access downloads.',
+  downloads: 'Downloads',
+  offline: 'Offline',
   title: 'VStudy component gallery',
   description: 'UI_FOUNDATION_GALLERY_DEV_ONLY_2026',
   scheme: 'Scheme',
@@ -158,7 +164,11 @@ export default function DesignGallery() {
             </>
           }
         />
-        <Section title={copy.cards} count={3}>
+        <SettingRow label={copy.converter} description={copy.converterHint}>
+        <SegmentedControl aria-label={copy.converter} defaultValue="online"
+          options={[{ value: 'online', label: copy.downloads }, { value: 'offline', label: copy.offline }]} />
+      </SettingRow>
+      <Section title={copy.cards} count={3}>
           <div className="grid gap-[var(--space-4)] md:grid-cols-3">
             {(['flat', 'raised', 'interactive'] as const).map((variant) => (
               <Card

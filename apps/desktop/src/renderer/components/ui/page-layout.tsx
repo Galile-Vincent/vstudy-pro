@@ -37,13 +37,15 @@ export function PageHeader({
 export function Section({
   title,
   count,
+  level = 2,
   actions,
   children,
   className,
   ...props
 }: Omit<ComponentProps<'section'>, 'title'> &
-  Pick<Slots, 'title' | 'actions'> & { count?: ReactNode }) {
+  Pick<Slots, 'title' | 'actions'> & { count?: ReactNode; level?: 2 | 3 | 4 | 5 | 6 }) {
   const id = useId();
+  const Heading = `h${level}` as const;
   return (
     <section
       aria-labelledby={id}
@@ -52,13 +54,13 @@ export function Section({
       className={cn('flex flex-col gap-[var(--space-4)]', className)}
     >
       <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)]">
-        <h2
+        <Heading
           id={id}
           className="flex items-center gap-[var(--space-2)] text-[length:var(--type-lg)] font-medium"
         >
           {title}
           {count !== undefined && <Badge variant="secondary">{count}</Badge>}
-        </h2>
+        </Heading>
         {actions}
       </div>
       {children}

@@ -10,3 +10,6 @@ export * from './badge';
 export * from './separator';
 export * from './input';
 export * from './toggle-group';
+
+export * from './setting-row';
+export * from './segmented-control';

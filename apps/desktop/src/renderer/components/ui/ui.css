@@ -12,3 +12,22 @@
 }
 html[data-theme=contrast] [data-slot=segmented-tabs-trigger][data-state=active] { outline:thin solid var(--ink); }
 html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=segmented-tabs-trigger]):is(:focus-visible,[data-demo-state=focus]) { outline:2px solid var(--focus); outline-offset:2px; }
+
+[data-slot=setting-row] { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-3) var(--space-6); min-width:0; }
+[data-slot=setting-row] > div:first-child { flex:1; min-width: min(100%,12rem); }
+[data-slot=setting-row] label { font-weight:500; }
+[data-slot=setting-row] p { color:var(--muted); font-size:var(--type-sm); margin-top:var(--space-1); }
+[data-slot=setting-control] { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2); max-width:100%; min-width:0; }
+[data-slot=setting-control] > :is(input,textarea) { width:8rem; max-width:100%; }
+[data-slot=setting-control] > [data-slot=select-trigger] { width:16rem; max-width:100%; }
+[data-slot=setting-row][data-layout=stack] { flex-direction:column; align-items:stretch; }
+[data-slot=setting-row][data-layout=stack] > [data-slot=setting-control] { width:100%; }
+[data-slot=setting-row][data-layout=stack] textarea { width:100%; font-family:var(--font-mono); }
+[data-slot=segmented-control] { display:flex; flex-wrap:wrap; gap:var(--space-1); padding:var(--space-1); border-radius:var(--r-md); background:var(--subtle); }
+[data-slot=segmented-control] > button { padding:var(--space-2) var(--space-3); border-radius:var(--r-sm); color:var(--muted); font-size:var(--type-sm); }
+[data-slot=segmented-control] > [data-state=checked] { background:var(--active); color:var(--ink); }
+[data-slot=segmented-control] > button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+[data-slot=segmented-control][data-disabled] { opacity:var(--opacity-disabled); }
+@media (forced-colors:active), (prefers-contrast:more) {
+ [data-slot=segmented-control] > [data-state=checked] { outline:thin solid var(--ink); }
+}
