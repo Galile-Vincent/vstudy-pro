@@ -1,5 +1,6 @@
-type Recovery = { deadline: number; message: string; restore: () => Promise<void> };
+type Recovery = { deadline: number; key: string; params: {count: number; title?: string | undefined}; sequence: number; restore: () => Promise<void> };
 let entries: Recovery[] = [];
+let sequence = 0;
 const listeners = new Set<() => void>();
 function publish() { listeners.forEach(listener => listener()); }
 export const recovery = {
@@ -9,9 +10,10 @@ export const recovery = {
     return () => { listeners.delete(listener); };
   },
   snapshot: () => entries,
-  add(message: string, restore: () => Promise<void>, deadline = Date.now() + 30000) {
+  add(key: string, restore: () => Promise<void>, deadline = Date.now() + 30000,
+    params: Recovery["params"] = {count:1}) {
     if (deadline <= Date.now()) return;
-    const entry = { message, restore, deadline };
+    const entry = { key, params, sequence: ++sequence, restore, deadline };
     entries = [...entries, entry];
     setTimeout(() => {
       entries = entries.filter(value => value !== entry);
