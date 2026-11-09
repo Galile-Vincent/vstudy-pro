@@ -100,3 +100,21 @@ html[data-input-modality=keyboard] .course-folder:focus-visible,.course-folder:f
 .library-results[data-view=grid] .document-card .document-title { background:transparent; box-shadow:none; }
 .app-shell .library-results .library-document .document-title { background:transparent; backdrop-filter:none; box-shadow:none; }
 @container library (width < 36rem) { .library-view .library-toolbar { flex-wrap:wrap; } .library-view .library-search { flex-basis:100%; order:3; } }
+
+.library-view .library-mode { height:auto; min-height:46px; }
+.library-view .library-mode > button { height:auto; min-height:40px; }
+.library-view .library-search { height:auto; min-height:40px; }
+.library-view .library-toolbar > button,
+.library-view .library-view-controls > button,
+.library-view-controls .app-select { height:auto; min-height:40px; }
+@container library-page (width < 42rem) {
+  .library-title { flex-wrap:wrap; }
+  .library-title > div { min-width:0; flex-basis:100%; }
+  .library-title > button { max-width:100%; white-space:normal; height:auto; min-height:40px; }
+  .library-toolbar { display:grid; grid-template-columns:minmax(0,1fr) auto; }
+  .library-toolbar > .library-mode { grid-column:1; grid-row:1; min-width:0; justify-self:start; }
+  .library-view .library-mode > button { min-width:0; padding-inline:var(--space-2); white-space:normal; }
+  .library-toolbar > [data-testid=library-filters] { grid-column:2; grid-row:1; }
+  .library-toolbar > .library-search { grid-column:1 / -1; grid-row:2; width:100%; min-width:0; }
+  .library-toolbar > .library-view-controls { grid-column:1 / -1; flex-wrap:wrap; }
+}
