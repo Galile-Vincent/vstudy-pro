@@ -206,7 +206,10 @@ export function LibraryView() {
   const openGroup = groupedView && openKey ? groups.find((g) => g.key === openKey) : undefined;
   const showFolders = groupedView && !openGroup;
   const shown = groupedView ? (openGroup?.items ?? []) : items;
+  const heading = useRef<HTMLHeadingElement>(null);
+  const folderFocus = useRef<string | null>(null);
   const selectFolder = (key: string | null) => {
+    folderFocus.current = key ? "heading" : openKey;
     setOpenKey(key);
     setActiveRow(undefined);
     setSelected([]);
@@ -214,6 +217,13 @@ export function LibraryView() {
     try { if (key) sessionStorage.setItem(`library-folder:${viewKey}`, key); else sessionStorage.removeItem(`library-folder:${viewKey}`); }
     catch { /* A blocked session store only loses the reopened folder. */ }
   };
+  useLayoutEffect(() => {
+    const target = folderFocus.current;
+    if (!target) return;
+    if (target === "heading") heading.current?.focus();
+    else document.getElementById(`library-folder-${encodeURIComponent(target)}`)?.focus();
+    folderFocus.current = null;
+  }, [openKey, showFolders]);
   const chooseMode = (next: LibraryMode) => {
     writeMode(next);
     setModeState(next);
@@ -614,7 +624,7 @@ export function LibraryView() {
     >
       <div className="library-title">
         <div>
-          <h1>{route.title ?? (folderPath(folders, query.folderId) || tr("common:library"))}</h1>
+          <h1 ref={heading} tabIndex={-1}>{route.title ?? (folderPath(folders, query.folderId) || tr("common:library"))}</h1>
           <p className="muted">{tr("library:documentCount", { count: items.length, formatted: format.number(items.length) + (cursor ? "+" : "") })}</p>
         </div>
         <Button variant="outline" className="primary"

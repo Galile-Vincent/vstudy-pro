@@ -226,3 +226,18 @@ it.each([['End',199], ['Home',0], ['PageDown',1], ['PageUp',0]] as const)(
  act(() => first.focus()); fireEvent.keyDown(first, {key});
  await waitFor(() => expect(document.activeElement?.getAttribute('data-index')).toBe(String(index)));
 });
+
+
+it.each(['back', 'breadcrumb'])('restores the originating folder after %s navigation', async action => {
+ state.invoke.mockImplementation(async c => c === 'library:documents:list'
+  ? {items:[row('inside')], nextCursor:null} : []);
+ mount(); await screen.findByText('inside');
+ fireEvent.click(screen.getByRole('button', {name:tr('library:viewFolders')}));
+ const folder = screen.getByRole('button', {name:tr('library:openFolder', {name:tr('library:unfiled')})});
+ act(() => folder.focus()); fireEvent.click(folder);
+ expect(document.activeElement).toBe(screen.getByRole('heading', {level:1}));
+ fireEvent.click(action === 'back'
+  ? screen.getByRole('button', {name:tr('library:backToFolders')})
+  : document.querySelector('.folder-crumb-root')!);
+ expect(document.activeElement).toBe(screen.getByRole('button', {name:tr('library:openFolder', {name:tr('library:unfiled')})}));
+});
