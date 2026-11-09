@@ -87,6 +87,7 @@
   "actions": "文件選項：{{name}}",
   "loadMore": "載入更多文件",
   "loaded": "已載入 {{formatted}} 份文件",
+  "deletePartial": "已刪除 {{succeeded}} / {{total}} 份，{{failed}} 份失敗：{{reasons}}",
   "undo": "復原",
   "deleted": "已刪除 {{formatted}} 份文件，30 秒內可復原",
   "moved": "已移動文件，30 秒內可復原",

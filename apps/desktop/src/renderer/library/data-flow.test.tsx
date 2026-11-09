@@ -22,6 +22,10 @@ it('offers Undo for the first deletion when the next deletion fails',async()=>{
   const {container}=mount();await screen.findByText('first');
   fireEvent.keyDown(container.querySelector('.library-results')!,{key:'a',ctrlKey:true});
   fireEvent.click(await screen.findByRole('button',{name:tr('library:delete')}));
+  await waitFor(()=>expect(container.querySelector('.library-live')?.textContent)
+    .toContain(tr('library:deletePartial',{
+      succeeded:'1',total:'2',failed:'1',reasons:`second: ${tr('errors:generic')}`,
+    })));
   fireEvent.click(await screen.findByRole('button',{name:tr('library:undo')}));
   await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:restore',{documentId:'first'}));
   expect(state.invoke).not.toHaveBeenCalledWith('library:documents:restore',{documentId:'second'});
@@ -45,4 +49,26 @@ it('falls back to the default sort when stored JSON is corrupt',async()=>{
   localStorage.setItem('library-sort:all','{broken');
   state.invoke.mockImplementation(async channel=>channel==='library:documents:list'?{items:[row('Readable library')],nextCursor:null}:[]);
   mount();expect(await screen.findByText('Readable library')).toBeTruthy();
+});
+
+it('keeps both deletion recoveries across Library navigation',async()=>{
+  const deleted=new Set<string>();
+  state.invoke.mockImplementation(async(channel,payload)=>{
+    if(channel==='library:documents:list')return {items:['first','second'].filter(id=>!deleted.has(id)).map(row),nextCursor:null};
+    if(channel==='library:documents:softDelete')deleted.add(payload.documentId);
+    if(channel==='library:documents:restore')deleted.delete(payload.documentId);
+    return [];
+  });
+  let view=mount();
+  for(const id of ['first','second']){
+    fireEvent.click((await screen.findByText(id)).closest('.library-document')!);
+    fireEvent.click(await screen.findByRole('button',{name:tr('library:delete')}));
+    await waitFor(()=>expect(deleted.has(id)).toBe(true));
+    await waitFor(()=>expect(screen.queryByText(id)).toBeNull());
+  }
+  view.unmount();view=mount();
+  fireEvent.click(await screen.findByRole('button',{name:/Undo/}));
+  await screen.findByText('second');
+  fireEvent.click(await screen.findByRole('button',{name:/Undo/}));
+  await screen.findByText('first');
 });

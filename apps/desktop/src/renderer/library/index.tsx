@@ -1,3 +1,4 @@
+import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import { Brand } from '../components/brand';
 import { DocumentArt } from '../shell/document-art';
@@ -154,7 +155,6 @@ export function LibraryView() {
     [tagging, setTagging] = useState(false),
     [folders, setFolders] = useState<Folder[]>([]),
     [tags, setTags] = useState<IpcResponse<"library:tags:list">>([]),
-    [undo, setUndo] = useState<(() => Promise<void>) | null>(null),
     [notice, setNotice] = useState("");
   const menuAnchor = useRef<HTMLElement | null>(null);
   const placeOf = (item: Item) => courseName(item, language) ?? (folderPath(folders, item.folderId) || tr("library:unfiled"));
@@ -286,14 +286,8 @@ export function LibraryView() {
       restoreTop.current = 0;
     }
   }, [loading]);
-  useEffect(() => {
-    if (!undo) return;
-    const timer = setTimeout(() => {
-      setUndo(null);
-      setNotice("");
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, [undo]);
+  const recoveries = useSyncExternalStore(recovery.subscribe, recovery.snapshot);
+  const recoveryNotice = recoveries.at(-1)?.message ?? "";
   const focusAfter = useRef<string | null>(null);
   const [activeRow, setActiveRow] = useState<string>();
   const tabRow = shown.some(item => item.document.id === activeRow) ? activeRow : shown[0]?.document.id;
@@ -365,19 +359,27 @@ export function LibraryView() {
       : selected;
   const remove = async (targets: Item["document"]["id"][]) => {
     await run(async () => {
-      const deleted: typeof targets = [];
-      try {
-        for (const documentId of targets) {
+      const failures: string[] = [];
+      let deleted = 0;
+      for (const documentId of targets) {
+        const deadline = Date.now() + 30000;
+        try {
           await desktop.invoke("library:documents:softDelete", { documentId });
-          deleted.push(documentId);
+          deleted++;
+          recovery.add(tr("library:deleted", { count: 1, formatted: format.number(1) }),
+            async () => {
+              await desktop.invoke("library:documents:restore", { documentId });
+              changed();
+            }, deadline);
+        } catch (error) {
+          const title = items.find(item => item.document.id === documentId)?.document.title ?? documentId;
+          failures.push(`${title}: ${errorText(error)}`);
         }
-        setNotice(tr("library:deleted", {count:deleted.length,formatted:format.number(deleted.length)}));
-      } finally {
-        if (deleted.length) setUndo(() => async () => {
-          for (const documentId of deleted) await desktop.invoke("library:documents:restore", { documentId });
-          changed();
-        });
       }
+      setNotice(failures.length ? tr("library:deletePartial", {
+        succeeded: format.number(deleted), total: format.number(targets.length),
+        failed: format.number(failures.length), reasons: failures.join("; "),
+      }) : "");
     });
     setMenu(null);
   };
@@ -385,7 +387,7 @@ export function LibraryView() {
     const previous = items.filter((i) => ids.includes(i.document.id));
     await run(() => moveDocuments(ids, folderId));
     setNotice(tr("library:moved"));
-    setUndo(() => async () => {
+    recovery.add(tr("library:moved"), async () => {
       for (const i of previous)
         await desktop.invoke("library:documents:move", {
           documentIds: [i.document.id],
@@ -1030,21 +1032,21 @@ export function LibraryView() {
           count: items.length,
           formatted: format.number(items.length),
         })}
+        {notice || recoveryNotice}
       </div>
-      {notice && (
+      {(notice || recoveryNotice) && (
         <div className="library-toast" role="status">
-          {notice}
-          {undo && (
+          {notice || recoveryNotice}
+          {recoveries.length > 0 && (
             <Button variant="outline"
               onClick={() =>
                 void run(async () => {
-                  await undo();
-                  setUndo(null);
+                  await recovery.undo();
                   setNotice("");
                 })
               }
             >
-              {tr("library:undo")}
+              {tr("library:undo")}{recoveries.length > 1 ? ` (${format.number(recoveries.length)})` : ""}
             </Button>
           )}
         </div>
