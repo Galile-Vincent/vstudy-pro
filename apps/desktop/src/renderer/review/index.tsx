@@ -109,6 +109,9 @@ export function ReviewView() {
     [actionError, setActionError] = useState(false),
     [busy, setBusy] = useState(false),
     [selection, setSelection] = useState<ReviewSelection | null>(null);
+  const [bounded, setBounded] = useState({ note: "", test: "" });
+  const noteBounded = useCallback((message: string) => setBounded(old => ({ ...old, note: message })), []);
+  const testBounded = useCallback((message: string) => setBounded(old => ({ ...old, test: message })), []);
   const courses = useReviewPage(
     useCallback(
       (cursor?: Cursor) =>
@@ -218,6 +221,7 @@ export function ReviewView() {
         }
       />
 
+      <p role="status" aria-live="polite" aria-atomic="true">{tab === "notes" ? bounded.note : tab === "tests" ? bounded.test : ""}</p>
       <MemoryConsentCard />
       {!online && <p role="status">{tr("review:offline")}</p>}
       <Toolbar
@@ -300,6 +304,7 @@ export function ReviewView() {
             <ArtifactPanel
               key={courseId + "note"}
               courseId={courseId}
+              onBoundedChange={noteBounded}
               kind="note"
               selection={selection}
             />
@@ -308,6 +313,7 @@ export function ReviewView() {
             <ArtifactPanel
               key={courseId + "test"}
               courseId={courseId}
+              onBoundedChange={testBounded}
               kind="test"
               selection={selection}
               onConfirmed={reload}

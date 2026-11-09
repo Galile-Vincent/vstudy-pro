@@ -11,17 +11,19 @@ import { Button } from "../components/ui/button";
 import { useReviewPage, type Cursor } from "./paging";
 
 export type ReviewScope = z.infer<typeof studyScopeSchema>;
-type Selection = { courseId: string; conceptKeys: string[]; labels: string[] };
+type Selection = { courseId: string; conceptKeys: string[]; labels: string[]; totalConcepts?: number };
 export function ScopePicker({
   courseId,
   selection,
   onChange,
+  onBoundedChange,
   needsSourceSelection,
   size = "standard",
   onSizeChange,
 }: {
   courseId: string;
   selection: Selection | null;
+  onBoundedChange?: ((message: string) => void) | undefined;
   onChange: (scope: ReviewScope | null) => void;
   needsSourceSelection?: boolean;
   size?: "short" | "standard" | "long";
@@ -29,7 +31,7 @@ export function ScopePicker({
 }) {
   const preselected = selection?.courseId === courseId ? selection : null;
   const [kind, setKind] = useState<ReviewScope["kind"]>(
-    preselected ? "concepts" : "units",
+    preselected?.totalConcepts ? "weak" : preselected ? "concepts" : "units",
   );
   const [unitIds, setUnitIds] = useState<string[]>([]);
   const [documentIds, setDocumentIds] = useState<string[]>([]);
@@ -70,7 +72,7 @@ export function ScopePicker({
     ),
   );
   useEffect(() => {
-    setKind(preselected ? "concepts" : "units");
+    setKind(preselected?.totalConcepts ? "weak" : preselected ? "concepts" : "units");
     setUnitIds([]);
     setDocumentIds([]);
     setConceptKeys(preselected?.conceptKeys ?? []);
@@ -121,6 +123,21 @@ export function ScopePicker({
   useEffect(() => {
     change.current(scope);
   }, [scope]);
+  useEffect(() => {
+    let current = true;
+    onBoundedChange?.("");
+    if (scope) void desktop.invoke("review:scope:preview", { courseId, scope })
+      .then((resolved) => {
+        if (current && resolved.omittedConcepts) onBoundedChange?.(
+          tr("review:bounded_session", {
+            count: resolved.omittedConcepts,
+            selected: resolved.conceptKeys.length,
+            total: resolved.totalConcepts,
+          }),
+        );
+      }).catch(() => {});
+    return () => { current = false; };
+  }, [courseId, scope, onBoundedChange]);
   function toggle(
     value: string,
     old: string[],
@@ -170,8 +187,8 @@ export function ScopePicker({
   return (
     <fieldset className="review-scope">
       <legend>{tr("review:scope_title")}</legend>
-      {kind === "concepts" && selected.length >= MAX_REVIEW_CONCEPTS && (
-        <p role="status">
+      {["concepts", "units", "documents"].includes(kind) && selected.length >= MAX_REVIEW_CONCEPTS && (
+        <p>
           {tr("review:scope_limit", { count: MAX_REVIEW_CONCEPTS })}
         </p>
       )}

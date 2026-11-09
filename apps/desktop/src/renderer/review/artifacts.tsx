@@ -22,10 +22,12 @@ export function ArtifactPanel({
   kind,
   selection,
   onConfirmed,
+  onBoundedChange,
 }: {
   courseId: string;
   kind: "note" | "test";
   selection: ReviewSelection | null;
+  onBoundedChange?: (message: string) => void;
   onConfirmed?: (() => void) | undefined;
 }) {
   const { i18n } = useTranslation();
@@ -248,20 +250,11 @@ export function ArtifactPanel({
   return (
     <section className="review-artifacts">
       <h2 id={`review-${kind}-heading`} tabIndex={-1}>{tr(kind === "note" ? "review:notes" : "review:tests")}</h2>
-      {selection?.totalConcepts !== undefined &&
-        selection.totalConcepts > selection.conceptKeys.length && (
-          <p role="status">
-            {tr("review:bounded_session", {
-              count: selection.totalConcepts - selection.conceptKeys.length,
-              selected: selection.conceptKeys.length,
-              total: selection.totalConcepts,
-            })}
-          </p>
-        )}
       <ScopePicker
         courseId={courseId}
         selection={selection}
         onChange={setScope}
+        onBoundedChange={onBoundedChange}
         size={size}
         onSizeChange={setSize}
         needsSourceSelection={
