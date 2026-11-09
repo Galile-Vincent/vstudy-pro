@@ -62,3 +62,5 @@ main.media { width:min(calc(100% - var(--space-10)),1120px); padding-block:var(-
 
 body:has(main.media) .nav-links a { color:var(--ink); }
 body:has(main.media) .site-header .button { background:var(--accent); color:var(--on-accent); }
+
+[data-media]:not([data-initialized]) button { display:none; }

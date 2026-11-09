@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 vi.hoisted(() => { Object.defineProperty(window, 'AnimationEvent', { value: Event, configurable: true }); });
+import { version } from '../../package.json';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
@@ -42,5 +43,5 @@ it('also delays dismissal requested by the dialog and cancels completion on unmo
 
 it('shows the version and beta badge in General settings', async () => {
   await mount();
-  expect(host.querySelector('.app-version')?.textContent).toBe('v0.4.4 beta');
+  expect(host.querySelector('.app-version')?.textContent).toBe(`v${version} beta`);
 });

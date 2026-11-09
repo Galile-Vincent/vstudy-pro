@@ -51,20 +51,25 @@ async function loadImage(src: string) {
 export async function initShareStory() {
   const root = document.querySelector<HTMLElement>('[data-media]');
   if (!root) return;
-  const config = JSON.parse(root.dataset.config!) as { copy: MediaCopy; palette: ShareData['palette']; url: string; version: string; symbol: string; screenshot: string; language: string };
-  const c = config.copy;
   const canvas = root.querySelector('canvas')!;
   const status = root.querySelector<HTMLElement>('[data-status]')!;
   const download = root.querySelector<HTMLButtonElement>('[data-action="download"]')!;
   const share = root.querySelector<HTMLButtonElement>('[data-action="share"]')!;
-  const report = (message: string) => { status.textContent = message; };
-  root.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach(button => {
-    button.addEventListener('click',async () => {
-      try { await navigator.clipboard.writeText(button.dataset.copy!); report(c.copied); }
-      catch { report(c.error); }
-    });
-  });
+  let announcement = 0;
+  const report = (message: string) => {
+    cancelAnimationFrame(announcement);
+    status.textContent = '';
+    announcement = requestAnimationFrame(() => { status.textContent = message; });
+  };
   try {
+    const config = JSON.parse(root.dataset.config!) as { copy: MediaCopy; palette: ShareData['palette']; url: string; displayUrl: string; version: string; symbol: string; screenshot: string; language: string };
+    const c = config.copy;
+    root.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach(button => {
+      button.addEventListener('click',async () => {
+        try { await navigator.clipboard.writeText(button.dataset.copy!); report(c.copied); }
+        catch { report(c.error); }
+      });
+    });
     const [symbol,screenshot] = await Promise.all([loadImage(config.symbol),loadImage(config.screenshot),document.fonts.ready]);
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas unavailable');
@@ -77,7 +82,7 @@ export async function initShareStory() {
       share.hidden = true;
       const format = root.querySelector<HTMLInputElement>('input[name="format"]:checked')!.value as ShareFormat;
       const look = root.querySelector<HTMLInputElement>('input[name="look"]:checked')!.value as ShareLook;
-      const layout = shareStoryLayout({format,look,headline:c.headline,chips:c.chips,free:c.free,url:config.url,version:config.version,palette:config.palette});
+      const layout = shareStoryLayout({format,look,headline:c.headline,chips:c.chips,free:c.free,displayUrl:config.displayUrl,beta:c.beta,version:config.version,palette:config.palette});
       canvas.width = layout.width;
       canvas.height = layout.height;
       paint(ctx,layout.commands,{symbol,screenshot});
@@ -106,6 +111,7 @@ export async function initShareStory() {
       try { await navigator.share({files:[file]}); report(c.ready); }
       catch (error) { if (!(error instanceof DOMException && error.name === 'AbortError')) report(c.error); }
     });
+    root.dataset.initialized = '';
     redraw();
-  } catch { report(c.error); }
+  } catch { report(root.dataset.error!); }
 }

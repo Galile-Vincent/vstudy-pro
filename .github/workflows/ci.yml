@@ -92,6 +92,7 @@ jobs:
       - run: pnpm --filter @vstudy/website typecheck
       - run: pnpm --filter @vstudy/website lint
       - run: pnpm --filter @vstudy/website build
+      - run: pnpm --filter @vstudy/website test
       - run: pnpm --filter @vstudy/website verify:static
       - run: pnpm knip
   check:

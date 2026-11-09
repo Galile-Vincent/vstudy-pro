@@ -1,6 +1,6 @@
 import type { Language } from './ui';
 export interface MediaCopy {
-  title: string; intro: string; kit: string; assets: string; symbol: string; lockups: [string,string];
+  beta: string; title: string; intro: string; kit: string; assets: string; symbol: string; lockups: [string,string];
   screenshots: string; shotNames: string[]; colors: string; colorNames: string[]; rules: string; usage: string[];
   boilerplate: string; about: string; contact: string; share: string; shareIntro: string; format: string; look: string;
   formats: [string,string]; looks: [string,string,string]; headline: [string,string]; chips: [string,string,string];
@@ -9,6 +9,7 @@ export interface MediaCopy {
 }
 export const mediaCopy: Record<Language, MediaCopy> = {
   en: {
+    beta: 'beta',
     title: 'Made to be shared.', intro: 'A little VStudy Pro, out in the world. Pick up our brand assets or make a post of your own.',
     kit: 'Media kit', assets: 'The essentials', symbol: 'Symbol', lockups: ['Lockup · light backgrounds','Lockup · dark backgrounds'],
     screenshots: 'Inside the app', shotNames: ['Courses','Study with AI','Library','Documents'], colors: 'Our palette',
@@ -23,6 +24,7 @@ export const mediaCopy: Record<Language, MediaCopy> = {
     preview: 'Share image preview', ready: 'Your image is ready.', copied: 'Copied.', saved: 'PNG download started.', error: 'Could not complete that action. Please try again.', loading: 'Preparing your image…',
   },
   'zh-Hant': {
+    beta: '測試版',
     title: '讓好用的工具，被看見。', intro: '下載 VStudy Pro 品牌素材，或製作一張屬於你的分享圖片。',
     kit: '媒體素材', assets: '品牌標誌', symbol: '品牌圖示', lockups: ['標誌組合・淺色背景','標誌組合・深色背景'],
     screenshots: '看看 App 裡面', shotNames: ['課程','AI 學習','資料庫','文件'], colors: '品牌色彩', colorNames: ['主色','墨色','紙白','天空藍','鳶尾紫'],
@@ -35,13 +37,14 @@ export const mediaCopy: Record<Language, MediaCopy> = {
     preview: '分享圖片預覽', ready: '圖片已準備好。', copied: '已複製。', saved: '已開始下載 PNG。', error: '操作未完成，請再試一次。', loading: '正在準備圖片…',
   },
   ja: {
+    beta: 'ベータ',
     title: '学びの道具を、もっと身近に。', intro: 'VStudy Pro のブランド素材をダウンロード。自分らしいシェア画像も作れます。',
     kit: 'メディアキット', assets: 'ブランド素材', symbol: 'シンボル', lockups: ['ロゴ・明るい背景用','ロゴ・暗い背景用'],
     screenshots: 'アプリの中を見る', shotNames: ['コース','AI と学ぶ','ライブラリ','ドキュメント'], colors: 'ブランドカラー', colorNames: ['アクセント','インク','ペーパー','スカイ','アイリス'],
     rules: 'ブランドの使い方', usage: ['名称は VStudy Pro と表記してください。','元の色を使い、色を変更しないでください。','シンボルの高さの半分以上の余白を確保してください。','ベータ版の紹介には、シンボルの横に小さな beta バッジを添えてください。'],
     boilerplate: 'VStudy Pro について', about: 'VStudy Pro は、コース、Moodle、ドキュメント、ノート、AI との会話をひとつにまとめたデスクトップ学習ワークスペースです。教材について質問し、タブで学習内容を開き、次の課題を計画できます。ライブラリは自分のパソコンに保存され、AI への接続は任意で選べます。',
     contact: '取材・お問い合わせ', share: '今日の学びを、シェアしよう。', shareIntro: 'サイズとスタイルを選ぶだけ。画像はブラウザー内で作成されます。',
-    format: 'サイズ', look: 'スタイル', formats: ['ストーリー','スクエア'], looks: ['ライト','ダーク','オーロラ'], headline: ['切り替えを減らして、','学びを深める。'],
+    format: 'サイズ', look: 'スタイル', formats: ['ストーリー','スクエア'], looks: ['ライト','ダーク','オーロラ'], headline: ['切り替えを減らして','学びを深める。'],
     chips: ['AI と学ぶ','コースと Moodle','ノートと資料'], free: '無料ダウンロード', download: 'PNG をダウンロード', shareAction: '画像を共有', copyLink: 'リンクをコピー', copyCaption: '投稿文をコピー', copy: '紹介文をコピー',
     caption: '切り替えを減らして、学びを深める。AI、コース、Moodle、ノートと資料をひとつに。VStudy Pro を無料ダウンロード',
     preview: 'シェア画像のプレビュー', ready: '画像の準備ができました。', copied: 'コピーしました。', saved: 'PNG のダウンロードを開始しました。', error: '操作できませんでした。もう一度お試しください。', loading: '画像を準備しています…',

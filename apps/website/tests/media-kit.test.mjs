@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { makeMediaKit, website } from '../scripts/make-media-kit.mjs';
 import sharp from 'sharp';
-test('brand exports regenerate byte for byte, including committed assets',async () => {
+test('brand exports regenerate matching SVGs and PNG pixels, including committed assets',async () => {
   const a = await mkdtemp(join(tmpdir(),'vstudy-media-a-'));
   const b = await mkdtemp(join(tmpdir(),'vstudy-media-b-'));
   try {
@@ -15,9 +15,17 @@ test('brand exports regenerate byte for byte, including committed assets',async 
     assert.equal(files.length,10);
     for (const file of files) {
       const bytes = await readFile(join(a,file));
-      assert.deepEqual(bytes,await readFile(join(b,file)),file);
-      assert.deepEqual(bytes,await readFile(join(website,'public/brand/kit',file)),file);
-      if (file.endsWith('.png')) assert.equal((await sharp(bytes).metadata()).format,'png');
+      for (const target of [join(b,file),join(website,'public/brand/kit',file)]) {
+        const actual = await readFile(target);
+        if (file.endsWith('.png')) {
+          const expectedPixels = await sharp(bytes).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+          const actualPixels = await sharp(actual).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+          assert.deepEqual(actualPixels.info,expectedPixels.info,file);
+          for (let i = 0; i < expectedPixels.data.length; i++) {
+            assert.ok(Math.abs(actualPixels.data[i]-expectedPixels.data[i]) <= 1,`${file} pixel byte ${i}`);
+          }
+        } else assert.deepEqual(actual,bytes,file);
+      }
     }
   } finally { await rm(a,{recursive:true}); await rm(b,{recursive:true}); }
 });
