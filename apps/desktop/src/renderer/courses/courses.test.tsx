@@ -105,9 +105,19 @@ describe("Courses", () => {
     expect(host.textContent).toContain('Amplifier lab report');
     expect(host.textContent).not.toContain('No deadlines this week');
   });
-  it("renders exactly one main landmark for the catalog", async () => {
-    await mount(createMockMoodleApi());
-    expect(host.querySelectorAll("main")).toHaveLength(1);
+  it("renders exactly one main in catalog, detail, Updates and Planner", async () => {
+    const api = createMockMoodleApi();
+    await mount(api);
+    expect(host.querySelectorAll('main')).toHaveLength(1);
+    await act(async () => getByRole(host, 'button', {name: /^Updates/}).click());
+    expect(host.querySelectorAll('main')).toHaveLength(1);
+    await act(async () => root.unmount());
+    root = createRoot(host);
+    await mount(api, (await api.overview()).courses[0]!.id);
+    expect(host.querySelectorAll('main')).toHaveLength(1);
+    await mount(api);
+    await act(async () => host.querySelector<HTMLButtonElement>('.planner-entry')!.click());
+    expect(host.querySelectorAll('main')).toHaveLength(1);
   });
   it("groups course header actions behind one primary action, refresh and an overflow menu", async () => {
     const api = createMockMoodleApi();
@@ -955,10 +965,12 @@ it("keeps all four filters with zero counts and associated empty panels", async 
   await mount(api);
   const tabs = [...host.querySelectorAll<HTMLButtonElement>('.moodle-term-tabs [role=tab]')];
   expect(tabs).toHaveLength(4);
-  expect(tabs[1]!.textContent).toContain("0");
+  expect(tabs[1]!.textContent).toBe("Upcoming0");
   await act(async () => tabs[1]!.focus());
   expect(host.querySelector('[role=tabpanel] [data-slot=empty-state]')).not.toBeNull();
   expect(tabs[1]!.getAttribute('aria-controls')).toBe(host.querySelector('[role=tabpanel][data-state=active]')?.id);
+  await act(async () => root.unmount());
+  root = createRoot(host);
   api.overview = async () => ({...overview, courses: []});
   await mount({...api});
   expect(host.querySelectorAll('.moodle-term-tabs [role=tab]')).toHaveLength(4);
@@ -1050,4 +1062,45 @@ it('uses level three deadline groups below Due soon and body empty copy', async 
   await mount({...api});
   expect(getByRole(host, 'heading', {name: /^Due soon/}).closest('section')?.querySelector('p')?.textContent)
     .toBe('No deadlines due in the next 7 days.');
+});
+
+it('retains a rejected sync error after a successful cached read', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = vi.fn(async () => ({...overview, upcoming: []}));
+  api.sync = vi.fn().mockRejectedValue(new Error('offline'));
+  await mount(api);
+  await act(async () => getByRole(host, 'button', {name: 'Refresh all schools'}).click());
+  expect(api.overview).toHaveBeenCalledTimes(2);
+  expect(host.querySelector('[role=alert]')?.textContent).toContain('Showing your last synced courses.');
+  expect(host.textContent).not.toContain('No deadlines due in the next 7 days.');
+});
+
+it('caps overdue at five recent items even when upcoming is expanded', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const now = Date.now();
+  const deadlines = (past: boolean) => Array.from({length: 7}, (_, i) => ({
+    ...overview.upcoming[0]!, id: `${past}-${i}`, title: `${past ? 'Overdue' : 'Next'} ${i}`,
+    submitted: false, dueAt: new Date(now + (past ? -1 : 1) * (i + 1) * 3600000).toISOString(),
+  }));
+  api.overview = async () => ({...overview, upcoming: [...deadlines(true).reverse(), ...deadlines(false)]});
+  await mount(api);
+  const titles = () => [...host.querySelectorAll('.moodle-due-link')].map(n => n.textContent);
+  expect(titles().slice(0, 5)).toEqual(['Overdue 0', 'Overdue 1', 'Overdue 2', 'Overdue 3', 'Overdue 4']);
+  await click('Show all');
+  expect(titles()).toHaveLength(12);
+  expect(titles()).not.toContain('Overdue 5');
+});
+
+it('supplies no empty heading during course loading or unavailable states', async () => {
+  const api = createMockMoodleApi();
+  const id = (await api.overview()).courses[0]!.id;
+  let resolve!: (value: Awaited<ReturnType<MoodleApi['course']>>) => void;
+  api.course = () => new Promise(done => {resolve = done;});
+  await mount(api, id);
+  expect(host.querySelector('h1:empty')).toBeNull();
+  await act(async () => resolve(undefined as unknown as Awaited<ReturnType<MoodleApi['course']>>));
+  expect(host.querySelector('h1:empty')).toBeNull();
+  expect(host.querySelectorAll('main')).toHaveLength(1);
 });
