@@ -38,14 +38,21 @@ export function DesktopChat({active,launcher,toolbarSlot}:{active:boolean;launch
     if(!provider){settings();return;}
     await create(provider.config.id,provider.models[0]!.id);
   };
+  const switching=useRef(false);
   const model=async(value:string)=>{
-    if(!conversation)return;
+    if(!conversation||switching.current)return;
+    switching.current=true;
     const slash=value.indexOf('/'),providerId=value.slice(0,slash) as Conversation['providerId'],modelId=value.slice(slash+1);
+    const hasMessages=async()=>(await desktop.invoke('messages:page',{conversationId:conversation.id,limit:1})).items.length>0;
     try {
-      const page=await desktop.invoke('messages:page',{conversationId:conversation.id,limit:1});
-      if(page.items.length){await create(providerId,modelId,true);return;}
-      setConversation(await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId,modelId}));
+      if(await hasMessages()){await create(providerId,modelId,true);return;}
+      try {setConversation(await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId,modelId}));}
+      catch(error) {
+        if(!await hasMessages())throw error;
+        await create(providerId,modelId,true);
+      }
     } catch {setFailed(true);}
+    finally {switching.current=false;}
   };
   const toolbar=<Toolbar className="gap-[var(--space-4)]" left={launcher} right={conversation && <Button variant="ghost" disabled={busy} onClick={()=>void start()}><Plus/>{tr('web-chat:new')}</Button>}/>;
   return <div className="web-chat-local chat-pane">{toolbarSlot===undefined ? toolbar : toolbarSlot && createPortal(toolbar,toolbarSlot)}
