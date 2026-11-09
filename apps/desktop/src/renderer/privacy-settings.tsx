@@ -1,8 +1,9 @@
+import { Card, Section, SettingRow, SegmentedControl } from './components/ui';
 import { useTrailingCommit } from './settings/use-trailing-commit';
 import { MemorySettings } from './review/memory-settings';
 import { AnalyticsSettings } from './analytics-ui';
 import { CliPrivacyPreferences } from './ai-cli/preferences';
-import { SettingsGroup, SettingsRow } from './settings/layout';
+
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { useEffect, useId, useRef, useState } from 'react';
@@ -57,12 +58,12 @@ export function PrivacySettings() {
   return (
     <div data-testid="privacy-settings">
       <AnalyticsSettings/>
-      <SettingsGroup title={tr('settings:network')}>
-        <SettingsRow label={tr('settings:network_copy')}>
+      <Section level={3} title={tr('settings:network')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
+        <SettingRow label={tr('settings:network_copy')}>
           <Button size="sm" variant="secondary" onClick={() => void refresh()}>
             {tr('settings:refresh')}
           </Button>
-        </SettingsRow>
+        </SettingRow>
         {events.length ? (
           events.map((event,index) => (
             <div className="network-event" key={`${index}-${event.at}`}>
@@ -77,15 +78,15 @@ export function PrivacySettings() {
         ) : (
           <div className="network-event empty">{tr('settings:empty_network')}</div>
         )}
-      </SettingsGroup>
+      </Card></Section>
       <CliPrivacyPreferences />
       <MemorySettings />
-      <SettingsGroup title={tr('settings:converter')}>
+      <Section level={3} title={tr('settings:converter')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
         {!loaded && <Button onClick={() => void load()}>{tr('settings:retry')}</Button>}
         {offline !== undefined && <p role="status">{tr(offline ? 'settings:mode_offline' : 'settings:mode_online')}</p>}
         {modeStatus && <p role="status">{modeStatus}</p>}
         {loaded && invalidIdle && <p id={idleErrorId} role="alert">{tr('settings:idle_range')}</p>}
-        <SettingsRow
+        <SettingRow
           label={tr('settings:idle_minutes')}
           description={tr('settings:converter_copy')}
         >
@@ -102,43 +103,33 @@ export function PrivacySettings() {
             onBlur={() => saveIdle()}
             onKeyDown={e => {if (e.key === 'Enter' || e.key === 'Escape') {commits.flush('idle');saveIdle();}}}
           />
-        </SettingsRow>
-        <SettingsRow label={tr('settings:converterMode')}>
-          <Button size="sm" variant="secondary" onClick={() => void mode(false)}>
-            {tr('settings:enable_downloads')}
-          </Button>
-          <Button size="sm" variant="secondary" onClick={() => void mode(true)}>
-            {tr('settings:offline')}
-          </Button>
-        </SettingsRow>
-      </SettingsGroup>
-      <SettingsGroup danger>
-        <SettingsRow
-          label={tr('settings:delete')}
-          description={tr('settings:delete_copy')}
-        >
-          <Input
-            aria-label={tr('settings:confirm')}
-            placeholder={tr('settings:deletePlaceholder')}
-            value={confirmation}
-            onChange={(e) => setConfirmation(e.target.value)}
-            autoComplete="off"
-          />
-          <Button
-            size="sm"
-            variant="ghost"
-            className="settings-danger"
-            disabled={confirmation !== 'DELETE'}
-            onClick={() =>
-              void desktop
-                .invoke('settings:deleteAllData', { confirmation: 'DELETE' })
-                .catch((e) => setError(errorText(e)))
-            }
-          >
-            {tr('settings:delete')}
-          </Button>
-        </SettingsRow>
-      </SettingsGroup>
+        </SettingRow>
+        <SettingRow label={tr('settings:converterMode')}>
+          <SegmentedControl aria-label={tr('settings:converterMode')}
+            value={offline === undefined ? '' : offline ? 'offline' : 'online'}
+            disabled={!loaded} onValueChange={value => void mode(value === 'offline')}
+            options={[
+              { value: 'online', label: tr('settings:enable_downloads') },
+              { value: 'offline', label: tr('settings:offline') },
+            ]} />
+        </SettingRow>
+      </Card></Section>
+      <Section level={3} title={tr('settings:delete')}>
+        <Card variant="flat" data-danger="true"
+          className="gap-[var(--space-4)] p-[var(--space-4)] bg-[color-mix(in_oklab,var(--danger)_7%,var(--surface))] text-[var(--danger)]">
+          <p>{tr('settings:delete_copy')}</p>
+          <SettingRow label={tr('settings:confirm')} htmlFor="delete-confirmation">
+            <Input id="delete-confirmation" aria-label={tr('settings:confirm')}
+              placeholder={tr('settings:deletePlaceholder')} value={confirmation}
+              onChange={e => setConfirmation(e.target.value)} autoComplete="off" />
+            <Button size="sm" variant="destructive" disabled={confirmation !== 'DELETE'}
+              onClick={() => void desktop.invoke('settings:deleteAllData', { confirmation: 'DELETE' })
+                .catch(e => setError(errorText(e)))}>
+              {tr('settings:delete')}
+            </Button>
+          </SettingRow>
+        </Card>
+      </Section>
       {error && <p role="alert">{error}</p>}
     </div>
   );

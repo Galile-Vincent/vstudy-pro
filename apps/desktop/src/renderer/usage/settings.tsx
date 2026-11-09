@@ -1,4 +1,5 @@
-import { SettingsGroup, SettingsRow } from '../settings/layout';
+import { Card, Section, SettingRow } from '../components/ui';
+
 import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -92,7 +93,7 @@ export function UsageSettings() {
         <p>{balanceNote()}</p>
       </div>
       <UsageDashboard documents={documents} />
-      <SettingsGroup title={tr('common:provider_rate_limits')}>
+      <Section level={3} title={tr('common:provider_rate_limits')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
         <div>
           {!limits.length && (
             <p className="muted">
@@ -127,12 +128,12 @@ export function UsageSettings() {
             </p>
           ))}
         </div>
-      </SettingsGroup>
+      </Card></Section>
       {settings && (
         <>
-          <SettingsGroup title={tr('settings:budgets')}>
+          <Section level={3} title={tr('settings:budgets')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
             <p>{tr('usage:budget_help')}</p>
-            <SettingsRow label={tr('common:monthly_budget_usd')}>
+            <SettingRow label={tr('common:monthly_budget_usd')}>
               <Input
                 aria-label={tr('common:monthly_budget_usd')}
                 type="number"
@@ -146,8 +147,8 @@ export function UsageSettings() {
                   })
                 }
               />
-            </SettingsRow>
-            <SettingsRow label={tr('common:monthly_token_cap')}>
+            </SettingRow>
+            <SettingRow label={tr('common:monthly_token_cap')}>
               <Input
                 aria-label={tr('common:monthly_token_cap')}
                 type="number"
@@ -161,8 +162,8 @@ export function UsageSettings() {
                   })
                 }
               />
-            </SettingsRow>
-            <SettingsRow label={tr('common:warn_at')}>
+            </SettingRow>
+            <SettingRow label={tr('common:warn_at')}>
               <Input
                 aria-label={tr('common:warn_at')}
                 type="number"
@@ -171,9 +172,9 @@ export function UsageSettings() {
                 value={settings.warnAtPercent}
                 onChange={(e) => setSettings({ ...settings, warnAtPercent: Number(e.target.value) })}
               />
-            </SettingsRow>
+            </SettingRow>
             <details><summary>{tr('usage:advanced_prices')}</summary>
-            <SettingsRow stack label={tr('common:price_overrides_usd_per_1m_tokens')}>
+            <SettingRow stack label={tr('common:price_overrides_usd_per_1m_tokens')}>
               <Textarea
                 aria-label={tr('common:price_overrides')}
                 rows={5}
@@ -181,7 +182,7 @@ export function UsageSettings() {
                 onChange={(e) => setOverrides(e.target.value)}
                 spellCheck={false}
               />
-            </SettingsRow>
+            </SettingRow>
             <p className="muted">
               {tr('common:json_keyed_by_exact_model_id_e_g')}
               {`{"my-model":{"input":2,"output":10,"cacheRead":0.1,"cacheWrite":2.5}}`}
@@ -209,7 +210,7 @@ export function UsageSettings() {
                 {tr('common:export_csv')}
               </Button>
             </div>
-          </SettingsGroup>
+          </Card></Section>
         </>
       )}
       {status && <p role="status">{status}</p>}

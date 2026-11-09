@@ -1,3 +1,4 @@
+import { Card, Section, SettingRow } from './components/ui';
 import { AppVersion } from './components/app-version';
 import { aiCliSetupEvent } from './ai-cli/entry';
 import { AiCliInventory } from './ai-cli/inventory';
@@ -145,16 +146,16 @@ export function ProviderSettings({
                 {tab === id &&
                   (id === 'general' ? (
                     <>
-                      <SettingsGroup title={tr('settings:languages')}>
+                      <Section level={3} title={tr('settings:languages')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
                         <LanguageSettings />
-                      </SettingsGroup>
-                      <SettingsGroup title={tr('settings:welcome')}>
-                        <SettingsRow label={tr('settings:welcomeGuide')} description={tr('settings:welcome_guide_hint')}>
+                      </Card></Section>
+                      <Section level={3} title={tr('settings:welcome')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
+                        <SettingRow label={tr('settings:welcomeGuide')} description={tr('settings:welcome_guide_hint')}>
                           <Button size="sm" variant="secondary" onClick={() => setGuide(true)}>
                             {tr('settings:show')}
                           </Button>
-                        </SettingsRow>
-                        <SettingsRow label={tr('settings:aboutApp')} description={tr('settings:about_hint')}>
+                        </SettingRow>
+                        <SettingRow label={tr('settings:aboutApp')} description={tr('settings:about_hint')}>
                           <Button
                             size="sm"
                             variant="secondary"
@@ -166,8 +167,8 @@ export function ProviderSettings({
                           >
                             {tr('settings:open')}
                           </Button>
-                        </SettingsRow>
-                      </SettingsGroup>
+                        </SettingRow>
+                      </Card></Section>
                       <AppVersion/>
                     </>
                   ) : id === 'appearance' ? (
