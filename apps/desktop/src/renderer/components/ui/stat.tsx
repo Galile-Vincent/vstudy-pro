@@ -25,7 +25,7 @@ export function Stat({
         {unit && (
           <>
             {' '}
-            <span className="ms-[var(--space-1)] text-[length:var(--type-base)]">{unit}</span>
+            <span className="text-[length:var(--type-base)]">{unit}</span>
           </>
         )}
       </span>
