@@ -2,6 +2,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { i18n } from '../../shared/i18n';
+import type { SelectHTMLAttributes } from 'react';
 import type { folderSchema } from '../../shared/library';
 import type { z } from 'zod';
 const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
@@ -9,6 +10,8 @@ vi.mock('../bridge', () => ({ desktop: {
   invoke, getPathForFile: () => '/tmp/notes.pdf',
 } }));
 vi.mock('../shell', () => ({ useOptionalNavigation: () => undefined }));
+vi.mock('../components/select', () => ({ Select: (props: SelectHTMLAttributes<HTMLSelectElement>) =>
+  <select {...props} data-value={props.value} /> }));
 import { UploadCard } from './upload-card';
 afterEach(cleanup);
 beforeEach(async () => { invoke.mockReset(); await i18n.changeLanguage('en'); });
@@ -60,4 +63,20 @@ it('marks the entire import section during drag and restores it on leave', () =>
   expect(screen.getByText('Drop to import').getAttribute('aria-hidden')).toBe('false');
   fireEvent.dragLeave(section);
   expect(section.getAttribute('data-dragging')).toBe('false');
+});
+it('imports into Unfiled when the selected folder disappeared', async () => {
+  const onImported = vi.fn();
+  const changed = vi.fn();
+  window.addEventListener('library-changed', changed);
+  const { rerender } = render(<UploadCard folders={[{ id: 'folder', name: 'Notes' } as z.infer<typeof folderSchema>]} onImported={onImported} />);
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: 'folder' } });
+  rerender(<UploadCard folders={[]} onImported={onImported} />);
+  invoke.mockResolvedValue({ id: 'doc', title: 'Notes' });
+  fireEvent.click(screen.getByRole('button', { name: 'Choose a file' }));
+  await act(async () => {});
+  expect(invoke).toHaveBeenCalledWith('documents:import', { folderId: null });
+  expect(invoke).not.toHaveBeenCalledWith('library:documents:move', expect.anything());
+  expect(onImported).toHaveBeenCalledOnce();
+  expect(changed).toHaveBeenCalledOnce();
+  window.removeEventListener('library-changed', changed);
 });
