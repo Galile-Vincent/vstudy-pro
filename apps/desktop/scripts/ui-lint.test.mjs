@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { inspect, regressions, collect, run } from './ui-lint.mjs';
 test('counts unsafe declarations while accepting tokens and focus rings', async () => {
-  assert.deepEqual(inspect(await readFile(new URL('./fixtures/ui-lint.css',import.meta.url),'utf8')), {shadow:1,radius:1,color:1,backdrop:1,'surface-class':1});
+  assert.deepEqual(inspect(await readFile(new URL('./fixtures/ui-lint.css',import.meta.url),'utf8')), {shadow:1,radius:1,color:2,backdrop:1,'surface-class':1});
   assert.equal(inspect('.x { box-shadow: 0 0 0 2px var(--focus), 3px 4px black; }').shadow,1);
   assert.equal(inspect('const style = {boxShadow: "var(--glass-shadow)", backdropFilter: "var(--glass-blur)"}',false).shadow,0);
   assert.equal(inspect('const style = {borderRadius: "8px", color: "rgb(1,2,3)"}',false).radius,1);
@@ -35,4 +35,30 @@ test('excludes library and token sources and refuses baseline increases on disk'
     assert.equal(await run({root,baselinePath,update:true}),0);
     assert.deepEqual(JSON.parse(await readFile(baselinePath,'utf8')),{});
   } finally { await rm(root,{recursive:true,force:true}); }
+});
+
+test('accepts token radii and catches physical corners and numeric styles', () => {
+  assert.equal(inspect('.x { border-radius: calc(var(--r-md) - 2px); border-top-left-radius: var(--r-sm) 8px; }').radius, 0);
+  for (const corner of ['top-left', 'top-right', 'bottom-left', 'bottom-right']) {
+    assert.equal(inspect(`.x { border-${corner}-radius: 8px; }`).radius, 1);
+  }
+  assert.equal(inspect(`const style = {borderRadius: 8, borderRadius: '8px'}`, false).radius, 2);
+});
+test('normalizes important and accepts quoted React keys', () => {
+  assert.equal(inspect('.x { box-shadow:none!important; backdrop-filter:var(--x)!important; }').shadow, 0);
+  assert.equal(inspect('.x { backdrop-filter:var(--x)!important; }').backdrop, 0);
+  assert.equal(inspect(`const style = {"boxShadow": "none!important", "backdropFilter": "var(--x)!important"}`, false).shadow, 0);
+  assert.equal(inspect(`const style = {"boxShadow": "0 4px 8px black"}`, false).shadow, 1);
+});
+test('counts color values in declarations and styles without counting anchors or text', () => {
+  assert.equal(inspect('<a href="#abc" id="abc">#fff plain text</a>', false).color, 0);
+  assert.equal(inspect('.x { content:"#abc"; --id:#abc; } #abc {}').color, 0);
+  for (const value of ['#abc', 'rgb(1,2,3)', 'rgba(1,2,3,.5)', 'hsl(0 0% 0%)', 'hsla(0,0%,0%,.5)', 'oklch(.5 .2 30)', 'oklab(.5 .2 .1)', 'lab(50 2 3)', 'lch(50 2 30)', 'color-mix(in srgb, var(--ink), red)']) {
+    assert.equal(inspect(`.x { background: ${value}; }`).color, 1, value);
+    assert.equal(inspect(`const style = {"borderTopColor": "${value}"}`, false).color, 1, value);
+  }
+  assert.equal(inspect('.x { background: color-mix(in oklab,var(--ink),var(--surface)); }').color, 0);
+  for (const key of ['color', 'backgroundColor', 'outlineColor', 'fill', 'stroke', 'boxShadow', 'textShadow', 'caretColor', 'accentColor']) {
+    assert.equal(inspect(`const style = {${key}: '#abc'}`, false).color, 1, key);
+  }
 });
