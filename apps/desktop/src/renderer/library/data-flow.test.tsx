@@ -12,7 +12,7 @@ vi.mock('../shell',()=>({useNavigate:()=>({route:state.route,navigate:vi.fn()})}
 vi.stubGlobal('ResizeObserver',class{observe(){}unobserve(){}disconnect(){}});
 const row=(id:string)=>({document:{id,title:id,sourceName:id+'.md',mime:'text/markdown',status:'ready',createdAt:'2026-11-01T00:00:00Z'},tags:[],folderId:null,sizeBytes:10,contentChars:null,pageCount:null,lastOpenedAt:null,pinnedAt:null,pinned:false});
 function mount(){localStorage.setItem('library-mode','files');document.documentElement.lang='en';document.documentElement.style.fontSize='16px';document.documentElement.style.setProperty('--library-row-height','4');return render(<TooltipProvider><LibraryView/></TooltipProvider>);}
-afterEach(()=>{cleanup();vi.resetAllMocks();localStorage.clear();sessionStorage.clear();});
+afterEach(()=>{state.route.query={};cleanup();vi.resetAllMocks();localStorage.clear();sessionStorage.clear();});
 it('offers Undo for the first deletion when the next deletion fails',async()=>{
   let deleted=false;
   state.invoke.mockImplementation(async(channel,payload)=>{
@@ -205,6 +205,7 @@ it('retains existing selections across conversion polls and removes departed IDs
  await waitFor(() => expect(screen.queryByText('departed')).toBeNull());
  expect(document.querySelectorAll('[data-selected=true]')).toHaveLength(1);
  expect(screen.getByText('selected').closest('.library-document')?.getAttribute('data-selected')).toBe('true');
+ expect(document.querySelector('.library-live')?.textContent).toContain(tr('library:selectedMissing',{count:1}));
 });
 
 
@@ -386,4 +387,43 @@ it.each(['en','zh-Hant','ja'])('localizes row name punctuation (%s)', async loca
  const punctuation=locale==='en'?', ':'、';
  expect(screen.getByRole('listitem',{name:`Notes${punctuation}${tr('library:itemUnselected')}`})).toBeTruthy();
  await i18n.changeLanguage('en');
+});
+
+it('keeps all 3000 selected targets after refresh and conversion poll', async () => {
+ const rows=Array.from({length:3000},(_,i)=>row('doc'+i));
+ rows[0]!.document.status='converting';
+ state.invoke.mockImplementation(async(c,q)=>{
+  if(c!=='library:documents:list')return [];
+  const offset=q.cursor?.sortValue??0;
+  return {items:rows.slice(offset,offset+q.limit),nextCursor:offset+q.limit<rows.length
+   ? {id:'next',sortValue:offset+q.limit}:null};
+ });
+ const {container}=mount(); await screen.findByText('doc0');
+ fireEvent.keyDown(container.querySelector('.library-results')!,{key:'a',ctrlKey:true});
+ await waitFor(()=>expect(container.querySelector('.bulk-bar')?.textContent).toContain('3,000'));
+ act(()=>window.dispatchEvent(new Event('library-changed')));
+ await act(async()=>{await new Promise(resolve=>setTimeout(resolve,1700));});
+ expect(container.querySelector('.bulk-bar')?.textContent).toContain('3,000');
+ fireEvent.click(screen.getByRole('button',{name:tr('library:delete')}));
+ await waitFor(()=>expect(state.invoke.mock.calls.filter(([c])=>c==='library:documents:softDelete')).toHaveLength(3000),{timeout:10000});
+});
+
+it('retains a selected document and its move target when it leaves a filtered view', async () => {
+ state.route.query={status:'failed'};
+ let visible=true;
+ const item=row('first');item.document.status='failed';
+ state.invoke.mockImplementation(async(c)=>{
+  if(c==='library:documents:list')return {items:visible?[item]:[],nextCursor:null};
+  if(c==='library:tree')return [{id:'destination',name:'Destination',parentId:null}];
+  return [];
+ });
+ mount();fireEvent.click((await screen.findByText('first',{selector:'button'})).closest('.library-document')!);
+ visible=false;act(()=>window.dispatchEvent(new Event('library-changed')));
+ await waitFor(()=>expect(screen.queryByText('first',{selector:'button'})).toBeNull());
+ expect(document.querySelector('.bulk-bar')?.textContent).toContain('1 selected');
+ expect(document.querySelector('.library-live')?.textContent).not.toContain(tr('library:selectedMissing',{count:1}));
+ fireEvent.click(screen.getByRole('button',{name:tr('library:move')}));
+ fireEvent.click(screen.getByRole('button',{name:'Destination'}));
+ await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:move',{documentIds:['first'],folderId:'destination'}));
+ state.route.query={};
 });

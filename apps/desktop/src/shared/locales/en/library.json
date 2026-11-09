@@ -224,5 +224,6 @@
   "recoveryAction": "Action {{number}}",
   "itemSelected": "Selected",
   "itemUnselected": "Not selected",
-  "selectDocument": "Select {{name}}"
+  "selectDocument": "Select {{name}}",
+  "selectedMissing": "{{count}} selected documents no longer exist"
 }

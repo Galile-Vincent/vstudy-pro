@@ -1,3 +1,4 @@
+import { provesExistence } from './selection';
 import { localDate, dayBound, validDay } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
@@ -189,6 +190,15 @@ export function LibraryView() {
   const loadedCount = useRef(0);
   loadedCount.current = items.length;
   const selectedSet = useMemo(() => new Set(selected), [selected]);
+  const selectedItems = useRef(new Map<Item["document"]["id"], Item>());
+  useLayoutEffect(() => {
+    for (const id of selectedItems.current.keys()) {
+      if (!selectedSet.has(id)) selectedItems.current.delete(id);
+    }
+    for (const item of items) {
+      if (selectedSet.has(item.document.id)) selectedItems.current.set(item.document.id, item);
+    }
+  }, [items, selectedSet]);
   const selectedIds = useRef(selected);
   selectedIds.current = selected;
   const menuAnchor = useRef<HTMLElement | null>(null);
@@ -324,7 +334,13 @@ export function LibraryView() {
         }
         setItems(rows);
         const available = new Set(rows.map(item => item.document.id));
-        setSelected(current => current.filter(id => available.has(id)));
+        if (provesExistence(query, page.nextCursor)) {
+          const missing = selectedIds.current.filter(id => !available.has(id));
+          if (missing.length) {
+            setSelected(current => current.filter(id => available.has(id)));
+            setNotice(tr("library:selectedMissing", {count: missing.length}));
+          }
+        }
         setCursor(page.nextCursor ?? undefined);
         setFolders(f);
         setTags(t);
@@ -465,7 +481,11 @@ export function LibraryView() {
   const moveItems = useRef<Item[]>([]);
   const openMove = (value: boolean) => {
     if (value) setNotice("");
-    if (value) moveItems.current = items.filter(item => ids.includes(item.document.id));
+    if (value) moveItems.current = menu && !selectedSet.has(menu.document.id)
+      ? [menu] : ids.flatMap(id => {
+        const item = selectedItems.current.get(id);
+        return item ? [item] : [];
+      });
     setMove(value);
   };
   const moveTo = async (folderId: Folder["id"] | null) => {

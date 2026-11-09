@@ -224,5 +224,6 @@
   "recoveryAction": "操作 {{number}}",
   "itemSelected": "已選取",
   "itemUnselected": "未選取",
-  "selectDocument": "選取 {{name}}"
+  "selectDocument": "選取 {{name}}",
+  "selectedMissing": "{{count}} 個已選文件已不存在"
 }
