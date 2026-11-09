@@ -25,7 +25,9 @@ export function createDataDeletion(
         await stop();
       });
       if (process.platform === 'win32' || (await lstat(root)).isSymbolicLink()) {
-        await realpath(root);
+        const failures = await deleteOwnedEntries(await realpath(root));
+        if (failures.length) await report(failures[0]!.error, true);
+        else await rm(root + '.delete-pending', {force:true});
       }
       else {
         try {

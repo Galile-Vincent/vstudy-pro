@@ -57,7 +57,7 @@ it('wipes the resolved symlink root instead of quarantining only the link', asyn
   const {root,parent} = await fixture();
   const link = join(parent,'linked'); await fs.symlink(root,link);
   await createDataDeletion(link, async () => {}, async () => {}, () => {})();
-  await fs.access(link + '.delete-pending');
+  await expect(fs.access(join(root,'vstudy.sqlite'))).rejects.toThrow();
   expect(await finishPendingDeletion(link,async () => {},vi.fn())).toBe(true);
   await expect(fs.access(join(root,'vstudy.sqlite'))).rejects.toThrow();
 });
@@ -70,7 +70,7 @@ it('uses deferred deletion directly on Windows without renaming the root', async
     const rename = vi.spyOn(fs,'rename'); rename.mockClear();
     await createDataDeletion(root,async () => {},async () => {},() => {})();
     expect(rename).not.toHaveBeenCalled();
-    await fs.access(root + '.delete-pending');
+    await expect(fs.access(join(root,'vstudy.sqlite'))).rejects.toThrow();
   } finally { Object.defineProperty(process,'platform',platform); }
 });
 it('clears every persisted partition and deletes unknown profile entries', async () => {
