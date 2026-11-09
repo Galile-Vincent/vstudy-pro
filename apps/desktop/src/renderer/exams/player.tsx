@@ -158,7 +158,7 @@ export function ExamPlayer({
           </Button>
         </p>
       )}
-      {!attempt && <p role="status">{tr("review:loading")}</p>}
+      {!attempt && !failed && <p role="status">{tr("review:loading")}</p>}
       {attempt && results ? (
         <>
           <header className="exam-score-header">

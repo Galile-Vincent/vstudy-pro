@@ -2,6 +2,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { ExamsView } from './index';
+import { TestPlayer } from '../review/test-player';
 import { fakeArtifact, fakeAttemptServer } from '../review/fake-attempt-server';
 const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock('../bridge', () => ({ desktop: { invoke } }));
@@ -41,5 +42,17 @@ it('shows the empty message only when history loaded and is empty', async () => 
  render(<ExamsView />);
  fireEvent.click(screen.getByRole('button', { name: 'exams:history' }));
  expect(await screen.findByText('exams:history_empty')).toBeTruthy();
+ expect(screen.queryByRole('alert')).toBeNull();
+});
+
+it('does not show loading next to the error when the attempt fails to load', async () => {
+ const server = fakeAttemptServer({ failures: { 'review:attempt:start': 1 } });
+ invoke.mockImplementation(server.invoke);
+ render(<TestPlayer artifact={exam} onRetake={vi.fn()} />);
+ const alert = await screen.findByRole('alert');
+ expect(alert.textContent).toContain('review:error');
+ expect(screen.queryByText('review:loading')).toBeNull();
+ fireEvent.click(screen.getByRole('button', { name: 'review:retry' }));
+ expect(await screen.findByRole('heading', { name: 'Question 1' })).toBeTruthy();
  expect(screen.queryByRole('alert')).toBeNull();
 });
