@@ -139,7 +139,7 @@
  font-size:var(--type-xs);
 }
 .workspace .chat-start { padding:var(--space-4) var(--space-8) var(--space-6); }
-.workspace .aui-root {
+:is(.workspace,.web-chat-local) .aui-root {
  --composer-bg:var(--material-card)!important;
  --composer-radius:var(--r-lg)!important;
  --composer-padding:var(--space-3)!important;
@@ -150,8 +150,9 @@
 }
 .workspace [data-slot=aui_message-group] { gap:var(--space-8); margin-bottom:var(--space-8); }
 .workspace .aui-thread-viewport-footer { gap:var(--space-3); padding-block:var(--space-3) var(--space-6); }
-.workspace [data-slot=aui_composer-shell],
-.workspace .aui-edit-composer-root,
+.web-chat-local .aui-thread-viewport-footer { gap:var(--space-3); padding:var(--space-3) var(--space-4) var(--space-4); }
+:is(.workspace,.web-chat-local) .aui-thread-scroll-to-bottom { top:auto; bottom:calc(100% + var(--space-2)); inset-inline-end:var(--space-4); align-self:auto; }
+:is(.workspace,.web-chat-local) :is([data-slot=aui_composer-shell],.aui-edit-composer-root),
 .workspace .new-chat-composer {
  border:0;
  border-radius:var(--r-lg);
@@ -160,16 +161,16 @@
  box-shadow:var(--elevation-floating);
 }
 .workspace .new-chat-composer { padding:var(--space-3); }
-.workspace [data-slot=aui_composer-shell]:focus-within {
+:is(.workspace,.web-chat-local) [data-slot=aui_composer-shell]:focus-within {
  background:var(--material-card);
 }
-.workspace .aui-composer-input { padding:var(--space-2); line-height:var(--chat-leading); }
-.workspace .aui-composer-action-wrapper { gap:var(--space-2); }
-.workspace .aui-composer-action-wrapper > div:last-child { max-width:none; }
+:is(.workspace,.web-chat-local) .aui-composer-input { padding:var(--space-2); line-height:var(--chat-leading); }
+:is(.workspace,.web-chat-local) .aui-composer-action-wrapper { gap:var(--space-2); }
+:is(.workspace,.web-chat-local) .aui-composer-action-wrapper > div:last-child { max-width:none; }
 @container(max-width:420px) {
- .workspace .aui-composer-action-wrapper { flex-wrap:wrap; }
- .workspace .aui-composer-action-wrapper .aui-composer-action-start { flex-basis:100%; }
- .workspace .aui-composer-action-wrapper > div:last-child { width:100%; justify-content:space-between; }
+ :is(.workspace,.web-chat-local) .aui-composer-action-wrapper { flex-wrap:wrap; }
+ :is(.workspace,.web-chat-local) .aui-composer-action-wrapper .aui-composer-action-start { flex-basis:100%; }
+ :is(.workspace,.web-chat-local) .aui-composer-action-wrapper > div:last-child { width:100%; justify-content:space-between; }
 }
 .workspace .aui-code-header-root { border:0; border-radius:var(--r-md) var(--r-md) 0 0; padding:var(--space-2) var(--space-3); }
 .workspace .aui-md-pre { border:0; border-radius:0 0 var(--r-md) var(--r-md); padding:var(--space-3); }
@@ -244,7 +245,8 @@
  .workspace .resize-handle::after, .workspace :is([data-slot=suggestions] button,.aui-thread-followup-suggestion,.blank-suggestions button,.aui-tool-group-content > div > *) { animation:none; transition:none; }
 }
 @media(prefers-contrast:more), (forced-colors:active) {
- [data-slot=suggestions] button,.workspace :is([data-slot=aui_composer-shell],.aui-edit-composer-root,.new-chat-composer,.aui-user-message-content,[data-slot=suggestions] button,.aui-thread-followup-suggestion) { border:1px solid var(--ink); }
+ [data-slot=suggestions] button,.workspace :is([data-slot=aui_composer-shell],.aui-edit-composer-root,.new-chat-composer,.aui-user-message-content,[data-slot=suggestions] button,.aui-thread-followup-suggestion),
+ .web-chat-local :is([data-slot=aui_composer-shell],.aui-edit-composer-root) { border:1px solid var(--ink); }
  .workspace .resize-handle::after { opacity:1; }
 }
 
