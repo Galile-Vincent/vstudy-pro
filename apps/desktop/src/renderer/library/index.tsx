@@ -382,8 +382,13 @@ export function LibraryView() {
     menu && !selected.includes(menu.document.id)
       ? [menu.document.id]
       : selected;
+  const inFlight = useRef(false);
+  const [busy,setBusy] = useState(false);
   const remove = async (targets: Item["document"]["id"][]) => {
-    await run(async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    try { await run(async () => {
       const failures: string[] = [];
       const restored: Item["document"]["id"][] = [];
       const deadline = Date.now() + 30000;
@@ -416,6 +421,7 @@ export function LibraryView() {
       }) : "");
     });
     setMenu(null);
+    } finally { inFlight.current = false; setBusy(false); }
   };
   const moveItems = useRef<Item[]>([]);
   const openMove = (value: boolean) => {
@@ -424,6 +430,10 @@ export function LibraryView() {
     setMove(value);
   };
   const moveTo = async (folderId: Folder["id"] | null) => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    try {
     const targets = moveItems.current;
     const failures: string[] = [];
     const remaining: Item[] = [];
@@ -462,6 +472,7 @@ export function LibraryView() {
     }) : "");
     if (moved) changed();
     if (!failures.length) { setMove(false); setMenu(null); }
+    } finally { inFlight.current = false; setBusy(false); }
   };
   const reorder = async (item: Item, delta: number) => {
     const destination = reorderDestination(items, items.indexOf(item), delta);
@@ -751,7 +762,7 @@ export function LibraryView() {
           >
             {tr("library:pin")}
           </Button>
-          <Button variant="outline" onClick={() => void remove(selected)}>
+          <Button variant="outline" disabled={busy} onClick={() => void remove(selected)}>
             {tr("library:delete")}
           </Button>
           <Button variant="outline" onClick={() => setSelected([])}>
@@ -1126,7 +1137,7 @@ export function LibraryView() {
           )}
         </div>
       )}
-      <LibraryMenus moveNotice={notice} liveRegion={liveRegion} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
+      <LibraryMenus busy={busy} moveNotice={notice} liveRegion={liveRegion} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
       {promptDialog}
     </section>
   );

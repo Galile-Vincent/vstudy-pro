@@ -123,3 +123,20 @@ it('clears a failed move notice when reopening the picker',async()=>{
  fireEvent.click(screen.getByRole('button',{name:tr('library:move')}));
  expect(screen.getByRole('dialog').textContent).not.toContain('failed');
 });
+
+it.each(['delete','move'])('ignores a double click during %s',async action=>{
+ let finish!:()=>void;
+ const channel=action==='delete'?'library:documents:softDelete':'library:documents:move';
+ state.invoke.mockImplementation(async c=>{
+  if(c==='library:documents:list')return {items:[row('first')],nextCursor:null};
+  if(c==='library:tree')return [{id:'destination',name:'Destination',parentId:null}];
+  if(c===channel)await new Promise<void>(resolve=>{finish=resolve;});
+  return [];
+ });
+ mount();fireEvent.click((await screen.findByText('first')).closest('.library-document')!);
+ let button=screen.getByRole('button',{name:tr(`library:${action}`)});
+ if(action==='move'){fireEvent.click(button);button=screen.getByRole('button',{name:'Destination'});}
+ fireEvent.click(button);fireEvent.click(button);
+ expect(state.invoke.mock.calls.filter(([c])=>c===channel)).toHaveLength(1);
+ await act(async()=>finish());
+});
