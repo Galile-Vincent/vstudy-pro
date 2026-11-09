@@ -143,5 +143,7 @@
   "step_privacy": "Analytics",
   "step_privacy_body": "Your choice. Both options let you use every study feature.",
   "detected": "Detected",
-  "preview_passage": "Explain one idea in your own words."
+  "preview_passage": "Explain one idea in your own words.",
+  "setup_complete": "Setup complete",
+  "setup_help": "Help"
 }

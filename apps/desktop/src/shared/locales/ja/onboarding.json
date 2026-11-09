@@ -143,5 +143,7 @@
   "step_privacy": "利用状況の分析",
   "step_privacy_body": "どちらを選んでも、すべての学習機能を利用できます。",
   "detected": "検出済み",
-  "preview_passage": "一つの考えを自分の言葉で説明する。"
+  "preview_passage": "一つの考えを自分の言葉で説明する。",
+  "setup_complete": "セットアップ完了",
+  "setup_help": "ヘルプ"
 }
