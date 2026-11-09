@@ -1,0 +1,62 @@
+import { readFile, readdir, writeFile } from 'node:fs/promises';
+import { resolve, relative } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+export const rules = ['shadow', 'radius', 'color', 'backdrop', 'surface-class'];
+export function inspect(source, css = true) {
+  const text = source.replace(/\/\*[\s\S]*?\*\//g, '');
+  const counts = Object.fromEntries(rules.map(rule => [rule, 0]));
+  const token = value => /^var\(--[\w-]+\)$/.test(value.trim());
+  const property = (names, check, rule) => {
+    const pattern = new RegExp(`(?:${names})\\s*:\\s*([^;\\n}]+)`, 'g');
+    for (const match of text.matchAll(pattern)) {
+      const value = match[1].trim().replace(/^['"]|['"],?$/g, '');
+      if (!check(value)) counts[rule]++;
+    }
+  };
+  property('box-shadow|boxShadow', value => token(value) || value === 'none' || /^0 0 0 \d+(?:\.\d+)?px (?:var\(--[\w-]+\)|currentColor)$/.test(value), 'shadow');
+  property('border-radius|borderRadius|border-(?:start|end)-(?:start|end)-radius|border(?:Top|Bottom)(?:Left|Right)Radius', value => !/\d+(?:\.\d+)?px/.test(value), 'radius');
+  counts.color = [...text.matchAll(/#[\da-f]{3,8}\b|\brgba?\(/gi)].length;
+  property('(?:-webkit-)?backdrop-filter|backdropFilter', value => token(value) || value === 'none', 'backdrop');
+  if (css) {
+    for (const match of text.matchAll(/([^{}]+)\{/g)) counts['surface-class'] += [...match[1].matchAll(/\.[\w-]+-(?:card|panel|tile)(?![\w-])/g)].length;
+  } else {
+    counts.radius += [...text.matchAll(/rounded-\[\d+(?:\.\d+)?px\]/g)].length;
+    counts.shadow += [...text.matchAll(/shadow-\[(?!var\(--)[^\]]+\]/g)].length;
+    counts.backdrop += [...text.matchAll(/backdrop-(?:blur|filter)-\[(?!var\(--)[^\]]+\]/g)].length;
+  }
+  return counts;
+}
+export function regressions(current, baseline) {
+  return Object.entries(current).flatMap(([file, counts]) => rules.filter(rule => counts[rule] > (baseline[file]?.[rule] ?? 0)).map(rule => `${file}: ${rule} ${baseline[file]?.[rule] ?? 0} → ${counts[rule]}`));
+}
+export async function collect(root) {
+  const result = {};
+  async function walk(directory) {
+    for (const entry of (await readdir(directory, {withFileTypes:true})).sort((a,b) => a.name.localeCompare(b.name))) {
+      const path = resolve(directory, entry.name);
+      const file = relative(root,path).replaceAll('\\','/');
+      if (/^components\/(?:ui|assistant-ui)(?:\/|$)/.test(file) || /(?:^|\/)(?:tokens|themes)(?:\.|\/)/.test(file)) continue;
+      if (entry.isDirectory()) await walk(path);
+      else if (/\.(css|tsx)$/.test(file)) {
+        const counts = inspect(await readFile(path,'utf8'),file.endsWith('.css'));
+        if (Object.values(counts).some(Boolean)) result[file] = counts;
+      }
+    }
+  }
+  await walk(root);
+  return result;
+}
+export async function run({ root = resolve(import.meta.dirname,'../src/renderer'), baselinePath = resolve(import.meta.dirname,'ui-lint.baseline.json'), update = false } = {}) {
+  const current = await collect(root);
+  let baseline;
+  try { baseline = JSON.parse(await readFile(baselinePath,'utf8')); }
+  catch (error) { if (error.code !== 'ENOENT' || !update) throw error; baseline = current; }
+  const failures = regressions(current,baseline);
+  if (failures.length) { console.error(failures.join('\n')); return 1; }
+  if (update) await writeFile(baselinePath,JSON.stringify(current,null,2)+'\n');
+  const totals = Object.fromEntries(rules.map(rule => [rule,Object.values(current).reduce((sum,counts) => sum+counts[rule],0)]));
+  console.log(`UI ratchet passed: ${JSON.stringify(totals)}. Reduce the baseline with --update-baseline after removing violations.`);
+  return 0;
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) process.exitCode = await run({update:process.argv.includes('--update-baseline')});
