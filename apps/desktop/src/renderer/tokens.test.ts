@@ -45,3 +45,11 @@ it('keeps opaque-mode hover fills distinct from their base fills', () => {
     expect(hover, selector).not.toBe(base);
   }
 });
+
+it('keeps library focus distinct from selected outlines in contrast modes', () => {
+  const library = readFileSync(new URL('./components/ui/ui.css', import.meta.url), 'utf8');
+  const focus = library.match(/html :is\([^{}]+:is\(:focus-visible,[^{}]+\{([^}]+)\}/);
+  expect(focus?.[1]).toContain('outline:2px solid var(--focus)');
+  expect(focus?.[1]).toContain('outline-offset:2px');
+  expect(library.indexOf(focus![0])).toBeGreaterThan(library.lastIndexOf('outline:thin solid var(--ink)'));
+});

@@ -1,6 +1,5 @@
 [data-slot=card][data-variant=flat] { background:var(--glass-tone); box-shadow:none; backdrop-filter:none; border-radius:var(--r-lg); }
 [data-slot=card][data-variant=interactive]:is(:hover,[data-demo-state=hover]) { background:var(--glass-fill-hover); }
-:is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=segmented-tabs-trigger]):is(:focus-visible,[data-demo-state=focus]) { outline:var(--space-1) solid var(--focus); }
 [data-slot=card][aria-disabled=true] { pointer-events:none; opacity:var(--opacity-disabled); }
 [data-slot=list-row][data-selected=true] { background:var(--active); }
 .ui-row-target:is(button,a):hover { background:var(--glass-tone); }
@@ -12,3 +11,4 @@
  [data-slot=segmented-tabs-trigger][data-state=active],[data-slot=list-row][data-selected=true] { outline:thin solid var(--ink); }
 }
 html[data-theme=contrast] [data-slot=segmented-tabs-trigger][data-state=active] { outline:thin solid var(--ink); }
+html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=segmented-tabs-trigger]):is(:focus-visible,[data-demo-state=focus]) { outline:2px solid var(--focus); outline-offset:2px; }
