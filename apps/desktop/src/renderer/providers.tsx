@@ -3,6 +3,7 @@ import { Card, Section, SettingRow } from './components/ui';
 import { AppVersion } from './components/app-version';
 import { aiCliSetupEvent } from './ai-cli/entry';
 import { AiCliInventory } from './ai-cli/inventory';
+import { DocumentSettings } from './settings/documents';
 import { StorageSettings } from "./settings/storage";
 import { AiSetupGuide } from './ai-setup';
 import { Switch } from './components/ui/switch';
@@ -176,6 +177,9 @@ export function ProviderSettings({
                             {tr('settings:open')}
                           </Button>
                         </SettingRow>
+                      </Card></Section>
+                      <Section level={3} title={tr('library:documents')}><Card variant="flat" className="p-[var(--space-4)]">
+                        <DocumentSettings />
                       </Card></Section>
                       <AppVersion/>
                     </>
