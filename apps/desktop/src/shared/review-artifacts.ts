@@ -19,6 +19,8 @@ export const examConfigSchema=z.object({
  difficulty:z.enum(['easy','medium','hard']),
 }).strict();
 export const studyResolvedScopeSchema=z.object({
+ totalConcepts:z.number().int().min(0).optional(),
+ omittedConcepts:z.number().int().min(0).optional(),
  sourceTitles:z.record(id,text).refine(v=>Object.keys(v).length<=8).optional(),
  exam:examConfigSchema.optional(),
  size:z.enum(['short','standard','long']).optional(),

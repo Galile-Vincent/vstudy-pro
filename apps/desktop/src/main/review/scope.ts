@@ -1,4 +1,4 @@
-import { studyScopeSchema, type StudyResolvedScope } from '../../shared/review-artifacts';
+import { MAX_REVIEW_CONCEPTS, studyScopeSchema, type StudyResolvedScope } from '../../shared/review-artifacts';
 import type { z } from 'zod';
 export interface ScopeInputs {
     units: {
@@ -70,6 +70,11 @@ export function resolveScope(raw: z.input<typeof studyScopeSchema>, data: ScopeI
     });
     const unitless = requestedConcepts.some(c => c.unitId === null);
     const documentIds = [...new Set(units.flatMap(u => u.documentIds).concat(scope.kind === 'documents' ? scope.documentIds : (scope.kind === 'concepts' || scope.kind === 'weak') && unitless ? data.documents : []))].filter(id => data.documents.includes(id));
-    const snapshot: StudyResolvedScope = { unitIds: units.map(u => u.id), documentIds, conceptKeys: requestedConcepts.filter(c => c.unitId === null || units.some(u => u.id === c.unitId)).map(c => c.key), from: range?.from ?? null, to: range?.to ?? null, timeZone: scope.kind === 'dates' ? scope.timeZone : 'UTC', sources: [], assumptions: fallback.length ? ['Undated units based on when you asked: ' + fallback.join(', ')] : [] };
-    return { status: documentIds.length ? 'resolved' as const : 'needs_source_selection' as const, snapshot };
+    const eligible = requestedConcepts.filter(c => c.unitId === null || units.some(u => u.id === c.unitId));
+    const chosen = eligible.slice(0, MAX_REVIEW_CONCEPTS);
+    const selectedUnits = units.filter(u => !eligible.length || chosen.some(c => c.unitId === u.id)).slice(0, MAX_REVIEW_CONCEPTS);
+    const selectedDocuments = documentIds.filter(id => chosen.some(c => c.unitId === null)
+        || selectedUnits.some(u => u.documentIds.includes(id)) || scope.kind === 'documents').slice(0, MAX_REVIEW_CONCEPTS);
+    const snapshot: StudyResolvedScope = { unitIds: selectedUnits.map(u => u.id), documentIds: selectedDocuments, conceptKeys: chosen.map(c => c.key), totalConcepts: eligible.length, omittedConcepts: Math.max(0, eligible.length - MAX_REVIEW_CONCEPTS), from: range?.from ?? null, to: range?.to ?? null, timeZone: scope.kind === 'dates' ? scope.timeZone : 'UTC', sources: [], assumptions: fallback.length ? ['Undated units based on when you asked: ' + fallback.join(', ')] : [] };
+    return { status: selectedDocuments.length ? 'resolved' as const : 'needs_source_selection' as const, snapshot };
 }

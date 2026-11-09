@@ -46,12 +46,27 @@ it('resolves an undated unit by time-qualified observations among 5,000 and reje
     await service.waitForIdle();
     expect(repo.find(outside.id)).toMatchObject({ status: 'failed', errorCode: 'review.needs_source_selection' });
 });
-it('returns a typed error only when the requested scope itself is too large', () => {
+it('bounds resolved units instead of rejecting a larger date window', () => {
     const { store, courseId, repo } = newCourse(cleanup);
     const insert = store.db.prepare("INSERT INTO study_units(id,courseId,kind,ordinal,title,sourceKey,sourceSectionId,startsAt,endsAt) VALUES(?,?,'moodle',?,?,?,?,'2030-01-02T00:00:00.000Z','2030-01-03T00:00:00.000Z')");
     for (let i = 0; i < 101; i++)
         insert.run(randomUUID(), courseId, i, 'Week ' + i, 'k' + i, 's' + i);
     const service = noteService(repo, document(store).excerpt);
-    expect(() => service.generate(request(courseId, { kind: 'dates', fromDate: '2030-01-01', toDate: '2030-01-08', timeZone: 'UTC' }))).toThrow('review.scope_limit');
+    expect(service.generate(request(courseId, { kind: 'dates', fromDate: '2030-01-01', toDate: '2030-01-08', timeZone: 'UTC' })).resolvedScope.unitIds).toHaveLength(100);
     expect(() => service.generate(request(courseId, { kind: 'dates', fromDate: '2031-01-01', toDate: '2031-01-08', timeZone: 'UTC' }))).not.toThrow();
 });
+
+for (const count of [101, 120]) {
+    it(`generates from ${count} concepts without a scope-limit failure`, async () => {
+        const { store, foundation, courseId, repo } = newCourse(cleanup);
+        const doc = document(store);
+        foundation.linkDocument(courseId, doc.id);
+        for (let i = 0; i < count; i++) foundation.addConcept({ courseId, label: `Topic ${i}` });
+        const service = noteService(repo, doc.excerpt);
+        const artifact = service.generate(request(courseId, { kind: 'documents', documentIds: [doc.id] }));
+        expect(artifact.resolvedScope.conceptKeys).toHaveLength(100);
+        expect(artifact.resolvedScope.omittedConcepts).toBe(count - 100);
+        await service.waitForIdle();
+        expect(repo.find(artifact.id)).toMatchObject({ status: 'ready', errorCode: null });
+    });
+}
