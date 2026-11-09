@@ -16,12 +16,13 @@ export function WebChatHub() {
   useTranslation();
   const {openTab}=useNavigate();
   const tab:Tab='desktop';
+  const [toolbar,setToolbar]=useState<HTMLDivElement|null>(null);
   const choose=(next:Tab)=>{if(next!=='desktop')openTab({view:'hosted-chat',provider:next,title:tr(`web-chat:${next}`)});};
   const label=(value:Tab)=>tr(`web-chat:${value}`);
   const launcher=<div className="web-chat-tabs" role="group" aria-label={tr('web-chat:choose')}>{tabs.map(value=><button key={value} id={`web-chat-tab-${value}`} aria-pressed={value===tab} onClick={()=>choose(value)}>{label(value)}</button>)}</div>;
   return <PageContainer as="main" className="web-chat-hub" aria-label={tr('web-chat:title')}>
-    <PageHeader title={tr('web-chat:title')} description={tr('web-chat:subtitle')}/>
-    <DesktopChat active launcher={launcher}/>
+    <PageHeader title={tr('web-chat:title')} description={tr('web-chat:subtitle')} actions={<div ref={setToolbar}/>}/>
+    <DesktopChat active launcher={launcher} toolbarSlot={toolbar}/>
   </PageContainer>;
 }
 export function HostedChat({provider,compact=false}:{provider:WebChatProvider;compact?:boolean}) {

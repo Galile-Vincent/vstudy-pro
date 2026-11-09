@@ -4,6 +4,7 @@ import { useTabPresentation } from '../tab-presentation';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { Chat } from '../chat';
 import { desktop } from '../bridge';
 import { tr } from '../../shared/i18n';
@@ -12,7 +13,7 @@ import type { Conversation, Message } from '../../shared/domain';
 import type { Providers } from '../providers';
 import { Button, EmptyState, Toolbar } from '../components/ui';
 import type { ReactNode } from 'react';
-export function DesktopChat({active,launcher}:{active:boolean;launcher?:ReactNode}) {
+export function DesktopChat({active,launcher,toolbarSlot}:{active:boolean;launcher?:ReactNode;toolbarSlot?:HTMLElement|null}) {
   useTranslation();
   const {initial,update}=useTabPresentation(useNavigate());
   const restored=initial?.kind==='app'?initial:undefined;
@@ -35,7 +36,8 @@ export function DesktopChat({active,launcher}:{active:boolean;launcher?:ReactNod
     try {const next=await desktop.invoke('conversations:create',{scope:'general',providerId:provider.config.id,modelId:provider.models[0]!.id});setConversation(next);setMessages([]);setCursor(null);setDraft('');try{localStorage.setItem('vstudy-web-chat-conversation',next.id);}catch{/* Optional persistence. */}}catch{setFailed(true);}finally{setBusy(false);}
   };
   const model=async(value:string)=>{if(!conversation)return;const slash=value.indexOf('/');try{setConversation(await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId:value.slice(0,slash) as Conversation['providerId'],modelId:value.slice(slash+1)}));}catch{setFailed(true);}};
-  return <div className="web-chat-local chat-pane"><Toolbar className="gap-[var(--space-4)]" left={launcher} right={conversation && <Button variant="ghost" disabled={busy} onClick={()=>void start()}><Plus/>{tr('web-chat:new')}</Button>}/>
+  const toolbar=<Toolbar className="gap-[var(--space-4)]" left={launcher} right={conversation && <Button variant="ghost" disabled={busy} onClick={()=>void start()}><Plus/>{tr('web-chat:new')}</Button>}/>;
+  return <div className="web-chat-local chat-pane">{toolbarSlot===undefined ? toolbar : toolbarSlot && createPortal(toolbar,toolbarSlot)}
     {failed && <p role="alert">{tr('web-chat:desktop_error')}</p>}
     {conversation ? <Chat key={conversation.id} conversation={conversation} history={messages} historyCursor={cursor} autoFocus={false} draft={draft} onDraft={setDraft} selection={null} onClearSelection={()=>{}} providers={providers} model={conversation.providerId+'/'+conversation.modelId} onModel={value=>void model(value)} onSettings={settings} onProvidersChanged={refresh} onUsage={settings}/> : <EmptyState className="web-chat-empty" headingLevel={2} title={tr('web-chat:desktop')} description={tr('web-chat:desktop_hint')} action={<Button disabled={busy || !active} onClick={()=>void start()}>{tr('web-chat:new')}</Button>}/>}
   </div>;
