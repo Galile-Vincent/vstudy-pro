@@ -220,7 +220,7 @@ html[data-reduced-transparency=true],html[data-theme=contrast] { --glass-blur:no
  border:0; background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); color:var(--ink);
  transition:box-shadow var(--motion-fast) var(--ease-standard),background-color var(--motion-fast) var(--ease-standard),transform var(--motion-fast) var(--ease-standard);
 }
-:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):is(:hover,[aria-expanded=true]) { background:var(--glass-fill-hover); box-shadow:var(--glass-shadow-hover); color:var(--ink); }
+:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):is(:hover,[aria-expanded=true],[aria-pressed=true]) { background:var(--glass-fill-hover); box-shadow:var(--glass-shadow-hover); color:var(--ink); }
 :is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):active { box-shadow:var(--glass-shadow); transform:translateY(.5px); }
 :is([data-slot=button][data-variant=default],button.primary) { box-shadow:var(--primary-shadow); transition:box-shadow var(--motion-fast) var(--ease-standard),transform var(--motion-fast) var(--ease-standard),filter var(--motion-fast) var(--ease-standard); }
 :is([data-slot=button][data-variant=default],button.primary):active { transform:translateY(1px); box-shadow:none; filter:brightness(.92); }
