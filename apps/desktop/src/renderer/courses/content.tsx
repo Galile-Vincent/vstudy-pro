@@ -28,7 +28,7 @@ import type {
 import { externalUrlSchema } from "../../shared/ipc";
 import { tr, i18n } from "../../shared/i18n";
 import { desktop } from "../bridge";
-import { Section, Toolbar } from "../components/ui";
+import { Section, Toolbar, ListRow, EmptyState } from "../components/ui";
 import { Button } from "../components/ui/button";
 import {
   Sheet,
@@ -188,31 +188,21 @@ function WeeklySection({
           {section.modules.map((module) => {
             const Icon = icons[module.kind] ?? BookOpen;
             return (
-              <button
+              <ListRow
                 key={module.id}
                 className="moodle-module"
+                title={module.name}
+                leading={<Icon />}
+                subtitle={<>
+                  {tr(`moodle:kind_${module.kind}`)}
+                  {module.dueAt && <time dateTime={module.dueAt}>{date(module.dueAt)}</time>}
+                  {module.fileIds.length > 0 && <span>
+                    {tr("moodle:attachment_count", { count: module.fileIds.length })}
+                  </span>}
+                </>}
                 onClick={() => onModule(module)}
                 disabled={!module.accessible}
-              >
-                <span className="moodle-row-icon">
-                  <Icon />
-                </span>
-                <span className="moodle-row-main">
-                  <strong>{module.name}</strong>
-                  <small>
-                    {tr(`moodle:kind_${module.kind}`)}
-                    {module.dueAt && <> · {date(module.dueAt)}</>}
-                    {module.fileIds.length > 0 && (
-                      <>
-                        {" "}
-                        ·{" "}
-                        {tr("moodle:attachment_count", {
-                          count: module.fileIds.length,
-                        })}
-                      </>
-                    )}
-                  </small>
-                </span>
+                meta={<>
                 {!module.accessible ? (
                   <LockKeyhole aria-label={tr("moodle:section_locked")} />
                 ) : (
@@ -225,8 +215,8 @@ function WeeklySection({
                     />
                   ))
                 )}
-                <ChevronRight />
-              </button>
+                </>}
+              />
             );
           })}
         </>
@@ -276,7 +266,7 @@ export function CourseContent({
             />
           ))
         ) : (
-          <p className="moodle-empty-inline">{tr((detail.panels?.contents ?? detail.fetchState) === "loading" ? "moodle:loading" : (detail.panels?.contents ?? detail.fetchState) === "error" ? `moodle:panel_error_${detail.panelErrors?.contents ?? "service"}` : "moodle:no_sections")}</p>
+          <EmptyState title={tr((detail.panels?.contents ?? detail.fetchState) === "loading" ? "moodle:loading" : (detail.panels?.contents ?? detail.fetchState) === "error" ? `moodle:panel_error_${detail.panelErrors?.contents ?? "service"}` : "moodle:no_sections")} />
         )}
       </div>
       </Section>
@@ -364,30 +354,28 @@ export function Announcements({ items, accountId }: { items: MoodleAnnouncement[
   const [selected, setSelected] = useState<MoodleAnnouncement>();
   const trigger = useRef<HTMLElement | null>(null);
   return (
-    <section className="moodle-panel">
-      <h2>{tr("moodle:announcements")}</h2>
+    <Section title={tr("moodle:announcements")}>
       {items.length ? (
         [...items]
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
           .map((item) => (
-            <button
+            <ListRow
               className="moodle-announcement"
               key={item.id}
+              title={item.subject}
+              subtitle={<>
+                <span className="block">{item.author} {date(item.createdAt)}</span>
+                <span className="block">{courseHtmlPreview(item.bodyHtml).slice(0, 220)}</span>
+              </>}
+              meta={<ChevronRight />}
               onClick={() => {
                 trigger.current = document.activeElement as HTMLElement;
                 setSelected(item);
               }}
-            >
-              <strong>{item.subject}</strong>
-              <small>
-                {item.author} · {date(item.createdAt)}
-              </small>
-              <p>{courseHtmlPreview(item.bodyHtml).slice(0, 220)}</p>
-              <ChevronRight />
-            </button>
+            />
           ))
       ) : (
-        <p>{tr("moodle:no_announcements")}</p>
+        <EmptyState title={tr("moodle:no_announcements")} />
       )}
       <Sheet
         open={!!selected}
@@ -417,6 +405,6 @@ export function Announcements({ items, accountId }: { items: MoodleAnnouncement[
           )}
         </SheetContent>
       </Sheet>
-    </section>
+    </Section>
   );
 }

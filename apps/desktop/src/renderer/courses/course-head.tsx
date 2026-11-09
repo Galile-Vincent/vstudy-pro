@@ -25,7 +25,7 @@ export function CourseHead({ title, chip, people, sync, fullName, syncing, menuT
     <TooltipProvider delayDuration={400}>
       <PageHeader
         title={title}
-        className="[&_h1]:break-words"
+        className="course-head [&_h1]:break-words"
         leading={
         <button type="button" className="inline-flex items-center gap-1 text-[var(--muted)]" onClick={onBack}>
           <ChevronLeft aria-hidden="true" />
@@ -54,7 +54,7 @@ export function CourseHead({ title, chip, people, sync, fullName, syncing, menuT
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" sideOffset={8}>
                 <DropdownMenuLabel>{tr("moodle:original_name")}</DropdownMenuLabel>
-                <p className="max-w-80 break-words px-2 text-sm">{fullName}</p>
+                <p className="moodle-raw-name max-w-80 break-words px-2 text-sm">{fullName}</p>
                 <DropdownMenuItem variant="destructive" onSelect={onDisconnect}>
                   <Unplug aria-hidden="true" />
                   {tr("moodle:disconnect")}
@@ -64,7 +64,7 @@ export function CourseHead({ title, chip, people, sync, fullName, syncing, menuT
           </div>
         }
         meta={<div className="flex flex-col gap-2 text-[var(--muted)]">
-        <p className="flex flex-wrap gap-x-4 gap-y-1">
+        <p className="course-head-meta flex flex-wrap gap-x-4 gap-y-1">
           {chip && <span >{chip}</span>}
           {people.map(value => <span key={value} >{value}</span>)}
         </p>
