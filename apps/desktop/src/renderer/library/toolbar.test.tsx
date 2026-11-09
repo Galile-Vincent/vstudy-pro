@@ -128,3 +128,12 @@ it('does not resurrect a removed date chip when editing the other bound',async()
   expect(q.addedBefore).toBeTruthy();expect(q.addedAfter).toBeUndefined();
  });
 });
+
+it('rejects a five digit year without breaking rendering',async()=>{
+ const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
+ const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ fireEvent.change(within(panel).getByRole('combobox',{name:tr('library:addedAfter')}),{target:{value:'custom'}});
+ fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:'20261-11-01'}});
+ expect(document.querySelector('.library-live')?.textContent).toBe(tr('library:dateRangeInvalid'));
+ expect(screen.getByText('notes')).toBeTruthy();
+});
