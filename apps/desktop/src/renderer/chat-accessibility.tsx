@@ -44,39 +44,33 @@ export const CopyAnswerButton: FC = () => {
 export function ToolAnnouncement() {
   useTranslation();
   const running = useAuiState(state => state.thread.isRunning);
-  const activeMessageId = useAuiState(state => state.thread.isRunning ? state.thread.messages.at(-1)?.id : undefined);
-  const tools = useAuiState(state => JSON.stringify(state.thread.messages.flatMap(message =>
-    message.role !== 'assistant' ? [] : message.content.flatMap(part => {
-      if (part.type !== 'tool-call') return [];
+  const message = useAuiState(state => state.thread.messages.at(-1));
+  const tracked = useRef<{id: string | undefined; active: boolean; seen: Map<string, string>} | null>(null);
+  const sequence = useRef(0);
+  const [entries, setEntries] = useState<{id: number; text: string}[]>([]);
+  useEffect(() => {
+    const initial = tracked.current === null;
+    if (!tracked.current || tracked.current.id !== message?.id) {
+      tracked.current = {id: message?.id, active: false, seen: new Map()};
+    }
+    const current = tracked.current;
+    if (running) current.active = true;
+    const announcements: {id: number; text: string}[] = [];
+    if (message?.role === 'assistant') for (const part of message.content) {
+      if (part.type !== 'tool-call') continue;
       const status = part.isError ? 'failed' : part.result !== undefined ? 'finished'
         : message.status?.type === 'incomplete'
           ? message.status.reason === 'cancelled' ? 'cancelled' : 'failed'
         : message.status?.type === 'running' ? 'started' : 'waiting';
-      return [{id: `${message.id}:${part.toolCallId}`, messageId: message.id, name: part.toolName, status}];
-    }))));
-  const seen = useRef<Map<string, string> | null>(null);
-  const active = useRef(new Set<string>());
-  const [entries, setEntries] = useState<string[]>([]);
-  useEffect(() => {
-    const current = JSON.parse(tools) as {id: string; messageId: string; name: string; status: string}[];
-    if (!seen.current) {
-      seen.current = new Map(current.map(tool => [tool.id, tool.status]));
-      return;
+      const previous = current.seen.get(part.toolCallId);
+      current.seen.set(part.toolCallId, status);
+      if (initial || !current.active || previous === status) continue;
+      announcements.push({id: sequence.current++, text: tr(`common:tool_${status}`, {tool: part.toolName})});
     }
-    if (activeMessageId) active.current.add(activeMessageId);
-    const announcements: string[] = [];
-    for (const tool of current) {
-      const previous = seen.current.get(tool.id);
-      if (previous === tool.status) continue;
-      seen.current.set(tool.id, tool.status);
-      if (!running && !active.current.has(tool.messageId)) continue;
-      active.current.add(tool.messageId);
-      announcements.push(tr(`common:tool_${tool.status}`, {tool: tool.name}));
-    }
-    if (announcements.length) setEntries(entries => [...entries, ...announcements]);
-  }, [tools, running, activeMessageId]);
+    if (announcements.length) setEntries(entries => [...entries, ...announcements].slice(-5));
+  }, [message, running]);
   return <div data-testid="tool-announcement" role="log" aria-live="polite"
     aria-relevant="additions" className="sr-only">
-    {entries.map((entry, index) => <div key={index}>{entry}</div>)}
+    {entries.map(entry => <div key={entry.id}>{entry.text}</div>)}
   </div>;
 }
