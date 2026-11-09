@@ -25,7 +25,7 @@ export default function DesignGallery() {
   }, [preferences]);
   const change = <K extends keyof ThemePreferences>(key:K,value:ThemePreferences[K]) => setPreferences(previous => ({...previous,[key]:value}));
   const action = <Button>{copy.action}</Button>;
-  return <PageContainer data-gallery={copy.description}>
+  return <main><PageContainer data-gallery={copy.description}>
     <PageHeader title={copy.title} description={copy.description} leading={<a href="#/">{copy.back}</a>} actions={action} meta={copy.meta}/>
     <Toolbar left={<Choice label={copy.scheme} value={preferences.colorScheme} values={choices(['system','light','dark'])} onChange={value => change('colorScheme',value as ThemePreferences['colorScheme'])}/>} center={<Choice label={copy.theme} value={preferences.themeId} values={builtinThemes.map(pack => ({value:pack.id,label:pack.name}))} onChange={value => change('themeId',value)}/>} right={<><Choice label={copy.material} value={preferences.cardTransparency} values={choices(['solid','soft','glass'])} onChange={value => change('cardTransparency',value as ThemePreferences['cardTransparency'])}/><Choice label={copy.contrast} value={String(preferences.contrast)} values={choices(['100','125','150'])} onChange={value => change('contrast',Number(value))}/></>}/>
     <Section title={copy.cards} count={3}><div className="grid gap-[var(--space-4)] md:grid-cols-3">
@@ -37,5 +37,5 @@ export default function DesignGallery() {
     <Section title={copy.forms}><FormField label={copy.label} description={copy.hint}>{props => <Input {...props}/>}</FormField><FormField label={copy.label} description={copy.hint} error={copy.error}>{props => <Input {...props}/>}</FormField><FormField label={copy.disabled}>{props => <Input {...props} disabled/>}</FormField></Section>
     <Section title={copy.tabs}><Tabs defaultValue="one"><SegmentedTabsList aria-label={copy.tabs}><SegmentedTabsTrigger value="one">{copy.rest}</SegmentedTabsTrigger><SegmentedTabsTrigger value="two">{copy.selected}</SegmentedTabsTrigger><SegmentedTabsTrigger value="three" disabled>{copy.disabled}</SegmentedTabsTrigger></SegmentedTabsList><TabsContent value="one">{copy.hint}</TabsContent><TabsContent value="two">{copy.meta}</TabsContent></Tabs></Section>
     <Section title={copy.action}><Toolbar left={<>{(['default','secondary','outline','ghost','link','destructive'] as const).map(variant => <Button key={variant} variant={variant}>{variant}</Button>)}</>} right={<Button disabled>{copy.disabled}</Button>}/><Separator/><ToggleGroup type="single" defaultValue="one" aria-label={copy.tabs}><ToggleGroupItem value="one">{copy.selected}</ToggleGroupItem><ToggleGroupItem value="two">{copy.rest}</ToggleGroupItem><ToggleGroupItem value="three" disabled>{copy.disabled}</ToggleGroupItem></ToggleGroup><Toolbar left={<>{(['default','secondary','outline','ghost','link','destructive'] as const).map(variant => <Badge key={variant} variant={variant}>{variant}</Badge>)}</>}/><Card><CardHeader><CardTitle>{copy.title}</CardTitle><CardAction>{action}</CardAction></CardHeader></Card></Section>
-  </PageContainer>;
+  </PageContainer></main>;
 }
