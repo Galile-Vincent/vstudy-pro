@@ -32,15 +32,13 @@ html[data-input-modality=keyboard] .library-view .library-search:has(:focus-visi
 .filter-popover > button { display:flex; align-items:center; gap:var(--space-2); }
 .filter-panel {
   position:absolute; top:100%; right:0; z-index:20;
-  width:var(--filter-width); max-height:70vh; max-width:calc(100vw - var(--space-6)); overflow:auto;
-  display:grid; gap:var(--space-4); padding:var(--space-4);
+  width:min(24rem, calc(100vw - 32px)); max-height:70vh; max-width:calc(100vw - 32px); overflow:auto;
+  display:grid; gap:var(--space-2); padding:var(--space-4);
   border:0; border-radius:var(--r-md); background:var(--surface); box-shadow:var(--elevation-floating);
 }
 [data-slot=popover-content].filter-panel { position:relative; inset:auto; margin:0; }
 .filter-panel[hidden] { display:none; }
-.filter-panel label,.library-dialog label { display:flex; gap:var(--space-2); justify-content:space-between; align-items:center; flex-wrap:wrap; font-size:var(--type-base); }
-.filter-panel label { display:grid; grid-template-columns:7rem minmax(0,1fr); }
-.filter-panel label:has(input[type=checkbox]),.filter-panel label:has([role=checkbox]) { display:flex; justify-content:flex-start; }
+.library-dialog label { display:flex; gap:var(--space-2); justify-content:space-between; align-items:center; flex-wrap:wrap; font-size:var(--type-base); }
 .filter-panel .app-select { width:100%; }
 .filter-panel :is(.app-select,input:not([type=checkbox])),.library-dialog :is(.app-select,input:not([type=checkbox])),.folder-node input {
   border:0; border-radius:var(--r-sm); background:color-mix(in oklab, var(--ink) 5%, var(--surface)); box-shadow:none; transition:none;
@@ -182,3 +180,6 @@ mark { background:var(--active); color:var(--ink); font-weight:600; }
 .document-status .status-badge { white-space:normal; overflow-wrap:anywhere; }
 .document-status progress { max-width:100%; }
 .document-status button { min-height:40px; }
+
+.filter-panel :is(button,input) { min-height:40px; }
+.filter-panel input[type=checkbox] { min-height:0; }

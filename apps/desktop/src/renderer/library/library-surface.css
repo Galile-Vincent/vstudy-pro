@@ -30,11 +30,8 @@
 @container docs (width < 52rem) { .document-course-inline { display:block; color:var(--muted); font-size:var(--type-xs); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } }
 
 .library-view-controls { display:flex; flex:none; align-items:center; gap:var(--space-2); }
-.filter-view { display:grid; grid-template-columns:7rem minmax(0,1fr); align-items:center; gap:var(--space-2); padding-bottom:var(--space-3); font-size:var(--type-base); }
-.filter-view .library-view-controls { min-width:0; flex-wrap:wrap; }
-.filter-view .library-view-controls .app-select { flex:1 1 100%; width:100%; min-width:0; background:var(--glass-tone); box-shadow:none; backdrop-filter:none; }
-.filter-view .library-view-controls > [data-slot=button] { height:32px; min-height:32px; width:32px; padding:0; background:var(--glass-tone); box-shadow:none; backdrop-filter:none; border-radius:var(--r-pill); }
-
+.filter-view { display:grid; gap:var(--space-2); }
+.filter-view .library-view-controls { flex-wrap:wrap; }
 /* List rows sit on the page; a soft tone marks hover and selection. */
 .library-results[data-view=list] .library-document:hover { background:var(--glass-tone); }
 .library-results[data-view=list] .library-document[data-selected=true],.library-results[data-view=list] .library-document[data-selected=true]:hover { background:var(--glass-tone-strong); }

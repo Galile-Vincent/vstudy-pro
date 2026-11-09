@@ -5,7 +5,7 @@ import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import { Brand } from '../components/brand';
 import type { CSSProperties } from 'react';
-import { PageContainer, PageHeader, Toolbar } from '../components/ui';
+import { PageContainer, PageHeader, Toolbar, FormField } from '../components/ui';
 import { Badge } from '../components/ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
 import './ui3.css';
@@ -786,9 +786,8 @@ export function LibraryView() {
             {(
               ["type", "status", "converter", "tagId", "folderId"] as const
             ).map((key) => (
-              <label key={key}>
-                {tr(`library:${key}`)}
-                <Select
+              <FormField key={key} label={tr(`library:${key}`)}>
+                {control => <Select {...control}
                   aria-label={tr(`library:${key}`)}
                   value={String(query[key] ?? "")}
                   onChange={(e) =>
@@ -829,12 +828,12 @@ export function LibraryView() {
                             {tr(`library:${v}`)}
                           </option>
                         ))}
-                </Select>
-              </label>
+                </Select>}
+              </FormField>
             ))}
             {(["subfolders", "hasChats", "pinned"] as const).map((key) => (
-              <label key={key}>
-                <Checkbox
+              <FormField key={key} label={tr(`library:${key}`)}>
+                {control => <Checkbox {...control}
                   checked={query[key] ?? false}
                   onChange={(e) =>
                     setQuery((q) => ({
@@ -842,20 +841,19 @@ export function LibraryView() {
                       [key]: e.target.checked || undefined,
                     }))
                   }
-                />
-                {tr(`library:${key}`)}
-              </label>
+                />}
+              </FormField>
             ))}
-            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:localDate(query.addedAfter),addedBefore:localDate(query.addedBefore)});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
+            <FormField label={tr("library:addedAfter")}>{control => <Select {...control} aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:localDate(query.addedAfter),addedBefore:localDate(query.addedBefore)});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
-            </Select></label>
-            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} aria-invalid={dateError} value={dateDraft[key]} onChange={e => updateDate(key,e.target.value)}/></label>)}
+            </Select>}</FormField>
+            {customDates && (["addedAfter","addedBefore"] as const).map(key => <FormField key={key} label={tr(`library:${key}`)}>{control => <Input {...control} type="date" aria-label={tr(`library:${key}`)} aria-invalid={dateError} value={dateDraft[key]} onChange={e => updateDate(key,e.target.value)}/>}</FormField>)}
             {dateError && <p>{tr("library:dateRangeInvalid")}</p>}
-            <label>{tr("library:size")}<Select aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
+            <FormField label={tr("library:size")}>{control => <Select {...control} aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
-            </Select></label>
+            </Select>}</FormField>
             {!showFolders && compactToolbar && <div className="filter-view"><span>{tr("library:sort")}</span>{viewControls}</div>}
-            <footer><Button variant="outline" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
+            <footer><Button variant="outline" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button></footer>
           </PopoverContent>
         </Popover>
         {!showFolders && !compactToolbar && viewControls}
@@ -886,9 +884,6 @@ export function LibraryView() {
         ))}
         {filters.length > 0 && (
           <>
-            <Button variant="outline" className="ghost" onClick={clearFilters}>
-              {tr("library:clearFilters")}
-            </Button>
             <Button variant="outline" className="ghost"
               onClick={async () => {
                 const name = await prompt(tr("library:saveFilter"));
