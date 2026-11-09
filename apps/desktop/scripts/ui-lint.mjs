@@ -8,9 +8,10 @@ export function inspect(source, css = true) {
   const counts = Object.fromEntries(rules.map(rule => [rule, 0]));
   const token = value => /^var\(--[\w-]+\)$/.test(value.trim());
   const property = (names, check, rule) => {
-    const pattern = new RegExp(`(?:${names})\\s*:\\s*([^;\\n}]+)`, 'g');
+    const end = css ? String.raw`([^;\n}]+)` : String.raw`(?:"([^"]*)"|'([^']*)'|([^,;\n}]+))`;
+    const pattern = new RegExp(String.raw`(?:${names})\s*:\s*${end}`, 'g');
     for (const match of text.matchAll(pattern)) {
-      const value = match[1].trim().replace(/^['"]|['"],?$/g, '');
+      const value = (match[1] ?? match[2] ?? match[3]).trim();
       if (!check(value)) counts[rule]++;
     }
   };

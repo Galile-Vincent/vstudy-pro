@@ -22,8 +22,8 @@ function Card(props: CardProps) {
 }
 
 const cardVariants = cva(
-  "flex flex-col gap-[var(--space-6)] rounded-[var(--r-lg)] bg-[color-mix(in_oklab,var(--ink)_4%,var(--surface))] py-[var(--space-6)] text-card-foreground",
-  { variants: { variant: { flat: "", raised: "", interactive: "text-start cursor-pointer disabled:opacity-[var(--opacity-disabled)]" } }, defaultVariants: { variant: "raised" } }
+  "flex flex-col rounded-[var(--r-lg)] bg-[color-mix(in_oklab,var(--ink)_4%,var(--surface))] text-card-foreground",
+  { variants: { variant: { flat: "gap-[var(--space-6)] py-[var(--space-6)]", raised: "gap-6 py-6", interactive: "gap-[var(--space-6)] py-[var(--space-6)] text-start cursor-pointer disabled:opacity-[var(--opacity-disabled)]" } }, defaultVariants: { variant: "raised" } }
 )
 
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {

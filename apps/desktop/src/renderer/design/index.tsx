@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { builtinThemes, themePreferencesSchema, type ThemePreferences } from '../../shared/themes';
-import { applyTheme } from '../settings/apply-appearance';
+import { applyTheme, previewTheme } from '../settings/apply-appearance';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, CardAction, PageContainer, PageHeader, Section, Toolbar, ListRow, EmptyState, Stat, FormField, Tabs, TabsContent, SegmentedTabsList, SegmentedTabsTrigger, Button, Badge, Input, Separator, ToggleGroup, ToggleGroupItem } from '../components/ui';
 
 const copy = { title: 'VStudy component gallery', description: 'UI_FOUNDATION_GALLERY_DEV_ONLY_2026', scheme: 'Scheme', theme: 'Theme pack', material: 'Material', contrast: 'Contrast', cards: 'Cards', structure: 'Rows and sections', forms: 'Fields', tabs: 'Segmented tabs', empty: 'No documents yet', hint: 'Import a document to start studying.', action: 'Import document', label: 'Course name', error: 'A course name is required', stats: 'Study time', unit: 'minutes', back: 'Back to app', meta: 'Development preview', disabled: 'Disabled', selected: 'Selected', rest: 'Rest', hover: 'Hover', focus: 'Focus' };
@@ -17,11 +17,11 @@ export default function DesignGallery() {
     return () => { if (style === null) root.removeAttribute('style'); else root.setAttribute('style',style); for (const [name,value] of attributes) { if(value === null) root.removeAttribute(name); else root.setAttribute(name,value); } };
   }, []);
   useEffect(() => {
-    applyTheme(preferences);
+    const restore = previewTheme(preferences);
     const query = matchMedia('(prefers-color-scheme: dark)');
     const update = () => applyTheme(preferences);
     query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
+    return () => { query.removeEventListener('change', update); restore(); };
   }, [preferences]);
   const change = <K extends keyof ThemePreferences>(key:K,value:ThemePreferences[K]) => setPreferences(previous => ({...previous,[key]:value}));
   const action = <Button>{copy.action}</Button>;
