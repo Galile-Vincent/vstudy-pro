@@ -427,3 +427,34 @@ it('retains a selected document and its move target when it leaves a filtered vi
  await waitFor(()=>expect(state.invoke).toHaveBeenCalledWith('library:documents:move',{documentIds:['first'],folderId:'destination'}));
  state.route.query={};
 });
+
+it('keeps 300 loaded rows, scroll and active row after a poll', async () => {
+ const rows=Array.from({length:500},(_,i)=>row('doc'+i));
+ rows[0]!.document.status='converting';
+ state.invoke.mockImplementation(async(c,q)=>{
+  if(c!=='library:documents:list')return [];
+  const offset=q.cursor?.sortValue??0;
+  return {items:structuredClone(rows.slice(offset,offset+q.limit)),
+   nextCursor:{id:'next',sortValue:offset+q.limit}};
+ });
+ const {container}=mount(); await screen.findByText('doc0');
+ for(let i=2;i<=6;i++){
+  fireEvent.click(screen.getByRole('button',{name:tr('library:loadMore')}));
+  await waitFor(()=>expect(container.querySelector('[aria-setsize="'+i*50+'"]')).toBeTruthy());
+ }
+ const viewport=container.querySelector<HTMLElement>('.library-results')!;
+ Object.defineProperty(viewport,'scrollHeight',{configurable:true,value:19200});
+ fireEvent.scroll(viewport,{target:{scrollTop:12800}});
+ const active=container.querySelector<HTMLElement>('[data-index="200"]')!;
+ act(()=>active.focus());
+ await act(async()=>{await new Promise(resolve=>setTimeout(resolve,1700));});
+ expect(container.querySelector('[aria-setsize="300"]')).toBeTruthy();
+ expect(viewport.scrollTop).toBe(12800);
+ expect(active.isConnected).toBe(true);
+ rows[200]!.document.title='Refreshed active row';
+ act(()=>window.dispatchEvent(new Event('library-changed')));
+ await screen.findByText('Refreshed active row');
+ expect(container.querySelector('[aria-setsize="300"]')).toBeTruthy();
+ expect(viewport.scrollTop).toBe(12800);
+ expect(active.isConnected).toBe(true);
+});

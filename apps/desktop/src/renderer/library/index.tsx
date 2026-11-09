@@ -275,11 +275,27 @@ export function LibraryView() {
     return () => clearTimeout(timer);
   }, [text]);
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (items.some((i) => i.document.status === "converting")) refresh();
+    let pending = false;
+    let cancelled = false;
+    let cursor: LibraryQuery["cursor"];
+    const timer = setInterval(async () => {
+      if (pending || !items.some(i => i.document.status === "converting")) return;
+      pending = true;
+      const id = generation.current;
+      try {
+        const page = await desktop.invoke("library:documents:list", {
+          ...query, cursor, limit: 100,
+        });
+        if (cancelled || id !== generation.current) return;
+        cursor = page.nextCursor ?? undefined;
+        const updates = new Map(page.items.map(item => [item.document.id, item]));
+        setItems(current => current.map(item => updates.get(item.document.id) ?? item));
+      } catch (error) {
+        if (!cancelled) setError(errorText(error));
+      } finally { pending = false; }
     }, 1500);
-    return () => clearInterval(timer);
-  }, [items, refresh]);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [query, items.some(i => i.document.status === "converting")]);
   useEffect(() => {
     localStorage.setItem(
       `library-sort:${viewKey}`,
@@ -320,13 +336,16 @@ export function LibraryView() {
           : 1;
         let extraPages = 0;
         while (
-          revision === 0 && sameQuery && extraPages < 2 && page.nextCursor &&
-          (rows.length * 64) / multiplier < restoreTop.current + 800
+          sameQuery && page.nextCursor &&
+          (rows.length < loadedCount.current ||
+            (revision === 0 && extraPages < 2 &&
+              (rows.length * 64) / multiplier < restoreTop.current + 800))
         ) {
           extraPages++;
           const next = await desktop.invoke("library:documents:list", {
             ...query,
             cursor: page.nextCursor,
+            limit: 100,
           });
           if (id !== generation.current) return;
           rows.push(...next.items);
