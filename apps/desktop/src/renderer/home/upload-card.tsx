@@ -49,6 +49,7 @@ export function UploadCard({
   );
   const upload = async (paths?: string[], sample = false) => {
     if (lock.current) return;
+    const destination = folders.find((folder) => folder.id === folderId)?.id ?? null;
     lock.current = true;
     setBusy(true);
     setError('');
@@ -57,7 +58,7 @@ export function UploadCard({
       const results = paths
         ? await desktop.invoke('documents:importPaths', {
             paths,
-            folderId: folders.find((f) => f.id === folderId)?.id ?? null,
+            folderId: destination,
           })
         : null;
       const documents = results
@@ -72,15 +73,15 @@ export function UploadCard({
                       : 'en',
                 })
               : desktop.invoke('documents:import', {
-                  folderId: folders.find((f) => f.id === folderId)?.id ?? null,
+                  folderId: destination,
                 })),
           ].filter((d): d is Document => !!d);
       const failed = results?.find((r) => !r.ok);
       if (failed && !failed.ok) setError(errorText(new Error(failed.error)));
-      if (folderId && documents.length)
+      if (destination && documents.length)
         await desktop.invoke('library:documents:move', {
           documentIds: documents.map((d) => d.id),
-          folderId: folders.find((f) => f.id === folderId)!.id,
+          folderId: destination,
         });
       documents.forEach((d) => {
         owned.current.add(d.id);
