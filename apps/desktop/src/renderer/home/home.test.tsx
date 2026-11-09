@@ -42,3 +42,18 @@ it('uses singular English study and unpriced-call labels', async () => {
  expect(renderToStaticMarkup(<Streak streak={{current:1,best:1,today:true,days:[]}}/>)).toContain('>1 day</strong>');
  expect(i18n.t('usage:unknown_calls',{count:1})).toBe('1 call unpriced; total is a lower bound.');
 });
+
+it('uses one Resume action and at most five recent rows without a nested main', async () => {
+  await i18n.changeLanguage('en');
+  const recentDocuments = Array.from({ length: 8 }, (_, index) => ({
+    document: { id: `doc-${index}`, title: `Notes ${index}`, sourceName: 'notes.pdf' },
+    lastChat: 'A useful summary',
+  })) as Dashboard['recentDocuments'];
+  const markup = renderToStaticMarkup(<Home initialData={{ ...empty, recentDocuments }}
+    navigate={() => {}} onUsage={() => {}}/>);
+  expect(markup).not.toContain('<main');
+  expect(markup.match(/data-slot="list-row"/g)).toHaveLength(5);
+  expect(markup).toContain('Resume');
+  expect(markup).not.toContain('Notes 6');
+  expect(markup).not.toContain('art-reader-kicker');
+});
