@@ -1,5 +1,6 @@
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
+import { ListRow } from "../components/ui";
 import { Brand } from '../components/brand';
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
@@ -894,7 +895,6 @@ function CoursesBody({
                 </TabsList><div className="course-list-controls"><Select value={sort} onValueChange={value => void changeSort(value)}><SelectTrigger className="course-sort" size="sm" aria-label={tr("moodle:sort_courses")}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="smart">{tr("moodle:sort_smart")}</SelectItem><SelectItem value="name">{tr("moodle:sort_name")}</SelectItem></SelectContent></Select><CourseViewSwitch value={view} onChange={changeView} /></div></div>
                 {termFilters.map(filter => <TabsContent key={filter} value={filter}>
                   {!overview.courses.some(course => matchesTerm(course,filter)) && <p className="moodle-empty-inline">{tr("moodle:no_term_courses")}</p>}
-                  <div className="course-heading-row" aria-hidden="true">{[false,true].map(repeat => <div key={String(repeat)} className="course-column-headings" data-repeat={repeat}><span>{tr("moodle:overdue_column")}</span><span>{tr("moodle:unread_column")}</span></div>)}</div>
                   {pinsVisible && orderedCourses.some(item => item.pinned && matchesTerm(item.course,filter)) && <div className="course-group-label"><h3>{tr("moodle:pinned_courses")}</h3></div>}
                   <ul className="moodle-grid" data-view={view} role="list">
                     {orderedCourses.filter(item => matchesTerm(item.course,filter)).map(({course,pinned},index,items) => {
@@ -905,15 +905,15 @@ function CoursesBody({
                       const labels = [`${prefix}-title`, ...(teacher ? [`${prefix}-teacher`] : []), ...(attention.overdue ? [`${prefix}-overdue`] : []), ...(attention.unread ? [`${prefix}-unread`] : []), ...(attention.next ? [`${prefix}-deadline`] : [])];
                       const tooltip = [course.fullName, attention.overdue ? tr('moodle:course_overdue_tooltip',{count:attention.overdue}) : '', attention.unread ? tr('moodle:course_unread_tooltip',{count:attention.unread}) : ''].filter(Boolean).join('\n');
                       const urgent = !!attention.next && Date.parse(attention.next.dueAt)-Date.now()<86400000;
-                      return <li key={course.id} className="moodle-course-card" title={course.fullName} data-course-id={course.id} data-pinned={pinned} data-group-start={pinsVisible && !pinned && index>0 && items[index-1]!.pinned}>
-                        <div className="moodle-card-body">
-                          <h3><button className="course-open" type="button" title={tooltip} aria-labelledby={labels.join(' ')} aria-describedby={`${prefix}-raw`} onAuxClick={event => {if(event.button === 1) {event.preventDefault();navigation?.openTab({view:"courses",courseId:course.id,title:name});}}} onClick={event => event.metaKey || event.ctrlKey ? navigation?.openTab({view:"courses",courseId:course.id,title:name}) : onCourse(course.id)}><span className="course-title" id={`${prefix}-title`}>{name}</span></button></h3>
-                          {(teacher || attention.next) && <p className="course-meta">
+                      return <li key={course.id} className="moodle-course-card min-w-0" title={course.fullName} data-course-id={course.id} data-pinned={pinned} data-group-start={pinsVisible && !pinned && index>0 && items[index-1]!.pinned}>
+                        <ListRow className="w-full min-h-14 gap-3"
+                          title={<button className="course-open block w-full text-start whitespace-normal break-words" type="button" title={tooltip} aria-labelledby={labels.join(' ')} aria-describedby={`${prefix}-raw`} onAuxClick={event => {if(event.button === 1) {event.preventDefault();navigation?.openTab({view:"courses",courseId:course.id,title:name});}}} onClick={event => event.metaKey || event.ctrlKey ? navigation?.openTab({view:"courses",courseId:course.id,title:name}) : onCourse(course.id)}><span className="course-title" id={`${prefix}-title`}>{name}</span></button>}
+                          subtitle={(teacher || attention.next) && <p className="course-meta flex flex-wrap items-baseline gap-x-2 text-sm">
                             {teacher && <span id={`${prefix}-teacher`}>{teacher}</span>}
                             {teacher && attention.next && <span className="course-meta-separator" aria-hidden="true">·</span>}
                             {attention.next && <time id={`${prefix}-deadline`} dateTime={attention.next.dueAt} title={attention.next.title} data-urgent={urgent}>{urgent && <Clock3 aria-hidden="true" />}{deadlinePhrase(attention.next.dueAt)}</time>}
                           </p>}
-                        </div>
+                          actions={<div className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" className="relative z-1"
                           aria-label={tr("moodle:open_course_tab", { course: name })}
                           title={tr("moodle:open_course_tab", { course: name })}
@@ -933,14 +933,16 @@ function CoursesBody({
                             })}>{tr("moodle:open_course_tab", { course: name })}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                        <div className="course-counts" aria-hidden="true">
+                        <div className="course-counts flex items-center gap-2" aria-hidden="true">
                           <span className="course-count course-overdue" data-count={attention.overdue} title={attention.overdue ? tr('moodle:course_overdue_tooltip',{count:attention.overdue}) : undefined}>{attention.overdue>0 && <><AlarmClock />{attention.overdue>99 ? '99+' : attention.overdue}</>}</span>
                           <span className="course-count course-unread-count" data-count={attention.unread} title={attention.unread ? tr('moodle:course_unread_tooltip',{count:attention.unread}) : undefined}>{attention.unread>0 && <><Mail />{attention.unread>99 ? '99+' : attention.unread}</>}</span>
                         </div>
-                        <button type="button" className="course-pin" aria-pressed={pinned} aria-label={tr(pinned ? 'moodle:unpin_course' : 'moodle:pin_course')} title={tr(pinned ? 'moodle:unpin_course' : 'moodle:pin_course')} aria-disabled={pinBusy === course.id} onClick={() => {if(!pinBusy)void pinCourse(course.accountId,course.id,!pinned);}}><Pin aria-hidden="true" /></button>
+                        <button type="button" className="course-pin grid size-9 place-items-center rounded-[var(--r-sm)]" aria-pressed={pinned} aria-label={tr(pinned ? 'moodle:unpin_course' : 'moodle:pin_course')} title={tr(pinned ? 'moodle:unpin_course' : 'moodle:pin_course')} aria-disabled={pinBusy === course.id} onClick={() => {if(!pinBusy)void pinCourse(course.accountId,course.id,!pinned);}}><Pin aria-hidden="true" /></button>
                         {attention.overdue>0 && <span id={`${prefix}-overdue`} className="sr-only">{tr('moodle:course_overdue',{count:attention.overdue})}</span>}
                         {attention.unread>0 && <span id={`${prefix}-unread`} className="sr-only">{tr('moodle:course_unread',{count:attention.unread})}</span>}
                         <span id={`${prefix}-raw`} className="sr-only">{course.fullName}{course.identity.lifecycle === 'unknown' && ` · ${tr('moodle:dates_unavailable')}`}</span>
+                        </div>}
+                        />
                       </li>;
 
                     })}

@@ -780,8 +780,7 @@ it('keeps empty count slots, caps the visible number, and orders the accessible 
   expect(host.querySelector('.course-unread-count')?.textContent).toBe('99+');
   expect(host.querySelector('.course-unread-count')?.getAttribute('title')).toBe('120 unread updates');
   expect(host.querySelector('.course-counts')?.children).toHaveLength(2);
-  expect(host.querySelector('.course-heading-row')?.getAttribute('aria-hidden')).toBe('true');
-  expect(host.querySelector('.course-column-headings')?.textContent).toBe('OverdueUnread');
+  expect(host.querySelector('.course-heading-row')).toBeNull();
   const button = host.querySelector<HTMLButtonElement>('.course-open')!;
   const labels = button.getAttribute('aria-labelledby')!.split(' ').map(id=>document.getElementById(id)!.textContent);
   expect(labels[0]).toBe(displayTitle(course.identity,'en',course.fullName));
