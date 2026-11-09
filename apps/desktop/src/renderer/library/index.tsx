@@ -419,6 +419,7 @@ export function LibraryView() {
   };
   const moveItems = useRef<Item[]>([]);
   const openMove = (value: boolean) => {
+    if (value) setNotice("");
     if (value) moveItems.current = items.filter(item => ids.includes(item.document.id));
     setMove(value);
   };
@@ -1109,6 +1110,7 @@ export function LibraryView() {
       {(notice || recoveryNotice) && (
         <div className="library-toast" role="status">
           {notice || recoveryNotice}
+          {notice && <Button variant="ghost" onClick={() => setNotice("")}>{tr("library:close")}</Button>}
           {recoveries.length > 0 && (
             <Button variant="outline"
               aria-label={`${tr("library:undo")}: ${recoveryNotice}`}
@@ -1124,7 +1126,7 @@ export function LibraryView() {
           )}
         </div>
       )}
-      <LibraryMenus moveNotice={notice} liveRegion={liveRegion} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={setTagging}/>
+      <LibraryMenus moveNotice={notice} liveRegion={liveRegion} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
       {promptDialog}
     </section>
   );

@@ -107,3 +107,19 @@ it('groups a bulk delete as one titled recovery action',async()=>{
  fireEvent.click(undo);
  await waitFor(()=>expect(state.invoke.mock.calls.filter(([c])=>c==='library:documents:restore')).toHaveLength(2));
 });
+
+it('clears a failed move notice when reopening the picker',async()=>{
+ state.invoke.mockImplementation(async c=>{
+  if(c==='library:documents:list')return {items:[row('first')],nextCursor:null};
+  if(c==='library:tree')return [{id:'destination',name:'Destination',parentId:null}];
+  if(c==='library:documents:move')throw new Error('failed');
+  return [];
+ });
+ mount();fireEvent.click((await screen.findByText('first')).closest('.library-document')!);
+ fireEvent.click(screen.getByRole('button',{name:tr('library:move')}));
+ fireEvent.click(screen.getByRole('button',{name:'Destination'}));
+ await waitFor(()=>expect(screen.getByRole('dialog').textContent).toContain('failed'));
+ fireEvent.click(screen.getByRole('button',{name:tr('library:close')}));
+ fireEvent.click(screen.getByRole('button',{name:tr('library:move')}));
+ expect(screen.getByRole('dialog').textContent).not.toContain('failed');
+});

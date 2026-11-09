@@ -138,7 +138,6 @@ export function LibraryMenus({moveNotice,liveRegion,menu,move,tagging,anchor,ite
           }}
         >
           {liveRegion}
-          {moveNotice && <p>{moveNotice}</p>}
           <div className="folder-picker">
             <p>{tr('library:tag_hint')}</p>{tags.map((tag) => (
               <label key={tag.id}>
