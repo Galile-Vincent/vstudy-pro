@@ -1,6 +1,7 @@
+import {cancellableInstall} from './install';
 import { parseUpdateInfo } from 'electron-updater/out/providers/Provider';
 import { EventEmitter } from 'node:events';
-import { app, net } from 'electron';
+import { app, net, autoUpdater as nativeUpdater } from 'electron';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { existsSync, readFileSync } from 'node:fs';
@@ -50,7 +51,12 @@ async function setupUpdater() {
   autoUpdater.setFeedURL({ provider:'custom', updateProvider:UpdateProvider });
   autoUpdater.disableWebInstaller = true;
   autoUpdater.disableDifferentialDownload = true;
-  return {autoUpdater,unsupported};
+  if ('cancelInstall' in autoUpdater) return {
+    autoUpdater:autoUpdater as typeof autoUpdater & {cancelInstall:() => void}, unsupported,
+  };
+  const updater = Object.assign(autoUpdater, cancellableInstall(autoUpdater,
+    process.platform === 'darwin' ? nativeUpdater : undefined));
+  return {autoUpdater:updater,unsupported};
 }
 export function createUpdates(store: Store, shown: Promise<void> = Promise.resolve()) {
   const fallback = Object.assign(new EventEmitter(), {autoDownload:false,allowDowngrade:false,

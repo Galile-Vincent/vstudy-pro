@@ -23,5 +23,6 @@
   "confirm_detail": "Restart waits for conversions, imports, chats and Moodle work to finish.",
   "download_progress": "Downloading update",
   "unavailable": "Automatic updates are unavailable for this build.",
-  "continue": "Continue"
+  "continue": "Continue",
+  "install_failed": "Installation did not start. Try again."
 }

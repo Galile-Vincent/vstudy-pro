@@ -13,6 +13,7 @@ export const updateStateSchema = z.discriminatedUnion('status', [
 export type UpdateState = z.infer<typeof updateStateSchema>;
 export const updateSnapshotSchema = z.object({ state: updateStateSchema,
   installing: z.boolean().optional(),
+  installError: z.boolean().optional(),
   result: z.enum(['current', 'checked', 'offline', 'cooldown']).optional(),
   currentVersion: z.string(), lastCheckedAt: z.number().nullable(), automatic: z.boolean() }).strict();
 export type UpdateSnapshot = z.infer<typeof updateSnapshotSchema>;

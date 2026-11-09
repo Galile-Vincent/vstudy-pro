@@ -21,7 +21,7 @@ export function UpdateRow() {
   useTranslation();
   const snapshot = useUpdates();
   const state = snapshot?.state;
-  const label = !state || ['idle', 'unsupported'].includes(state.status) ? '' : state.status === 'available'
+  const label = snapshot?.installError ? tr('updates:install_failed') : !state || ['idle', 'unsupported'].includes(state.status) ? '' : state.status === 'available'
     ? tr('updates:available', {version:state.version}) : state.status === 'downloading'
       ? tr('updates:downloading', {percent:state.percent}) : tr(`updates:${state.status}`);
   const action = () => {
@@ -39,7 +39,7 @@ export function UpdateRow() {
         </Button>}
       {state?.status === 'available' && <Button variant="link" size="icon-sm" aria-label={tr('updates:notes')} title={tr('updates:notes')}
         onClick={() => void desktop.invoke('updates:notes', {})}><FileText aria-hidden="true" /></Button>}
-      {state?.status === 'error' && <Button variant="link" size="sm" onClick={action}>
+      {(state?.status === 'error' || snapshot?.installError) && <Button variant="link" size="sm" onClick={action}>
         {tr('updates:retry')}</Button>}
       {state?.status === 'downloading' && <Progress value={state.percent} aria-valuenow={state.percent} aria-valuemin={0} aria-valuemax={100}
         aria-label={tr('updates:download_progress')} />}

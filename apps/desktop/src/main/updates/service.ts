@@ -3,7 +3,7 @@ import type { AppUpdater } from 'electron-updater';
 import type { UpdateSnapshot, UpdateState } from '../../shared/updates';
 import { reduceUpdate, updateError, type UpdateEvent } from './state';
 type Updater = Pick<AppUpdater, 'on' | 'removeListener' | 'checkForUpdates' | 'downloadUpdate'
-  | 'quitAndInstall' | 'autoDownload' | 'allowDowngrade' | 'allowPrerelease' | 'autoInstallOnAppQuit'>;
+  | 'quitAndInstall' | 'autoDownload' | 'allowDowngrade' | 'allowPrerelease' | 'autoInstallOnAppQuit'> & {cancelInstall?: () => void};
 export class Updates {
   private state: UpdateState;
   private lastCheckedAt: number | null = null;
@@ -13,6 +13,8 @@ export class Updates {
   private result: UpdateSnapshot['result'];
   private manual = false;
   private installing = false;
+  private installError = false;
+  private installTimer: ReturnType<typeof setTimeout> | undefined;
   private quietState: UpdateState | undefined;
   private listeners = new Set<(snapshot: UpdateSnapshot) => void>();
   private timer: ReturnType<typeof setTimeout>;
@@ -40,8 +42,9 @@ export class Updates {
     this.interval = setInterval(() => { void this.automaticCheck(); }, 6 * 60 * 60_000);
   }
   private async automaticCheck() {
-    if (!(this.options.getAutomatic?.() ?? this.automatic) ||
-      !(this.options.ready?.() ?? true) || !this.options.online()) return;
+    try {
+      if (!this.automaticEnabled() || !(this.options.ready?.() ?? true) || !this.options.online()) return;
+    } catch { return; }
     if (this.state.status === 'unsupported') return;
     this.firstCheck = true;
     await this.check(false);
@@ -74,7 +77,7 @@ export class Updates {
     return this.automatic;
   }
   snapshot = (): UpdateSnapshot => ({state:this.state.status === 'checking' && this.quietState ? this.quietState : this.state, currentVersion:this.options.version,
-    lastCheckedAt:this.lastCheckedAt, automatic:this.automaticEnabled(), installing:this.installing, ...(this.result ? {result:this.result} : {})});
+    lastCheckedAt:this.lastCheckedAt, automatic:this.automaticEnabled(), installing:this.installing, installError:this.installError, ...(this.result ? {result:this.result} : {})});
   subscribe(listener: (snapshot: UpdateSnapshot) => void) {
     this.listeners.add(listener); return () => { this.listeners.delete(listener); };
   }
@@ -94,6 +97,7 @@ export class Updates {
     this.emit();
   }
   private failed(error: unknown) {
+    if (this.installing || this.installError && this.state.status === 'ready') { this.installFailed(); return; }
     if ((error as {code?:unknown})?.code === 'NO_STABLE_UPDATE') this.dispatch({type:'current'});
     else this.dispatch({type:'error',code:updateError(error)});
   }
@@ -129,11 +133,19 @@ export class Updates {
     void this.updater.downloadUpdate().catch(error => this.dispatch({type:'error', code:updateError(error)}));
     return this.snapshot();
   }
+  private installFailed() {
+    clearTimeout(this.installTimer);
+    this.updater.cancelInstall?.();
+    this.installing = false; this.installError = true; this.emit();
+  }
   async install(prepare?: () => Promise<void>) {
     if (this.state.status === 'ready' && !this.installing) {
-      this.installing = true; this.emit();
-      try { if (prepare) await prepare(); this.updater.quitAndInstall(); }
-      catch { this.dispatch({type:'error',code:'integrity'}); }
+      this.installing = true; this.installError = false; this.emit();
+      try {
+        if (prepare) await prepare();
+        this.installTimer = setTimeout(() => this.installFailed(), 60_000);
+        this.updater.quitAndInstall();
+      } catch { this.installFailed(); }
     }
     return this.snapshot();
   }
@@ -142,6 +154,7 @@ export class Updates {
   }
   dispose() {
     this.disposed = true;
+    clearTimeout(this.installTimer);
     clearTimeout(this.timer); clearInterval(this.interval); clearInterval(this.monitor);
     for (const [name, callback] of this.events) this.updater.removeListener(name, callback);
     this.listeners.clear();

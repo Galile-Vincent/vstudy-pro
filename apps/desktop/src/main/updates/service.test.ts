@@ -157,3 +157,28 @@ it('waits for coordinated shutdown before invoking the native installer',async()
   await service.install();expect(updater.quitAndInstall).not.toHaveBeenCalled();
   finish();await installing;expect(updater.quitAndInstall).toHaveBeenCalledOnce();
 });
+
+it.each(['throw', 'hang', 'error'])('keeps installer retryable after %s', async mode => {
+  vi.useFakeTimers();
+  const {service, updater} = setup();
+  await service.check(); updater.emit('update-available', {version:'0.4.5'});
+  await service.download(); updater.emit('update-downloaded', {version:'0.4.5'});
+  if (mode === 'throw') updater.quitAndInstall.mockImplementationOnce(() => {throw new Error('failed');});
+  await service.install();
+  if (mode === 'error') updater.emit('error', {code:'ERR_UPDATER_INVALID_SIGNATURE'});
+  await vi.advanceTimersByTimeAsync(60_000);
+  expect(service.snapshot().installing).toBe(false);
+  if (mode === 'hang') updater.emit('error', {code:'ETIMEDOUT'});
+  expect(service.snapshot().state.status).toBe('ready');
+  await service.install(); expect(updater.quitAndInstall).toHaveBeenCalledTimes(2);
+});
+it('ignores automatic checks after settings reads become unavailable', async () => {
+  vi.useFakeTimers();
+  const updater = new FakeUpdater();
+  const service = new Updates(updater as never, {version:'0.4.4',automatic:true,
+    online:()=>true, getAutomatic:()=>{throw new Error('closed');},
+    ready:()=>{throw new Error('closed');}, saveAutomatic:()=>{}});
+  services.push(service);
+  await vi.advanceTimersByTimeAsync(30_000);
+  expect(updater.checkForUpdates).not.toHaveBeenCalled();
+});

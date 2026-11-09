@@ -50,7 +50,6 @@ import { registerChatIpc } from "./chat";
 /** App-owned transport and packaged paths are injected only by the composition root. */
 export interface AppIpcOptions {
   updates?: import('../updates/service').Updates;
-  prepareUpdateInstall?: () => Promise<void>;
   newsletterConsent?:NewsletterConsentHook;
   moodleRequest?:typeof fetch;
   mcpPaths?:{peerHelper?:string;serverBin:string};
@@ -125,7 +124,7 @@ export function registerIpc(
         if (!await updateConsent(event,'install')) return updates.snapshot();
         await disposeMoodle.waitForIdle(); await chat.waitForIdle();
         await disposeDocuments.waitForIdle(); await disposeLibrary.waitForIdle();
-        return updates.install(options.prepareUpdateInstall);
+        return updates.install();
       } finally { installing = false; }
     });
     registrar.handle('updates:setAuto', ({enabled}) => updates.setAuto(enabled));
@@ -217,5 +216,5 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { if (!updates?.snapshot().installing) { stopUpdates?.(); updates?.dispose(); } await webChats.dispose(); await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async () => { stopUpdates?.(); updates?.dispose(); await webChats.dispose(); await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
 }

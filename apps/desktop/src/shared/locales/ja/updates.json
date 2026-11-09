@@ -23,5 +23,6 @@
   "confirm_detail": "変換、インポート、チャット、Moodle の処理が完了するまで待機します。",
   "download_progress": "更新をダウンロード中",
   "unavailable": "このビルドでは自動更新を利用できません。",
-  "continue": "続ける"
+  "continue": "続ける",
+  "install_failed": "インストールが開始されませんでした。再試行してください。"
 }
