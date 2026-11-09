@@ -5,7 +5,7 @@ import { Sparkles } from 'lucide-react';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { Button } from '../components/ui/button';
-import { SettingsGroup } from '../settings/layout';
+import { Card, Section, SettingRow } from '../components/ui';
 import { aiCliChanged, openAiCliSetup } from './entry';
 import { cliNames, recommendedProvider } from './model';
 import { useCliTools } from './use-tools';
@@ -33,10 +33,9 @@ export function AiCliInventory({ compact = false, settings = false }: { compact?
   const summary = error ? tr('ai-cli:inventory_error') : ready
     ? `${cliNames[recommendedProvider(tools)]} · ${tr('ai-cli:ready_title')}` : tr('ai-cli:summary_unconnected');
   const entry = <Button variant="secondary" className="ai-cli-inventory-entry" onClick={() => openAiCliSetup()}><Sparkles size={16} aria-hidden="true" /><span>{tr('ai-cli:title')}</span></Button>;
-  if (settings) return <SettingsGroup title={tr('ai-cli:tools')}>
-    <p role="status">{summary}</p>
-    <div className="settings-row ai-cli-tool-actions">{entry}</div>
-  </SettingsGroup>;
+  if (settings) return <Section level={3} title={tr('ai-cli:tools')}><Card variant="flat" className="p-[var(--space-4)]">
+    <SettingRow label={tr('ai-cli:tools')} description={<span role="status">{summary}</span>}>{entry}</SettingRow>
+  </Card></Section>;
   return <section className="ai-cli-inventory" data-compact={compact} aria-label={tr('ai-cli:tools')}>
     <Button variant="ghost" className="ai-cli-inventory-entry" onClick={() => { openAiCliSetup(); }}><Sparkles size={16} aria-hidden="true" /><span>{tr('ai-cli:tools')}</span><span className="ai-cli-dot" data-ready={ready} aria-hidden="true" /><span className="sr-only">{tr(ready ? 'ai-cli:ready_title' : 'ai-cli:setup_needed')}</span></Button>
     <div className="ai-cli-versions">{tools.map(tool => <div key={tool.provider} className="ai-cli-version-entry"><button type="button" className="ai-cli-version" title={tr(`ai-cli:status_${tool.status}`)} onClick={() => { openAiCliSetup(tool.provider); }}><span>{cliNames[tool.provider]}</span><code>{tool.version ?? tr('ai-cli:missing')}</code><small>{statusLabel(tool)}</small></button>{releaseNotes(tool)}</div>)}</div>

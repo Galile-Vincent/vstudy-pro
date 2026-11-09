@@ -44,7 +44,7 @@ function GrantEditor({ grant, onClose }: { grant: Grant; onClose: () => void }) 
 
 export function AgentGrants() {
   const agents = useAgents();
-  const [message,setMessage] = useState('');
+  const [messages,setMessages] = useState<Record<string,string>>({});
   const [editing, setEditing] = useState<string | null>(null);
   const grants = agents.state?.grants ?? [];
   const grant = grants.find(grant => grant.id === editing);
@@ -54,8 +54,8 @@ export function AgentGrants() {
     {grants.map(grant => <article className="agents-card" data-grant-id={grant.id} key={grant.id}>
       <header className="agents-card-header"><h4>{grant.clientName}</h4><span className="agents-badge">{tr(`agents:${grant.revokedAt ? 'revoked' : Date.parse(grant.expiresAt) <= Date.now() ? 'expired' : 'active'}`)}</span>{!grant.revokedAt && <div className="agents-actions">
         <Button aria-label={tr('agents:client_action',{action:tr('agents:edit'),name:grant.clientName})} size="sm" variant="secondary" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => setEditing(grant.id)}>{tr('agents:edit')}</Button>
-        <Button aria-label={tr('agents:client_action',{action:tr('agents:revoke'),name:grant.clientName})} size="sm" variant="ghost" className="agents-danger" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => void agents.act('mcp:revoke', { grantId: grant.id }).then(ok => {if (ok) setMessage(tr('agents:revoke_done',{name:grant.clientName}));})}>{tr('agents:revoke')}</Button>
-      </div>}</header>
+        <Button aria-label={tr('agents:client_action',{action:tr('agents:revoke'),name:grant.clientName})} size="sm" variant="ghost" className="agents-danger" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => void agents.act('mcp:revoke', { grantId: grant.id }).then(ok => {if (ok) setMessages(previous => ({...previous,[grant.id]:tr('agents:revoke_done',{name:grant.clientName})}));})}>{tr('agents:revoke')}</Button>
+      </div>}{messages[grant.id] && <span role="status">{messages[grant.id]}</span>}</header>
       <dl className="agents-details">
         <div><dt>{tr('agents:client_id')}</dt><dd><code>{grant.clientId}</code></dd></div>
         <div><dt>{tr('agents:scopes')}</dt><dd className="agents-scopes">{grant.scopes.map(scope => <span className="agents-scope" key={scope} title={scope}>{tr(`agents:scope_${scope.replace(':', '_')}`)}</span>)}</dd></div>
@@ -65,7 +65,6 @@ export function AgentGrants() {
         <div><dt>{tr('agents:expiry')}</dt><dd><AgentDate value={grant.expiresAt} /></dd></div>
       </dl>
     </article>)}
-    {message && <p role="status">{message}</p>}
     {grant && <GrantEditor key={grant.id} grant={grant} onClose={() => setEditing(null)} />}
   </section>;
 }
