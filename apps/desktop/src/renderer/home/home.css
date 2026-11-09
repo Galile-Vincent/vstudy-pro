@@ -67,3 +67,14 @@
 @media(prefers-reduced-motion:reduce) { .home-page button,.home-reading-card::before { transition:none; } .home-page button:active:not(:disabled) { transform:none; } }
 @media(prefers-contrast:more) { .home-page .home-card,.home-reading-card { outline:1px solid var(--ink); } }
 @media(forced-colors:active) { .home-page .home-card,.home-reading-card { outline:1px solid CanvasText; } }
+
+.home-content { container-type:inline-size; }
+.art-reader-launchpad {
+  display:grid;
+  grid-template-columns:minmax(0,2fr) minmax(0,1fr);
+  gap:var(--space-6);
+  align-items:start;
+}
+@container (width < 720px) {
+  .art-reader-launchpad { grid-template-columns:minmax(0,1fr); }
+}
