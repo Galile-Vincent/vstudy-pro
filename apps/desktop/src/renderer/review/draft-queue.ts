@@ -40,7 +40,13 @@ class DraftQueue {
 
  flush(): Promise<void> {
   clearTimeout(this.timer); this.timer = undefined;
-  return this.running ??= this.pump();
+  if (!this.running) {
+   this.running = Promise.resolve().then(() => this.pump()).finally(() => {
+    this.running = null;
+    this.settleIfIdle();
+   });
+  }
+  return this.running;
  }
 
  private schedule(ms: number) {
@@ -62,7 +68,6 @@ class DraftQueue {
     if (this.pending.get(itemId)?.seq === seq) failedIds.set(itemId, seq);
    }
   }
-  this.running = null;
   this.setFailed(failedIds.size > 0);
   if (failedIds.size && this.timer === undefined) this.schedule(DRAFT_RETRY_MS);
   this.settleIfIdle();
