@@ -131,10 +131,12 @@ export function UploadCard({
       }}
       onDragEnd={resetDrag}
       onDragOver={(e) => {
+        if (!e.dataTransfer.types.includes('Files')) return;
         e.preventDefault();
         e.stopPropagation();
       }}
       onDrop={(e) => {
+        if (!e.dataTransfer.types.includes('Files')) return;
         e.preventDefault();
         e.stopPropagation();
         resetDrag();
