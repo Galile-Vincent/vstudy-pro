@@ -24,8 +24,12 @@ afterEach(async () => {
   vi.useRealTimers();
   vi.resetAllMocks();
 });
+const held: (() => void)[] = [];
+let hold = false;
 async function setup(count: number, fallback?: () => void) {
   vi.useFakeTimers();
+  hold = false;
+  held.length = 0;
   let items = Array.from({ length: count }, (_, i) => make(i + 1));
   invoke.mockImplementation(async (channel, payload) => {
     if (channel === 'chats:facets') return { courses: [], documents: [], models: [] };
@@ -33,7 +37,9 @@ async function setup(count: number, fallback?: () => void) {
       if (payload.patch.deleted) items = items.filter(h => h.id !== payload.conversationId);
       return { ok: true };
     }
-    return { items, nextCursor: null };
+    const result = { items: [...items], nextCursor: null };
+    if (!hold) return result;
+    return new Promise(resolve => { held.push(() => resolve(result)); });
   });
   const host = document.createElement('div');
   document.body.append(host);
@@ -77,4 +83,58 @@ it('moves focus to the page heading when Undo disappears with focus', async () =
   await act(async () => { host.querySelector<HTMLButtonElement>('[role=status] button')!.click(); });
   await act(() => vi.advanceTimersByTimeAsync(800));
   expect(fallback).toHaveBeenCalled();
+});
+
+const type = async (host: HTMLElement, value: string) => {
+  const input = host.querySelector<HTMLInputElement>('input[type=search]')!;
+  input.focus();
+  await act(() => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  return input;
+};
+const release = async () => {
+  await act(async () => { held.splice(0).forEach(resolve => resolve()); });
+  await act(() => vi.advanceTimersByTimeAsync(800));
+};
+
+it('keeps focus in the search input when a delayed deletion refresh arrives while typing', async () => {
+  const host = await setup(3);
+  hold = true;
+  await deleteRow(host, 1);
+  const input = await type(host, 'chat');
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  await release();
+  expect(document.activeElement).toBe(input);
+});
+it('keeps focus on a control the user moved to before the delayed refresh arrives', async () => {
+  const host = await setup(3);
+  hold = true;
+  await deleteRow(host, 1);
+  const chip = [...host.querySelectorAll('button')].find(b => b.textContent === 'General')!;
+  chip.focus();
+  await release();
+  expect(document.activeElement).toBe(chip);
+});
+it('does not pull focus back into the list when the deletion refresh lands after Undo', async () => {
+  const fallback = vi.fn(() => (document.activeElement as HTMLElement | null)?.blur());
+  const host = await setup(3, fallback);
+  hold = true;
+  await deleteRow(host, 1);
+  const undo = host.querySelector<HTMLButtonElement>('[role=status] button')!;
+  undo.focus();
+  await act(async () => { undo.click(); });
+  await act(() => vi.advanceTimersByTimeAsync(200));
+  expect(fallback).toHaveBeenCalled();
+  await release();
+  expect(document.activeElement?.matches('[data-history-result]')).toBe(false);
+});
+it('hands focus to the newest delete only', async () => {
+  const host = await setup(4);
+  hold = true;
+  await deleteRow(host, 0);
+  await deleteRow(host, 2);
+  await release();
+  expect(focusedTitle()).toContain('Chat 4');
 });
