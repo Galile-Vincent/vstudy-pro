@@ -421,11 +421,12 @@ function CoursesBody({
       <div className="moodle-notifications">
         {items.map((n) => (
           <ListRow key={n.id} data-unread={!n.read}
+            className="flex-col items-stretch [&>.ui-row-target]:w-full"
             title={<span className="flex items-center gap-2">
               {!n.read && <span className="moodle-unread" role="img" aria-label={tr("moodle:unread")} />}
               {n.subject}
             </span>}
-            subtitle={plainText(n.body)}
+            subtitle={<span className="line-clamp-2">{plainText(n.body)}</span>}
             meta={<time dateTime={n.createdAt}>{relative(n.createdAt)}</time>}
             actions={<div className="flex flex-wrap gap-2">
               {n.url && <Button variant="ghost" onClick={() => openMoodle(n.accountId,{kind:'page',url:n.url!})}>{tr('webview:open')}<ArrowUpRight /></Button>}
