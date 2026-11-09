@@ -915,3 +915,16 @@ it("C2 gives the sibling new-tab icon a course-specific name", async () => {
   expect(action.closest(".course-open")).toBeNull();
 });
 
+
+it("keeps all four filters with zero counts and associated empty panels", async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, courses: [overview.courses[0]!]});
+  await mount(api);
+  const tabs = [...host.querySelectorAll<HTMLButtonElement>('.moodle-term-tabs [role=tab]')];
+  expect(tabs).toHaveLength(4);
+  expect(tabs[1]!.textContent).toContain("0");
+  await act(async () => tabs[1]!.focus());
+  expect(host.querySelector('[role=tabpanel] [data-slot=empty-state]')).not.toBeNull();
+  expect(tabs[1]!.getAttribute('aria-controls')).toBe(host.querySelector('[role=tabpanel]')?.id);
+});
