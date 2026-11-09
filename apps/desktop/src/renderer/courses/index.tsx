@@ -172,6 +172,8 @@ function CoursesBody({
   const [showUpdates, setShowUpdates] = useState(false);
   const [allDue, setAllDue] = useState(false);
   const updatesTrigger = useRef<HTMLButtonElement>(null);
+  const disconnectPending = useRef(false);
+  const connectTrigger = useRef<HTMLButtonElement>(null);
   const disconnectTrigger = useRef<HTMLButtonElement>(null);
   const disconnectSchool = useRef<string | undefined>(undefined);
   const [showPlanner, setShowPlanner] = useState(false);
@@ -185,6 +187,17 @@ function CoursesBody({
   }, [showPlanner]);
   const openMoodle = useMoodleWebview();
   const [overview, setOverview] = useState<MoodleOverview>();
+  useEffect(() => {
+    if (!disconnectPending.current) return;
+    disconnectPending.current = false;
+    const target = overview?.accounts.length
+      ? pageRef.current?.querySelector('h1') : connectTrigger.current;
+    if (target instanceof HTMLElement) {
+      target.tabIndex = -1;
+      target.focus();
+      if (target === connectTrigger.current) target.removeAttribute('tabindex');
+    }
+  }, [overview]);
   const [orderSnapshot,setOrderSnapshot] = useState<{data:MoodleOverview;now:number}>();
   const [sortPreferences,setSortPreferences] = useState<CourseSortPreferences>({});
   const [pinBusy,setPinBusy] = useState<string>();
@@ -289,12 +302,13 @@ function CoursesBody({
     }
   };
   const disconnect = async (accountId: string) => {
+    disconnectPending.current = true;
     setConfirmDisconnect(undefined);
     try {
       await api.disconnect(accountId);
       if (courseId) onCourse();
       else await refresh(true);
-    } catch { failure(); }
+    } catch { disconnectPending.current = false; failure(); }
   };
   const openFile = async (fileId: string, action?: DocumentAction) => {
     setOpening(fileId);
@@ -544,7 +558,7 @@ function CoursesBody({
         </Button>}
         <Button ref={plannerTrigger} variant="outline" className="planner-entry"
           onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
-        {!overview?.accounts.length && <Button variant="outline" onClick={() => setConnect(true)}>
+        {!overview?.accounts.length && <Button ref={connectTrigger} variant="outline" onClick={() => setConnect(true)}>
           <GraduationCap />{tr("moodle:connect_school")}
         </Button>}
       </div>} />
@@ -623,7 +637,7 @@ function CoursesBody({
                 {account.status === "expired" && (
                   <div className="moodle-expired" role="alert">
                     {tr("moodle:expired")}
-                    <Button variant="outline" onClick={() => setConnect(true)}>
+                    <Button ref={connectTrigger} variant="outline" onClick={() => setConnect(true)}>
                       {tr("moodle:reconnect")}
                     </Button>
                   </div>
@@ -1222,7 +1236,7 @@ function CoursesBody({
           )
         )}
         <Dialog open={!!confirmDisconnect} onOpenChange={open => { if (!open) setConfirmDisconnect(undefined); }}>
-          <DialogContent onCloseAutoFocus={event => { event.preventDefault(); disconnectTrigger.current?.focus(); }}>
+          <DialogContent onCloseAutoFocus={event => { event.preventDefault(); if (!disconnectPending.current) disconnectTrigger.current?.focus(); }}>
             <DialogHeader>
               <DialogTitle>{tr("moodle:disconnect_title", { school: disconnectSchool.current ?? tr("moodle:this_school") })}</DialogTitle>
               <DialogDescription asChild><div className="grid gap-2"><p>{tr("moodle:disconnect_removes")}</p><p>{tr("moodle:disconnect_keeps")}</p></div></DialogDescription>

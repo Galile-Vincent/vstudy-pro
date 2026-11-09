@@ -960,3 +960,12 @@ it('shows invalid and absent dates in an explicit final group', async () => {
   expect(host.textContent).toContain('Undated work');
   expect(host.textContent).toContain('Invalid date work');
 });
+
+it('keeps focus on a surviving target after the last disconnect', async () => {
+  const api = createMockMoodleApi();
+  await mount(api);
+  await act(async () => getByRole(host, 'button', {name: /^Disconnect school/}).click());
+  await act(async () => getByRole(document.body, 'dialog').querySelector<HTMLButtonElement>('button[data-variant=destructive]')!.click());
+  await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
+  expect(document.activeElement).toBe(host.querySelector('[data-slot=page-header] button:last-child'));
+});
