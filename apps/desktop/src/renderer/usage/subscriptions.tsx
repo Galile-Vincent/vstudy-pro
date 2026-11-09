@@ -69,7 +69,7 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
         {expanded ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
       </Button>
     </div>}
-    <div id={regionId} role={compact ? 'region' : undefined} aria-label={compact ? tr('usage:subscription_limits') : undefined} hidden={compact && !expanded} className={compact ? 'subscription-details' : undefined} tabIndex={compact ? 0 : undefined}>
+    <div id={regionId} hidden={compact && !expanded} className={compact ? 'subscription-details' : undefined} tabIndex={compact ? 0 : undefined}>
     <header><strong>{tr('usage:subscription_limits')}</strong><Button variant="ghost" size="icon" disabled={loading} aria-label={tr('common:refresh_usage')} onClick={() => window.dispatchEvent(new Event('subscription-refresh'))}><RefreshCw size={14} aria-hidden="true"/></Button></header>
     {error ? <small role="status">{tr('usage:quota_unavailable')}</small> : !rows ? <small role="status">{tr('usage:usage_loading')}</small> : rows.map(row => <div key={row.provider} className="subscription-provider">
       <div className="subscription-provider-name">{providerName(row.provider)}{row.status !== 'ready' && <small>{tr(`usage:quota_${row.status}`)}</small>}</div>

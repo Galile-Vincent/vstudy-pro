@@ -80,3 +80,10 @@ it('breaks equal usage ties by the soonest reset', async () => {
   render(<SubscriptionMeters compact />);
   expect(await screen.findByRole('progressbar', { name: 'Codex · 5h' })).toBeTruthy();
 });
+
+it('exposes one subscription landmark when expanded', async () => {
+  localStorage.setItem(key, 'true');
+  render(<SubscriptionMeters compact />);
+  await screen.findByText('Codex · 5h', { selector: '.subscription-summary-label' });
+  expect(screen.getAllByRole('region', { name: 'Subscription limits' })).toHaveLength(1);
+});
