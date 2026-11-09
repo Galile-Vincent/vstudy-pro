@@ -290,7 +290,7 @@ export function Home({
                     const action = (
                       <Button
                         variant={index === 0 ? 'default' : 'ghost'}
-                        aria-label={`${tr('home:continue')}: ${title}`}
+                        aria-label={tr('home:resume_title', { title })}
                         onClick={() => navigate('workspace', recent.document.id)}
                       >
                         {index === 0 ? tr('home:resume') : tr('home:continue')}
