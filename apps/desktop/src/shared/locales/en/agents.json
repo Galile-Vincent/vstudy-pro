@@ -140,5 +140,6 @@
   "review": "Review",
   "dismiss": "Dismiss",
   "revoke_done": "Access revoked for {{name}}.",
-  "client_action": "{{action}} — {{name}}"
+  "client_action": "{{action}} — {{name}}",
+  "deny_help": "Deny rejects the request immediately. Use Review to inspect it first."
 }

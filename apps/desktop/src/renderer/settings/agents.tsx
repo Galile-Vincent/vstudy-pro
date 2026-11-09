@@ -35,13 +35,14 @@ export function AgentsSettings() {
       <div className="agents-connect-entry"><Button variant="secondary" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => setConnecting(true)}>{tr('agents:connect')}</Button></div>
       {agents.state.enabled && <section className="agents-section">
         <h3>{tr('agents:waiting')}</h3>
+        <p>{tr('agents:deny_help')}</p>
         {[...agents.state.pairings, ...agents.state.proposals].filter(request => Date.parse(request.expiresAt) > Date.now()).map(request =>
           <div key={request.id}>
             <span>{request.clientName}</span>
             <Button variant="secondary" disabled={agents.pending} onClick={() => window.dispatchEvent(new CustomEvent('vstudy:review-agent',{detail:request.id}))}>{tr('agents:review')}</Button>
-            <Button variant="ghost" disabled={agents.pending || agents.connection !== 'ready'} onClick={() => void ('code' in request
+            <Button variant="ghost" disabled={agents.pending || agents.connection !== 'ready' || agents.attempted.has(request.id)} onClick={() => void ('code' in request
               ? agents.act('mcp:pair-decision',{pairingId:request.id,approve:false,scopes:[],accountIds:[]})
-              : agents.act('mcp:proposal-decision',{proposalId:request.id,approve:false}))}>{tr('agents:dismiss')}</Button>
+              : agents.act('mcp:proposal-decision',{proposalId:request.id,approve:false}))}>{tr('agents:deny')}</Button>
           </div>)}
       </section>}
       <AgentGrants />

@@ -69,3 +69,18 @@ it.each(['pairing', 'proposal'])('mounts global %s consent on Home with Settings
   expect(document.querySelector('[data-testid=agents-settings]')).toBeNull();
   expect(document.querySelector('[role=dialog]')?.textContent).toContain(tr(kind === 'pairing' ? 'agents:pair_title' : 'agents:proposal_title'));
 });
+
+it('keeps consent open when Settings closes underneath it', async () => {
+  vi.useFakeTimers();
+  await act(() => root.render(<App/>));
+  await act(() => window.dispatchEvent(new CustomEvent('vstudy:open-settings',{detail:{tab:'agents'}})));
+  try {
+    state={...state,pairings:[pairingFixture()]};
+    await act(()=>vi.advanceTimersByTimeAsync(1100));
+    expect(document.querySelector('[data-testid=agent-consent]')).not.toBeNull();
+    await click(tr('common:close_settings'));
+    expect(document.querySelector('[data-testid=agents-settings]')).toBeNull();
+    expect(document.querySelector('[data-testid=agent-consent]')).not.toBeNull();
+    expect(invoke.mock.calls.filter(([c])=>c==='mcp:pair-decision')).toHaveLength(0);
+  } finally {vi.useRealTimers();}
+});

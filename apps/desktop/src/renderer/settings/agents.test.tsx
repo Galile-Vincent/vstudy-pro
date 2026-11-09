@@ -144,3 +144,12 @@ it('announces successful revocation inline', async () => {
   await mount(); await click('Revoke access');
   expect(view.host.querySelector('[role=status]')?.textContent).toContain('Access revoked');
 });
+
+it('allows a failed pairing denial to be retried and reports the error', async () => {
+  state.enabled=true;state.pairings=[pairingFixture()];await mount();
+  invoke.mockRejectedValueOnce(new Error('private failure'));
+  await click('Deny');
+  expect(view.host.textContent).toContain(tr('agents:action_error'));
+  await click('Deny');
+  expect(invoke.mock.calls.filter(([c])=>c==='mcp:pair-decision')).toHaveLength(2);
+});
