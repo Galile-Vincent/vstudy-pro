@@ -86,3 +86,14 @@ it('sends explicit branch context once the final earlier page is loaded',async()
   fireEvent.click(screen.getByRole('button',{name:'Send'}));
   await waitFor(()=>expect(bridge.invoke).toHaveBeenCalledWith('chat:start',expect.objectContaining({contextTurnIds:['old-question','recent-question']})));
 });
+
+it('moves focus to the first newly loaded message when the final page removes the button', async () => {
+  await i18n.changeLanguage('en');
+  bridge.invoke.mockResolvedValue({items: [message('old-first'), message('old-second')], nextCursor: null});
+  mount([message('recent')], {id: 'recent', createdAt: '2026-11-02T00:00:00Z'});
+  const button = screen.getByRole('button', {name: tr('common:load_earlier_messages')});
+  button.focus();
+  fireEvent.click(button);
+  await waitFor(() => expect(document.activeElement?.getAttribute('data-message-id')).toBe('old-first'));
+  expect(screen.queryByRole('button', {name: tr('common:load_earlier_messages')})).toBeNull();
+});
