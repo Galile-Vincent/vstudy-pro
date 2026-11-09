@@ -323,7 +323,7 @@ export function LibraryView() {
   }) : '';
   const focusAfter = useRef<string | null>(null);
   const [activeRow, setActiveRow] = useState<string>();
-  const tabRow = shown.some(item => item.document.id === activeRow) ? activeRow : shown[0]?.document.id;
+  const keyboardFocus = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (!loading && focusAfter.current) {
       const target = document.getElementById(focusAfter.current);
@@ -514,6 +514,23 @@ export function LibraryView() {
         Math.ceil((scroller.current?.clientHeight ?? 800) / rowHeight + 5) *
           columns,
     );
+  const visibleIndices = Array.from(
+    {length: flowing ? shown.length : end - start},
+    (_, offset) => (flowing ? 0 : start) + offset,
+  );
+  const activeIndex = shown.findIndex(item => item.document.id === activeRow);
+  const tabRow = visibleIndices.includes(activeIndex) ? activeRow
+    : visibleIndices.map(index => shown[index]!).find(item => selected.includes(item.document.id))?.document.id
+      ?? shown[visibleIndices[0] ?? 0]?.document.id;
+  const renderedIndices = activeIndex >= 0 && !visibleIndices.includes(activeIndex)
+    ? [...visibleIndices, activeIndex].sort((a, b) => a - b) : visibleIndices;
+  useLayoutEffect(() => {
+    if (!keyboardFocus.current) return;
+    const target = document.getElementById(`library-document-${keyboardFocus.current}`);
+    target?.focus({preventScroll:true});
+    if (flowing) target?.scrollIntoView?.({block:"nearest"});
+    keyboardFocus.current = null;
+  }, [activeRow, start, end, flowing]);
   useLayoutEffect(()=>{
     const viewport=scroller.current;
     if(!viewport||!selected.length||!bulkHeight)return;
@@ -885,9 +902,9 @@ export function LibraryView() {
               position: "relative",
             }}
           >
-            {shown.slice(flowing ? 0 : start, flowing ? undefined : end).map((item, offset) => {
-              const d = item.document,
-                index = (flowing ? 0 : start) + offset;
+            {renderedIndices.map(index => {
+              const item = shown[index]!;
+              const d = item.document;
               return (
                 <div
                   key={d.id}
@@ -974,9 +991,10 @@ export function LibraryView() {
                   onKeyDown={(e) => {
                     if (e.target !== e.currentTarget) return;
                     const sideways = grid && ["ArrowLeft", "ArrowRight"].includes(e.key);
-                    const step = sideways ? 1 : grid ? columns : 1;
+                    const page = Math.max(1, Math.floor((scroller.current?.clientHeight ?? 0) / rowHeight));
+                    const step = e.key.startsWith("Page") ? page * columns : sideways ? 1 : grid ? columns : 1;
                     if (
-                      (["ArrowUp", "ArrowDown", "Home", "End"].includes(e.key) || sideways) &&
+                      (["ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"].includes(e.key) || sideways) &&
                       !e.altKey &&
                       !e.metaKey &&
                       !e.ctrlKey
@@ -991,22 +1009,20 @@ export function LibraryView() {
                                 0,
                                 Math.min(
                                   shown.length - 1,
-                                  index + (e.key === "ArrowUp" || e.key === "ArrowLeft" ? -step : step),
+                                  index + (["ArrowUp", "ArrowLeft", "PageUp"].includes(e.key) ? -step : step),
                                 ),
                               );
                       if (e.shiftKey) setSelected(selectedRange(shown, anchor.current ?? d.id, shown[next]!.document.id));
                       if (!anchor.current) anchor.current = d.id;
-                      if (scroller.current) {
-                        scroller.current.scrollTop =
-                          Math.floor(next / columns) * rowHeight;
+                      keyboardFocus.current = shown[next]!.document.id;
+                      setActiveRow(shown[next]!.document.id);
+                      if (!flowing && scroller.current) {
+                        scroller.current.scrollTop = Math.floor(next / columns) * rowHeight;
                         setTop(scroller.current.scrollTop);
-                        requestAnimationFrame(() =>
-                          scroller.current
-                            ?.querySelector<HTMLElement>(
-                              `[data-index="${next}"]`,
-                            )
-                            ?.focus(),
-                        );
+                      }
+                      if (next === index) {
+                        e.currentTarget.focus();
+                        keyboardFocus.current = null;
                       }
                       return;
                     }

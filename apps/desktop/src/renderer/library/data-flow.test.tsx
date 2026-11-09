@@ -202,3 +202,27 @@ it('retains existing selections across conversion polls and removes departed IDs
  expect(document.querySelectorAll('[data-selected=true]')).toHaveLength(1);
  expect(screen.getByText('selected').closest('.library-document')?.getAttribute('data-selected')).toBe('true');
 });
+
+
+it('keeps keyboard focus mounted and a rendered entry point after scrolling', async () => {
+ state.invoke.mockImplementation(async c => c === 'library:documents:list'
+  ? {items: Array.from({length:200}, (_, i) => row('doc' + i)), nextCursor:null} : []);
+ const {container} = mount(); await screen.findByText('doc0');
+ const first = container.querySelector<HTMLElement>('[data-index="0"]')!;
+ act(() => first.focus());
+ const viewport = container.querySelector('.library-results')!;
+ fireEvent.scroll(viewport, {target:{scrollTop:6400}});
+ expect(document.activeElement).toBe(first);
+ expect(first.isConnected).toBe(true);
+ expect(container.querySelectorAll('.library-document[tabindex="0"]')).toHaveLength(1);
+});
+
+it.each([['End',199], ['Home',0], ['PageDown',1], ['PageUp',0]] as const)(
+ 'scrolls and focuses the %s keyboard target', async (key, index) => {
+ state.invoke.mockImplementation(async c => c === 'library:documents:list'
+  ? {items: Array.from({length:200}, (_, i) => row('doc' + i)), nextCursor:null} : []);
+ const {container} = mount(); await screen.findByText('doc0');
+ const first = container.querySelector<HTMLElement>('[data-index="0"]')!;
+ act(() => first.focus()); fireEvent.keyDown(first, {key});
+ await waitFor(() => expect(document.activeElement?.getAttribute('data-index')).toBe(String(index)));
+});
