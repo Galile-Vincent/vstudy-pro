@@ -5,6 +5,7 @@ import { cliInstallSources, manualInstallCommand } from '../../shared/ai-cli-man
 import { desktopPlatform } from '../../shared/platform';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
+import { Toolbar } from '../components/ui';
 import { Button } from '../components/ui/button';
 import type { CliDetection } from './model';
 
@@ -54,10 +55,10 @@ export function ManualInstall({ provider, required = false, busy = false, onChec
         <li>{tr('ai-cli:manual_step_return')}</li>
       </ol>
       <pre className="ai-cli-output"><code>{command}</code></pre>
-      <div className="ai-cli-actions">
+      <Toolbar left={<>
         <Button variant="secondary" data-manual-copy disabled={busy || pending} onClick={() => void navigator.clipboard.writeText(command).then(() => { setCopied(true); setError(undefined); }).catch(() => setError('copy'))}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_command')}</Button>
         <Button variant="secondary" data-manual-terminal disabled={busy || pending} onClick={() => void act(true)}>{tr(windows ? 'ai-cli:open_terminal_windows' : 'ai-cli:open_terminal')}</Button>
-      </div>
+      </>} />
       <Button className="ai-cli-manual-check" data-manual-check disabled={busy || pending} onClick={() => void act(false)}>{tr(pending ? 'ai-cli:manual_working' : 'ai-cli:check_again')}</Button>
     </> : <p>{tr('ai-cli:failure_unsupported')}</p>}
     {error && <p role="alert">{tr(error === 'copy' ? 'ai-cli:copy_error' : 'ai-cli:manual_terminal_error')}</p>}
