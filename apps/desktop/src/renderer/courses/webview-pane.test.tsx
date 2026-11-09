@@ -95,3 +95,27 @@ it('never overlays a completed-file card on a Moodle page',async()=>{
  await screen.findByText('Course');expect(screen.queryByRole('button',{name:'Open document'})).toBeNull();
  }finally{cleanup();}
 });
+
+it.each([
+  ['connecting', null], ['loading', null], ['error', 'offline'],
+  ['error', 'session-expired'], ['error', 'unavailable'], ['error', 'blocked'],
+])('keeps one main and a coherent heading tree in %s / %s', async (status, error) => {
+  const { render, screen, cleanup } = await import('@testing-library/react');
+  invoke.mockResolvedValue({ id: 'state-pane', generation: 1, status, error,
+    url: 'https://school.example/', title: 'Course', secure: true, zoom: 1,
+    canGoBack: false, canGoForward: false });
+  try {
+    render(<MoodleWebviewPane tabId="11111111-1111-4111-a111-111111111111"
+      accountId="school" target={{ kind: 'page', url: 'https://school.example/' }}
+      onClose={() => {}} onDocument={() => {}} onReconnect={() => {}} />);
+    await screen.findByRole('heading', { name: 'Course', level: 1 });
+    expect(screen.getAllByRole('main')).toHaveLength(1);
+    expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
+    if (error) {
+      expect(screen.getByRole('heading', { level: 2 }).closest('[role=alert]')).toBeTruthy();
+    } else {
+      expect(screen.getByRole('progressbar')).toBeTruthy();
+      expect(screen.queryByRole('heading', { level: 2 })).toBeNull();
+    }
+  } finally { cleanup(); }
+});

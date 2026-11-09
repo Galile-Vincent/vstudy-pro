@@ -34,7 +34,9 @@ it('shows a checked site before asking for a password and clears form secrets on
   const {connect,connected,closed} = await mount();
   expect(document.querySelector('input[type=password]')).toBeNull();
   await click('Chung Yuan');
-  expect(document.querySelector('.moodle-site-result [class*=font-medium]')?.textContent).toBe('Example University');
+  const { getByRole, getByText } = await import('@testing-library/react');
+  const result = getByRole(document.body, 'status', { name: '' });
+  expect(getByText(result, 'Example University')).toBeTruthy();
   expect(document.querySelector('.moodle-site-result')?.textContent).toContain('school.example/moodle');
   expect(document.querySelector('[aria-current=step]')?.textContent).toBe('2Check site');
   expect(document.querySelector('input[type=password]')).toBeNull();

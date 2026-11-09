@@ -442,7 +442,10 @@ describe("Courses", () => {
       "agent",
     );
     expect(host.textContent).toContain("Action completed.");
-    expect(document.activeElement?.getAttribute("aria-label")).toBe("Course assistant");
+    const { getByRole } = await import("@testing-library/react");
+    expect(document.activeElement?.querySelector("h2")).toBe(
+      getByRole(host, "heading", { name: "Course assistant", level: 2 }),
+    );
   });
 });
 
