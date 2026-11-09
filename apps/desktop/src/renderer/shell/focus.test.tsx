@@ -18,7 +18,7 @@ beforeEach(()=>{
   host=document.createElement('div');document.body.append(host);root=createRoot(host);
 });
 afterEach(async()=>{await act(async()=>root.unmount());host.remove();vi.useRealTimers();vi.unstubAllGlobals();});
-function Routes(){const {navigate,closeWelcome,route}=useNavigate();return <><p>{route.view}</p><button id="welcome-entry" onClick={()=>navigate('welcome')}>Welcome</button><button id="close-welcome" onClick={closeWelcome}>Close</button><button id="other" onClick={()=>navigate('library')}>Other route</button><button id="chosen">My focus</button></>;}
+function Routes(){const {navigate,closeWelcome,route,closeTab,openTab}=useNavigate();return <><p>{route.view}</p><button id="welcome-entry" onClick={()=>navigate('welcome')}>Welcome</button><button id="close-welcome" onClick={closeWelcome}>Close</button><button id="other" onClick={()=>navigate('library')}>Other route</button><button id="open-test-tab" onClick={()=>openTab("home")}>New</button><button id="noop-close" onClick={()=>closeTab("missing")}>No-op</button><button id="chosen">My focus</button></>;}
 async function mount(){await act(async()=>root.render(<AppShell><Routes/></AppShell>));await act(async()=>vi.advanceTimersByTime(20));}
 async function click(id:string){await act(async()=>{const button=host.querySelector<HTMLButtonElement>('#'+id)!;button.focus();button.click();});}
 it('cancels Welcome return focus when a newer navigation occurs',async()=>{
@@ -75,4 +75,88 @@ it('badges the sidebar brand while keeping the profile fallback unbadged', async
   expect(host.querySelector('.shell-brand .sr-only')?.textContent?.trim()).toBe('beta');
   expect(host.querySelector('.art-reader-avatar .vstudy-brand')).not.toBeNull();
   expect(host.querySelector('.art-reader-avatar .beta-badge')).toBeNull();
+});
+
+import { createTab, saveTabs } from './tab-state';
+it.each(['home', 'library', 'last'] as const)('focuses the surviving target after closing into %s', async view => {
+  const first = createTab('00000000-0000-4000-8000-000000000001', { view: view === 'last' ? 'home' : view }, 1);
+  const closing = createTab('00000000-0000-4000-8000-000000000002', { view: 'home' }, 2);
+  saveTabs(localStorage, { version: 1, activeId: closing.id, tabs: view === 'last' ? [closing] : [first, createTab('00000000-0000-4000-8000-000000000003', { view }, 0), closing] });
+  await mount();
+  await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', ctrlKey: true, bubbles: true })));
+  await act(async () => vi.advanceTimersByTime(20));
+  expect(document.activeElement?.id).toEqual(view === 'last' ? 'shell-content' : 'tab-00000000-0000-4000-8000-000000000003');
+});
+
+it('leaves a docked sidebar and its focused input alone on Escape', async () => {
+  await mount();
+  const input = document.createElement('input');
+  host.querySelector('.shell-sidebar')!.append(input);
+  input.focus();
+  await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })));
+  expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(false);
+  expect(document.activeElement).toBe(input);
+});
+
+it.each([700, 900, 1280])('shares shortcut and toggle state at %ipx', async width => {
+  vi.stubGlobal('innerWidth', width);
+  vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('767') ? width < 768 : width < 1200, addEventListener() {}, removeEventListener() {} }));
+  await mount();
+  const toggle = host.querySelector<HTMLButtonElement>('.shell-toggle')!;
+  const initial = toggle.getAttribute('aria-expanded');
+  await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', ctrlKey: true, cancelable: true })));
+  expect(toggle.getAttribute('aria-expanded')).not.toBe(initial);
+  expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(toggle.getAttribute('aria-expanded') === 'false');
+  await act(async () => toggle.click());
+  expect(toggle.getAttribute('aria-expanded')).toBe(initial);
+});
+
+it('anchors overlays below the tabs and restores a visible workspace toggle', async () => {
+  const style = document.createElement('style');
+  style.textContent = '.shell-sidebar { position:absolute; }';
+  document.head.append(style);
+  const rects = vi.spyOn(HTMLElement.prototype, 'getClientRects').mockImplementation(function (this: HTMLElement) {
+    return (this.classList.contains('shell-toggle') ? [] : [{}]) as unknown as DOMRectList;
+  });
+  const bounds = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+    return { bottom: this.classList.contains('app-tabs') ? 49 : 0 } as DOMRect;
+  });
+  try {
+    await mount();
+    const toggle = host.querySelector<HTMLButtonElement>('.shell-toggle')!;
+    const header = document.createElement('header');
+    header.className = 'app-header';
+    const workspace = document.createElement('div');
+    workspace.className = 'workspace';
+    const visibleToggle = document.createElement('button');
+    visibleToggle.setAttribute('aria-label', toggle.getAttribute('aria-label')!);
+    header.append(visibleToggle); workspace.append(header); host.append(workspace);
+    await act(async () => toggle.click());
+    expect(host.querySelector<HTMLElement>('.shell-sidebar')!.style.getPropertyValue('--sidebar-overlay-top')).toBe('49px');
+    host.querySelector<HTMLButtonElement>('.shell-sidebar button')!.focus();
+    await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })));
+    expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(true);
+    expect(document.activeElement).toBe(visibleToggle);
+  } finally { style.remove(); rects.mockRestore(); bounds.mockRestore(); }
+});
+
+it('focuses the active tab after closing an inactive tab with its close button', async () => {
+  const tabs = [1, 2, 3].map(index => createTab(
+    `00000000-0000-4000-8000-00000000000${index}`, { view: 'home' }, index,
+  ));
+  saveTabs(localStorage, { version: 1, activeId: tabs[0]!.id, tabs });
+  await mount();
+  const close = host.querySelectorAll<HTMLButtonElement>('.app-tab-close')[1]!;
+  await act(async () => { close.focus(); close.click(); });
+  expect(host.querySelectorAll('[role=tab]')).toHaveLength(2);
+  expect(document.activeElement?.id).toBe(`tab-${tabs[0]!.id}`);
+});
+
+it('does not carry no-op close focus into the next new tab', async () => {
+  await mount(); await click('noop-close');
+  const chosen = host.querySelector<HTMLButtonElement>('#chosen')!;
+  chosen.focus();
+  await act(() => host.querySelector<HTMLButtonElement>('#open-test-tab')!.click());
+  expect(host.querySelectorAll('[role=tab]')).toHaveLength(2);
+  expect(document.activeElement).toBe(chosen);
 });

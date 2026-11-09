@@ -148,7 +148,7 @@
   },
   "shell/tab-strip.css": {
     "shadow": 0,
-    "radius": 3,
+    "radius": 1,
     "color": 0,
     "backdrop": 0,
     "surface-class": 0

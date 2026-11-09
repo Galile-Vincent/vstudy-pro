@@ -13,7 +13,7 @@ import { HelpMenu } from "../onboarding/help";
 import { useSidebarOverlay } from './use-sidebar-overlay';
 import { applyAppearance } from '../settings/apply-appearance';
 import { Button } from '../components/ui/button';
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup } from '../components/ui/sidebar';
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel } from '../components/ui/sidebar';
 import { transitionTo } from "./view-transition";
 import { desktop } from "../bridge";
 import { applyLanguage } from "../i18n";
@@ -66,7 +66,7 @@ export function AppShell({
     return () => window.removeEventListener('vstudy:toggle-sidebar', toggle);
   }, []);
   const closeSidebar = useCallback(() => setSidebarVisible(false), []);
-  const sidebarOverlay = useSidebarOverlay(closeSidebar);
+  const sidebarOverlay = useSidebarOverlay(closeSidebar, sidebarVisible);
   useEffect(() => {
     const pointer=()=>{document.documentElement.dataset.inputModality='pointer';};
     const keyboard=(event:KeyboardEvent)=>{if(['Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))document.documentElement.dataset.inputModality='keyboard';};
@@ -125,7 +125,19 @@ export function AppShell({
     return true;
   };
   const activateTab = (id: string) => { capture(); setTransientRoute({}); dispatch({ type: 'activate', id, now: Date.now() }); };
-  const closeTab = (id: string) => { capture(); setTransientRoute({}); dispatch({ type: 'close', id, fallback: createTab(crypto.randomUUID(), { view: 'home' }, Date.now()) }); };
+  const focusAfterClose = useRef(false);
+  const closeTab = (id: string) => {
+    if (!tabsRef.current.tabs.some(tab => tab.id === id)) return;
+    focusAfterClose.current = true;
+    capture();
+    setTransientRoute({});
+    dispatch({ type: 'close', id, fallback: createTab(crypto.randomUUID(), { view: 'home' }, Date.now()) });
+  };
+  useLayoutEffect(() => {
+    if (!focusAfterClose.current) return;
+    focusAfterClose.current = false;
+    (document.getElementById(`tab-${tabs.activeId}`) ?? document.getElementById('shell-content'))?.focus();
+  }, [tabs.activeId, tabs.tabs.length]);
   const reorderTabs = (ids: string[]) => dispatch({ type: 'reorder', ids });
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1199px)');
@@ -194,93 +206,306 @@ export function AppShell({
     }, 0);
   }, [route.view]);
   return (
-    <NavigationContext.Provider value={{ recordMoodleImport:(id,documentId,expectedRoute)=>{const tab=tabsRef.current.tabs.find(tab=>tab.id===id);const current=tab?.history.entries[tab.history.index];if(current?.view!=='moodle' || current.accountId!==expectedRoute.accountId || JSON.stringify(current.target)!==JSON.stringify(expectedRoute.target))return false;if(current.target?.kind==='file')dispatch({type:'imported',id,documentId});return saveTabs(localStorage,tabsRef.current);}, updateNativePresentation:(id,presentation,title,expectedRoute)=>{const tab=tabsRef.current.tabs.find(tab=>tab.id===id);const current=tab?.history.entries[tab.history.index];if(expectedRoute && (current?.view!==expectedRoute.view || current.documentId!==expectedRoute.documentId))return;if(!tab)return;const next=mergeTabPresentation(tab.presentation,presentation);if(JSON.stringify(tab.presentation)!==JSON.stringify(next) || (title!==undefined && title!==tab.title))dispatch({type:'presentation',id,presentation:next,...(title ? {title} : {})});}, tabs, activeTabId: tabs.activeId, openTab, activateTab, closeTab, reorderTabs, route, navigate, canGoBack: canMoveHistory(history, 'back'), canGoForward: canMoveHistory(history, 'forward'), goBack: () => goHistory('back'), goForward: () => goHistory('forward'), closeWelcome }}>
-      <SidebarProvider open={sidebarVisible} onOpenChange={setSidebarVisible}><div className="app-shell" data-view={route.view} data-sidebar-overlay={sidebarOverlay}>
-        <a className="skip-link" href="#shell-content">
-          {tr("common:skip_content")}
-        </a>
-        <Sidebar role="complementary" collapsible="none"
-          hidden={!sidebarVisible}
-          className="shell-sidebar"
-          aria-label={tr("common:document_library")}
-        >
-          <SidebarHeader className="shell-brand"><span className="art-reader-brand-mark" aria-hidden="true"><Brand beta/></span><span>{tr("library:brand")}<span className="sr-only"> {tr("library:beta")}</span></span></SidebarHeader><SidebarContent>
-          <SidebarGroup><p className="art-reader-sidebar-label">{tr("art-reader:workspace")}</p><SidebarMenu>
-            <SidebarMenuItem><SidebarMenuButton
-              aria-current={route.view === "home" ? "page" : undefined}
-              onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("home")}
+    <NavigationContext.Provider
+  value={{
+    recordMoodleImport: (id, documentId, expectedRoute) => {
+      const tab = tabsRef.current.tabs.find((tab) => tab.id === id);
+      const current = tab?.history.entries[tab.history.index];
+      if (
+        current?.view !== 'moodle' ||
+        current.accountId !== expectedRoute.accountId ||
+        JSON.stringify(current.target) !== JSON.stringify(expectedRoute.target)
+      )
+        return false;
+      if (current.target?.kind === 'file') dispatch({ type: 'imported', id, documentId });
+      return saveTabs(localStorage, tabsRef.current);
+    },
+    updateNativePresentation: (id, presentation, title, expectedRoute) => {
+      const tab = tabsRef.current.tabs.find((tab) => tab.id === id);
+      const current = tab?.history.entries[tab.history.index];
+      if (
+        expectedRoute &&
+        (current?.view !== expectedRoute.view ||
+          current.documentId !== expectedRoute.documentId)
+      )
+        return;
+      if (!tab) return;
+      const next = mergeTabPresentation(tab.presentation, presentation);
+      if (
+        JSON.stringify(tab.presentation) !== JSON.stringify(next) ||
+        (title !== undefined && title !== tab.title)
+      )
+        dispatch({
+          type: 'presentation',
+          id,
+          presentation: next,
+          ...(title ? { title } : {}),
+        });
+    },
+    tabs,
+    activeTabId: tabs.activeId,
+    openTab,
+    activateTab,
+    closeTab,
+    reorderTabs,
+    route,
+    navigate,
+    canGoBack: canMoveHistory(history, 'back'),
+    canGoForward: canMoveHistory(history, 'forward'),
+    goBack: () => goHistory('back'),
+    goForward: () => goHistory('forward'),
+    closeWelcome,
+  }}
+>
+  <SidebarProvider
+    mobileSheet={false}
+    open={sidebarVisible}
+    onOpenChange={setSidebarVisible}
+  >
+    <div
+      className="app-shell"
+      data-view={route.view}
+      data-sidebar-overlay={sidebarOverlay}
+    >
+      <a
+        className="skip-link"
+        href="#shell-content"
+      >
+        {tr('common:skip_content')}
+      </a>
+      <Sidebar
+        role="complementary"
+        collapsible="none"
+        hidden={!sidebarVisible}
+        className="shell-sidebar"
+        aria-label={tr('common:document_library')}
+      >
+        <SidebarHeader className="shell-brand">
+          <span
+            className="art-reader-brand-mark"
+            aria-hidden="true"
+          >
+            <Brand beta />
+          </span>
+          <span>
+            {tr('library:brand')}
+            <span className="sr-only"> {tr('library:beta')}</span>
+          </span>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>{tr('art-reader:workspace')}</SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={route.view === 'home'}
+                  aria-current={route.view === 'home' ? 'page' : undefined}
+                  onClick={(event) =>
+                    (event.metaKey || event.ctrlKey ? openTab : navigate)('home')
+                  }
+                >
+                  <Home />
+                  {tr('library:home')}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={route.view === 'ai-chats'}
+                  aria-current={route.view === 'ai-chats' ? 'page' : undefined}
+                  onClick={(event) =>
+                    (event.metaKey || event.ctrlKey ? openTab : navigate)('ai-chats')
+                  }
+                >
+                  <HistoryIcon />
+                  {tr('web-chat:title')}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  data-parent={!!route.query?.folderId}
+                  isActive={route.view === 'library' || route.view === 'workspace'}
+                  aria-current={
+                    route.view === 'library' || route.view === 'workspace'
+                      ? 'page'
+                      : undefined
+                  }
+                  onClick={(event) =>
+                    (event.metaKey || event.ctrlKey ? openTab : navigate)('library')
+                  }
+                >
+                  <BookOpen />
+                  {tr('common:library')}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={route.view === 'courses'}
+                  aria-current={route.view === 'courses' ? 'page' : undefined}
+                  onClick={(event) =>
+                    (event.metaKey || event.ctrlKey ? openTab : navigate)('courses')
+                  }
+                >
+                  <GraduationCap />
+                  {tr('moodle:courses')}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={route.view === 'exams'}
+                  aria-current={route.view === 'exams' ? 'page' : undefined}
+                  onClick={(event) =>
+                    (event.metaKey || event.ctrlKey ? openTab : navigate)('exams')
+                  }
+                >
+                  <ClipboardCheck />
+                  {tr('exams:title')}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={route.view === 'review'}
+                  aria-current={route.view === 'review' ? 'page' : undefined}
+                  onClick={(event) =>
+                    (event.metaKey || event.ctrlKey ? openTab : navigate)('review')
+                  }
+                >
+                  <BookOpen />
+                  {tr('review:title')}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  isActive={route.view === 'history'}
+                  aria-current={route.view === 'history' ? 'page' : undefined}
+                  onClick={(event) =>
+                    (event.metaKey || event.ctrlKey ? openTab : navigate)('history')
+                  }
+                >
+                  <HistoryIcon />
+                  {tr('history:title')}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroup>
+          {sidebar}
+        </SidebarContent>
+        <SidebarFooter>
+          <SubscriptionMeters compact />
+          <div className="art-reader-profile">
+            <span
+              className="art-reader-avatar"
+              aria-hidden="true"
             >
-              <Home />
-              {tr("library:home")}
-            </SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "ai-chats" ? "page" : undefined} onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("ai-chats")}><HistoryIcon/>{tr("web-chat:title")}</SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton
-              data-parent={!!route.query?.folderId}
-              aria-current={route.view === "library" || route.view === "workspace" ? "page" : undefined}
-              onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("library")}
+              {displayName ? Array.from(displayName)[0]?.toLocaleUpperCase() : <Brand />}
+            </span>
+            <span>
+              <strong>{displayName || tr('library:brand')}</strong>
+              <small>{tr('art-reader:local')}</small>
+            </span>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={tr('common:settings')}
+              title={tr('common:settings')}
+              onClick={() => window.dispatchEvent(new Event('vstudy:open-settings'))}
             >
-              <BookOpen />
-              {tr("common:library")}
-            </SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "courses" ? "page" : undefined} onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("courses")}><GraduationCap />{tr("moodle:courses")}</SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "exams" ? "page" : undefined} onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("exams")}><ClipboardCheck/>{tr("exams:title")}</SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "review" ? "page" : undefined} onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("review")}><BookOpen/>{tr("review:title")}</SidebarMenuButton></SidebarMenuItem>
-            <SidebarMenuItem><SidebarMenuButton aria-current={route.view === "history" ? "page" : undefined} onClick={(event) => (event.metaKey || event.ctrlKey ? openTab : navigate)("history")}><HistoryIcon/>{tr("history:title")}</SidebarMenuButton></SidebarMenuItem>
-          </SidebarMenu></SidebarGroup>
-          {sidebar}</SidebarContent><SidebarFooter><SubscriptionMeters compact /><div className="art-reader-profile"><span className="art-reader-avatar" aria-hidden="true">{displayName ? Array.from(displayName)[0]?.toLocaleUpperCase() : <Brand/>}</span><span><strong>{displayName || tr("library:brand")}</strong><small>{tr("art-reader:local")}</small></span><Button variant="ghost" size="icon" aria-label={tr("common:settings")} title={tr("common:settings")} onClick={() => window.dispatchEvent(new Event("vstudy:open-settings"))}><Settings aria-hidden="true"/></Button></div></SidebarFooter>
-        </Sidebar>
-        <div className="shell-main">
-          <TabStrip />
-          <header className="shell-topbar">
-            <Button variant="ghost"
-              className="shell-toggle"
-              aria-label={tr("common:toggle_document_library")}
-              aria-expanded={sidebarVisible}
-              onClick={() => setSidebarVisible((v) => !v)}
-            >
-              <Menu />
+              <Settings aria-hidden="true" />
             </Button>
-            {route.view === "workspace" ? (
-              <Button variant="ghost"
-                onClick={() =>
-                  navigate({
-                    view: "library",
-                    query: route.query,
-                    title: route.title,
-                  })
-                }
-              >
-                <ArrowLeft />
-                {route.title ?? tr("common:library")}
-              </Button>
-            ) : (
-              <span>
-                {route.view === "home"
-                  ? tr("library:home")
-                  : route.view === "hosted-chat" && route.provider ? tr(`web-chat:${route.provider}`) : route.view === "ai-chats" ? tr("web-chat:title") : route.view === "exams" ? tr("exams:title") : route.view === "review" ? tr("review:title") : route.view === "history" ? tr("history:title") : route.view === "moodle" ? tr("webview:title") : route.view === "courses" ? tr("moodle:courses") : route.view === "welcome" ? tr("welcome:page_title") : tr("common:library")}
-              </span>
-            )}
-            {route.view !== 'workspace' && status}
-            <HelpMenu />
-            <Button variant="ghost" className="shell-history-trigger" aria-label={tr('history:find')} title={tr('history:find') + ' (' + tr('history:shortcut') + ')'} onClick={() => window.dispatchEvent(new Event('vstudy:find-history'))}><Search size={16}/><span>{tr('history:find')}</span><kbd>{tr('history:shortcut')}</kbd></Button>
-          </header>
-          {route.view === 'workspace' && <div className="shell-workspace-status">{status}</div>}
-          <div id="shell-content" role={route.view === "library" ? "main" : undefined} className="shell-content" tabIndex={-1}>
-            {children}
-            <HistorySwipeNavigation canGoBack={canMoveHistory(history, "back")} canGoForward={canMoveHistory(history, "forward")} onNavigate={goHistory} />
           </div>
+        </SidebarFooter>
+      </Sidebar>
+      <div className="shell-main">
+        <TabStrip />
+        <header className="shell-topbar">
+          <Button
+            variant="ghost"
+            className="shell-toggle"
+            aria-label={tr('common:toggle_document_library')}
+            aria-expanded={sidebarVisible}
+            onClick={() => setSidebarVisible((v) => !v)}
+          >
+            <Menu />
+          </Button>
+          {route.view === 'workspace' ? (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                navigate({
+                  view: 'library',
+                  query: route.query,
+                  title: route.title,
+                })
+              }
+            >
+              <ArrowLeft />
+              {route.title ?? tr('common:library')}
+            </Button>
+          ) : (
+            <span>
+              {route.view === 'home'
+                ? tr('library:home')
+                : route.view === 'hosted-chat' && route.provider
+                  ? tr(`web-chat:${route.provider}`)
+                  : route.view === 'ai-chats'
+                    ? tr('web-chat:title')
+                    : route.view === 'exams'
+                      ? tr('exams:title')
+                      : route.view === 'review'
+                        ? tr('review:title')
+                        : route.view === 'history'
+                          ? tr('history:title')
+                          : route.view === 'moodle'
+                            ? tr('webview:title')
+                            : route.view === 'courses'
+                              ? tr('moodle:courses')
+                              : route.view === 'welcome'
+                                ? tr('welcome:page_title')
+                                : tr('common:library')}
+            </span>
+          )}
+          {route.view !== 'workspace' && status}
+          <HelpMenu />
+          <Button
+            variant="ghost"
+            className="shell-history-trigger"
+            aria-label={tr('history:find')}
+            title={tr('history:find') + ' (' + tr('history:shortcut') + ')'}
+            onClick={() => window.dispatchEvent(new Event('vstudy:find-history'))}
+          >
+            <Search size={16} />
+            <span>{tr('history:find')}</span>
+            <kbd>{tr('history:shortcut')}</kbd>
+          </Button>
+        </header>
+        {route.view === 'workspace' && (
+          <div className="shell-workspace-status">{status}</div>
+        )}
+        <div
+          id="shell-content"
+          role={route.view === 'library' ? 'main' : undefined}
+          className="shell-content"
+          tabIndex={-1}
+        >
+          {children}
+          <HistorySwipeNavigation
+            canGoBack={canMoveHistory(history, 'back')}
+            canGoForward={canMoveHistory(history, 'forward')}
+            onNavigate={goHistory}
+          />
         </div>
-      </div></SidebarProvider>
-    </NavigationContext.Provider>
+      </div>
+    </div>
+  </SidebarProvider>
+</NavigationContext.Provider>
   );
 }
 export function HomePlaceholder() {
   useTranslation();
   return (
     <div className="empty">
-      <Home aria-hidden="true" />
-      <h1>{tr("library:home")}</h1>
-      <p>{tr("library:homePlaceholder")}</p>
-    </div>
+  <Home aria-hidden="true" />
+  <h1>{tr('library:home')}</h1>
+  <p>{tr('library:homePlaceholder')}</p>
+</div>
   );
 }

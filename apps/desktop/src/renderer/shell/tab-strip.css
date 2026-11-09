@@ -1,15 +1,12 @@
 .app-tabs { position:relative; display:flex; align-items:center; gap:4px; padding:6px 12px; min-width:0; flex-shrink:0; border-bottom:1px solid var(--border); background:var(--surface); }
-.app-tabs-scroll { display:flex; flex:1; min-width:0; overflow-x:auto; gap:4px; mask-image:linear-gradient(to right,transparent,var(--foreground) 8px,var(--foreground) calc(100% - 8px),transparent); padding-inline:8px; }
+.app-tabs-scroll { display:flex; flex:1; min-width:0; overflow-x:auto; gap:4px; padding-inline:8px; }
 .app-tab { flex:1 0 120px; max-width:220px; display:flex; align-items:center; min-width:120px; border-radius:6px; color:var(--muted); }
-.app-tab[data-active=true] { background:color-mix(in oklab,var(--ink) 6%,var(--surface)); color:var(--foreground); box-shadow:none; font-weight:500; }
-.app-tabs button { cursor:pointer; border:0; background:transparent; color:inherit; border-radius:5px; padding:8px; }
+.app-tab[data-active=true] { flex-basis:200px; min-width:200px; background:color-mix(in oklab,var(--ink) 6%,var(--surface)); color:var(--foreground); box-shadow:none; font-weight:500; }
 .app-tab [role=tab] { display:flex; align-items:center; gap:6px; min-width:0; flex:1; text-align:start; }
 .app-tab [role=tab] span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .app-tab svg { flex-shrink:0; }
-.app-tabs button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
 .app-tabs-menu { display:flex; flex-direction:column; gap:4px; max-height:400px; overflow:auto; }
-.app-tabs-menu button { text-align:start; padding:8px; border-radius:5px; }
-.app-tabs-menu button:hover { background:var(--surface); }
+.app-tabs-menu button { justify-content:flex-start; }
 .app-tabs-single { position:absolute; top:16px; right:12px; z-index:7; border:0; padding:0; }
 .app-shell[data-view=workspace] .app-tabs-single { position:relative; top:auto; right:auto; justify-content:flex-end; }
 .app-shell .shell-main .shell-topbar { padding-inline-end:56px; }
