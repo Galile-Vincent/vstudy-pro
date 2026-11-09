@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { act } from "react";
-import { getByRole } from "@testing-library/dom";
+import { act, useState } from "react";
+import { getByRole, waitFor } from "@testing-library/dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Courses, deadlineGroup } from "./index";
@@ -1103,4 +1103,38 @@ it('supplies no empty heading during course loading or unavailable states', asyn
   await act(async () => resolve(undefined as unknown as Awaited<ReturnType<MoodleApi['course']>>));
   expect(host.querySelector('h1:empty')).toBeNull();
   expect(host.querySelectorAll('main')).toHaveLength(1);
+});
+
+
+it('focuses Courses after a multi-account disconnect without stealing later focus', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  overview.accounts.push({...overview.accounts[0]!, id: 'second', siteName: 'Second'});
+  api.overview = async () => overview;
+  api.disconnect = async id => { overview.accounts = overview.accounts.filter(a => a.id !== id); };
+  await mount(api);
+  await act(async () => getByRole(host, 'button', {name: 'Disconnect Second'}).click());
+  await click('Disconnect school', getByRole(document.body, 'dialog'));
+  await waitFor(() => expect(document.activeElement).toBe(getByRole(host, 'heading', {level: 1, name: 'Courses'})));
+  const search = document.createElement('input');
+  host.append(search);
+  search.focus();
+  await act(async () => getByRole(host, 'button', {name: 'Refresh all schools'}).click());
+  expect(document.activeElement).toBe(search);
+});
+
+it('focuses the course list after disconnecting from course detail', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  overview.accounts.push({...overview.accounts[0]!, id: 'second', siteName: 'Second'});
+  api.overview = async () => overview;
+  api.disconnect = async () => { overview.accounts = overview.accounts.slice(1); };
+  function RoutedCourses() {
+    const [id, setId] = useState<string | undefined>(overview.courses[0]!.id);
+    return <Courses api={api} courseId={id} onCourse={setId} onDocument={() => {}} />;
+  }
+  await act(async () => root.render(<RoutedCourses />));
+  await chooseDisconnect();
+  await click('Disconnect school', getByRole(document.body, 'dialog'));
+  await waitFor(() => expect(document.activeElement).toBe(getByRole(host, 'heading', {level: 2, name: /Your courses/})));
 });
