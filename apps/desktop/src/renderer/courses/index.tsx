@@ -203,11 +203,13 @@ function CoursesBody({
   const termInitialized = useRef(false);
   useEffect(() => {
     if (!overview || termInitialized.current) return;
+    if (!overview.courses.length &&
+      (syncing || overview.accounts.some(account => !account.syncedAt))) return;
     termInitialized.current = true;
     setTerm(termFilters.find(filter =>
       overview.courses.some(course => matchesTerm(course, filter)),
     ) ?? 'current');
-  }, [overview]);
+  }, [overview, syncing]);
   const lang = i18n.resolvedLanguage || "en";
   const [opening, setOpening] = useState<string>();
   const [agentRequest, setAgentRequest] = useState(0);
@@ -889,6 +891,7 @@ function CoursesBody({
         value={selectedTerm}
         onValueChange={(value) => {
           prepareMovement.current();
+          termInitialized.current = true;
           setTerm(value as MoodleTermFilter);
         }}
         className="moodle-term-tabs"
