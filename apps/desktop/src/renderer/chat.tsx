@@ -37,6 +37,7 @@ import { documentCitationSchema } from "../shared";
 import { DocumentReference } from "./components/assistant-ui/elements/document-reference";
 import { DocumentSource, DocumentTool, jumpToCitation } from './document-elements';
 import { createChatAdapter } from "./chat-adapter";
+import { followUpSuggestions } from "./chat-suggestions";
 import { type Providers } from "./providers";
 
 export function Chat({
@@ -136,9 +137,8 @@ export function Chat({
   );
 
   const speech = useMemo(() => typeof window !== 'undefined' && 'speechSynthesis' in window ? new WebSpeechSynthesisAdapter() : undefined, []);
-  const suggestion = useMemo(() => ({generate: async () => [{prompt:tr('common:which_passages_support_this_answer')},{prompt:tr('common:explain_this_more_simply')}]}), []);
   const runtimeOptions = {
-    adapters: { suggestion, ...(speech ? {speech} : {}) },
+    adapters: { suggestion: followUpSuggestions, ...(speech ? {speech} : {}) },
     initialMessages: chatHistoryMessages(history),
   };
   const session=useChatSession(conversation.id,navigation?.activeTabId ?? conversation.id,connection,runtimeOptions);

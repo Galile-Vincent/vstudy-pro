@@ -10,5 +10,7 @@
   "answer_directly_running": "Wait for the current reply to finish, then ask for a direct answer.",
   "answer_directly_empty": "Ask a question first. Just answer replies to your last question.",
   "answer_directly_unavailable": "This chat's model is unavailable. Choose an available model first.",
-  "model_switch_note": "Switching starts a new conversation"
+  "model_switch_note": "Switching starts a new conversation",
+  "tool_calls_one": "{{count}} tool call",
+  "tool_calls_other": "{{count}} tool calls"
 }
