@@ -273,13 +273,25 @@ export function LibraryView() {
   };
   useLayoutEffect(() => {
     const target = folderFocus.current;
-    folderFocus.current = null;
     if (!target) return;
-    if (target === "heading") heading.current?.focus();
-    else (document.getElementById(`library-folder-${encodeURIComponent(target)}`)
-      ?? document.querySelector<HTMLElement>(".course-folder")
-      ?? heading.current)?.focus();
-  });
+    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    const restore = () => {
+      if (folderFocus.current !== target) return;
+      const element = target === "heading" ? heading.current
+        : document.getElementById(`library-folder-${encodeURIComponent(target)}`);
+      if (element) {
+        element.focus();
+        folderFocus.current = null;
+      } else if (++attempts < 10) timer = setTimeout(restore, 50);
+      else {
+        (document.querySelector<HTMLElement>(".course-folder") ?? heading.current)?.focus();
+        folderFocus.current = null;
+      }
+    };
+    restore();
+    return () => clearTimeout(timer);
+  }, [openKey, showFolders, loading, groups]);
   const chooseMode = (next: LibraryMode) => {
     writeMode(next);
     setModeState(next);

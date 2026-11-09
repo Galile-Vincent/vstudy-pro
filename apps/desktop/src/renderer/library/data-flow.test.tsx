@@ -546,3 +546,18 @@ it.each(['en','zh-Hant','ja'])('announces failed row recovery instructions (%s)'
  expect(state.invoke).not.toHaveBeenCalledWith('documents:retry',{documentId:'Broken'});
  await i18n.changeLanguage('en');
 });
+
+it('retries focus restoration until the originating folder mounts', async () => {
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[row('inside')],nextCursor:null}:[]);
+ mount();await screen.findByText('inside');
+ fireEvent.click(screen.getByRole('button',{name:tr('library:viewFolders')}));
+ fireEvent.click(screen.getByRole('button',{name:tr('library:openFolder',{name:tr('library:unfiled')})}));
+ const get=document.getElementById.bind(document);
+ let pending=true;
+ const spy=vi.spyOn(document,'getElementById').mockImplementation(id=>pending&&id.startsWith('library-folder-')?null:get(id));
+ fireEvent.click(screen.getByRole('button',{name:tr('library:backToFolders')}));
+ expect(document.activeElement?.classList.contains('course-folder')).toBe(false);
+ pending=false;
+ await waitFor(()=>expect(document.activeElement).toBe(screen.getByRole('button',{name:tr('library:openFolder',{name:tr('library:unfiled')})})));
+ spy.mockRestore();
+});
