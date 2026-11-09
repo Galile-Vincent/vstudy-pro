@@ -39,7 +39,7 @@
 .library-results[data-view=grid] .library-document[data-selected=true] { background:var(--active); }
 .library-results[data-view=grid] .library-document:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
 
-.library-toolbar { gap:var(--space-3); }
+.library-toolbar { flex-wrap:wrap; gap:var(--space-3); }
 .library-toolbar > div { display:contents; }
 .library-mode { display:inline-flex; flex:none; gap:var(--space-2); }
 .library-view .library-mode > button,
