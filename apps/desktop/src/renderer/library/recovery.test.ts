@@ -1,4 +1,4 @@
-import { afterEach, expect, it, vi } from 'vitest';
+import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { recovery } from './recovery';
 afterEach(()=>{vi.useRealTimers();});
 it('expires the first recovery without extending it when another is added',async()=>{
@@ -21,3 +21,5 @@ it('skips a failed recovery and leaves the older action reachable', async () => 
  await recovery.undo();
  expect(older).toHaveBeenCalledOnce();
 });
+
+beforeEach(() => recovery.reset());

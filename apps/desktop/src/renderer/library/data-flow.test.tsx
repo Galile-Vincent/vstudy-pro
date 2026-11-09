@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
+import { recovery } from './recovery';
 import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
-import { afterEach, expect, it, vi } from 'vitest';
+import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
 import { tr } from '../../shared/i18n';
@@ -156,3 +157,5 @@ it('keeps one persistent live region through the move dialog',async()=>{
  expect(document.querySelector('.library-live')).toBe(live);
  expect(document.querySelectorAll('.library-toast[role="status"]')).toHaveLength(0);
 });
+
+beforeEach(() => recovery.reset());

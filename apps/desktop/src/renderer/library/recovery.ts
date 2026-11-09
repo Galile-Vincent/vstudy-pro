@@ -3,6 +3,7 @@ let entries: Recovery[] = [];
 const listeners = new Set<() => void>();
 function publish() { listeners.forEach(listener => listener()); }
 export const recovery = {
+  reset() { entries = []; publish(); },
   subscribe(listener: () => void) {
     listeners.add(listener);
     return () => { listeners.delete(listener); };

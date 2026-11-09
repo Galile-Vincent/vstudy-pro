@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
+import { recovery } from './recovery';
 import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import type { SelectHTMLAttributes } from 'react';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
@@ -73,7 +74,9 @@ it('shows a reversed custom range error and never submits an impossible range',a
  const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
  const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
  fireEvent.change(within(panel).getByRole('combobox',{name:tr('library:addedAfter')}),{target:{value:'custom'}});
+ fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:'2026-09-01'}});
  fireEvent.change(within(panel).getByLabelText(tr('library:addedBefore')),{target:{value:'2026-10-01'}});
+ await waitFor(()=>expect(state.invoke.mock.calls.some(([c,q])=>c==='library:documents:list' && q.addedAfter && q.addedBefore)).toBe(true));
  fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:'2026-11-02'}});
  await waitFor(()=>expect(document.querySelector('.library-live')?.textContent).toContain(tr('library:dateRangeInvalid')));
  for(const [channel,q] of state.invoke.mock.calls){if(channel==='library:documents:list' && q.addedBefore && q.addedAfter)expect(q.addedAfter<=q.addedBefore).toBe(true);}
@@ -85,7 +88,7 @@ it.each(['en','zh-Hant','ja'])('localizes converter, dates and sizes in filter c
  await mount(false);document.documentElement.lang=locale;
  const chips=document.querySelector('.filter-chips')!;
  expect(chips.textContent).toContain(tr('library:markitdown'));
- expect(chips.textContent).not.toContain('2026-11-01T');
+ expect(chips.textContent).toContain(new Intl.DateTimeFormat(locale).format(new Date('2026-11-01T00:00:00.000Z')));
  expect(chips.textContent).not.toContain('10000000');
  expect(chips.textContent).toContain(new Intl.NumberFormat(locale,{style:'unit',unit:'megabyte',unitDisplay:'short'}).format(10));
  await i18n.changeLanguage('en');
@@ -102,4 +105,12 @@ it('submits equal picked days inclusively through local 23:59',async()=>{
   expect(q.addedBefore).toBe(new Date(2026,10,2,23,59,59,999).toISOString());
  });
  expect(document.querySelector('.filter-chips')?.textContent).toContain(new Intl.DateTimeFormat('en').format(new Date(2026,10,2)));
+ fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:''}});
+ await waitFor(()=>{
+  const q=state.invoke.mock.calls.filter(([c])=>c==='library:documents:list').at(-1)?.[1];
+  expect(q.addedAfter).toBeUndefined();
+  expect(q.addedBefore).toBe(new Date(2026,10,2,23,59,59,999).toISOString());
+ });
 });
+
+beforeEach(() => recovery.reset());
