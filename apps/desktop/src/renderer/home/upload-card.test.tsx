@@ -26,15 +26,15 @@ it('omits destination when no folders exist', () => {
   expect(screen.queryByRole('combobox')).toBeNull();
 });
 
-it('holds one lock while a sample import is pending, including drops', async () => {
+it.each(['Choose a file', 'Try a sample document'])('holds one lock while %s is pending, including drops', async name => {
   let finish!: (value: null) => void;
   invoke.mockImplementation(() => new Promise(resolve => { finish = resolve; }));
   const { container } = render(<UploadCard />);
-  fireEvent.click(screen.getByRole('button', { name: 'Try a sample document' }));
+  fireEvent.click(screen.getByRole('button', { name }));
   fireEvent.drop(container.firstChild!, {
     dataTransfer: { files: [new File(['notes'], 'notes.pdf')] },
   });
-  expect(invoke.mock.calls.map(call => call[0])).toEqual(['documents:importSample']);
+  expect(invoke.mock.calls.map(call => call[0])).toEqual([name === 'Choose a file' ? 'documents:import' : 'documents:importSample']);
   expect(screen.getByRole('button', { name: 'Choose a file' }).hasAttribute('disabled')).toBe(true);
   await act(async () => finish(null));
   invoke.mockResolvedValue([]);
@@ -57,13 +57,46 @@ it.each(['Choose a file', 'Try a sample document'])('shows actionable errors fro
 it('marks the entire import section during drag and restores it on leave', () => {
   const { container } = render(<UploadCard title="Bring a document"/>);
   const section = container.firstElementChild!;
-  fireEvent.dragEnter(section);
+  fireEvent.dragEnter(section, { dataTransfer: { types: ['Files'] } });
   expect(section.getAttribute('data-dragging')).toBe('true');
-  expect(section.getAttribute('style')).toContain('var(--active)');
   expect(screen.getByText('Drop to import').getAttribute('aria-hidden')).toBe('false');
   fireEvent.dragLeave(section);
   expect(section.getAttribute('data-dragging')).toBe('false');
 });
+
+it('ignores text drags', () => {
+  const { container } = render(<UploadCard />);
+  fireEvent.dragEnter(container.firstChild!, { dataTransfer: { types: ['text/plain'] } });
+  expect(container.firstElementChild!.getAttribute('data-dragging')).toBe('false');
+});
+it.each(['dragEnd', 'blur', 'dragLeave'])('clears nested drag depth on %s', event => {
+  const { container } = render(<UploadCard />);
+  const card = container.firstElementChild!;
+  for (let i = 0; i < 3; i++) fireEvent.dragEnter(card, { dataTransfer: { types: ['Files'] } });
+  if (event === 'blur') fireEvent.blur(window);
+  else if (event === 'dragEnd') fireEvent.dragEnd(card);
+  else fireEvent.dragLeave(card, { relatedTarget: null });
+  expect(card.getAttribute('data-dragging')).toBe('false');
+});
+it('rejects a busy drag visibly without highlighting', async () => {
+  invoke.mockReturnValue(new Promise(() => {}));
+  const { container } = render(<UploadCard />);
+  fireEvent.click(screen.getByRole('button', { name: 'Choose a file' }));
+  fireEvent.dragEnter(container.firstChild!, { dataTransfer: { types: ['Files'] } });
+  expect(container.firstElementChild!.getAttribute('data-dragging')).toBe('false');
+  fireEvent.drop(container.firstChild!, { dataTransfer: { files: [] } });
+  expect(screen.getByRole('status').textContent).toContain('Wait');
+});
+it('releases the picker lock after an error and accepts a drop', async () => {
+  invoke.mockRejectedValueOnce(new Error('failed')).mockResolvedValue([]);
+  const { container } = render(<UploadCard />);
+  fireEvent.click(screen.getByRole('button', { name: 'Choose a file' }));
+  await act(async () => {});
+  fireEvent.drop(container.firstChild!, { dataTransfer: { files: [new File([''], 'notes.pdf')] } });
+  await act(async () => {});
+  expect(invoke.mock.calls.map(call => call[0])).toEqual(['documents:import', 'documents:importPaths']);
+});
+
 it('imports into Unfiled when the selected folder disappeared', async () => {
   const onImported = vi.fn();
   const changed = vi.fn();

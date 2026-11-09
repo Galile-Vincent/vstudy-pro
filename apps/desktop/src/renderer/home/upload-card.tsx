@@ -47,9 +47,22 @@ export function UploadCard({
       }),
     []
   );
+  const resetDrag = () => {
+    dragDepth.current = 0;
+    setDragging(false);
+  };
+  useEffect(() => {
+    window.addEventListener('blur', resetDrag);
+    window.addEventListener('dragend', resetDrag);
+    return () => {
+      window.removeEventListener('blur', resetDrag);
+      window.removeEventListener('dragend', resetDrag);
+    };
+  }, []);
   const upload = async (paths?: string[], sample = false) => {
     if (lock.current) return;
     const destination = folders.find((folder) => folder.id === folderId)?.id ?? null;
+    resetDrag();
     lock.current = true;
     setBusy(true);
     setError('');
@@ -164,13 +177,16 @@ export function UploadCard({
       style={dragging ? { background: 'var(--active)' } : undefined}
       data-dragging={dragging}
       onDragEnter={(e) => {
+        if (busy || !e.dataTransfer.types.includes('Files')) return;
         e.preventDefault();
         dragDepth.current++;
         setDragging(true);
       }}
-      onDragLeave={() => {
-        if (--dragDepth.current <= 0) setDragging(false);
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) resetDrag();
+        else if (--dragDepth.current <= 0) resetDrag();
       }}
+      onDragEnd={resetDrag}
       onDragOver={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -178,9 +194,11 @@ export function UploadCard({
       onDrop={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        dragDepth.current = 0;
-        setDragging(false);
-        if (lock.current) return;
+        resetDrag();
+        if (lock.current) {
+          setMessage(tr('home:drop_busy'));
+          return;
+        }
         const paths = Array.from(e.dataTransfer.files, (file) => desktop.getPathForFile?.(file) ?? '');
         if (paths.length && paths.every(Boolean)) void upload(paths);
         else setError(tr('home:drop_error'));
