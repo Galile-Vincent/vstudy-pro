@@ -34,11 +34,15 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jum
   const focusMessage = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (cursor || focusMessage.current === null) return;
-    const messages = container.current?.parentElement?.querySelectorAll<HTMLElement>('[data-message-id]');
-    const target = Array.from(messages ?? []).find(message => message.dataset.messageId === focusMessage.current);
-    if (target) { target.tabIndex = -1; target.focus(); }
-    else { container.current?.focus(); return; }
+    const id = focusMessage.current;
     focusMessage.current = null;
+    const parent = container.current?.parentElement;
+    queueMicrotask(() => {
+      const messages = parent?.querySelectorAll<HTMLElement>('[data-message-id]');
+      const target = Array.from(messages ?? []).find(message => message.dataset.messageId === id);
+      if (target) { target.tabIndex = -1; target.focus(); }
+      else container.current?.focus();
+    });
   }, [cursor, messageIds]);
   const pending = useRef(false), live = useRef(true);
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
@@ -51,10 +55,11 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jum
       if (!live.current || runtime.thread.getState().isRunning) return;
       const current = runtime.thread.export();
       const ids = new Set(current.messages.map(item => item.message.id));
-      const older = ExportedMessageRepository.fromArray(chatHistoryMessages(page.items.filter(message => !ids.has(message.id))));
+      const added = page.items.filter(message => !ids.has(message.id));
+      const older = ExportedMessageRepository.fromArray(chatHistoryMessages(added));
       const parentId = older.messages.at(-1)?.message.id;
       if (parentId) runtime.thread.import({...current,messages:[...older.messages,...current.messages.map(item => item.parentId === null ? {...item,parentId} : item)]});
-      if (!page.nextCursor && hadFocus) focusMessage.current = page.items[0]?.id ?? '';
+      if (!page.nextCursor && hadFocus) focusMessage.current = added[0]?.id ?? null;
       setCursor(page.nextCursor); onLoaded(page.items,page.nextCursor);
     } catch (failure) { if (live.current) setError(errorText(failure)); }
     finally { pending.current = false; if (live.current) setLoading(false); }

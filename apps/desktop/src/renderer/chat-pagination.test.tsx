@@ -97,3 +97,23 @@ it('moves focus to the first newly loaded message when the final page removes th
   await waitFor(() => expect(document.activeElement?.getAttribute('data-message-id')).toBe('old-first'));
   expect(screen.queryByRole('button', {name: tr('common:load_earlier_messages')})).toBeNull();
 });
+
+it.each([{items: []}, {items: [message('recent')]}])('does not steal composer focus after an exhausted page: %j', async ({items}) => {
+  await i18n.changeLanguage('en');
+  bridge.invoke.mockImplementation(async channel => {
+    if (channel === 'messages:page') return {items, nextCursor: null};
+    if (channel === 'chat:start') bridge.listener?.({type: 'done'});
+    return {ok: true};
+  });
+  mount([message('recent')], {id: 'recent', createdAt: '2026-11-02T00:00:00Z'});
+  const button = screen.getByRole('button', {name: tr('common:load_earlier_messages')});
+  button.focus();
+  fireEvent.click(button);
+  await waitFor(() => expect(screen.queryByRole('button', {name: tr('common:load_earlier_messages')})).toBeNull());
+  const input = screen.getByRole('textbox');
+  input.focus();
+  fireEvent.change(input, {target: {value: 'Follow up'}});
+  fireEvent.click(screen.getByRole('button', {name: 'Send'}));
+  await screen.findByText('Follow up');
+  expect(document.activeElement).toBe(input);
+});
