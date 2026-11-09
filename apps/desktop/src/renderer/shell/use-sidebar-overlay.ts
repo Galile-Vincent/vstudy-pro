@@ -5,7 +5,24 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
   const [overlay, setOverlay] = useState(false);
   useEffect(() => {
     let wasOverlay = false;
+    const observed = new Set<Element>();
+    const resize = new ResizeObserver(() => measure());
     const measure = () => {
+      const elements = document.querySelectorAll(
+        '.shell-main, .shell-topbar, .app-tabs, .workspace .app-header',
+      );
+      for (const element of observed) {
+        if (!element.isConnected) {
+          resize.unobserve(element);
+          observed.delete(element);
+        }
+      }
+      for (const element of elements) {
+        if (!observed.has(element)) {
+          resize.observe(element);
+          observed.add(element);
+        }
+      }
       const sidebar = document.querySelector<HTMLElement>('.shell-sidebar');
       const shell = sidebar?.closest<HTMLElement>('.app-shell');
       if (!sidebar || !shell) return;
@@ -32,16 +49,18 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
     };
     const observer = new MutationObserver(measure);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
-    const resize = new ResizeObserver(measure);
-    const main = document.querySelector('.shell-main');
-    if (main) resize.observe(main);
-    const layout = new MutationObserver(measure);
+    const layout = new MutationObserver(records => {
+      if (records.some(record => record.type === 'attributes'
+        || [...record.addedNodes, ...record.removedNodes].some(node =>
+          node instanceof Element && (node.matches(
+            '.shell-topbar, .app-tabs, .workspace, .app-header',
+          ) || node.querySelector('.shell-topbar, .app-tabs, .workspace .app-header')),
+        ))) measure();
+    });
     const shell = document.querySelector('.app-shell');
-    if (shell) layout.observe(shell, { attributes: true, attributeFilter: ['data-view'] });
-    const topbar = document.querySelector('.shell-topbar');
-    if (topbar) resize.observe(topbar);
-    const tabs = document.querySelector('.app-tabs');
-    if (tabs) resize.observe(tabs);
+    if (shell) layout.observe(shell, {
+      attributes: true, attributeFilter: ['data-view'], childList: true, subtree: true,
+    });
     window.addEventListener('resize', measure);
     measure();
     return () => { observer.disconnect(); layout.disconnect(); resize.disconnect(); window.removeEventListener('resize', measure); };
