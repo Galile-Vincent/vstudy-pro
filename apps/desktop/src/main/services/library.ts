@@ -1,3 +1,4 @@
+import { libraryErrors } from '../../shared/library-errors';
 /**
  * Query and organize library metadata, folders, tags, pins, and soft deletion.
  * Owned by main/services.
@@ -40,7 +41,7 @@ export class LibraryService {
     } }
     folders() { return this.store.db.prepare('SELECT f.*,(WITH RECURSIVE subtree(id) AS (SELECT f.id UNION ALL SELECT child.id FROM folders child JOIN subtree s ON child.parentId=s.id) SELECT count(*) FROM documents d WHERE d.folderId IN (SELECT id FROM subtree) AND d.deletedAt IS NULL) AS count FROM folders f ORDER BY position,id').all().map(r => folderSchema.parse(r)); }
     private folder(id: string) { const f = this.store.db.prepare('SELECT * FROM folders WHERE id=?').get(id); if (!f)
-        throw new Error('Folder not found'); return folderSchema.parse(f); }
+        throw new Error(libraryErrors.folder_missing); return folderSchema.parse(f); }
     private ancestors(id: string | null) { const result: string[] = []; while (id) {
         if (result.includes(id))
             throw new Error('Folder cycle');
@@ -86,7 +87,7 @@ export class LibraryService {
         this.store.db.prepare('UPDATE documents SET folderId=?,position=? WHERE id=?').run(folderId, this.position('documents', folderId, before), id);
     } }); }
     require(id: string) { const d = this.store.documents.get(documentIdSchema.parse(id)); if (!d)
-        throw new Error('Document not found'); return d; }
+        throw new Error(libraryErrors.document_missing); return d; }
     item(row: Record<string, unknown>) { return libraryDocumentSchema.parse({ document: documentSchema.parse(Object.fromEntries(['id','title','sourceName','sourceHash','sourcePath','mime','converter','status','activeVersion','markdownPath','createdAt',...(row.status==='failed'?['error']:[])].map(key=>[key,row[key]]))), folderId: row.folderId as string | null, position: Number(row.position), pinned: Boolean(row.pinned), pinnedAt: row.pinnedAt as string | null, lastOpenedAt: row.lastOpenedAt as string | null, pageCount: row.pageCount as number | null, sizeBytes: row.sizeBytes === null ? null : Number(row.sizeBytes), contentChars: row.contentChars === null ? null : Number(row.contentChars), course: courseOf(row) }); }
     list(input: LibraryQuery) {
         const q = libraryQuerySchema.parse(input), args: SQLInputValue[] = [], where = ['d.deletedAt IS NULL'];
@@ -165,12 +166,12 @@ export class LibraryService {
     rename(id: string, title: string) { this.require(id); this.store.db.prepare('UPDATE documents SET title=? WHERE id=?').run(title, id); }
     softDelete(id: string) {
         const result = this.store.db.prepare('UPDATE documents SET deletedAt=coalesce(deletedAt,?) WHERE id=?').run(new Date().toISOString(), id);
-        if (!result.changes) throw new Error('Document not found');
+        if (!result.changes) throw new Error(libraryErrors.document_missing);
     }
     restore(id: string, reason: 'undo' | 'import' = 'undo') { if(activePurges.has(id))throw new Error('storage.busy'); this.transaction(() => { const r = this.store.db.prepare('SELECT deletedAt,markdownPath,activeVersion FROM documents WHERE id=?').get(id); if (!r)
-        throw new Error('Document not found'); if (r.deletedAt === null)
+        throw new Error(libraryErrors.document_missing); if (r.deletedAt === null)
         return; if (reason === 'undo' && Date.now() - Date.parse(String(r.deletedAt)) > 30000)
-        throw new Error('Undo expired'); this.store.db.prepare('UPDATE documents SET deletedAt=NULL WHERE id=?').run(id); if (r.markdownPath) {
+        throw new Error(libraryErrors.undo_expired); this.store.db.prepare('UPDATE documents SET deletedAt=NULL WHERE id=?').run(id); if (r.markdownPath) {
         try {
             this.search.update(id, readFileSync(containedPath(this.root, r.activeVersion==='ai'?join(dirname(String(r.markdownPath)),'content.ai.md'):String(r.markdownPath)), 'utf8'));
         }

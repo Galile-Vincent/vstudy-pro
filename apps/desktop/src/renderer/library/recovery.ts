@@ -21,8 +21,10 @@ export const recovery = {
   async undo() {
     const entry = entries.filter(value => value.deadline > Date.now()).at(-1);
     if (!entry) return;
-    await entry.restore();
-    entries = entries.filter(value => value !== entry);
-    publish();
+    try { await entry.restore(); }
+    finally {
+      entries = entries.filter(value => value !== entry);
+      publish();
+    }
   },
 };
