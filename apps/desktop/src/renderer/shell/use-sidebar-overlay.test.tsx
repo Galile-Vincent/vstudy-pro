@@ -47,3 +47,20 @@ it('observes chrome that mounts later and tracks its resizing', async () => {
   bottom = 95; await act(() => resize());
   expect(host.querySelector<HTMLElement>('.shell-sidebar')!.style.getPropertyValue('--sidebar-overlay-top')).toBe('95px');
 });
+it.each(['search', 'input', 'menu', 'consumed', 'inside'])('respects Escape ownership for %s', async target => {
+  await mountOverlay();
+  const inside = host.querySelector<HTMLButtonElement>('#inside')!;
+  let element: HTMLElement = inside;
+  if (target === 'search') element = host.querySelector<HTMLInputElement>('#search')!;
+  if (target === 'input') element = host.querySelector<HTMLInputElement>('aside input')!;
+  if (target === 'menu') {
+    const menu = document.createElement('div'); menu.setAttribute('role', 'menu');
+    menu.append(inside); host.querySelector('aside')!.append(menu);
+  }
+  element.focus();
+  const event = new KeyboardEvent('keydown', { key: 'Escape', cancelable: true, bubbles: true });
+  if (target === 'consumed') event.preventDefault();
+  await act(() => element.dispatchEvent(event));
+  expect(close).toHaveBeenCalledTimes(target === 'inside' ? 1 : 0);
+  if (target !== 'inside') expect(document.activeElement).toBe(element);
+});

@@ -133,7 +133,7 @@ it('anchors overlays below the tabs and restores a visible workspace toggle', as
     header.append(visibleToggle); workspace.append(header); host.append(workspace);
     await act(async () => toggle.click());
     expect(host.querySelector<HTMLElement>('.shell-sidebar')!.style.getPropertyValue('--sidebar-overlay-top')).toBe('49px');
-    visibleToggle.focus();
+    host.querySelector<HTMLButtonElement>('.shell-sidebar button')!.focus();
     await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })));
     expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(true);
     expect(document.activeElement).toBe(visibleToggle);
