@@ -39,5 +39,8 @@
   "quota_keychain": "Allow reading Claude Code credentials from macOS Keychain for this app session. Only sent to api.anthropic.com to read usage.",
   "quota_summary": "Usage",
   "quota_expand": "Expand subscription usage",
-  "quota_collapse": "Collapse subscription usage"
+  "quota_collapse": "Collapse subscription usage",
+  "quota_window_label": "{{provider}} · {{window}}",
+  "quota_window_used": "{{label}}: {{percent}}% used",
+  "quota_unavailable_count": "{{count}} unavailable"
 }

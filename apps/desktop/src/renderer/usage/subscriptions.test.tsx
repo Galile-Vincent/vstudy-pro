@@ -21,7 +21,7 @@ it('defaults to one collapsed summary with the highest provider window and wired
   const button = screen.getByRole('button', { name: 'Expand subscription usage' });
   expect(button.getAttribute('aria-expanded')).toBe('false');
   expect(document.getElementById(button.getAttribute('aria-controls')!)?.hidden).toBe(true);
-  expect(screen.getByText('Codex', { selector: '.subscription-summary-label' })).toBeTruthy();
+  expect(screen.getByText('Codex · 5h', { selector: '.subscription-summary-label' })).toBeTruthy();
   expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('85');
   expect(screen.queryByRole('button', { name: 'Refresh usage' })).toBeNull();
 });
@@ -52,7 +52,7 @@ it('does not summarize stale windows as current usage', async () => {
   vi.mocked(desktop.invoke).mockResolvedValue([{ ...usage('claude', [99]), status: 'stale' }, usage('codex', [0])]);
   render(<SubscriptionMeters compact />);
   await waitFor(() => expect(screen.getByText('0%', { selector: '.subscription-summary-percent' })).toBeTruthy());
-  expect(screen.getByText('Codex', { selector: '.subscription-summary-label' })).toBeTruthy();
+  expect(screen.getByText('Codex · 5h', { selector: '.subscription-summary-label' })).toBeTruthy();
 });
 it('works when storage reads and writes throw', async () => {
   vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('disabled'); });
@@ -60,4 +60,23 @@ it('works when storage reads and writes throw', async () => {
   render(<SubscriptionMeters compact />);
   fireEvent.click(screen.getByRole('button', { name: 'Expand subscription usage' }));
   expect(screen.getByRole('button', { name: 'Collapse subscription usage' }).getAttribute('aria-expanded')).toBe('true');
+});
+
+it('names the selected window and reports providers without current data', async () => {
+  vi.mocked(desktop.invoke).mockResolvedValue([
+    { ...usage('claude', [99]), status: 'unavailable' }, usage('codex', [10]),
+  ]);
+  render(<SubscriptionMeters compact />);
+  const bar = await screen.findByRole('progressbar', { name: 'Codex · 5h' });
+  expect(bar.getAttribute('aria-valuetext')).toBe('Codex · 5h: 10% used');
+  expect(screen.getByText('1 unavailable')).toBeTruthy();
+});
+it('breaks equal usage ties by the soonest reset', async () => {
+  const claude = usage('claude', [85]);
+  const codex = usage('codex', [85]);
+  claude.windows[0]!.resetsAt = '2026-11-10T00:00:00Z';
+  codex.windows[0]!.resetsAt = '2026-11-09T12:00:00Z';
+  vi.mocked(desktop.invoke).mockResolvedValue([claude, codex]);
+  render(<SubscriptionMeters compact />);
+  expect(await screen.findByRole('progressbar', { name: 'Codex · 5h' })).toBeTruthy();
 });

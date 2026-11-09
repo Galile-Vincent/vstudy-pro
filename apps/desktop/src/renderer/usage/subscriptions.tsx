@@ -43,14 +43,28 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
     return () => { active = false; clearInterval(interval); window.removeEventListener('subscription-refresh', refresh); };
   }, []);
   const highest = error ? undefined : rows?.filter(row => row.status === 'ready')
-    .flatMap(row => row.windows.map(window => ({ provider: row.provider, percent: window.usedPercent })))
-    .reduce<{ provider: SubscriptionUsage['provider']; percent: number } | undefined>((best, window) => !best || window.percent > best.percent ? window : best, undefined);
-  const summaryLabel = highest ? providerName(highest.provider) : tr('usage:quota_summary');
+    .flatMap(row => row.windows.map(window => ({ ...window, provider: row.provider })))
+    .sort((a, b) => b.usedPercent - a.usedPercent
+      || (a.resetsAt ? Date.parse(a.resetsAt) : Infinity)
+        - (b.resetsAt ? Date.parse(b.resetsAt) : Infinity)
+      || a.provider.localeCompare(b.provider)
+      || a.label.localeCompare(b.label))[0];
+  const summaryLabel = highest ? tr('usage:quota_window_label', {
+    provider: providerName(highest.provider),
+    window: tr(highest.label === '5h' ? 'usage:quota_5h' : 'usage:quota_weekly'),
+  }) : tr('usage:quota_summary');
+  const unavailable = rows?.filter(row => row.status !== 'ready').length ?? 0;
+  const summaryValue = highest ? tr('usage:quota_window_used', {
+    label: summaryLabel, percent: Math.round(highest.usedPercent),
+  }) : tr('usage:quota_unknown');
   return <section className="subscription-meters" data-compact={compact} aria-label={tr('usage:subscription_limits')} aria-busy={loading}>
     {compact && <div className="subscription-summary">
       <span className="subscription-summary-label">{summaryLabel}</span>
-      <span className="subscription-summary-percent">{highest ? `${Math.round(highest.percent)}%` : '—'}</span>
-      <Progress className="subscription-progress" value={highest?.percent ?? 0} aria-label={summaryLabel} aria-valuenow={highest?.percent} aria-valuetext={highest ? `${Math.round(highest.percent)}%` : tr('usage:quota_unknown')} />
+      <span className="subscription-summary-percent">{highest ? `${Math.round(highest.usedPercent)}%` : '—'}</span>
+      <Progress className="subscription-progress" value={highest?.usedPercent ?? 0} aria-label={summaryLabel} aria-valuenow={highest?.usedPercent} aria-valuetext={summaryValue} />
+      {(error || unavailable > 0) && <small className="subscription-summary-unavailable">
+        {error ? tr('usage:quota_unavailable') : tr('usage:quota_unavailable_count', { count: unavailable })}
+      </small>}
       <Button variant="ghost" size="icon" aria-expanded={expanded} aria-controls={regionId} aria-label={tr(expanded ? 'usage:quota_collapse' : 'usage:quota_expand')} onClick={toggle}>
         {expanded ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
       </Button>

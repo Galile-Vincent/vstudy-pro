@@ -39,5 +39,8 @@
   "quota_keychain": "このアプリセッション中、macOS キーチェーンから Claude Code の認証情報を読み取ることを許可します。使用量の取得のため api.anthropic.com にのみ送信します。",
   "quota_summary": "使用量",
   "quota_expand": "サブスクリプション使用量を展開",
-  "quota_collapse": "サブスクリプション使用量を折りたたむ"
+  "quota_collapse": "サブスクリプション使用量を折りたたむ",
+  "quota_window_label": "{{provider}} · {{window}}",
+  "quota_window_used": "{{label}}：{{percent}}% 使用済み",
+  "quota_unavailable_count": "{{count}} 件取得不可"
 }
