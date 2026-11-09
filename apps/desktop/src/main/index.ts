@@ -99,7 +99,7 @@ app.on('web-contents-created', (_event, contents) => {
   contents.on('will-attach-webview', event => event.preventDefault());
 });
 let store: Store | undefined;
-let disposeIpc: (() => Promise<void>) | undefined;
+let disposeIpc: ((deleting?: boolean) => Promise<void>) | undefined;
 let window: BrowserWindow | null = null;
 let deletingData = false;
 let stopWindowState: (() => void) | undefined;
@@ -316,15 +316,19 @@ if (ownsApplication) void app.whenReady().then(async () => {
     quitting = true;
     stopWindowState?.();
     stopFileLogging();
-    await disposeIpc?.();
-    const stoppingTelemetry = telemetry;
-    telemetry = undefined;
-    await stoppingTelemetry?.stop();
-    await session.defaultSession.closeAllConnections();
-    session.defaultSession.flushStorageData();
-    await session.defaultSession.cookies.flushStore();
+    const results = await Promise.allSettled([
+      disposeIpc?.(true),
+      (async () => {
+        const stoppingTelemetry = telemetry;
+        telemetry = undefined;
+        await stoppingTelemetry?.stop();
+      })(),
+      clearDeletionSession(session.defaultSession),
+    ]);
     store?.close();
     store = undefined;
+    const errors = results.filter(result => result.status === 'rejected').map(result => result.reason);
+    if (errors.length) throw new AggregateError(errors,'Deletion shutdown incomplete');
   }, async (error, scheduled) => {
     const code = (error as NodeJS.ErrnoException | undefined)?.code;
     const reason = tr(code === 'EACCES' || code === 'EPERM'
@@ -341,13 +345,14 @@ if (ownsApplication) void app.whenReady().then(async () => {
     if (deleteRequested) throw Error('VSTUDY_STATUS:' + JSON.stringify({
       code:'settings.delete_in_progress', params:{},
     }));
-    if (!await appReady) throw Error('Application is not ready');
     deleteRequested = true;
     try {
+      if (!await appReady) throw Error('Application is not ready');
       const result = await showAttachedMessage({ type: 'warning', message: tr('settings:delete_title'), detail: tr('settings:delete_copy'), buttons: [tr('common:cancel'), tr('settings:delete')], defaultId: 0, cancelId: 0 }, event.sender);
       if (result.response !== 1) { deleteRequested = false; return {ok:true}; }
     } catch (error) { deleteRequested = false; throw error; }
     await deleteData();
+    if (!deletingData) deleteRequested = false;
     return { ok: true };
   });
   nativeTheme.on("updated", () => { if (store) applyNativeTheme(store.settings.get()); });

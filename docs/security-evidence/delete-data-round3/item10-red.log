@@ -1,0 +1,33 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop
+
+ ❯ src/main/ipc/index.test.ts (7 tests | 1 failed) 228ms
+   × keeps IPC handlers until workers stop during normal shutdown 15ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/ipc/index.test.ts > keeps IPC handlers until workers stop during normal shutdown
+AssertionError: expected 'ipc' to be 'workers' // Object.is equality
+
+Expected: "workers"
+Received: "ipc"
+
+ ❯ src/main/ipc/index.test.ts:111:20
+    109|   vi.mocked(ipcMain.removeHandler).mockImplementation(()=>{order.push(…
+    110|   await dispose();
+    111|   expect(order[0]).toBe('workers');
+       |                    ^
+    112| });
+    113|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  18:20:54
+   Duration  528ms (transform 268ms, setup 0ms, import 249ms, tests 228ms, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/ipc/index.test.ts

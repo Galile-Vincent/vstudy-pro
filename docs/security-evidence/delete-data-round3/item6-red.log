@@ -1,0 +1,32 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop
+
+ ❯ src/main/index.test.ts (37 tests | 1 failed) 2051ms
+   × flushes default cookies without opening partition contexts during deletion 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/index.test.ts > flushes default cookies without opening partition contexts during deletion
+Error: duplicate context
+ ❯ Object.<anonymous> src/main/index.test.ts:31:44
+     29|     app, dialog: { showMessageBox: vi.fn(async () => ({ response: 1 })…
+     30|     protocol: { registerSchemesAsPrivileged: vi.fn(), handle: vi.fn() …
+     31|     session: { fromPath:vi.fn(() => {throw Error("duplicate context");…
+       |                                            ^
+     32|       clearStorageData:vi.fn(), clearCache:vi.fn(), clearAuthCache:vi.…
+     33|       closeAllConnections:vi.fn(), flushStorageData:vi.fn(), cookies:{…
+ ❯ src/main/index.ts:250:41
+ ❯ src/main/index.ts:250:21
+ ❯ src/main/index.test.ts:396:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 36 passed (37)
+   Start at  18:17:07
+   Duration  2.12s (transform 168ms, setup 0ms, import 26ms, tests 2.05s, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/index.test.ts

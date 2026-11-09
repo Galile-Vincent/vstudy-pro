@@ -1,0 +1,36 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop
+
+ ❯ src/main/index.test.ts (38 tests | 1 failed) 2139ms
+   × bounds startup session deletion even when Chromium never responds 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/index.test.ts > bounds startup session deletion even when Chromium never responds
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/main/index.test.ts:412:21
+    410|     void clear([]).catch(() => {}).finally(() => {settled=true;});
+    411|     await vi.advanceTimersByTimeAsync(12_001);
+    412|     expect(settled).toBe(true);
+       |                     ^
+    413|   } finally {vi.useRealTimers();window.webContents.emit('did-finish-lo…
+    414| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 37 passed (38)
+   Start at  18:18:56
+   Duration  2.21s (transform 151ms, setup 0ms, import 27ms, tests 2.14s, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/index.test.ts

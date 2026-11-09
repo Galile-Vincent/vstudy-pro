@@ -8,7 +8,7 @@ import { id, seedStudent } from '../planner/__fixtures__/student';
 let registerIpc: typeof import('./index').registerIpc;
 
 const mocks=vi.hoisted(()=>({
-  focused:vi.fn(), save:vi.fn(), write:vi.fn(),
+  chatDispose:vi.fn(), focused:vi.fn(), save:vi.fn(), write:vi.fn(),
   exportCalendar:undefined as McpBackendOptions['exportCalendar'] | undefined,
 }));
 vi.mock('electron',()=>({
@@ -20,7 +20,7 @@ vi.mock('../providers/executable-pins',()=>({ExecutablePins:class {},setExecutab
 vi.mock('../providers',()=>({createProviderRegistry:()=>({})}));
 vi.mock('../i18n',()=>({tr:(key:string)=>key,updateApplicationMenu:vi.fn()}));
 vi.mock('./usage',()=>({registerUsageIpc:vi.fn()}));
-vi.mock('./chat',()=>({registerChatIpc:()=>({dispose:vi.fn()})}));
+vi.mock('./chat',()=>({registerChatIpc:()=>({dispose:mocks.chatDispose})}));
 vi.mock('./ai-cli',()=>({registerAiCliIpc:()=>vi.fn()}));
 vi.mock('./documents',()=>({registerDocumentsIpc:()=>vi.fn()}));
 vi.mock('./planner',()=>({registerPlannerIpc:()=>vi.fn()}));
@@ -98,4 +98,29 @@ it('recovers interrupted memory and abandoned generation only at normal IPC star
   expect(artifacts.find(artifact.id)?.status).toBe('interrupted');
   expect(store.db.prepare('SELECT attemptToken FROM study_jobs WHERE id=?').get(job.id)?.attemptToken).not.toBe(job.attemptToken);
  }finally{await dispose();}
+});
+
+it('keeps IPC handlers until workers stop during normal shutdown', async () => {
+  const {dispose}=fixture(undefined);
+  const {reviewWorkers}=await import('../review/workers');
+  const {ipcMain}=await import('electron');
+  const order:string[]=[];
+  vi.spyOn(reviewWorkers,'dispose').mockImplementationOnce(async()=>{order.push('workers');});
+  vi.mocked(ipcMain.removeHandler).mockImplementation(()=>{order.push('ipc');});
+  await dispose();
+  expect(order[0]).toBe('workers');
+});
+
+it('removes IPC and starts chat cancellation before deletion waits on review disposal', async () => {
+  const {dispose}=fixture(undefined);
+  const {reviewWorkers}=await import('../review/workers');
+  const {ipcMain}=await import('electron');
+  let release!:()=>void;
+  vi.spyOn(reviewWorkers,'dispose').mockImplementationOnce(() => new Promise(resolve => {release=resolve;}));
+  vi.mocked(ipcMain.removeHandler).mockClear();
+  const pending=dispose(true);
+  try {
+    expect(ipcMain.removeHandler).toHaveBeenCalled();
+    expect(mocks.chatDispose).toHaveBeenCalledOnce();
+  } finally {release();await pending;}
 });

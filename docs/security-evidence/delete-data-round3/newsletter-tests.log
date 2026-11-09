@@ -1,0 +1,12 @@
+
+> @vstudy/newsletter@0.1.0 test /Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/newsletter
+> vitest run
+
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/newsletter
+
+
+ Test Files  1 passed (1)
+      Tests  25 passed (25)
+   Start at  18:22:01
+   Duration  192ms (transform 33ms, setup 0ms, import 49ms, tests 50ms, environment 0ms)

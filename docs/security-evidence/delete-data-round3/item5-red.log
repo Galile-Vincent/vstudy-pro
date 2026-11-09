@@ -1,0 +1,29 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop
+
+ ❯ src/main/services/delete-data.test.ts (16 tests | 1 failed) 163ms
+   × aborts a storage-owning stream before waiting for its release 106ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/services/delete-data.test.ts > aborts a storage-owning stream before waiting for its release
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ vi.waitFor.timeout src/main/services/delete-data.test.ts:108:45
+    106|   const stop = vi.fn(async () => {release();});
+    107|   const pending = deletion.createDataDeletion('/owned',stop,vi.fn(),vi…
+    108|   try { await vi.waitFor(() => expect(stop).toHaveBeenCalledOnce(),{ti…
+       |                                             ^
+    109|   finally { release(); await pending; }
+    110| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  18:16:45
+   Duration  239ms (transform 19ms, setup 0ms, import 26ms, tests 163ms, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/services/delete-data.test.ts

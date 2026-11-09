@@ -63,7 +63,7 @@ export function registerIpc(
   isTrusted: (event: IpcMainInvokeEvent) => boolean,
   restoreMainWindow: () => BrowserWindow | undefined | Promise<BrowserWindow | undefined> = () => undefined,
   options:AppIpcOptions = {},
-): () => Promise<void> {
+): (deleting?: boolean) => Promise<void> {
   const pins = new ExecutablePins(`${app.getPath('userData')}/executable-pins.json`, async (previous, current) => {
     const result = await showAttachedMessage({type:'warning', message:tr('settings:binary_changed'), detail:tr('settings:binary_detail',{previous:previous.path,current:current.path,hash:current.hash,mtime:new Date(current.mtime).toISOString()}), buttons:[tr('common:cancel'),tr('settings:allow')],defaultId:0,cancelId:0});
     return result.response === 1;
@@ -173,5 +173,22 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { registrar.dispose(); await webChats.dispose(); await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async (deleting = false) => {
+    if (deleting) {
+      registrar.dispose();
+      app.removeListener('browser-window-created',restoreMcp);
+      disposePlanner();
+      disposeLibrary();
+      const results = await Promise.allSettled([
+        webChats.dispose(),reviewWorkers.dispose(),mcp.dispose(),disposeAiCli(),
+        disposeMoodle(),chat.dispose(),disposeDiscovery(),disposeSearchWorkers(),
+        disposeDocuments(),disposeLibrary.waitForIdle(),
+      ]);
+      navigation.clear();
+      const errors = results.filter(result => result.status === 'rejected').map(result => result.reason);
+      if (errors.length) throw new AggregateError(errors,'Deletion shutdown incomplete');
+      return;
+    }
+    await webChats.dispose(); await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments();
+  };
 }

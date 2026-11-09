@@ -1,0 +1,60 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop
+
+ ❯ src/main/services/delete-pending.test.ts (10 tests | 2 failed) 2263ms
+   × wipes the resolved symlink root instead of quarantining only the link 9ms
+   × uses deferred deletion directly on Windows without renaming the root 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/services/delete-pending.test.ts > wipes the resolved symlink root instead of quarantining only the link
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/main/services/delete-pending.test.ts:60:53
+     58|   const link = join(parent,'linked'); await fs.symlink(root,link);
+     59|   await createDataDeletion(link, async () => {}, async () => {}, () =>…
+     60|   await expect(fs.access(join(root,'vstudy.sqlite'))).rejects.toThrow(…
+       |                                                     ^
+     61|   expect(await finishPendingDeletion(link,async () => {},vi.fn())).toB…
+     62|   await expect(fs.access(join(root,'vstudy.sqlite'))).rejects.toThrow(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/main/services/delete-pending.test.ts > uses deferred deletion directly on Windows without renaming the root
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/main/services/delete-pending.test.ts:73:55
+     71|     await createDataDeletion(root,async () => {},async () => {},() => …
+     72|     expect(rename).not.toHaveBeenCalled();
+     73|     await expect(fs.access(join(root,'vstudy.sqlite'))).rejects.toThro…
+       |                                                       ^
+     74|   } finally { Object.defineProperty(process,'platform',platform); }
+     75| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 8 passed (10)
+   Start at  18:15:51
+   Duration  2.34s (transform 21ms, setup 0ms, import 29ms, tests 2.26s, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/services/delete-pending.test.ts

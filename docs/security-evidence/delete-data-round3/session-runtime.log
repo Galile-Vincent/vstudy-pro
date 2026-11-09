@@ -1,0 +1,4 @@
+Downloading Electron binary...
+{"sameContext":false,"secondCookies":[],"listing":["Partitions"]}
+{"afterClear":[]}
+/Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/node_modules/.pnpm/electron@42.11.16/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron exited with signal SIGKILL

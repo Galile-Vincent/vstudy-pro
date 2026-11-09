@@ -1,0 +1,47 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop
+
+ ❯ src/main/services/delete-data.test.ts (15 tests | 3 failed) 59ms
+   × removes a partially written marker and keeps the app usable 1ms
+   × accepts unsupported directory fsync EINVAL 0ms
+   × accepts unsupported directory fsync ENOTSUP 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/services/delete-data.test.ts > removes a partially written marker and keeps the app usable
+AssertionError: expected "vi.fn()" to be called with arguments: [ '/owned.delete-pending', …(1) ]
+
+Number of calls: 0
+
+ ❯ src/main/services/delete-data.test.ts:91:17
+     89|   io.open.mockResolvedValueOnce({writeFile:vi.fn().mockRejectedValue(E…
+     90|   const s = setup(); await s.run();
+     91|   expect(io.rm).toHaveBeenCalledWith('/owned.delete-pending',{force:tr…
+       |                 ^
+     92|   expect(s.relaunch).not.toHaveBeenCalled();
+     93|   expect(s.stop).not.toHaveBeenCalled();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/main/services/delete-data.test.ts > accepts unsupported directory fsync EINVAL
+ FAIL  src/main/services/delete-data.test.ts > accepts unsupported directory fsync ENOTSUP
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/main/services/delete-data.test.ts:98:50
+     96|   io.open.mockResolvedValueOnce({writeFile:vi.fn(),sync:vi.fn(),close:…
+     97|     .mockResolvedValueOnce({sync:vi.fn().mockRejectedValue(Object.assi…
+     98|   const s=setup(); await s.run(); expect(s.stop).toHaveBeenCalledOnce(…
+       |                                                  ^
+     99| });
+    100|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 12 passed (15)
+   Start at  18:16:14
+   Duration  136ms (transform 21ms, setup 0ms, import 29ms, tests 59ms, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/services/delete-data.test.ts

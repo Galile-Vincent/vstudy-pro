@@ -1,0 +1,41 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop
+
+ ❯ src/main/services/delete-data.test.ts (17 tests | 1 failed) 109ms
+   × reports partial stop failure and always relaunches 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/services/delete-data.test.ts > reports partial stop failure and always relaunches
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "delete-all",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/main/services/delete-data.test.ts:42:30
+     40|   const s=setup(); s.stop.mockRejectedValueOnce(new Error('stop failed…
+     41|   await s.run(); expect(io.rename).not.toHaveBeenCalled();
+     42|   expect(workers.resume).not.toHaveBeenCalled();
+       |                              ^
+     43|   expect(s.report).toHaveBeenCalledWith(expect.objectContaining({messa…
+     44|   expect(s.relaunch).toHaveBeenCalledOnce();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+   Start at  18:25:57
+   Duration  201ms (transform 30ms, setup 0ms, import 39ms, tests 109ms, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/services/delete-data.test.ts

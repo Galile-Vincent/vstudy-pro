@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { McpRuntime } from './mcp/runtime';
 
 const mocks = vi.hoisted(() => ({
-  initialize:vi.fn(), confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
+  handlers:new Map<string,(...args:unknown[]) => Promise<unknown>>(), initialize:vi.fn(), confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
   showMessage: vi.fn(), fatal: vi.fn(), copyDiagnostics: vi.fn(), logDeletionFailure:vi.fn(), log: vi.fn(), registerIpc: vi.fn(), restore: undefined as undefined | (() => void),
 }));
 const electron = await vi.hoisted(async () => {
@@ -40,7 +40,7 @@ vi.mock('electron', () => electron);
 vi.mock('node:fs', async importOriginal => ({...await importOriginal<typeof import('node:fs')>(), mkdirSync:vi.fn()}));
 vi.mock('./db', () => ({ openStore: () => ({ settings: { get: () => ({}) }, close: mocks.closeStore }) }));
 vi.mock('./ipc', () => ({ registerIpc: (...args:unknown[]) => mocks.registerIpc(...args) }));
-vi.mock('./ipc/register', () => ({ createIpcRegistrar: () => ({ handle: vi.fn() }) }));
+vi.mock('./ipc/register', () => ({ createIpcRegistrar: () => ({ handle: vi.fn((name:string,handler:(...args:unknown[]) => Promise<unknown>) => mocks.handlers.set(name,handler)) }) }));
 vi.mock('./services/secrets', () => ({ createSecretStore: vi.fn() }));
 vi.mock('./services/delete-data', () => ({ createDataDeletion: vi.fn(() => vi.fn()), cleanupDeletedData: vi.fn(async () => true), finishPendingDeletion: vi.fn(async () => true) }));
 vi.mock('./assets', () => ({ assetHandler: vi.fn() }));
@@ -63,6 +63,7 @@ beforeEach(() => {
   processListeners = new Map(['exit', 'uncaughtExceptionMonitor', 'unhandledRejection'].map(event => [event, eventProcess.rawListeners(event)]));
   vi.resetModules();
   vi.clearAllMocks();
+  mocks.handlers.clear();
   mocks.registerIpc.mockReturnValue(mocks.dispose);
   electron.app.removeAllListeners();
   electron.nativeTheme.removeAllListeners();
@@ -422,4 +423,18 @@ it('reports deletion errors with a failure title in one unparented notice', asyn
     title:'settings:delete_failure_title',message:'settings:delete_failed',
   }));
   window.webContents.emit('did-finish-load');
+});
+
+it('rejects a second deletion request while the first waits for app readiness', async () => {
+  const window=await start();
+  const handler=mocks.handlers.get('settings:deleteAllData')!;
+  const pending=handler({}, {sender:window.webContents});
+  const second=handler({}, {sender:window.webContents}).catch(error => String(error));
+  try {
+    const result=await Promise.race([second,new Promise(resolve => setTimeout(() => resolve('waiting'),100))]);
+    expect(result).toContain('settings.delete_in_progress');
+  } finally {
+    window.webContents.emit('did-finish-load');
+    await Promise.allSettled([pending,second]);
+  }
 });

@@ -1,0 +1,33 @@
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop
+
+ ❯ src/main/index.test.ts (40 tests | 1 failed) 2264ms
+   × rejects a second deletion request while the first waits for app readiness 112ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/main/index.test.ts > rejects a second deletion request while the first waits for app readiness
+AssertionError: expected 'waiting' to contain 'settings.delete_in_progress'
+
+Expected: "settings.delete_in_progress"
+Received: "waiting"
+
+ ❯ src/main/index.test.ts:435:20
+    433|   try {
+    434|     const result=await Promise.race([second,new Promise(resolve => set…
+    435|     expect(result).toContain('settings.delete_in_progress');
+       |                    ^
+    436|   } finally {
+    437|     window.webContents.emit('did-finish-load');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 39 passed (40)
+   Start at  18:23:52
+   Duration  2.34s (transform 170ms, setup 0ms, import 28ms, tests 2.26s, environment 0ms)
+
+undefined
+/Users/vc/.t3/worktrees/vstudy-pro/t3-3af3b6fd/apps/desktop:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/main/index.test.ts
