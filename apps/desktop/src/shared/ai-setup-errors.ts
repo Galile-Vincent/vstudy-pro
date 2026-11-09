@@ -8,6 +8,7 @@ export const setupErrors = {
   certificate: { title: 'certificate', next: 'certificate', action: null },
   offline: { title: 'offline', next: 'reconnect', action: null },
   'permission-denied': { title: 'permission', next: 'permission', action: null },
+  'disk-full': { title: 'disk_full', next: 'disk_full', action: null },
   'command-not-found': { title: 'not_found', next: 'install', action: 'install' },
   'wrong-version': { title: 'version', next: 'install', action: 'install' },
   'rate-limit': { title: 'limit', next: 'wait', action: null },
@@ -17,6 +18,7 @@ export type SetupIssue = keyof typeof setupErrors;
 export function classifySetupError(code: string, rawText = ''): SetupIssue {
   const text = rawText.slice(0, 4000);
   if (code !== 'unknown' && code in setupErrors) return code as SetupIssue;
+  if (/ENOSPC|EDQUOT|no space left|disk (?:is )?full|disk quota/i.test(text)) return 'disk-full';
   if (/429|rate.?limit|quota|too many requests|resource.exhausted/i.test(text)) return 'rate-limit';
   if (/ENOENT|command not found|not recognized|executable[^\n]{0,80}not found/i.test(text)) return 'command-not-found';
   if (/EACCES|EPERM|permission denied/i.test(text)) return 'permission-denied';
@@ -36,5 +38,5 @@ export function setupDiagnostic(input: { tool: string; version: string | null; o
   const version = input.version && /^v?\d+(?:\.\d+){1,3}(?:-[a-z0-9.-]{1,32})?$/i.test(input.version) ? input.version : 'unknown';
   const os = ['darwin', 'win32', 'linux'].includes(input.os) ? input.os : 'unknown';
   const exitCode = Number.isSafeInteger(input.exitCode) ? input.exitCode : 'unknown';
-  return `Tool: ${tool}\nVersion: ${version}\nOS: ${os}\nExit code: ${exitCode}\nLast error: ${classifySetupError('unknown', input.error)}`;
+  return `Tool: ${tool}\nVersion: ${version}\nOS: ${os}\nExit code: ${exitCode}\nLast error: ${classifySetupError(input.error, input.error)}`;
 }

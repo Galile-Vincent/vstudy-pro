@@ -42,6 +42,8 @@
   "loading": "Loading your review…",
   "load_more": "Load more",
   "retry": "Try again",
+  "draft_save_failed": "Your latest choice could not be saved yet. It stays on screen and we will keep trying.",
+  "graded_earlier": "This question was already graded with your earlier answer. That answer stays final.",
   "error": "Could not load or save your study memory. Please try again.",
   "offline": "Your provider is offline. Saved questions are still available. Reconnect and try again.",
   "budget": "Memory collection is paused by your review budget. Check your limits, then try again.",

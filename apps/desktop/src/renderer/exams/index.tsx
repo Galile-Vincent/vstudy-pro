@@ -1,19 +1,29 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ClipboardCheck, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { EXAM_COURSE_ID } from "../../shared/review-artifacts";
 import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
 import { desktop } from "../bridge";
-import { Button } from "../components/ui/button";
+import {
+  Button,
+  EmptyState,
+  FormField,
+  Input,
+  PageContainer,
+  PageHeader,
+  Section,
+  Toolbar,
+} from "../components/ui";
 import { ExamHistory } from "./history";
-import { Input } from "../components/ui/input";
+import { useFooterInset } from "./footer-inset";
 import { Textarea } from "../components/ui/textarea";
 import { TestPlayer } from "../review/test-player";
 import { useReviewPage, type Cursor } from "../review/paging";
-import "../review/artifacts.css";
 import "./exams.css";
 type Artifact = NonNullable<IpcResponse<"review:artifact:get">>;
+const selectClass =
+  "h-9 w-full rounded-md border border-input bg-transparent px-3 text-base md:text-sm";
 const initialCounts = {
   mcq: 3,
   multi_select: 2,
@@ -21,9 +31,12 @@ const initialCounts = {
   cloze: 2,
   true_false: 2,
 };
-export function ExamsView() {
+export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
   const { i18n } = useTranslation();
-  const [documents, setDocuments] = useState<IpcResponse<"documents:list">>([]),
+  const footerInset = useFooterInset();
+  const [documents, setDocuments] = useState<IpcResponse<
+      "documents:list"
+    > | null>(null),
     [providers, setProviders] = useState<IpcResponse<"providers:list">>([]);
   const [selected, setSelected] = useState<string[]>([]),
     [prompt, setPrompt] = useState(""),
@@ -133,65 +146,85 @@ export function ExamsView() {
     setArtifact(value);
     history.retry();
   };
+  const leave = (
+    <Button
+      variant="ghost"
+      disabled={busy}
+      onClick={() => {
+        setArtifact(null);
+        setMode("setup");
+        history.retry();
+      }}
+    >
+      {tr("exams:back")}
+    </Button>
+  );
+  const ready = documents?.filter((d) => d.status === "ready") ?? [];
   return (
-    <main className="exams-view review-artifacts">
-      <header className="exams-heading">
-        <ClipboardCheck size={28} />
-        <div>
-          <h1>{tr("exams:title")}</h1>
-          <p>{tr("exams:subtitle")}</p>
-        </div>
-        <nav
-          className="exam-view-navigation"
-          aria-label={tr("exams:navigation")}
-        >
-          <Button
-            variant={mode === "setup" && !artifact ? "secondary" : "ghost"}
-            aria-pressed={mode === "setup" && !artifact}
-            onClick={() => {
-              setArtifact(null);
-              setMode("setup");
-              history.retry();
-            }}
+    <PageContainer as="main" className="exams-view" data-tab-scroll="">
+      <PageHeader
+        title={tr("exams:title")}
+        description={tr("exams:subtitle")}
+        actions={
+          <nav
+            className="flex gap-[var(--space-1)]"
+            aria-label={tr("exams:navigation")}
           >
-            {tr("exams:new_exam")}
-          </Button>
-          <Button
-            variant={mode === "history" && !artifact ? "secondary" : "ghost"}
-            aria-pressed={mode === "history" && !artifact}
-            onClick={() => {
-              setArtifact(null);
-              setMode("history");
-              history.retry();
-            }}
-          >
-            {tr("exams:history")}
-          </Button>
-        </nav>
-      </header>
+            <Button
+              variant={mode === "setup" && !artifact ? "secondary" : "ghost"}
+              aria-pressed={mode === "setup" && !artifact}
+              onClick={() => {
+                setArtifact(null);
+                setMode("setup");
+                history.retry();
+              }}
+            >
+              {tr("exams:new_exam")}
+            </Button>
+            <Button
+              variant={mode === "history" && !artifact ? "secondary" : "ghost"}
+              aria-pressed={mode === "history" && !artifact}
+              onClick={() => {
+                setArtifact(null);
+                setMode("history");
+                history.retry();
+              }}
+            >
+              {tr("exams:history")}
+            </Button>
+          </nav>
+        }
+      />
       {error && <p role="alert">{error}</p>}
-      {!artifact && mode === "setup" && (
+      {!artifact && mode === "setup" && documents && !ready.length && (
+        <EmptyState
+          headingLevel={2}
+          icon={<FileText size={32} />}
+          title={tr("exams:empty_title")}
+          description={tr("exams:no_documents")}
+          action={<Button onClick={onOpenLibrary}>{tr("common:library")}</Button>}
+        />
+      )}
+      {!artifact && mode === "setup" && ready.length > 0 && (
         <form
-          className="exam-setup"
           onSubmit={(e) => {
             e.preventDefault();
             void run(generate);
           }}
         >
-          <fieldset disabled={busy}>
-            <legend>{tr("exams:sources")}</legend>
-            <p>{tr("exams:source_hint")}</p>
-            <div className="exam-documents">
-              {documents
-                .filter((d) => d.status === "ready")
-                .map((d) => (
-                  <label key={d.id}>
+          <fieldset
+            disabled={busy}
+            className="flex min-w-0 flex-col gap-[var(--space-8)]"
+          >
+            <Section title={tr("exams:sources")}>
+              <p className="text-[var(--muted)]">{tr("exams:source_hint")}</p>
+              <div className="exam-documents">
+                {ready.map((d) => (
+                  <label className="exam-choice" key={d.id}>
                     <input
                       type="checkbox"
                       checked={selected.includes(d.id)}
-                      disabled={
-                        !selected.includes(d.id) && selected.length >= 8
-                      }
+                      disabled={!selected.includes(d.id) && selected.length >= 8}
                       onChange={(e) =>
                         setSelected(
                           e.target.checked
@@ -200,127 +233,150 @@ export function ExamsView() {
                         )
                       }
                     />
-                    <FileText size={16} />
+                    <FileText size={16} aria-hidden="true" />
                     <span>{d.title}</span>
                   </label>
                 ))}
-            </div>
-            {!documents.some((d) => d.status === "ready") && (
-              <p>{tr("exams:no_documents")}</p>
-            )}
-          </fieldset>
-          <label>
-            {tr("exams:prompt")}
-            <Textarea
-              maxLength={4000}
-              rows={3}
-              value={prompt}
-              placeholder={tr("exams:prompt_hint")}
-              onChange={(e) => setPrompt(e.target.value)}
-            />
-          </label>
-          <fieldset disabled={busy}>
-            <legend>{tr("exams:question_types")}</legend>
-            <div className="exam-counts">
-              {Object.entries(counts).map(([type, count]) => (
-                <label key={type}>
-                  {tr(`exams:${type}`)}
-                  <Input
-                    type="number"
-                    min={0}
-                    max={40}
-                    value={count}
-                    onChange={(e) =>
-                      setCounts({
-                        ...counts,
-                        [type]: Math.max(
-                          0,
-                          Math.min(40, Math.trunc(Number(e.target.value))),
-                        ),
-                      })
-                    }
+              </div>
+            </Section>
+            <Section title={tr("exams:configuration")}>
+              <FormField label={tr("exams:prompt")}>
+                {(field) => (
+                  <Textarea
+                    {...field}
+                    maxLength={4000}
+                    rows={2}
+                    value={prompt}
+                    placeholder={tr("exams:prompt_hint")}
+                    onChange={(e) => setPrompt(e.target.value)}
                   />
-                </label>
-              ))}
-            </div>
-            <p>{tr("exams:total", { count: total })}</p>
-          </fieldset>
-          <div className="exam-options">
-            <label>
-              {tr("exams:difficulty")}
-              <select
-                value={difficulty}
-                onChange={(e) =>
-                  setDifficulty(e.target.value as typeof difficulty)
+                )}
+              </FormField>
+              <fieldset className="flex flex-col gap-[var(--space-3)]">
+                <legend className="mb-[var(--space-3)] font-medium">
+                  {tr("exams:question_types")}
+                </legend>
+                <div className="exam-fields">
+                  {Object.entries(counts).map(([type, count]) => (
+                    <FormField key={type} label={tr(`exams:${type}`)}>
+                      {(field) => (
+                        <Input
+                          {...field}
+                          type="number"
+                          min={0}
+                          max={40}
+                          value={count}
+                          onChange={(e) =>
+                            setCounts({
+                              ...counts,
+                              [type]: Math.max(
+                                0,
+                                Math.min(
+                                  40,
+                                  Math.trunc(Number(e.target.value)),
+                                ),
+                              ),
+                            })
+                          }
+                        />
+                      )}
+                    </FormField>
+                  ))}
+                </div>
+                <p className="text-[var(--muted)]">
+                  {tr("exams:total", { count: total })}
+                </p>
+              </fieldset>
+              <div className="exam-fields">
+                <FormField label={tr("exams:difficulty")}>
+                  {(field) => (
+                    <select
+                      {...field}
+                      className={selectClass}
+                      value={difficulty}
+                      onChange={(e) =>
+                        setDifficulty(e.target.value as typeof difficulty)
+                      }
+                    >
+                      {["easy", "medium", "hard"].map((v) => (
+                        <option key={v} value={v}>
+                          {tr(`exams:${v}`)}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </FormField>
+                <FormField label={tr("exams:language")}>
+                  {(field) => (
+                    <select
+                      {...field}
+                      className={selectClass}
+                      value={language}
+                      onChange={(e) =>
+                        setLanguage(e.target.value as typeof language)
+                      }
+                    >
+                      <option value="en">English</option>
+                      <option value="zh-Hant">繁體中文</option>
+                      <option value="ja">日本語</option>
+                    </select>
+                  )}
+                </FormField>
+                <FormField label={tr("review:generation_model")}>
+                  {(field) => (
+                    <select
+                      {...field}
+                      className={selectClass}
+                      value={model}
+                      onChange={(e) => setModel(e.target.value)}
+                    >
+                      {choices.map((c, i) => (
+                        <option key={c.providerId + c.modelId} value={i}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </FormField>
+              </div>
+              {!choices.length && <p>{tr("review:choose_provider")}</p>}
+            </Section>
+            <div className="exam-footer" ref={footerInset}>
+              <Button
+                type="submit"
+                disabled={
+                  busy ||
+                  !selected.length ||
+                  total < 1 ||
+                  total > 40 ||
+                  !choices.length
                 }
               >
-                {["easy", "medium", "hard"].map((v) => (
-                  <option key={v} value={v}>
-                    {tr(`exams:${v}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              {tr("exams:language")}
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as typeof language)}
-              >
-                <option value="en">English</option>
-                <option value="zh-Hant">繁體中文</option>
-                <option value="ja">日本語</option>
-              </select>
-            </label>
-            <label>
-              {tr("review:generation_model")}
-              <select value={model} onChange={(e) => setModel(e.target.value)}>
-                {choices.map((c, i) => (
-                  <option key={c.providerId + c.modelId} value={i}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {!choices.length && <p>{tr("review:choose_provider")}</p>}
-          <Button
-            variant="secondary"
-            type="submit"
-            disabled={
-              busy ||
-              !selected.length ||
-              total < 1 ||
-              total > 40 ||
-              !choices.length
-            }
-          >
-            {tr("exams:generate")}
-          </Button>
+                {tr("exams:generate")}
+              </Button>
+            </div>
+          </fieldset>
         </form>
       )}
-      {artifact && (
-        <article className="exam-active-artifact">
-          <div className="exam-artifact-toolbar">
-            <h2>{artifact.title}</h2>
-            <Button
-              variant="ghost"
-              disabled={busy}
-              onClick={() => {
-                setArtifact(null);
-                history.retry();
-              }}
-            >
-              {tr("exams:back")}
-            </Button>
-          </div>
-          {artifact.status === "ready" ? (
-            <TestPlayer
-              key={artifact.id}
-              artifact={artifact}
-              onRetake={() => {}}
-            />
-          ) : artifact.status === "generating" ? (
+      {artifact && artifact.status === "ready" && (
+        <TestPlayer
+          key={artifact.id}
+          artifact={artifact}
+          onRetake={() => {}}
+          actions={leave}
+        />
+      )}
+      {artifact && artifact.status !== "ready" && (
+        <>
+          <Toolbar
+            left={
+              <h2 className="text-[length:var(--type-lg)] font-medium">
+                {artifact.title}
+              </h2>
+            }
+            right={leave}
+          />
+          {artifact.status === "generating" ? (
             <div role="status">
               <p>{tr("review:stage_generating")}</p>
               <Button
@@ -346,26 +402,25 @@ export function ExamsView() {
               {tr("review:generation_failed")} ({artifact.errorCode})
             </p>
           )}
-        </article>
+        </>
       )}
       {!artifact && mode === "history" && (
-        <section
-          className="exam-history-section"
-          aria-label={tr("exams:history")}
-        >
-          <h2>{tr("exams:history")}</h2>
+        <Section title={tr("exams:history")}>
           {history.loading && <p role="status">{tr("review:loading")}</p>}
           {history.error && (
-            <Button onClick={history.retry}>{tr("review:retry")}</Button>
+            <p role="alert">
+              {tr("exams:history_error")}{" "}
+              <Button onClick={history.retry}>{tr("review:retry")}</Button>
+            </p>
           )}
-          {!history.items.length && !history.loading && (
+          {!history.items.length && !history.loading && !history.error && (
             <p>{tr("exams:history_empty")}</p>
           )}
           <ExamHistory
             items={history.items}
             busy={busy}
             documentTitle={(id) =>
-              documents.find((d) => d.id === id)?.title ?? id
+              documents?.find((d) => d.id === id)?.title ?? id
             }
             onOpen={(id) =>
               void run(async () =>
@@ -395,11 +450,11 @@ export function ExamsView() {
           {history.cursor && (
             <Button onClick={history.more}>{tr("review:load_more")}</Button>
           )}
-        </section>
+        </Section>
       )}
-      <p className="review-footnote">
+      <p className="text-[length:var(--type-sm)] text-[var(--muted)]">
         {tr("review:validation_notice")} · {tr("exams:grading_notice")}
       </p>
-    </main>
+    </PageContainer>
   );
 }

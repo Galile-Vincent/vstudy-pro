@@ -188,7 +188,7 @@ mark { background:var(--active); color:var(--ink); font-weight:600; }
 .home-list li > button:not(:first-child) { opacity:0; border:0; background:transparent; transition:opacity var(--motion-fast) ease-out; }
 .home-list li:hover > button,.home-list li:focus-within > button { opacity:1; }
 .home-list li > button:disabled { visibility:hidden; }
-.home-card button:not(.primary):not(.home-row),.onboarding button:not(.primary):not(.app-select) { border-color:var(--hairline); }
+.home-card button:not(.primary):not(.home-row) { border-color:var(--hairline); }
 
 /* Sidebar controls share the shell's flat navigation treatment. */
 .app-shell .shell-sidebar .folder-node > button { height:100%; min-height:0; width:auto; flex:none; padding:var(--space-1); }

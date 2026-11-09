@@ -3,16 +3,19 @@ import { useState } from 'react';
 import type { CliActionSession } from '../../shared/ai-cli';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
+import { FormField, Toolbar } from '../components/ui';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { outputLinks, readableOutput } from './model';
 
-export function SignInAction({ session }: { session: CliActionSession }) {
+export function SignInAction({ session, onRetry }: { session: CliActionSession; onRetry?: () => void }) {
   const [code, setCode] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(false);
   const active = session.phase === 'running';
+  const cancelled = session.phase === 'cancelled';
   const url = outputLinks(session.output)[0];
   const deviceCode = readableOutput(session.output).match(/(?:device|user|one.time|verification|security)\s+code(?:\s+is)?(?:\s*\([^)\n]*\))?\s*[:：]?\s*([A-Z0-9]{4,}(?:-[A-Z0-9]{4,})+)/i)?.[1];
   const send = async () => {
@@ -24,19 +27,24 @@ export function SignInAction({ session }: { session: CliActionSession }) {
     catch { setError(true); }
     finally { setSending(false); }
   };
-  return <section className="ai-cli-sign-in" aria-label={tr('ai-cli:step_login')}>
-    <p role="status" className={session.phase === 'succeeded' ? 'ai-cli-success' : undefined}>{tr(session.phase === 'succeeded' ? 'ai-cli:signin_verified' : active ? sent ? 'ai-cli:code_sent' : url ? 'ai-cli:signin_waiting' : 'ai-cli:signin_preparing' : `ai-cli:phase_${session.phase}`)}</p>
+  return <section className="ai-cli-sign-in" data-cancelled={cancelled || undefined} aria-label={tr('ai-cli:step_login')}>
+    <p role="status" className={session.phase === 'succeeded' ? 'ai-cli-success' : undefined}>{tr(session.phase === 'succeeded' ? 'ai-cli:signin_verified' : active ? sent ? 'ai-cli:code_sent' : url ? 'ai-cli:signin_waiting' : 'ai-cli:signin_preparing' : cancelled ? 'ai-cli:signin_cancelled' : `ai-cli:phase_${session.phase}`)}</p>
+    {cancelled && onRetry && <Button variant="secondary" onClick={onRetry}>{tr('ai-cli:retry_signin')}</Button>}
     {active && <>
-      {url && <div className="ai-cli-actions">
+      {url && <Toolbar left={<>
         <Button onClick={() => void desktop.invoke('shell:openExternal', { url }).catch(() => setError(true))}>{tr('ai-cli:open_signin')}</Button>
         <Button variant="secondary" onClick={() => void navigator.clipboard.writeText(url).then(() => setCopied(true)).catch(() => setError(true))}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_signin_link')}</Button>
-      </div>}
+      </>} />}
       {deviceCode && <p className="ai-cli-device-code">{tr('ai-cli:device_code')} <code>{deviceCode}</code></p>}
       <form onSubmit={event => { event.preventDefault(); void send(); }}>
-        <label htmlFor="ai-cli-returned-code">{tr('ai-cli:returned_code')}</label>
-        <p id="ai-cli-code-help" className="muted">{tr('ai-cli:returned_code_help')}</p>
-        <div className="ai-cli-code-row"><input id="ai-cli-returned-code" aria-describedby="ai-cli-code-help" autoComplete="off" spellCheck={false} value={code} maxLength={4094} disabled={sending} onChange={event => { setCode(event.target.value); setSent(false); }} />
-          <Button type="submit" variant="secondary" disabled={sending || !code.trim()}>{tr('ai-cli:send_code')}</Button></div>
+        <FormField label={tr('ai-cli:returned_code')} description={tr('ai-cli:returned_code_help')} controlId="ai-cli-returned-code">
+          {field => (
+            <Toolbar
+              center={<Input {...field} autoComplete="off" spellCheck={false} value={code} maxLength={4094} disabled={sending} onChange={event => { setCode(event.target.value); setSent(false); }} />}
+              right={<Button type="submit" variant="secondary" disabled={sending || !code.trim()}>{tr('ai-cli:send_code')}</Button>}
+            />
+          )}
+        </FormField>
       </form>
     </>}
     {error && <p role="alert">{tr('ai-cli:terminal_error')}</p>}

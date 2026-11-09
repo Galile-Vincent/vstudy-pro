@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { onboardingForward } from './helpers/onboarding.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const evidence = join(root, '../../docs/evidence/onboarding/design-pass');
@@ -26,8 +27,8 @@ try {
     await page.waitForFunction(() => document.documentElement.dataset.scheme === 'light');
     await page.locator('.product-preview-light').evaluate(image => image.decode());
     if (step === 'appearance') {
-      await page.locator('.onboarding footer .primary').click();
-      await page.locator('.onboarding footer .primary').click();
+      await onboardingForward(page).click();
+      await onboardingForward(page).click();
       await page.locator('input[name=onboarding-scheme]').first().waitFor();
       assert.equal(await page.locator('input[name=onboarding-scheme]').count(), 3);
       assert.equal(await page.locator('.onboarding .themes-grid, .onboarding .settings-row').count(), 0);

@@ -3,16 +3,17 @@ import assert from 'node:assert/strict';
 import { mkdir,mkdtemp,rm,writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join,resolve } from 'node:path';
+import { onboardingForward } from './helpers/onboarding.mjs';
 const directory=await mkdtemp(join(tmpdir(),'vstudy-welcome-details-'));let app;
 const results={};
 const evidence=resolve('../../docs/evidence/welcome-details');await mkdir(evidence,{recursive:true});
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
  const page=await app.firstWindow();const goHome=async()=>{if(!await page.locator('.shell-sidebar').isVisible()){if(await page.locator('.app-header').isVisible())await page.locator('.app-header').getByRole('button',{name:'Library',exact:true}).click();await page.getByRole('button',{name:'Toggle document library',exact:true}).click();}await page.locator('.shell-sidebar').getByRole('button',{name:'Home',exact:true}).click();};await page.emulateMedia({reducedMotion:'reduce'});await page.locator('.onboarding[data-state=open]').waitFor();
- for(const step of ['welcome','language','appearance','acquisition']) {await page.locator(`.onboarding[data-step=${step}]`).waitFor();await page.locator('.onboarding footer .primary').click();}
+ for(const step of ['welcome','language','appearance','acquisition']) {await page.locator(`.onboarding[data-step=${step}]`).waitFor();await onboardingForward(page).click();}
  await page.locator('.onboarding[data-step=privacy]').getByRole('button',{name:'No thanks',exact:true}).click();
- await page.locator('.onboarding[data-step=goal]').getByRole('radio',{name:/Import my own documents/}).check();await page.locator('.onboarding footer .primary').click();
- await page.locator('.onboarding[data-step=start]').waitFor();await page.locator('.onboarding footer .primary').click();await page.locator('.onboarding').waitFor({state:'detached'});await goHome();
+ await page.locator('.onboarding[data-step=goal]').getByRole('radio',{name:/Import my own documents/}).check();await onboardingForward(page).click();
+ await page.locator('.onboarding[data-step=start]').waitFor();await onboardingForward(page).click();await page.locator('.onboarding').waitFor({state:'detached'});await goHome();
  await page.locator('.home-page').waitFor();assert.equal(await page.locator('.welcome').count(),0);assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).welcomeSeen,false);results.noAutomaticTour=true;
  await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));
  await page.locator('#welcome-settings-entry').click();await page.locator('.welcome').waitFor();
