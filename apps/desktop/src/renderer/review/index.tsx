@@ -150,6 +150,16 @@ export function ReviewView() {
     setCourseId(wanted);
   }, [courses.loading, courses.items, route.courseId]);
   const weak = useWeakConcepts(courseId, revision);
+  useEffect(() => {
+    if (weak.loading || weak.error) return;
+    setSelection(old => {
+      if (!old || old.courseId !== courseId) return old;
+      const remaining = old.conceptKeys.flatMap((key, i) =>
+        weak.items.some(c => c.key === key) ? [{ key, label: old.labels[i]! }] : []);
+      if (remaining.length === old.conceptKeys.length) return old;
+      return { ...old, conceptKeys: remaining.map(c => c.key), labels: remaining.map(c => c.label) };
+    });
+  }, [weak.items, weak.loading, weak.error, courseId]);
   const tab =
     userTab ?? (weak.loading || weak.items.length ? "weak" : "recent");
   const failedAction = useRef<(() => Promise<unknown>) | null>(null);

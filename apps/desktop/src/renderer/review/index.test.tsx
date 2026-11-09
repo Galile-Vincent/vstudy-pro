@@ -258,3 +258,15 @@ it.each(['today', 'make_test'] as const)('moves focus after %s opens Tests', asy
   fireEvent.click(button);
   await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('heading', { name: en.tests })));
 });
+
+it('removes refreshed understood concepts from the next generation scope', async () => {
+  render(<ReviewView />);
+  fireEvent.click(await screen.findByRole('button', { name: en.make_test }));
+  expect((await screen.findByRole('checkbox', { name: 'Concept 1' }) as HTMLInputElement).checked).toBe(true);
+  fireEvent.mouseDown(screen.getByRole('tab', { name: en.weak }), { button: 0 });
+  state.masteryPages = [[]];
+  fireEvent.click(await screen.findByRole('button', { name: en.understood }));
+  await screen.findByText(en.weak_empty);
+  fireEvent.mouseDown(screen.getByRole('tab', { name: en.tests }), { button: 0 });
+  expect(screen.queryByRole('checkbox', { name: 'Concept 1' })).toBeNull();
+});
