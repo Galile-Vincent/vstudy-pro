@@ -472,3 +472,18 @@ it('bounds mounted rows after deletion with scroll past the content end', async 
  await waitFor(()=>expect(container.querySelector('[aria-setsize="5000"]')).toBeTruthy(),{timeout:10000});
  expect(container.querySelectorAll('.library-document').length).toBeLessThan(80);
 });
+
+it('uses nearest scrolling for arrows within and beyond the viewport', async () => {
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'
+  ? {items:Array.from({length:30},(_,i)=>row('doc'+i)),nextCursor:null}:[]);
+ const {container}=mount(); await screen.findByText('doc0');
+ const viewport=container.querySelector<HTMLElement>('.library-results')!;
+ Object.defineProperty(viewport,'clientHeight',{configurable:true,value:400});
+ const first=container.querySelector<HTMLElement>('[data-index="0"]')!;
+ act(()=>first.focus());fireEvent.keyDown(first,{key:'ArrowDown'});
+ expect(viewport.scrollTop).toBe(0);
+ for(let i=1;i<6;i++)fireEvent.keyDown(container.querySelector('[data-index="'+i+'"]')!,{key:'ArrowDown'});
+ expect(viewport.scrollTop).toBe(48);
+ fireEvent.keyDown(container.querySelector('[data-index="6"]')!,{key:'ArrowUp'});
+ expect(viewport.scrollTop).toBe(48);
+});

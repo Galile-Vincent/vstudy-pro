@@ -1112,7 +1112,15 @@ export function LibraryView() {
                       keyboardFocus.current = shown[next]!.document.id;
                       setActiveRow(shown[next]!.document.id);
                       if (scroller.current) {
-                        scroller.current.scrollTop = layout.offsets[Math.floor(next / columns)]!;
+                        const lane = Math.floor(next / columns);
+                        const offset = layout.offsets[lane]!;
+                        if (!e.key.startsWith("Arrow")) scroller.current.scrollTop = offset;
+                        else if (offset < scroller.current.scrollTop) scroller.current.scrollTop = offset;
+                        else {
+                          const bottom = offset + layout.heights[lane]!;
+                          const visibleBottom = scroller.current.scrollTop + scroller.current.clientHeight;
+                          if (bottom > visibleBottom) scroller.current.scrollTop = bottom - scroller.current.clientHeight;
+                        }
                         setTop(scroller.current.scrollTop);
                       }
                       if (next === index) {
