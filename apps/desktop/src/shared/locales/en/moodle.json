@@ -256,5 +256,7 @@
   "open_course_tab": "Open {{course}} in new tab",
   "catalog_course_actions": "Actions for {{course}}",
   "connect_another_school": "Connect another school",
-  "no_due_date": "No due date"
+  "no_due_date": "No due date",
+  "refresh_all_schools": "Refresh all schools",
+  "disconnect_school_named": "Disconnect {{school}}"
 }

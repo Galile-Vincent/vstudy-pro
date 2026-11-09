@@ -256,5 +256,7 @@
   "open_course_tab": "{{course}}を新しいタブで開く",
   "catalog_course_actions": "{{course}}の操作",
   "connect_another_school": "別の学校を接続",
-  "no_due_date": "期限なし"
+  "no_due_date": "期限なし",
+  "refresh_all_schools": "すべての学校を更新",
+  "disconnect_school_named": "{{school}}の接続を解除"
 }

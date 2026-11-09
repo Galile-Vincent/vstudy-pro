@@ -595,13 +595,19 @@ function CoursesBody({
         )}
         {!!overview?.accounts.length && !showUpdates && (!courseId || overview.accounts.some(account => account.status === "expired" || account.signInStorage)) && (
           <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap gap-2">
+              <Button variant="ghost" onClick={() => setConnect(true)}>
+                <GraduationCap />{tr("moodle:connect_another_school")}
+              </Button>
+              <Button variant="ghost" disabled={syncing} onClick={() => void sync()}>
+                <RefreshCw className={syncing ? "moodle-spin" : ""} />
+                {tr("moodle:refresh_all_schools")}
+              </Button>
+            </div>
             {overview.accounts.map((account) => (
               <div key={account.id} className="flex flex-wrap items-center gap-2">
                 <ListRow className="min-w-0 flex-[1_1_100%] min-[1200px]:flex-[1_1_12rem] [&_.ui-row-target]:break-words" title={account.displayName}
                   subtitle={`${account.siteName} · ${new URL(account.siteUrl).host}`} />
-                <Button variant="ghost" onClick={() => setConnect(true)}>
-                  <GraduationCap />{tr("moodle:connect_another_school")}
-                </Button>
                 <small>
                   {account.syncedAt
                     ? tr("moodle:synced", { time: relative(account.syncedAt) })
@@ -610,16 +616,7 @@ function CoursesBody({
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label={tr("moodle:refresh")}
-                  disabled={syncing}
-                  onClick={() => void sync()}
-                >
-                  <RefreshCw className={syncing ? "moodle-spin" : ""} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={tr("moodle:disconnect")}
+                  aria-label={tr("moodle:disconnect_school_named", { school: account.siteName })}
                   onClick={event => {
                     disconnectTrigger.current = event.currentTarget;
                     disconnectSchool.current = account.siteName;
