@@ -35,3 +35,9 @@
 .app-shell[data-view=courses] .context-coach p { margin-block:0 var(--space-1); font-size:var(--type-sm); line-height:1.5; }
 .app-shell[data-view=courses] .context-coach button { height:1.75rem; padding-inline:var(--space-2); font-size:var(--type-xs); }
 .app-shell[data-view=courses] .context-coach > button { width:1.75rem; padding:0; }
+@media (forced-colors: active), (prefers-contrast: more) {
+  .course-pin[aria-pressed="true"] {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+  }
+}
