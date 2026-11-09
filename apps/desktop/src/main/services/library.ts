@@ -163,7 +163,10 @@ export class LibraryService {
     pin(id: string, pinned: boolean) { this.require(id); this.store.db.prepare('UPDATE documents SET pinned=?,pinnedAt=CASE WHEN ? THEN coalesce(pinnedAt,?) ELSE NULL END WHERE id=?').run(Number(pinned), Number(pinned), new Date().toISOString(), id); }
     reorderPins(table: 'documents' | 'folders', ids: string[]) { this.transaction(() => ids.forEach((id, i) => this.store.db.prepare(`UPDATE ${table} SET pinnedAt=? WHERE id=? AND pinned=1`).run(new Date(Date.now() - i).toISOString(), id))); }
     rename(id: string, title: string) { this.require(id); this.store.db.prepare('UPDATE documents SET title=? WHERE id=?').run(title, id); }
-    softDelete(id: string) { this.store.db.prepare('UPDATE documents SET deletedAt=coalesce(deletedAt,?) WHERE id=?').run(new Date().toISOString(), id); }
+    softDelete(id: string) {
+        const result = this.store.db.prepare('UPDATE documents SET deletedAt=coalesce(deletedAt,?) WHERE id=?').run(new Date().toISOString(), id);
+        if (!result.changes) throw new Error('Document not found');
+    }
     restore(id: string, reason: 'undo' | 'import' = 'undo') { if(activePurges.has(id))throw new Error('storage.busy'); this.transaction(() => { const r = this.store.db.prepare('SELECT deletedAt,markdownPath,activeVersion FROM documents WHERE id=?').get(id); if (!r)
         throw new Error('Document not found'); if (r.deletedAt === null)
         return; if (reason === 'undo' && Date.now() - Date.parse(String(r.deletedAt)) > 30000)
