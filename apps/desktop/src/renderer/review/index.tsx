@@ -763,6 +763,12 @@ function Weak({
 }) {
   const [editing, setEditing] = useState<string | null>(null),
     [label, setLabel] = useState("");
+  const renameTarget = useRef<string | null>(null);
+  const renameInput = useRef<HTMLInputElement>(null);
+  const finishRename = (id: string) => {
+    setEditing(null);
+    document.getElementById(`weak-menu-${id}`)?.focus();
+  };
   const items = weak.items;
   const neighbour = (index: number) => {
     const other = items[index + 1] ?? items[index - 1];
@@ -836,6 +842,7 @@ function Weak({
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
+                        id={`weak-menu-${c.id}`}
                         aria-label={tr("review:row_actions", {
                           concept: c.label,
                         })}
@@ -843,9 +850,16 @@ function Weak({
                         <MoreHorizontal size={16} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" onCloseAutoFocus={(event) => {
+                      if (renameTarget.current === c.id) {
+                        event.preventDefault();
+                        renameTarget.current = null;
+                        renameInput.current?.focus();
+                      }
+                    }}>
                       <DropdownMenuItem
                         onSelect={() => {
+                          renameTarget.current = c.id;
                           setEditing(c.id);
                           setLabel(c.label);
                         }}
@@ -879,13 +893,17 @@ function Weak({
                       changes: { label },
                     });
                     setEditing(null);
-                  }, [`weak-${c.id}`]);
+                  }, [`weak-menu-${c.id}`]);
                 }}
               >
                 <label>
                   {tr("review:rename")}
                   <input
                     autoFocus
+                    ref={renameInput}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") finishRename(c.id);
+                    }}
                     maxLength={240}
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
@@ -894,7 +912,7 @@ function Weak({
                 <Button disabled={busy || !label.trim()} type="submit">
                   {tr("review:save")}
                 </Button>
-                <Button type="button" onClick={() => setEditing(null)}>
+                <Button type="button" onClick={() => finishRename(c.id)}>
                   {tr("review:cancel")}
                 </Button>
               </form>
