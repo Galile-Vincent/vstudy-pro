@@ -49,7 +49,6 @@ html[data-input-modality=pointer] .library-results .document-title:focus { outli
 .library-toolbar .library-search { flex:1 1 12rem; }
 
 .library-results[data-view=list] .library-document:is(:hover,:focus-within,[data-selected=true]) .document-actions { opacity:1; }
-.library-view { container:library / inline-size; }
 .library-view .bulk-bar button,.library-title > button { font-size:var(--type-base); }
 .library-view .bulk-bar button { height:auto; min-height:2rem; }
-@container library (width < 32rem) { .library-toolbar .library-search { flex-basis:100%; } }
+@container library-page (width < 32rem) { .library-toolbar .library-search { flex-basis:100%; } }

@@ -1,3 +1,4 @@
+import { libraryErrors } from '../../shared/library-errors';
 /**
  * Register validated register IPC operations and delegate privileged work to main services.
  * Owned by main/ipc.
@@ -48,7 +49,7 @@ export function createIpcRegistrar(
         else if (++budget.count > policy.requests) throw new Error('IPC rate limited');
         let release = () => {};
         try {
-          release = channel.startsWith('storage:') ? () => {} : enterStorageRequest();
+          release = (channel.startsWith('storage:') || ['updates:install', 'updates:cancel', 'updates:download'].includes(channel)) ? () => {} : enterStorageRequest();
           const request = ipcContract[channel].request.parse(payload) as IpcRequest<C>;
           const response = await handler(request, event);
           if (channel.startsWith('review:') && Buffer.byteLength(JSON.stringify(response) ?? '') > 512 * 1024) throw new Error('review.response_limit');
@@ -73,6 +74,10 @@ export function createIpcRegistrar(
           if (error instanceof Error && /Search took too long|Refine your query/.test(error.message)) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message.startsWith('Search took too long') ? 'errors.search_too_long' : 'errors.search_refine',params:{}}));
           if (error instanceof Error && error.message.startsWith('ai_parse.')) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'errors.'+error.message,params:{}}));
           if (error instanceof Error && error.message === 'errors.keychain_unavailable') throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message,params:{}}));
+          if (channel.startsWith('library:') && error instanceof Error) {
+            const reason = Object.entries(libraryErrors).find(([, message]) => message === error.message);
+            if (reason) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'library.' + reason[0],params:{}}));
+          }
           if (channel === 'converter:mode') throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error instanceof Error && /offline/.test(error.message) ? 'errors.converter_offline' : error instanceof Error && /Install uv|Python 3.10/.test(error.message) ? 'errors.converter_python' : 'errors.converter_failed',params:{}}));
           if (channel.startsWith('review:') && error instanceof Error && /^review\.[a-z_]+$/.test(error.message)) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message,params:{}}));
           const code=error instanceof Error && error.message.includes('Only empty conversations') ? 'errors.conversation_not_empty' : 'errors.generic';

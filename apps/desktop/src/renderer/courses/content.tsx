@@ -1,8 +1,8 @@
 import { CourseFileActions, type DocumentAction, type DocumentOutcome } from '../document-open';
+import { flushSync } from "react-dom";
 import { useMoodleWebview } from './webview';
 import {
   createElement,
-  useEffect,
   useRef,
   useState,
   type ReactNode,
@@ -29,6 +29,7 @@ import type {
 import { externalUrlSchema } from "../../shared/ipc";
 import { tr, i18n } from "../../shared/i18n";
 import { desktop } from "../bridge";
+import { Section, Toolbar, ListRow, EmptyState } from "../components/ui";
 import { Button } from "../components/ui/button";
 import {
   Sheet,
@@ -117,6 +118,7 @@ export function SafeCourseHtml({ html, onLink }: { html: string; onLink?: ((url:
           </a>
         );
     }
+    if (/^H[1-6]$/.test(node.tagName)) return createElement("p", {key}, children);
     return allowed.has(node.tagName)
       ? createElement(node.tagName.toLowerCase(), { key }, children)
       : children;
@@ -147,22 +149,19 @@ const date = (value: string) =>
 function WeeklySection({
   section,
   onModule,
+  open,
+  setOpen,
 }: {
   section: MoodleSection;
+  open: boolean;
+  setOpen: (open: boolean) => void;
   onModule: (module: MoodleModule) => void;
 }) {
-  const [open, setOpen] = useState(section.current);
-  const ref = useRef<HTMLElement>(null);
-  useEffect(() => {
-    if (section.current) {
-      setOpen(true);
-      ref.current?.scrollIntoView?.({ block: "nearest", behavior: "instant" });
-    }
-  }, [section.current]);
   return (
-    <section ref={ref} className="moodle-week" data-current={section.current}>
+    <section className="moodle-week" data-current={section.current}>
+      <h3 id={`week-heading-${section.id}`} tabIndex={-1}>
       <button
-        className="moodle-week-heading"
+        className="moodle-week-heading flex min-h-14 w-full items-center gap-3 rounded-[var(--r-sm)] bg-[var(--subtle)] px-3 py-2 text-start"
         aria-expanded={section.accessible ? open : false}
         aria-controls={`week-${section.id}`}
         onClick={() => section.accessible && setOpen(!open)}
@@ -174,8 +173,8 @@ function WeeklySection({
           <LockKeyhole />
         )}
         <span>
-          <strong>{section.name}</strong>
-          <small>
+          <span className="block font-medium">{section.name}</span>
+          <small className="block text-[var(--muted)]">
             {section.accessible
               ? tr("moodle:module_count", { count: section.modules.length })
               : tr("moodle:section_locked")}
@@ -185,37 +184,30 @@ function WeeklySection({
           <span className="moodle-chip">{tr("moodle:this_week")}</span>
         )}
       </button>
+      </h3>
+      <div id={`week-${section.id}`} role="region"
+        aria-labelledby={`week-heading-${section.id}`} hidden={!open || !section.accessible}>
       {open && section.accessible && (
-        <div id={`week-${section.id}`}>
+        <>
           {section.summaryHtml && <SafeCourseHtml html={section.summaryHtml} />}
           {section.modules.map((module) => {
             const Icon = icons[module.kind] ?? BookOpen;
             return (
-              <button
+              <ListRow
                 key={module.id}
                 className="moodle-module"
+                title={module.name}
+                leading={<Icon />}
+                subtitle={<>
+                  {tr(`moodle:kind_${module.kind}`)}
+                  {module.dueAt && <time dateTime={module.dueAt}>{date(module.dueAt)}</time>}
+                  {module.fileIds.length > 0 && <span>
+                    {tr("moodle:attachment_count", { count: module.fileIds.length })}
+                  </span>}
+                </>}
                 onClick={() => onModule(module)}
                 disabled={!module.accessible}
-              >
-                <span className="moodle-row-icon">
-                  <Icon />
-                </span>
-                <span className="moodle-row-main">
-                  <strong>{module.name}</strong>
-                  <small>
-                    {tr(`moodle:kind_${module.kind}`)}
-                    {module.dueAt && <> · {date(module.dueAt)}</>}
-                    {module.fileIds.length > 0 && (
-                      <>
-                        {" "}
-                        ·{" "}
-                        {tr("moodle:attachment_count", {
-                          count: module.fileIds.length,
-                        })}
-                      </>
-                    )}
-                  </small>
-                </span>
+                meta={<>
                 {!module.accessible ? (
                   <LockKeyhole aria-label={tr("moodle:section_locked")} />
                 ) : (
@@ -228,20 +220,25 @@ function WeeklySection({
                     />
                   ))
                 )}
-                <ChevronRight />
-              </button>
+                </>}
+              />
             );
           })}
-        </div>
+        </>
       )}
+      </div>
     </section>
   );
 }
 export function CourseContent({
   detail,
   openFile,
+  openWeeks,
+  setWeekOpen,
 }: {
   detail: MoodleCourseDetail;
+  openWeeks: ReadonlySet<string>;
+  setWeekOpen: (id: string, open: boolean) => void;
   openFile: (id: string, action?: DocumentAction) => Promise<DocumentOutcome | undefined>;
   onError: () => void;
 }) {
@@ -252,12 +249,28 @@ export function CourseContent({
   const [opening, setOpening] = useState(false);
   return (
     <>
-      <div className="moodle-weeks">
+      <Section title={tr("moodle:content")} actions={
+        detail.sections.some(section => section.current) && <Toolbar right={
+          <Button variant="ghost" onClick={() => {
+            const current = detail.sections.find(section => section.current);
+            if (current?.accessible) flushSync(() => setWeekOpen(current.id, true));
+            const heading = document.getElementById(`week-heading-${current?.id}`);
+            heading?.focus({ preventScroll: true });
+            heading?.scrollIntoView?.({
+              block: "start",
+              behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+            });
+          }}>{tr("moodle:jump_current_week")}</Button>
+        } />
+      }>
+      <div className="moodle-weeks flex flex-col gap-3">
         {detail.sections.length ? (
           detail.sections.map((section) => (
             <WeeklySection
               key={section.id}
               section={section}
+              open={openWeeks.has(section.id)}
+              setOpen={(open) => setWeekOpen(section.id, open)}
               onModule={(module) => {
                 trigger.current = document.activeElement as HTMLElement;
                 setSelected(module);
@@ -265,9 +278,10 @@ export function CourseContent({
             />
           ))
         ) : (
-          <p className="moodle-empty-inline">{tr((detail.panels?.contents ?? detail.fetchState) === "loading" ? "moodle:loading" : (detail.panels?.contents ?? detail.fetchState) === "error" ? `moodle:panel_error_${detail.panelErrors?.contents ?? "service"}` : "moodle:no_sections")}</p>
+          <EmptyState title={tr((detail.panels?.contents ?? detail.fetchState) === "loading" ? "moodle:loading" : (detail.panels?.contents ?? detail.fetchState) === "error" ? `moodle:panel_error_${detail.panelErrors?.contents ?? "service"}` : "moodle:no_sections")} />
         )}
       </div>
+      </Section>
       <Sheet
         open={!!selected}
         onOpenChange={(open) => {
@@ -352,30 +366,28 @@ export function Announcements({ items, accountId }: { items: MoodleAnnouncement[
   const [selected, setSelected] = useState<MoodleAnnouncement>();
   const trigger = useRef<HTMLElement | null>(null);
   return (
-    <section className="moodle-panel">
-      <h2>{tr("moodle:announcements")}</h2>
+    <Section title={tr("moodle:announcements")}>
       {items.length ? (
         [...items]
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
           .map((item) => (
-            <button
+            <ListRow
               className="moodle-announcement"
               key={item.id}
+              title={item.subject}
+              subtitle={<>
+                <span className="block">{item.author} {date(item.createdAt)}</span>
+                <span className="block">{courseHtmlPreview(item.bodyHtml).slice(0, 220)}</span>
+              </>}
+              meta={<ChevronRight />}
               onClick={() => {
                 trigger.current = document.activeElement as HTMLElement;
                 setSelected(item);
               }}
-            >
-              <strong>{item.subject}</strong>
-              <small>
-                {item.author} · {date(item.createdAt)}
-              </small>
-              <p>{courseHtmlPreview(item.bodyHtml).slice(0, 220)}</p>
-              <ChevronRight />
-            </button>
+            />
           ))
       ) : (
-        <p>{tr("moodle:no_announcements")}</p>
+        <EmptyState title={tr("moodle:no_announcements")} />
       )}
       <Sheet
         open={!!selected}
@@ -405,6 +417,6 @@ export function Announcements({ items, accountId }: { items: MoodleAnnouncement[
           )}
         </SheetContent>
       </Sheet>
-    </section>
+    </Section>
   );
 }

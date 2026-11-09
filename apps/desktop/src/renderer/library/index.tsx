@@ -1,3 +1,7 @@
+import { provesExistence } from './selection';
+import { virtualWindow } from './window';
+import { localDate, dayBound, validDay } from './dates';
+import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import { Brand } from '../components/brand';
 import { DocumentArt } from '../shell/document-art';
@@ -12,6 +16,7 @@ import { Input } from '../components/ui/input';
 import { contentLanguage } from "../../shared/content-language";
 import { Select } from "../components/select";
 import {
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -43,7 +48,6 @@ import {
   changed,
   reorderDestination,
   importFiles,
-  moveDocuments,
   selectedRange,
   courseName,
   groupByCourse,
@@ -63,16 +67,54 @@ function folderPath(folders: Folder[], id: string | null | undefined) {
   for (let level = 0; id && level < 8; level++) { const folder = folders.find(f => f.id === id); if (!folder) break; names.unshift(folder.name); id = folder.parentId; }
   return names.join(' › ');
 }
-export function formatSize(bytes: number | null, locale: string) {
+export function formatSize(bytes: number | null, locale: string, short = false) {
     if (bytes === null) return tr("library:unknown_size");
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
   const exponent = Math.min(3, Math.max(0, Math.floor(Math.log10(Math.max(1, bytes)) / 3)));
-  return new Intl.NumberFormat(locale, { style: 'unit', unitDisplay:'long', unit: units[exponent], maximumFractionDigits: 1 }).format(bytes / 1000 ** exponent);
+  return new Intl.NumberFormat(locale, { style: 'unit', unitDisplay:short ? 'short' : 'long', unit: units[exponent], maximumFractionDigits: 1 }).format(bytes / 1000 ** exponent);
 }
 function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpen:(event: React.MouseEvent<HTMLButtonElement>)=>void}) {
  const ref=useRef<HTMLButtonElement>(null);const [visible,setVisible]=useState(false);
  return <Tooltip delayDuration={500} open={visible} onOpenChange={next=>{const button=ref.current;const hidden=button?.closest('.library-document')?.querySelectorAll(':scope > div');setVisible(next&&!!button&&(button.scrollWidth>button.clientWidth||Array.from(hidden??[]).some(e=>getComputedStyle(e).display==='none')));}}><TooltipTrigger asChild><Button ref={ref} variant="ghost" className="document-title" tabIndex={-1} lang={contentLanguage(title)} onAuxClick={event=>{if(event.button===1){event.preventDefault();onOpen(event);}}} onClick={onOpen}>{title}</Button></TooltipTrigger><TooltipContent className="document-tooltip"><div>{title}</div><div>{details}</div></TooltipContent></Tooltip>;
 }
+function useEvent<T extends (...args: never[]) => unknown>(callback: T): T {
+  const latest = useRef(callback);
+  useLayoutEffect(() => { latest.current = callback; });
+  return useCallback(((...args) => latest.current(...args)) as T, []);
+}
+function retainItems(previous: Item[], next: Item[]) {
+  const byId = new Map(previous.map(item => [item.document.id, item]));
+  return next.map(item => {
+    const old = byId.get(item.document.id);
+    return old && JSON.stringify(old) === JSON.stringify(item) ? old : item;
+  });
+}
+function StatusBlock({id, measure, children}: {
+  id: string; measure: (id: string, height: number) => void;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const element = ref.current!;
+    const update = () => measure(id, element.getBoundingClientRect().height);
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    update();
+    return () => observer.disconnect();
+  }, [id, measure]);
+  return <div ref={ref} className="document-status">{children}</div>;
+}
+type RowProps = {
+  item: Item; index: number; count: number; grid: boolean;
+  height: number; offset: number; columns: number; tabRow: boolean;
+  selected: boolean; folderId: string | null | undefined; place: string;
+  language: string; locale: string | undefined; page: number | undefined;
+  total: number | undefined; render: () => React.ReactNode;
+};
+const DocumentRow = memo(function DocumentRow({render}: RowProps) {
+  return render();
+}, (previous, next) => (Object.keys(previous) as (keyof RowProps)[])
+  .every(key => key === "render" || previous[key] === next[key]));
 const defaults: LibraryQuery = { sort: "manual", direction: "asc", limit: 50 };
 const compactQuery = "(max-width: 1099px)";
 function useCompactToolbar() {
@@ -104,7 +146,7 @@ export function Snippet({ text }: { text: string }) {
   );
 }
 export function LibraryView() {
-  useTranslation();
+  const { i18n } = useTranslation();
   const [prompt, promptDialog] = useLibraryPrompt();
   const { route, navigate, openTab } = useNavigate(),
     format = useFormat();
@@ -118,7 +160,33 @@ export function LibraryView() {
     catch { /* Corrupt optional sort preferences must not prevent opening the library. */ }
     return {...defaults, ...sort, ...route.query};
   });
+  const clearFilters = () => {
+    setCustomDates(false);
+    setDateDraft({addedAfter:"",addedBefore:""});
+    setDateError(false);
+    setQuery(q => ({
+      ...defaults, sort: q.sort, direction: q.direction,
+      view: q.view, folderId: q.folderId, subfolders: q.subfolders,
+      text: text.trim() || undefined,
+    }));
+  };
   const [customDates,setCustomDates] = useState(false);
+  const [dateDraft, setDateDraft] = useState({
+    addedAfter: localDate(query.addedAfter),
+    addedBefore: localDate(query.addedBefore),
+  });
+  const [dateError, setDateError] = useState(false);
+  const updateDate = (key: "addedAfter" | "addedBefore", value: string) => {
+    const next = { ...dateDraft, [key]: value };
+    setDateDraft(next);
+    const invalid = !validDay(next.addedAfter) || !validDay(next.addedBefore) || !!(next.addedAfter && next.addedBefore && next.addedAfter > next.addedBefore);
+    setDateError(invalid);
+    if (!invalid) setQuery(q => ({
+      ...q,
+      addedAfter: next.addedAfter ? dayBound(next.addedAfter) : undefined,
+      addedBefore: next.addedBefore ? dayBound(next.addedBefore,true) : undefined,
+    }));
+  };
   const [filtersOpen,setFiltersOpen] = useState(false);
   const compactToolbar = useCompactToolbar();
   useEffect(() => {
@@ -154,8 +222,21 @@ export function LibraryView() {
     [tagging, setTagging] = useState(false),
     [folders, setFolders] = useState<Folder[]>([]),
     [tags, setTags] = useState<IpcResponse<"library:tags:list">>([]),
-    [undo, setUndo] = useState<(() => Promise<void>) | null>(null),
     [notice, setNotice] = useState("");
+  const loadedCount = useRef(0);
+  loadedCount.current = items.length;
+  const selectedSet = useMemo(() => new Set(selected), [selected]);
+  const selectedItems = useRef(new Map<Item["document"]["id"], Item>());
+  useLayoutEffect(() => {
+    for (const id of selectedItems.current.keys()) {
+      if (!selectedSet.has(id)) selectedItems.current.delete(id);
+    }
+    for (const item of items) {
+      if (selectedSet.has(item.document.id)) selectedItems.current.set(item.document.id, item);
+    }
+  }, [items, selectedSet]);
+  const selectedIds = useRef(selected);
+  selectedIds.current = selected;
   const menuAnchor = useRef<HTMLElement | null>(null);
   const placeOf = (item: Item) => courseName(item, language) ?? (folderPath(folders, item.folderId) || tr("library:unfiled"));
   const scroller = useRef<HTMLDivElement>(null),
@@ -178,18 +259,44 @@ export function LibraryView() {
   const openGroup = groupedView && openKey ? groups.find((g) => g.key === openKey) : undefined;
   const showFolders = groupedView && !openGroup;
   const shown = groupedView ? (openGroup?.items ?? []) : items;
+  const heading = useRef<HTMLHeadingElement>(null);
+  const folderFocus = useRef<string | null>(null);
   const selectFolder = (key: string | null) => {
+    folderFocus.current = key === openKey ? null : key ? "heading" : openKey;
     setOpenKey(key);
+    anchor.current = "";
     setActiveRow(undefined);
     setSelected([]);
     restoreTop.current = 0;
     try { if (key) sessionStorage.setItem(`library-folder:${viewKey}`, key); else sessionStorage.removeItem(`library-folder:${viewKey}`); }
     catch { /* A blocked session store only loses the reopened folder. */ }
   };
+  useLayoutEffect(() => {
+    const target = folderFocus.current;
+    if (!target) return;
+    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    const restore = () => {
+      if (folderFocus.current !== target) return;
+      const element = target === "heading" ? heading.current
+        : document.getElementById(`library-folder-${encodeURIComponent(target)}`);
+      if (element) {
+        element.focus();
+        folderFocus.current = null;
+      } else if (++attempts < 10) timer = setTimeout(restore, 50);
+      else {
+        (document.querySelector<HTMLElement>(".course-folder") ?? heading.current)?.focus();
+        folderFocus.current = null;
+      }
+    };
+    restore();
+    return () => clearTimeout(timer);
+  }, [openKey, showFolders, loading, groups]);
   const chooseMode = (next: LibraryMode) => {
     writeMode(next);
     setModeState(next);
     selectFolder(null);
+    folderFocus.current = null;
   };
   useEffect(() => {
     if (openKey && !loading && !cursor && groupedView && !groups.some((g) => g.key === openKey)) selectFolder(null);
@@ -217,11 +324,27 @@ export function LibraryView() {
     return () => clearTimeout(timer);
   }, [text]);
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (items.some((i) => i.document.status === "converting")) refresh();
+    let pending = false;
+    let cancelled = false;
+    let cursor: LibraryQuery["cursor"];
+    const timer = setInterval(async () => {
+      if (pending || !items.some(i => i.document.status === "converting")) return;
+      pending = true;
+      const id = generation.current;
+      try {
+        const page = await desktop.invoke("library:documents:list", {
+          ...query, cursor, limit: 100,
+        });
+        if (cancelled || id !== generation.current) return;
+        cursor = page.nextCursor ?? undefined;
+        const updates = new Map(page.items.map(item => [item.document.id, item]));
+        setItems(current => retainItems(current, current.map(item => updates.get(item.document.id) ?? item)));
+      } catch (error) {
+        if (!cancelled) setError(errorText(error));
+      } finally { pending = false; }
     }, 1500);
-    return () => clearInterval(timer);
-  }, [items, refresh]);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [query, items.some(i => i.document.status === "converting")]);
   useEffect(() => {
     localStorage.setItem(
       `library-sort:${viewKey}`,
@@ -229,17 +352,23 @@ export function LibraryView() {
     );
     const id = ++generation.current;
     fetching.current = false;
-    if (previousQuery.current === JSON.stringify(query)) {
+    const sameQuery = previousQuery.current === JSON.stringify(query);
+    if (sameQuery) {
       restoreTop.current = scroller.current?.scrollTop ?? restoreTop.current;
     } else {
+      setSelected([]);
+      anchor.current = "";
+      selectedIds.current = [];
       restoreTop.current = 0;
       previousQuery.current = JSON.stringify(query);
     }
-    setLoading(true);
+    if (!loadedCount.current) setLoading(true);
     setError("");
-    setSelected([]);
     void Promise.all([
-      desktop.invoke("library:documents:list", { ...query, cursor: undefined }),
+      desktop.invoke("library:documents:list", {
+        ...query, cursor: undefined,
+        limit: sameQuery ? Math.min(100, Math.max(query.limit, loadedCount.current)) : query.limit,
+      }),
       desktop.invoke("library:tree", {}),
       desktop.invoke("library:tags:list", {}),
     ])
@@ -255,19 +384,33 @@ export function LibraryView() {
               ),
             )
           : 1;
+        let extraPages = 0;
         while (
-          page.nextCursor &&
-          (rows.length * 64) / multiplier < restoreTop.current + 800
+          sameQuery && page.nextCursor &&
+          (rows.length < loadedCount.current ||
+            (revision === 0 && extraPages < 2 &&
+              (rows.length * 64) / multiplier < restoreTop.current + 800))
         ) {
+          extraPages++;
           const next = await desktop.invoke("library:documents:list", {
             ...query,
             cursor: page.nextCursor,
+            limit: 100,
           });
           if (id !== generation.current) return;
           rows.push(...next.items);
           page.nextCursor = next.nextCursor;
         }
-        setItems(rows);
+        setItems(current => retainItems(current, rows));
+        const available = new Set<string>(rows.map(item => item.document.id));
+        if (anchor.current && !available.has(anchor.current)) anchor.current = "";
+        if (provesExistence(query, page.nextCursor)) {
+          const missing = selectedIds.current.filter(id => !available.has(id));
+          if (missing.length) {
+            setSelected(current => current.filter(id => available.has(id)));
+            setNotice(tr("library:selectedMissing", {count: missing.length}));
+          }
+        }
         setCursor(page.nextCursor ?? undefined);
         setFolders(f);
         setTags(t);
@@ -286,17 +429,15 @@ export function LibraryView() {
       restoreTop.current = 0;
     }
   }, [loading]);
-  useEffect(() => {
-    if (!undo) return;
-    const timer = setTimeout(() => {
-      setUndo(null);
-      setNotice("");
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, [undo]);
+  const recoveries = useSyncExternalStore(recovery.subscribe, recovery.snapshot);
+  const latestRecovery = recoveries.at(-1);
+  const recoveryNotice = latestRecovery ? tr(latestRecovery.key, {
+    ...latestRecovery.params,
+    name: latestRecovery.params.title ?? tr('library:recoveryCount', latestRecovery.params),
+  }) : '';
   const focusAfter = useRef<string | null>(null);
   const [activeRow, setActiveRow] = useState<string>();
-  const tabRow = shown.some(item => item.document.id === activeRow) ? activeRow : shown[0]?.document.id;
+  const keyboardFocus = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (!loading && focusAfter.current) {
       const target = document.getElementById(focusAfter.current);
@@ -304,7 +445,7 @@ export function LibraryView() {
       focusAfter.current = null;
     }
   }, [loading, items]);
-  const run = async (action: () => Promise<unknown>) => {
+  const run = useEvent(async (action: () => Promise<unknown>) => {
     const focused = document.activeElement as HTMLElement | null;
     focusAfter.current = focused?.closest<HTMLElement>("[data-index]")?.id ?? menuAnchor.current?.closest<HTMLElement>("[data-index]")?.id ?? "shell-content";
     try {
@@ -312,7 +453,7 @@ export function LibraryView() {
     } catch (e) {
       setNotice(errorText(e));
     } finally { changed(); }
-  };
+  });
   const more = async () => {
     if (!cursor || fetching.current) return;
     fetching.current = true;
@@ -351,53 +492,122 @@ export function LibraryView() {
     setCursor(undefined);
     setSelected((openGroup ? all.filter((i) => (i.course?.id ?? uncategorizedKey) === openGroup.key) : all).map((i) => i.document.id));
   };
-  const open = (item: Item, newTab = false) => {
+  const open = useEvent((item: Item, newTab = false) => {
     void run(() => openDocument(item.document.id, () => (newTab ? openTab : navigate)({
       view: "workspace",
       documentId: item.document.id,
       query: route.query,
       title: newTab ? item.document.title : route.title,
     })));
-  };
+  });
   const ids =
-    menu && !selected.includes(menu.document.id)
+    menu && !selectedSet.has(menu.document.id)
       ? [menu.document.id]
       : selected;
+  const inFlight = useRef(false);
+  const [busy,setBusy] = useState(false);
   const remove = async (targets: Item["document"]["id"][]) => {
-    await run(async () => {
-      const deleted: typeof targets = [];
-      try {
-        for (const documentId of targets) {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    try { await run(async () => {
+      const failures: string[] = [];
+      const restored: Item["document"]["id"][] = [];
+      const deadline = Date.now() + 30000;
+      let deleted = 0;
+      for (const documentId of targets) {
+        try {
           await desktop.invoke("library:documents:softDelete", { documentId });
-          deleted.push(documentId);
+          deleted++;
+          restored.push(documentId);
+          selectedIds.current = selectedIds.current.filter(id => id !== documentId);
+          setSelected(selectedIds.current);
+        } catch (error) {
+          const title = items.find(item => item.document.id === documentId)?.document.title ?? documentId;
+          failures.push(`${title}: ${errorText(error)}`);
         }
-        setNotice(tr("library:deleted", {count:deleted.length,formatted:format.number(deleted.length)}));
-      } finally {
-        if (deleted.length) setUndo(() => async () => {
-          for (const documentId of deleted) await desktop.invoke("library:documents:restore", { documentId });
-          changed();
-        });
       }
+      if (restored.length) recovery.add('library:recoveryDeleted', async () => {
+        try {
+          const results = await Promise.allSettled(restored.map(documentId =>
+            desktop.invoke('library:documents:restore', {documentId})));
+          const failure = results.find(result => result.status === 'rejected');
+          if (failure?.status === 'rejected') throw failure.reason;
+        } finally { changed(); }
+      }, deadline, {
+        count: restored.length,
+        title: restored.length === 1
+          ? items.find(item => item.document.id === restored[0])?.document.title ?? restored[0]
+          : undefined,
+      });
+      setNotice(failures.length ? tr("library:deletePartial", {
+        succeeded: format.number(deleted), total: format.number(targets.length),
+        failed: format.number(failures.length), reasons: failures.join("; "),
+      }) : "");
     });
     setMenu(null);
+    } finally { inFlight.current = false; setBusy(false); }
+  };
+  const moveItems = useRef<Item[]>([]);
+  const openMove = (value: boolean) => {
+    if (value) setNotice("");
+    if (value) moveItems.current = menu && !selectedSet.has(menu.document.id)
+      ? [menu] : ids.flatMap(id => {
+        const item = selectedItems.current.get(id);
+        return item ? [item] : [];
+      });
+    setMove(value);
   };
   const moveTo = async (folderId: Folder["id"] | null) => {
-    const previous = items.filter((i) => ids.includes(i.document.id));
-    await run(() => moveDocuments(ids, folderId));
-    setNotice(tr("library:moved"));
-    setUndo(() => async () => {
-      for (const i of previous)
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    try {
+    const targets = moveItems.current;
+    const failures: string[] = [];
+    const remaining: Item[] = [];
+    const restored: Item[] = [];
+    const deadline = Date.now() + 30000;
+    let moved = 0;
+    for (const item of targets) {
+      try {
         await desktop.invoke("library:documents:move", {
-          documentIds: [i.document.id],
-          folderId: i.folderId,
+          documentIds: [item.document.id], folderId,
         });
-      changed();
+        moved++;
+        restored.push(item);
+        selectedIds.current = selectedIds.current.filter(id => id !== item.document.id);
+        setSelected(selectedIds.current);
+      } catch (error) {
+        remaining.push(item);
+        failures.push(`${item.document.title}: ${errorText(error)}`);
+      }
+    }
+    if (restored.length) recovery.add('library:recoveryMoved', async () => {
+      try {
+        const results = await Promise.allSettled(restored.map(item =>
+          desktop.invoke('library:documents:move', {
+            documentIds: [item.document.id], folderId: item.folderId,
+          })));
+        const failure = results.find(result => result.status === 'rejected');
+        if (failure?.status === 'rejected') throw failure.reason;
+      } finally { changed(); }
+    }, deadline, {
+      count: restored.length,
+      title: restored.length === 1 ? restored[0]!.document.title : undefined,
     });
-    setMove(false);
-    setMenu(null);
+    moveItems.current = remaining;
+    setNotice(failures.length ? tr("library:movePartial", {
+      succeeded: format.number(moved), total: format.number(targets.length),
+      failed: format.number(failures.length), reasons: failures.join("; "),
+    }) : "");
+    if (moved || failures.length) changed();
+    if (!failures.length) { setMove(false); setMenu(null); }
+    } finally { inFlight.current = false; setBusy(false); }
   };
   const reorder = async (item: Item, delta: number) => {
-    const destination = reorderDestination(items, items.indexOf(item), delta);
+    const current = rowContext.current.items;
+    const destination = reorderDestination(current, current.findIndex(row => row.document.id === item.document.id), delta);
     if (!destination) return;
     await run(() => desktop.invoke("library:documents:move", { documentIds: [item.document.id], ...destination }));
   };
@@ -414,28 +624,60 @@ export function LibraryView() {
     observer.observe(viewport);
     return () => observer.disconnect();
   }, [loading, grid, items.length > 0, showFolders]);
+
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const rowHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : rowRem * textScale,
-    columns = grid
-      ? Math.max(1, Math.floor(viewportWidth / 280))
-      : 1,
-    start = Math.min(Math.max(0,shown.length-columns),Math.max(0, Math.floor(top / rowHeight) - 2) * columns),
-    end = Math.min(
-      shown.length,
-      start +
-        Math.ceil((scroller.current?.clientHeight ?? 800) / rowHeight + 5) *
-          columns,
-    );
+  const baseHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : (rowRem || 2.75) * (textScale || 16);
+  const rowHeight = baseHeight;
+  const columns = grid ? Math.max(1, Math.floor(viewportWidth / 280)) : 1;
+  const [statusHeights, setStatusHeights] = useState<Record<string, number>>({});
+  const measureStatus = useCallback((id: string, height: number) => {
+    if (height <= 0) return;
+    setStatusHeights(current => current[id] === height ? current : {...current, [id]: height});
+  }, []);
+  const itemHeight = (item: Item) => rowHeight + (item.document.status === "ready"
+    ? 0 : statusHeights[item.document.id] ?? 80 * (textScale || 16) / 16);
+  const layout = useMemo(() => {
+    const offsets = [0];
+    const heights: number[] = [];
+    for (let index = 0; index < shown.length; index += columns) {
+      const height = Math.max(...shown.slice(index, index + columns).map(itemHeight)) + (grid ? 16 : 0);
+      heights.push(height);
+      offsets.push(offsets[offsets.length - 1]! + height);
+    }
+    return { offsets, heights };
+  }, [shown, columns, rowHeight, statusHeights, textScale]);
+  const rowContext = useRef({ shown, items, layout, columns, rowHeight, grid, selected, selectedSet });
+  rowContext.current = { shown, items, layout, columns, rowHeight, grid, selected, selectedSet };
+  const {start, end} = virtualWindow(
+    layout.offsets, columns, shown.length, top,
+    scroller.current?.clientHeight || 800,
+  );
+  const visibleIndices = Array.from(
+    {length: end - start},
+    (_, offset) => start + offset,
+  );
+  const activeIndex = shown.findIndex(item => item.document.id === activeRow);
+  const tabRow = visibleIndices.includes(activeIndex) ? activeRow
+    : visibleIndices.map(index => shown[index]!).find(item => selectedSet.has(item.document.id))?.document.id
+      ?? shown[visibleIndices[0] ?? 0]?.document.id;
+  const renderedIndices = activeIndex >= 0 && !visibleIndices.includes(activeIndex)
+    ? [...visibleIndices, activeIndex].sort((a, b) => a - b) : visibleIndices;
+  useLayoutEffect(() => {
+    if (!keyboardFocus.current) return;
+    const target = document.getElementById(`library-document-${keyboardFocus.current}`);
+    target?.focus({preventScroll:true});
+    keyboardFocus.current = null;
+  }, [activeRow, start, end]);
   useLayoutEffect(()=>{
     const viewport=scroller.current;
     if(!viewport||!selected.length||!bulkHeight)return;
     const index=shown.findIndex(item=>item.document.id===selected[selected.length-1]);
     if(index<0)return;
-    const rowTop=Math.floor(index/columns)*rowHeight;
+    const rowTop=layout.offsets[Math.floor(index/columns)]!;
     const available=Math.max(rowHeight,viewport.clientHeight-bulkHeight-24);
     if(rowTop<viewport.scrollTop)viewport.scrollTop=rowTop;
-    else if(rowTop+rowHeight>viewport.scrollTop+available)viewport.scrollTop=rowTop+rowHeight-available;
-  },[selected,bulkHeight,rowHeight,columns,shown]);
+    else if(rowTop+layout.heights[Math.floor(index/columns)]!>viewport.scrollTop+available)viewport.scrollTop=rowTop+layout.heights[Math.floor(index/columns)]!-available;
+  },[selected,bulkHeight,rowHeight,columns,shown,layout]);
   const viewControls = (
     <div className="library-view-controls">
         <Select
@@ -483,6 +725,14 @@ export function LibraryView() {
         </Button>
     </div>
   );
+  const liveRegion = (
+    <div className="library-live" aria-live="polite">
+        {dateError ? tr('library:dateRangeInvalid') : notice || recoveryNotice || tr('library:loaded', {
+          count: items.length, formatted: format.number(items.length),
+        })}
+        {!dateError && !notice && latestRecovery && ` · ${tr('library:recoveryAction', {number: latestRecovery.sequence})}`}
+      </div>
+  );
   return (
     <section
       onDragOver={(e) => e.preventDefault()}
@@ -501,7 +751,7 @@ export function LibraryView() {
     >
       <div className="library-title">
         <div>
-          <h1>{route.title ?? (folderPath(folders, query.folderId) || tr("common:library"))}</h1>
+          <h1 ref={heading} tabIndex={-1}>{openGroup ? openGroup.name ?? tr("library:unfiled") : (folderPath(folders, query.folderId) || route.title || tr("common:library"))}</h1>
           <p className="muted">{tr("library:documentCount", { count: items.length, formatted: format.number(items.length) + (cursor ? "+" : "") })}</p>
         </div>
         <Button variant="outline" className="primary"
@@ -590,15 +840,16 @@ export function LibraryView() {
                 {tr(`library:${key}`)}
               </label>
             ))}
-            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setCustomDates(true);return;} setCustomDates(false); setQuery(q => ({...q, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
+            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:localDate(query.addedAfter),addedBefore:localDate(query.addedBefore)});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
             </Select></label>
-            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} value={query[key]?.slice(0,10) ?? ''} onChange={e => setQuery(q => ({...q,[key]:e.target.value ? new Date(e.target.value).toISOString() : undefined}))}/></label>)}
+            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} aria-invalid={dateError} value={dateDraft[key]} onChange={e => updateDate(key,e.target.value)}/></label>)}
+            {dateError && <p>{tr("library:dateRangeInvalid")}</p>}
             <label>{tr("library:size")}<Select aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select></label>
             {!showFolders && compactToolbar && <div className="filter-view"><span>{tr("library:sort")}</span>{viewControls}</div>}
-            <footer><Button variant="outline" className="ghost" onClick={() => setQuery(defaults)}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
+            <footer><Button variant="outline" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
           </PopoverContent>
         </Popover>
         {!showFolders && !compactToolbar && viewControls}
@@ -607,20 +858,29 @@ export function LibraryView() {
         {filters.map(([key, value]) => (
           <Button variant="outline"
             key={key}
-            onClick={() => setQuery((q) => ({ ...q, [key]: undefined }))}
+            onClick={() => {
+              if (key === 'addedAfter' || key === 'addedBefore') {
+                setDateDraft(draft => ({...draft,[key]:''}));
+                setDateError(false);
+              }
+              setQuery(q => ({...q,[key]:undefined}));
+            }}
           >
             {tr(`library:${key}`)}:{" "}
             {typeof value === "boolean"
               ? tr("library:yes")
               : (folders.find((f) => f.id === value)?.name ??
                 tags.find((t) => t.id === value)?.name ??
-                (["status", "type"].includes(key) ? tr(`library:${value}`) : String(value)))}{" "}
+                (["status", "type", "converter"].includes(key) ? tr(`library:${value}`)
+                  : ["addedAfter", "addedBefore"].includes(key) ? format.date(String(value))
+                  : ["minSize", "maxSize"].includes(key) ? formatSize(Number(value), language, true)
+                  : String(value)))}{" "}
             <X size={12} aria-hidden="true" />
           </Button>
         ))}
         {filters.length > 0 && (
           <>
-            <Button variant="outline" className="ghost" onClick={() => setQuery({ ...defaults, ...route.query })}>
+            <Button variant="outline" className="ghost" onClick={clearFilters}>
               {tr("library:clearFilters")}
             </Button>
             <Button variant="outline" className="ghost"
@@ -652,7 +912,7 @@ export function LibraryView() {
           <Button variant="outline"
             onClick={async () => {
               setMenu(null);
-              setMove(true);
+              openMove(true);
             }}
           >
             {tr("library:move")}
@@ -670,7 +930,7 @@ export function LibraryView() {
           >
             {tr("library:pin")}
           </Button>
-          <Button variant="outline" onClick={() => void remove(selected)}>
+          <Button variant="outline" disabled={busy} onClick={() => void remove(selected)}>
             {tr("library:delete")}
           </Button>
           <Button variant="outline" onClick={() => setSelected([])}>
@@ -708,7 +968,7 @@ export function LibraryView() {
               text
                 ? setText("")
                 : filters.length
-                  ? setQuery(defaults)
+                  ? clearFilters()
                   : void run(() => importFiles(query.folderId ?? null))
             }
           >
@@ -772,41 +1032,59 @@ export function LibraryView() {
         >
           <div
             style={{
-              height: Math.ceil(shown.length / columns) * rowHeight,
+              height: layout.offsets.at(-1),
+              display: grid ? "grid" : undefined,
+              gridTemplateColumns: grid ? `repeat(${columns}, minmax(0, 1fr))` : undefined,
+              gap: grid ? "var(--space-4)" : undefined,
               position: "relative",
             }}
           >
-            {shown.slice(start, end).map((item, offset) => {
-              const d = item.document,
-                index = start + offset;
-              return (
+            {renderedIndices.map(index => {
+              const item = shown[index]!;
+              const d = item.document;
+              const lane = Math.floor(index / columns);
+              const height = itemHeight(item);
+              const offset = layout.offsets[lane]!;
+              return <DocumentRow key={d.id} item={item} index={index}
+                count={shown.length} grid={grid} height={height} offset={offset}
+                columns={columns} tabRow={tabRow === d.id} selected={selectedSet.has(d.id)}
+                folderId={query.folderId} place={placeOf(item)} language={language}
+                locale={i18n.resolvedLanguage} page={progress[d.id]?.page}
+                total={progress[d.id]?.total} render={() => (
                 <div
-                  key={d.id}
                   id={`library-document-${d.id}`}
                   data-index={index}
                   role="listitem"
+                  aria-label={tr("library:rowName", {
+                    title:d.title,
+                    selection:tr(selectedSet.has(d.id) ? "library:itemSelected" : "library:itemUnselected"),
+                  }) + (d.status === "failed" ? ` · ${tr("library:failedInstructions")}` : "")}
                   aria-posinset={index + 1}
                   aria-setsize={shown.length}
-                  data-selected={selected.includes(d.id)}
+                  data-selected={selectedSet.has(d.id)}
                   tabIndex={tabRow === d.id ? 0 : -1}
                   onFocus={() => { setActiveRow(d.id);  }}
                   onMouseEnter={() => {  }}
                   className={`library-document ${grid ? "document-card" : ""}`}
                   style={{
-                    height: grid ? rowHeight - 16 : rowHeight,
+                    height,
+                    minHeight: height,
+                    rowGap: !grid && d.status !== "ready" ? 0 : undefined,
+                    gridTemplateRows: !grid && d.status !== "ready" ? `${rowHeight}px max-content` : undefined,
                     position: "absolute",
-                    top: Math.floor(index / columns) * rowHeight,
+                    top: offset,
                     left: `${((index % columns) * 100) / columns}%`,
-                    width: grid ? `calc(${100 / columns}% - var(--space-4))` : "100%",
+                    width: `${100 / columns}%`,
                   }}
                   draggable
                   onDragStart={(e) => {
+                    const {items, selected, selectedSet} = rowContext.current;
                     e.dataTransfer.setData(
                       "application/vstudy-origin",
                       JSON.stringify(
                         items
                           .filter((i) =>
-                            (selected.includes(d.id)
+                            (selectedSet.has(d.id)
                               ? selected
                               : [d.id]
                             ).includes(i.document.id),
@@ -820,7 +1098,7 @@ export function LibraryView() {
                     e.dataTransfer.setData(
                       "application/vstudy-documents",
                       JSON.stringify(
-                        selected.includes(d.id) ? selected : [d.id],
+                        selectedSet.has(d.id) ? selected : [d.id],
                       ),
                     );
                   }}
@@ -841,6 +1119,7 @@ export function LibraryView() {
                     );
                   }}
                   onClick={(e) => {
+                    const {shown} = rowContext.current;
                     if (
                       (e.target as HTMLElement).closest("button,input,summary")
                     )
@@ -863,10 +1142,12 @@ export function LibraryView() {
                   }}
                   onKeyDown={(e) => {
                     if (e.target !== e.currentTarget) return;
+                    const {shown, layout, columns, rowHeight, grid} = rowContext.current;
                     const sideways = grid && ["ArrowLeft", "ArrowRight"].includes(e.key);
-                    const step = sideways ? 1 : grid ? columns : 1;
+                    const page = Math.max(1, Math.floor((scroller.current?.clientHeight ?? 0) / rowHeight));
+                    const step = e.key.startsWith("Page") ? page * columns : sideways ? 1 : grid ? columns : 1;
                     if (
-                      (["ArrowUp", "ArrowDown", "Home", "End"].includes(e.key) || sideways) &&
+                      (["ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"].includes(e.key) || sideways) &&
                       !e.altKey &&
                       !e.metaKey &&
                       !e.ctrlKey
@@ -881,29 +1162,42 @@ export function LibraryView() {
                                 0,
                                 Math.min(
                                   shown.length - 1,
-                                  index + (e.key === "ArrowUp" || e.key === "ArrowLeft" ? -step : step),
+                                  index + (["ArrowUp", "ArrowLeft", "PageUp"].includes(e.key) ? -step : step),
                                 ),
                               );
                       if (e.shiftKey) setSelected(selectedRange(shown, anchor.current ?? d.id, shown[next]!.document.id));
                       if (!anchor.current) anchor.current = d.id;
+                      keyboardFocus.current = shown[next]!.document.id;
+                      setActiveRow(shown[next]!.document.id);
                       if (scroller.current) {
-                        scroller.current.scrollTop =
-                          Math.floor(next / columns) * rowHeight;
+                        const lane = Math.floor(next / columns);
+                        const offset = layout.offsets[lane]!;
+                        if (!e.key.startsWith("Arrow")) scroller.current.scrollTop = offset;
+                        else if (offset < scroller.current.scrollTop) scroller.current.scrollTop = offset;
+                        else {
+                          const bottom = offset + layout.heights[lane]!;
+                          const visibleBottom = scroller.current.scrollTop + scroller.current.clientHeight;
+                          if (bottom > visibleBottom) scroller.current.scrollTop = bottom - scroller.current.clientHeight;
+                        }
                         setTop(scroller.current.scrollTop);
-                        requestAnimationFrame(() =>
-                          scroller.current
-                            ?.querySelector<HTMLElement>(
-                              `[data-index="${next}"]`,
-                            )
-                            ?.focus(),
-                        );
+                      }
+                      if (next === index) {
+                        e.currentTarget.focus();
+                        keyboardFocus.current = null;
                       }
                       return;
                     }
-                    if (e.key === "Enter") open(item, e.metaKey || e.ctrlKey);
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (d.status === "failed" && !e.shiftKey) void run(() =>
+                        desktop.invoke("documents:retry", {documentId:d.id}));
+                      else open(item, e.metaKey || e.ctrlKey);
+                    }
                     if (e.key === " ") {
                       e.preventDefault();
-                      setSelected([d.id]);
+                      anchor.current = d.id;
+                      setSelected(current => current.includes(d.id)
+                        ? current.filter(id => id !== d.id) : [...current, d.id]);
                     }
                     if (
                       e.key === "ContextMenu" ||
@@ -922,6 +1216,15 @@ export function LibraryView() {
                     }
                   }}
                 >
+                  <input type="checkbox" className="sr-only" tabIndex={-1}
+                    aria-label={tr('library:selectDocument', {name:d.title})}
+                    checked={selectedSet.has(d.id)}
+                    onDoubleClick={event => event.stopPropagation()}
+                    onChange={event => {
+                      anchor.current = d.id;
+                      setSelected(current => event.target.checked
+                        ? [...current, d.id] : current.filter(id => id !== d.id));
+                    }}/>
 {grid ? <><DocumentArt id={d.id} kind={d.sourceName.split('.').pop()?.toUpperCase() ?? 'MD'}/><div className="document-cell">
                     <FileText className="document-glyph" aria-hidden="true" />
                     <div className="document-info">
@@ -940,7 +1243,7 @@ export function LibraryView() {
                         {item.pageCount != null && <span>{tr("library:pages", {count:item.pageCount, formatted:format.number(item.pageCount)})}</span>}
                         <span>{formatSize(item.sizeBytes, document.documentElement.lang)}</span>
                         <span>{format.date(d.createdAt)}</span>
-                        {d.status !== 'ready' && <span className="status-badge" data-status={d.status}>{d.status === 'failed' ? <AlertTriangle/> : <LoaderCircle/>}{tr(`library:${d.status}`)}</span>}
+
                       </div>
                       {item.snippet && (
                         <p className="search-snippet">
@@ -953,26 +1256,7 @@ export function LibraryView() {
                             {t.name}
                           </span>
                         ))}
-                        {d.status === "failed" && (
-                          <Button variant="outline"
-                            onClick={() =>
-                              void run(() =>
-                                desktop.invoke("documents:retry", {
-                                  documentId: d.id,
-                                }),
-                              )
-                            }
-                          >
-                            {tr("library:retry")}
-                          </Button>
-                        )}
-                        {d.status === "converting" && (
-                          <progress
-                            value={progress[d.id]?.page}
-                            max={progress[d.id]?.total}
-                            aria-label={tr("common:conversion_progress")}
-                          />
-                        )}
+
                       </div>
                     </div>
                     <Button variant="outline"
@@ -1010,11 +1294,24 @@ export function LibraryView() {
                   <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge variant="outline" key={t.id}>{t.name}</Badge>)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>
                   <div className="document-folder" title={placeOf(item)}>{placeOf(item)}</div>
                   <div className="document-size">{item.pageCount!=null&&<>{tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)})} · </>}{item.sizeBytes===null?tr("library:unknown_size"):new Intl.NumberFormat(document.documentElement.lang,{style:"unit",unit:"kilobyte",unitDisplay:"short",maximumFractionDigits:1}).format(item.sizeBytes/1000)}</div>
-                  <div className="document-added">{d.status==='failed'?<Button variant="ghost" size="sm" onClick={()=>void run(()=>desktop.invoke('documents:retry',{documentId:d.id}))}>{tr('library:retry')}</Button>:d.status==='converting'?<progress value={progress[d.id]?.page} max={progress[d.id]?.total} aria-label={tr('common:conversion_progress')}/>:format.date(d.createdAt)}</div>
+                  <div className="document-added">{format.date(d.createdAt)}</div>
                   <div className="document-type"><Badge variant="secondary">{d.sourceName.split('.').pop()?.toUpperCase()}</Badge></div>
                   <Button variant="ghost" size="icon-sm" className="document-actions" aria-label={tr('library:actions',{name:d.title})} tabIndex={-1} onClick={e=>{menuAnchor.current=e.currentTarget;setMenu(item);}}><MoreHorizontal/></Button></>}
+                  {d.status !== 'ready' && <StatusBlock id={d.id} measure={measureStatus}>
+                    <span className="status-badge" data-status={d.status}>
+                      {d.status === 'failed' ? <AlertTriangle/> : <LoaderCircle/>}
+                      {tr(`library:${d.status}`)}
+                    </span>
+                    {d.status === 'failed' && <Button variant="outline" tabIndex={-1}
+                      onClick={() => void run(() => desktop.invoke('documents:retry', {documentId:d.id}))}>
+                      {tr('library:retry')}
+                    </Button>}
+                    {d.status === 'converting' && <progress
+                      value={progress[d.id]?.page} max={progress[d.id]?.total}
+                      aria-label={tr('common:conversion_progress')}/>}
+                  </StatusBlock>}
                 </div>
-              );
+              )} />;
             })}
           </div>
           {cursor && !groupedView && (
@@ -1025,31 +1322,27 @@ export function LibraryView() {
         </div>
         </>
       )}
-      <div className="library-live" aria-live="polite">
-        {tr("library:loaded", {
-          count: items.length,
-          formatted: format.number(items.length),
-        })}
-      </div>
-      {notice && (
-        <div className="library-toast" role="status">
-          {notice}
-          {undo && (
+      {liveRegion}
+      {(notice || recoveryNotice) && (
+        <div className="library-toast">
+          {notice || recoveryNotice}
+          {notice && <Button variant="ghost" onClick={() => setNotice("")}>{tr("library:close")}</Button>}
+          {recoveries.length > 0 && (
             <Button variant="outline"
+              aria-label={`${tr("library:undo")}: ${recoveryNotice}`}
               onClick={() =>
                 void run(async () => {
-                  await undo();
-                  setUndo(null);
+                  await recovery.undo();
                   setNotice("");
                 })
               }
             >
-              {tr("library:undo")}
+              {tr("library:undo")}{recoveries.length > 1 ? ` (${format.number(recoveries.length)})` : ""}
             </Button>
           )}
         </div>
       )}
-      <LibraryMenus menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={setMove} setTagging={setTagging}/>
+      <LibraryMenus busy={busy} moveNotice={notice} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
       {promptDialog}
     </section>
   );

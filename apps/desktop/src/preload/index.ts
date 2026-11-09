@@ -1,3 +1,4 @@
+import { updateSnapshotSchema } from '../shared/updates';
 import {webChatClearedChannel,webChatProviderSchema} from '../shared/web-chat';
 import { reviewProgressChannel, reviewProgressSchema } from '../shared/review-generate';
 import { contextBridge, ipcRenderer, webUtils } from "electron";
@@ -45,6 +46,14 @@ function subscribeTrackpad(channel: typeof trackpadScrollBeginChannel | typeof t
   return () => { ipcRenderer.removeListener(channel, receive); };
 }
 const api: DesktopApi = {
+  onUpdateState(listener) {
+    const receive = (_event: Electron.IpcRendererEvent, payload: unknown) => {
+      const parsed = updateSnapshotSchema.safeParse(payload);
+      if (parsed.success) listener(parsed.data);
+    };
+    ipcRenderer.on('updates:state', receive);
+    return () => { ipcRenderer.removeListener('updates:state', receive); };
+  },
   onReviewProgress(listener) {
     const receive = (_event:Electron.IpcRendererEvent,payload:unknown) => {const parsed=reviewProgressSchema.safeParse(payload);if(parsed.success)listener(parsed.data);};
     ipcRenderer.on(reviewProgressChannel,receive);
