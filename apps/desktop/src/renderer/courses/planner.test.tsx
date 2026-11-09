@@ -112,3 +112,15 @@ it('resets the displayed course and submitted course together after quick add', 
   await act(async () => { fireEvent.submit(host.querySelector('form')!); });
   expect(repo.snapshot().tasks.find(task => task.title === 'Second task')?.courseId).toBeNull();
 });
+
+it('associates quick-add validation errors with the affected control', async () => {
+  const { fireEvent, getByRole } = await import('@testing-library/react');
+  await mount();
+  await fill('input[name="title"]', '   ');
+  await act(async () => { fireEvent.submit(host.querySelector('form')!); });
+  const title = getByRole(host.querySelector('form')!, 'textbox');
+  expect(title.getAttribute('aria-invalid')).toBe('true');
+  const error = document.getElementById(title.getAttribute('aria-describedby')!);
+  expect(error?.getAttribute('role')).toBe('alert');
+  expect(error?.textContent).toBeTruthy();
+});

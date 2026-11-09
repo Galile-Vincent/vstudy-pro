@@ -1,4 +1,5 @@
 /** Direct student input stays separate from model proposals. Exam input creates a reviewable proposal. */
+import { ZodError } from "zod";
 import { useState, type FormEvent } from "react";
 import type { MoodleCourse } from "../../shared/moodle";
 import { examInputSchema, taskInputSchema, type PlannerAction } from "../../shared/planner";
@@ -14,6 +15,7 @@ export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
 }) {
   const [taskCourse, setTaskCourse] = useState("none");
   const [examCourse, setExamCourse] = useState("none");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const submitTask = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -23,10 +25,16 @@ export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
     try {
       await api.quickAdd(taskInputSchema.parse({ title: data.get("title"), courseId: (data.get("courseId") === "none" ? null : data.get("courseId")) || null,
         dueAt: data.get("dueAt") ? new Date(String(data.get("dueAt"))).toISOString() : null, estimateMinutes: Number(data.get("estimate")) }));
+      setErrors({});
       form.reset();
       setTaskCourse("none");
       await onSaved();
-    } catch { onError(); } finally { setBusy(false); }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        setErrors(Object.fromEntries(error.issues.map(issue => [String(issue.path[0]), tr("planner:error")])));
+      }
+      onError();
+    } finally { setBusy(false); }
   };
   const submitExam = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -50,11 +58,18 @@ export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
   return <div className="planner-forms">
     <Card variant="flat" className="p-6"><details open>
       <summary>{tr("planner:quick_add")}</summary>
-      <form className="planner-form" onSubmit={e => void submitTask(e)}>
-        <FormField className="planner-wide" label={tr("planner:task_title")} children={field => <Input {...field} name="title" required maxLength={200} autoComplete="off" />} />
+      <form className="planner-form" onSubmit={e => void submitTask(e)}
+        onInvalid={event => {
+          const input = event.target as HTMLInputElement;
+          setErrors(current => ({ ...current, [input.name === "estimate" ? "estimateMinutes" : input.name]: input.validationMessage }));
+        }} onInput={event => {
+          const input = event.target as HTMLInputElement;
+          setErrors(current => ({ ...current, [input.name === "estimate" ? "estimateMinutes" : input.name]: "" }));
+        }}>
+        <FormField className="planner-wide" error={errors.title || undefined} label={tr("planner:task_title")}  children={field => <Input {...field} name="title" required maxLength={200} autoComplete="off" />} />
         {courseField(taskCourse, setTaskCourse)}
-        <FormField label={tr("planner:due")} children={field => <Input {...field} type="datetime-local" name="dueAt" />} />
-        <FormField label={tr("planner:estimate")} children={field => <Input {...field} type="number" name="estimate" min={5} max={2880} step={5} defaultValue={30} required />} />
+        <FormField error={errors.dueAt || undefined} label={tr("planner:due")}  children={field => <Input {...field} type="datetime-local" name="dueAt" />} />
+        <FormField error={errors.estimateMinutes || undefined} label={tr("planner:estimate")}  children={field => <Input {...field} type="number" name="estimate" min={5} max={2880} step={5} defaultValue={30} required />} />
         <Button type="submit" disabled={busy}>{tr("planner:quick_add")}</Button>
       </form>
     </details></Card>

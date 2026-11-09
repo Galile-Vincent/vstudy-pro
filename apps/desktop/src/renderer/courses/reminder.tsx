@@ -85,21 +85,19 @@ export function Reminder({
             </Button>
           ))}
         </div>
-        <FormField label={tr("moodle:custom_time")} children={field => <Input {...field}
+        <FormField error={invalid ? tr("moodle:future_time") : undefined} label={tr("moodle:custom_time")} children={field => <Input {...field}
             type="datetime-local"
             value={custom}
             onChange={(e) => {
               setCustom(e.target.value);
               setInvalid(false);
             }}
-            aria-invalid={invalid}
           />} />
         <FormField label={tr("moodle:note")} children={field => <Input {...field}
             maxLength={280}
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />} />
-        {invalid && <p role="alert">{tr("moodle:future_time")}</p>}
         <Button
           disabled={busy || !custom}
           onClick={() => void save(new Date(custom).getTime())}

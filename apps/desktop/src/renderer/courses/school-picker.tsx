@@ -11,9 +11,9 @@ import './schools.css';
 
 type Choice = {url:string;name:string;search:string;group:'connected'|'recent'|'directory';icon?:string;country?:string};
 /** Connected schools precede recent choices, then bundled directory entries, without duplicate URLs. */
-export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind}: {
+export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind,error}: {
   schools:MoodleSchool[];recent:MoodleSiteCheck[];accounts:MoodleAccount[];input:string;
-  onInput:(value:string)=>void;busy:boolean;onFind:(url:string)=>void;
+  error?:string|undefined;onInput:(value:string)=>void;busy:boolean;onFind:(url:string)=>void;
 }) {
   const {i18n} = useTranslation('schools');
   const [active,setActive] = useState(-1);
@@ -34,9 +34,12 @@ export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind}
   const results = choices.filter(choice => fuzzySiteMatch(input,choice.search));
   const selected = results[active];
   const urlLike = /^https:\/\/[^\s]+$/i.test(input.trim()) || /^(?:https:\/\/)?[^\s/?#]+\.[^\s]+$/i.test(input.trim());
+  const fieldError = /^http:\/\//i.test(input) ? tr("schools:https_required")
+    : /^(?!https?:)[a-z][a-z0-9+.-]*:\/\//i.test(input) || /[?&](?:qrlogin|qrloginkey|token|wstoken)=/i.test(input)
+      ? tr("schools:qr_unsupported") : error;
   return <>
     <form className="moodle-connect-form" onSubmit={event => {event.preventDefault();if (!busy) {if (selected) onFind(selected.url); else if (urlLike) onFind(input);else if (results[0]) onFind(results[0].url);}}}>
-      <FormField controlId="moodle-site" label={tr('schools:search_label')} describedBy="moodle-url-hint moodle-search-count" children={field => <Input {...field} ref={inputRef} value={input} autoComplete="off" autoCapitalize="none" spellCheck={false}
+      <FormField error={fieldError} controlId="moodle-site" label={tr('schools:search_label')} describedBy="moodle-url-hint moodle-search-count" children={field => <Input {...field} ref={inputRef} value={input} autoComplete="off" autoCapitalize="none" spellCheck={false}
         placeholder={tr('schools:search_placeholder')} disabled={busy}
         role="combobox" aria-autocomplete="list" aria-expanded={results.length > 0} aria-controls="moodle-school-results"
         aria-activedescendant={selected ? `moodle-school-${active}` : undefined}
@@ -51,8 +54,6 @@ export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind}
       <small id="moodle-url-hint">{tr('schools:privacy_hint')}</small>
       <Button type="submit" disabled={(!urlLike && !results.length) || busy}>{busy ? <LoaderCircle className="moodle-spin" /> : <ArrowRight />}{tr(busy ? 'moodle:checking_site' : 'moodle:check_site')}</Button>
     </form>
-    {/^http:\/\//i.test(input) && <p role="alert">{tr('schools:https_required')}</p>}
-    {/^(?!https?:)[a-z][a-z0-9+.-]*:\/\//i.test(input) || /[?&](?:qrlogin|qrloginkey|token|wstoken)=/i.test(input) ? <p role="alert">{tr('schools:qr_unsupported')}</p> : null}
     <small id="moodle-search-count" role="status" aria-live="polite">{tr('schools:result_count',{count:results.length})}</small>
     <div id="moodle-school-results" className="moodle-school-results" role="listbox" aria-label={tr('schools:results')}>
       {(['connected','recent','directory'] as const).map(group => results.some(choice => choice.group === group) && <div key={group} role="group" aria-label={tr(`schools:${group}`)} className="moodle-site-list">

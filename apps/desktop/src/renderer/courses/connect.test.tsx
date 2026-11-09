@@ -71,6 +71,10 @@ it('shows a typed authentication error and leaves credentials empty',async () =>
   await act(async () => password.form!.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
   expect(document.querySelector('[role=alert]')?.textContent).toBe('The username or password was not accepted. Try again.');
   expect(password.value).toBe('');
+  expect(password.getAttribute('aria-invalid')).toBe('true');
+  const error = document.getElementById(password.getAttribute('aria-describedby')!);
+  expect(error?.getAttribute('role')).toBe('alert');
+  expect(error?.textContent).toContain('not accepted');
 });
 it('ignores a completed check after the dialog closes',async () => {
   const {api} = await mount();let done!: (value: Awaited<ReturnType<typeof api.checkSite>>) => void;
@@ -138,4 +142,14 @@ it('offers an alternate SSO provider alongside a password form',async () => {
   expect(document.querySelector('input[type=password]')).not.toBeNull();
   await click('Continue with Campus ID');
   expect(connect).toHaveBeenCalledWith({siteUrl:'https://school.example/moodle',provider:0});
+});
+
+it('associates an insecure URL error with the school combobox', async () => {
+  const { fireEvent, getByRole } = await import('@testing-library/react');
+  await mount();
+  const input = getByRole(document.body, 'combobox');
+  await act(async () => { fireEvent.change(input, { target: { value: 'http://school.example' } }); });
+  expect(input.getAttribute('aria-invalid')).toBe('true');
+  const ids = input.getAttribute('aria-describedby')!.split(' ');
+  expect(ids.some(id => document.getElementById(id)?.getAttribute('role') === 'alert')).toBe(true);
 });

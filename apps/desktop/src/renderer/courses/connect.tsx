@@ -101,6 +101,8 @@ export function ConnectDialog({open,onOpenChange,api,onConnected,accounts = []}:
       }
     } finally {if (generation === sequence.current) setBusy(null);}
   };
+  const credentialError = error === "moodle:auth_invalidlogin" ? tr(error) : undefined;
+  const siteError = error === "moodle:site_check_error" || error.startsWith("schools:") ? tr(error) : undefined;
   const step = flow.step === 'find' ? 0 : flow.step === 'result' ? 1 : 2;
   const plan = flow.step === 'find' ? undefined : flow.site.authPlan;
   return <Dialog open={open} onOpenChange={onOpenChange}>
@@ -118,7 +120,7 @@ export function ConnectDialog({open,onOpenChange,api,onConnected,accounts = []}:
         }}>{tr('moodle:keychain_retry')}</Button>
         <Button disabled={!!busy} onClick={() => onOpenChange(false)}>{tr('moodle:keychain_session')}</Button>
       </div> : flow.step === 'find' ? <>
-        <SchoolPicker schools={schools} recent={recent} accounts={accounts} input={input} onInput={value => {setInput(value);setError('');}} busy={!!busy} onFind={url => void find(url)} />
+        <SchoolPicker error={siteError} schools={schools} recent={recent} accounts={accounts} input={input} onInput={value => {setInput(value);setError('');}} busy={!!busy} onFind={url => void find(url)} />
       </> : <>
         <ListRow className="moodle-site-result" role="status" leading={<SchoolLogo name={flow.site.siteName} icon={flow.site.iconUrl} />}
           title={flow.site.siteName} subtitle={new URL(flow.site.siteUrl).host + new URL(flow.site.siteUrl).pathname.replace(/\/$/,'')}
@@ -128,8 +130,8 @@ export function ConnectDialog({open,onOpenChange,api,onConnected,accounts = []}:
           const username = String(data.get('username') ?? ''); const password = String(data.get('password') ?? '');
           form.reset(); void connect(undefined,{username,password});
         }}>
-          <FormField controlId="moodle-username" label={tr('moodle:username')} children={field => <Input {...field} name="username" autoComplete="username" required maxLength={256} disabled={!!busy} />} />
-          <FormField controlId="moodle-password" label={tr('moodle:password')} children={field => <Input {...field} name="password" type="password" autoComplete="current-password" required maxLength={4096} disabled={!!busy} />} />
+          <FormField error={credentialError} controlId="moodle-username" label={tr('moodle:username')} children={field => <Input {...field} name="username" autoComplete="username" required maxLength={256} disabled={!!busy} />} />
+          <FormField error={credentialError} controlId="moodle-password" label={tr('moodle:password')} children={field => <Input {...field} name="password" type="password" autoComplete="current-password" required maxLength={4096} disabled={!!busy} />} />
           <Button type="submit" disabled={!!busy}>{busy && <LoaderCircle className="moodle-spin" />}{tr(busy ? 'moodle:connecting' : 'moodle:password_sign_in')}</Button>
           <small>{tr('moodle:password_hint')}</small>
         </form> : <div className="moodle-connect-form">
@@ -145,7 +147,7 @@ export function ConnectDialog({open,onOpenChange,api,onConnected,accounts = []}:
       {busy === 'permission' && <div role="status"><p>{tr('moodle:keychain_waiting')}</p><p>{tr('moodle:keychain_hint')}</p></div>}
       {!unsaved && error === 'moodle:keychain_error' && flow.step === 'result' && <Button disabled={!!busy} onClick={() => {setStorage('session');setError('');setFlow({step:'sign-in',site:flow.site});}}>{tr('moodle:keychain_session')}</Button>}
       {ssoMode && <div role="status"><p>{tr(ssoMode === 'external' ? 'moodle:waiting_browser' : 'moodle:waiting_embedded')}</p><Button variant="ghost" onClick={() => {if (activeSite) void api.ssoCancel(activeSite).catch(() => setError('moodle:connect_error'));}}>{tr('moodle:sso_cancel')}</Button></div>}
-      {error && <p className="moodle-connect-error" role="alert">{tr(error)}</p>}
+      {error && !credentialError && !siteError && <p className="moodle-connect-error" role="alert">{tr(error)}</p>}
       {busy && <span className="sr-only" role="status">{tr(busy === 'checking' ? 'moodle:checking_site' : busy === 'permission' ? 'moodle:keychain_waiting' : 'moodle:connecting')}</span>}
     </DialogContent>
   </Dialog>;
