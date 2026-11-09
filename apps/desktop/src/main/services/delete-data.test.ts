@@ -39,6 +39,7 @@ it('holds admission across concurrent calls and failures', async () => {
 it('reports partial stop failure and always relaunches', async () => {
   const s=setup(); s.stop.mockRejectedValueOnce(new Error('stop failed'));
   await s.run(); expect(io.rename).not.toHaveBeenCalled();
+  expect(workers.resume).not.toHaveBeenCalled();
   expect(s.report).toHaveBeenCalledWith(expect.objectContaining({message:'stop failed'}),true);
   expect(s.relaunch).toHaveBeenCalledOnce();
 });
@@ -96,4 +97,15 @@ it.each(['EINVAL','ENOTSUP'])('accepts unsupported directory fsync %s', async co
   io.open.mockResolvedValueOnce({writeFile:vi.fn(),sync:vi.fn(),close:vi.fn()})
     .mockResolvedValueOnce({sync:vi.fn().mockRejectedValue(Object.assign(Error(code),{code})),close:vi.fn()});
   const s=setup(); await s.run(); expect(s.stop).toHaveBeenCalledOnce();
+});
+
+it('aborts a storage-owning stream before waiting for its release', async () => {
+  vi.resetModules();
+  const maintenance = await import('../storage/maintenance');
+  const deletion = await import('./delete-data');
+  const release = maintenance.enterStorageRequest();
+  const stop = vi.fn(async () => {release();});
+  const pending = deletion.createDataDeletion('/owned',stop,vi.fn(),vi.fn())();
+  try { await vi.waitFor(() => expect(stop).toHaveBeenCalledOnce(),{timeout:100}); }
+  finally { release(); await pending; }
 });

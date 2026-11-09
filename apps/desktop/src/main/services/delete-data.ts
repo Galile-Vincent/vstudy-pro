@@ -20,9 +20,9 @@ export function createDataDeletion(
       await markDeletionPending(root);
       scheduled = true;
       await quiesce(async () => {
+        await stop();
         await stopStorageForDeletion();
         await reviewWorkers.waitForIdle();
-        await stop();
       });
       if (process.platform === 'win32' || (await lstat(root)).isSymbolicLink()) {
         const failures = await deleteOwnedEntries(await realpath(root));
@@ -38,7 +38,7 @@ export function createDataDeletion(
         catch (error) { await report(error, scheduled); }
       }
     } catch (error) {
-      reviewWorkers.resume('delete-all');
+      if (!scheduled) reviewWorkers.resume('delete-all');
       await report(error, scheduled);
     } finally {
       if (scheduled) relaunch();
