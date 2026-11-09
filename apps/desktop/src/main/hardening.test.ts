@@ -15,7 +15,7 @@ import { cliArgs, cliEnvironment } from './providers/cli';
 import { validateImport } from './services/import-security';
 import { containedPath } from './services/file-paths';
 import { exportFile } from './services/export-file';
-import { deleteAllData } from './services/delete-data';
+import { createDataDeletion } from './services/delete-data';
 it('redacts secrets and home paths centrally', () => {
   const result = redact(`sk-secret Bearer token x-api-key: abc ${homedir()}/Documents/book`);
   for (const value of ['sk-secret', 'token', 'abc', homedir()]) expect(result).not.toContain(value);
@@ -55,7 +55,7 @@ it('rejects symlinks, hardlinks and signature mismatches; deletes every data tre
     await writeFile(join(root, 'secrets.json'), 'encrypted');
     await writeFile(join(root, 'vstudy.sqlite'), 'db');
     let stopped = false;
-    await deleteAllData(root, async () => { stopped = true; });
+    await createDataDeletion(root, async () => { stopped = true; }, async error => {throw error;}, () => {})();
     expect(stopped).toBe(true);
     await expect(access(root)).rejects.toThrow();
   } finally { await import('node:fs/promises').then(fs => fs.rm(root, { recursive: true, force: true })); }

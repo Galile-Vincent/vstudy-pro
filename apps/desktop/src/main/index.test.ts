@@ -40,14 +40,14 @@ vi.mock('./db', () => ({ openStore: () => ({ settings: { get: () => ({}) }, clos
 vi.mock('./ipc', () => ({ registerIpc: (...args:unknown[]) => mocks.registerIpc(...args) }));
 vi.mock('./ipc/register', () => ({ createIpcRegistrar: () => ({ handle: vi.fn() }) }));
 vi.mock('./services/secrets', () => ({ createSecretStore: vi.fn() }));
-vi.mock('./services/delete-data', () => ({ deleteAllData: vi.fn() }));
+vi.mock('./services/delete-data', () => ({ createDataDeletion: vi.fn(() => vi.fn()), cleanupDeletedData: vi.fn() }));
 vi.mock('./assets', () => ({ assetHandler: vi.fn() }));
 vi.mock('./theme', () => ({ applyNativeTheme: vi.fn(), nativeBackground: () => '#ffffff' }));
 vi.mock('./moodle/sso-protocol', () => ({ initializeMoodleProtocol: mocks.initialize }));
 vi.mock('./storage/reconcile', () => ({ reconcileDownloads: vi.fn() }));
 vi.mock('./storage/restore-startup', () => ({ confirmRestoreStartup: mocks.confirm, rollbackRestoreStartup: mocks.rollback }));
 vi.mock('./storage/backup', () => ({ recoverRestore: vi.fn() }));
-vi.mock('./logging', () => ({ log: mocks.log, copyDiagnostics: mocks.copyDiagnostics }));
+vi.mock('./logging', () => ({ log: mocks.log, stopFileLogging: vi.fn(), copyDiagnostics: mocks.copyDiagnostics }));
 vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage, showStartupError: mocks.fatal }));
 vi.mock('./window-state', () => ({readWindowState: () => ({width:1200,height:800,maximized:false}), trackWindowState:vi.fn()}));
 vi.mock('./shutdown', () => ({ coordinateShutdown: () => vi.fn() }));

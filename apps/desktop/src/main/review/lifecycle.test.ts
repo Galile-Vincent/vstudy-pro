@@ -50,7 +50,7 @@ it.each(['storage settle','shutdown','delete-all'] as const)('drains both real w
   operation=exclusiveStorage(settle,async()=>{expect(settled).toBe(true);});
  }else{
   const stop=async()=>{await reviewWorkers.dispose();await settle();};
-  operation=path==='delete-all' ? (await import('../services/delete-data')).deleteAllData(root,stop) : stop();
+  operation=path==='delete-all' ? (await import('../services/delete-data')).createDataDeletion(root,stop,async error=>{throw error;},()=>{})() : stop();
  }
  await Promise.resolve();expect(settled).toBe(false);
  expect(()=>generation.generate({...request,idempotencyKey:randomUUID()})).toThrow('suspended');

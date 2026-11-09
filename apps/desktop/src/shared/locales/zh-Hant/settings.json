@@ -109,7 +109,7 @@
   "event_ai_cli_status": "AI 工具狀態檢查",
   "event_moodle_request": "Moodle 請求",
   "event_unknown": "網路請求",
-  "delete_failed": "無法刪除應用程式資料（{{reason}}）。請關閉使用這些檔案的其他程式後重試。",
+  "delete_failed": "無法移動資料：{{reason}}。您的資料完好無損。VStudy 將重新啟動。",
   "delete_failed_permission": "無法刪除應用程式資料：存取遭拒，請確認檔案權限後重試。",
   "delete_failed_busy": "無法刪除應用程式資料：檔案使用中，請關閉其他程式後重試。",
   "delete_failed_files": "無法移除所有應用程式資料檔案，請確認磁碟空間後重試。",
