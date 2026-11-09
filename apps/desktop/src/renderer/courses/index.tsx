@@ -1159,7 +1159,7 @@ function CoursesBody({
                 {tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:next_seven_days" : "moodle:no_due_date")}
               </h3>
               <ul className="moodle-due-list list-none p-0">
-                {items.slice(0, group === 0 || !allDue ? 5 : undefined).map((d) => {
+                {items.slice(0, allDue ? undefined : 5).map((d) => {
                   const course = overview.courses.find((c) => c.id === d.courseId);
                   return (
                     <li key={d.id}>
@@ -1193,7 +1193,7 @@ function CoursesBody({
           ),
       )}
       {!error && overdue.length + dueSoon.length + undated.length === 0 && <p className="text-[var(--muted)]">{tr("moodle:all_caught_up")}</p>}
-      {Math.max(dueSoon.length, undated.length) > 5 && (
+      {Math.max(overdue.length, dueSoon.length, undated.length) > 5 && (
         <Button variant="ghost" aria-expanded={allDue} onClick={() => setAllDue(!allDue)}>
           {tr(allDue ? "moodle:show_less" : "moodle:show_all")}
         </Button>

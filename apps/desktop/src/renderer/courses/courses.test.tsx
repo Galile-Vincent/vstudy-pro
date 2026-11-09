@@ -1078,7 +1078,7 @@ it('retains a rejected sync error after a successful cached read', async () => {
   expect(host.textContent).not.toContain('No deadlines due in the next 7 days.');
 });
 
-it('caps overdue at five recent items even when upcoming is expanded', async () => {
+it('expands overdue alongside upcoming and restores the five-row cap', async () => {
   const api = createMockMoodleApi();
   const overview = await api.overview();
   const now = Date.now();
@@ -1091,8 +1091,10 @@ it('caps overdue at five recent items even when upcoming is expanded', async () 
   const titles = () => [...host.querySelectorAll('.moodle-due-link')].map(n => n.textContent);
   expect(titles().slice(0, 5)).toEqual(['Overdue 0', 'Overdue 1', 'Overdue 2', 'Overdue 3', 'Overdue 4']);
   await click('Show all');
-  expect(titles()).toHaveLength(12);
-  expect(titles()).not.toContain('Overdue 5');
+  expect(titles()).toHaveLength(14);
+  expect(titles()).toContain('Overdue 5');
+  await click('Show less');
+  expect(titles()).toHaveLength(10);
 });
 
 it('names the unavailable page with one h1 after course loading', async () => {
@@ -1191,4 +1193,21 @@ it('labels course refresh for its single-course behavior', async () => {
   await act(async () => getByRole(host, 'button', {name: 'Refresh this course'}).click());
   expect(course).toHaveBeenCalledWith(id, true);
   expect(sync).not.toHaveBeenCalled();
+});
+
+
+it('offers Show all when only overdue has more than five items', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, upcoming: Array.from({length: 12}, (_, i) => ({
+    ...overview.upcoming[0]!, id: `overdue-${i}`, title: `Overdue task ${i}`,
+    submitted: false, dueAt: new Date(Date.now() - (i + 1) * 3600000).toISOString(),
+  }))});
+  await mount(api);
+  const section = getByRole(host, 'heading', {level: 2, name: /^Due soon/}).closest('section')!;
+  expect(section.querySelectorAll('.moodle-due-link')).toHaveLength(5);
+  expect(getByRole(section, 'heading', {level: 2}).textContent).toContain('12');
+  await act(async () => getByRole(section, 'button', {name: 'Show all'}).click());
+  expect(section.querySelectorAll('.moodle-due-link')).toHaveLength(12);
+  expect(getByRole(section, 'button', {name: 'Show less'}).getAttribute('aria-expanded')).toBe('true');
 });
