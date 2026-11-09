@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { SelectHTMLAttributes } from 'react';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
 import { tr } from '../../shared/i18n';
 const state = vi.hoisted(() => ({ invoke: vi.fn(), route: { view: 'library', query: {} as Record<string, unknown> } }));
+vi.mock('../components/select',()=>({Select:(props:SelectHTMLAttributes<HTMLSelectElement>)=><select {...props}/>}));
 vi.mock('../bridge', () => ({ desktop: { invoke: state.invoke } }));
 vi.mock('../shell', () => ({ useNavigate: () => ({ route: state.route, navigate: vi.fn() }) }));
 vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
@@ -53,4 +55,26 @@ it('clears optional filters while preserving folder, sort, and search in both in
   expect(calls.at(-1)?.[1].status).toBeUndefined();
  });
  expect((screen.getByRole('textbox',{name:tr('library:search')}) as HTMLInputElement).value).toBe('notes');
+});
+
+it('clears the custom before bound when a relative preset is selected',async()=>{
+ const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
+ const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ const preset=within(panel).getByRole('combobox',{name:tr('library:addedAfter')});
+ fireEvent.change(preset,{target:{value:'custom'}});
+ fireEvent.change(within(panel).getByLabelText(tr('library:addedBefore')),{target:{value:'2026-10-01'}});
+ fireEvent.change(preset,{target:{value:'7'}});
+ await waitFor(()=>{
+  const query=state.invoke.mock.calls.filter(([channel])=>channel==='library:documents:list').at(-1)?.[1];
+  expect(query.addedAfter).toBeTruthy();expect(query.addedBefore).toBeUndefined();
+ });
+});
+it('shows a reversed custom range error and never submits an impossible range',async()=>{
+ const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
+ const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ fireEvent.change(within(panel).getByRole('combobox',{name:tr('library:addedAfter')}),{target:{value:'custom'}});
+ fireEvent.change(within(panel).getByLabelText(tr('library:addedBefore')),{target:{value:'2026-10-01'}});
+ fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:'2026-11-02'}});
+ await waitFor(()=>expect(document.querySelector('.library-live')?.textContent).toContain(tr('library:dateRangeInvalid')));
+ for(const [channel,q] of state.invoke.mock.calls){if(channel==='library:documents:list' && q.addedBefore && q.addedAfter)expect(q.addedAfter<=q.addedBefore).toBe(true);}
 });
