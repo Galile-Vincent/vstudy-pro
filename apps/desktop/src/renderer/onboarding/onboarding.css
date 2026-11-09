@@ -73,3 +73,4 @@ html[data-theme-transition=tokens] .product-preview-light { transition:opacity 3
 }
 html[data-theme=contrast] :is(.onboarding-choice,.onboarding .analytics-sources label) { border:1px solid var(--ink); }
 html[data-theme=contrast] .onboarding-choice[data-selected=true] { outline:2px solid var(--ink); outline-offset:-3px; }
+html[data-theme=contrast] :is(.onboarding,.learning-dialog)[data-slot=dialog-content] { border:1px solid var(--ink); }
