@@ -40,8 +40,9 @@ export function displayTeachers(identity: MoodleCourseIdentity, language: string
   return identity.teachers.map(teacher => teacher[lang] || teacher[lang === 'zh' ? 'en' : 'zh']).filter(Boolean).join(', ');
 }
 /** Choose the course class label without exposing raw multilingual markup. */
-export function displayClass(identity: MoodleCourseIdentity): string {
-  return identity.classLabel.zh || identity.classLabel.en || '';
+export function displayClass(identity: MoodleCourseIdentity, language = 'zh-Hant'): string {
+  const preferred = /^(zh|ja)(-|$)/i.test(language) ? 'zh' : 'en';
+  return identity.classLabel[preferred] || identity.classLabel[preferred === 'zh' ? 'en' : 'zh'] || '';
 }
 /** Include courses according to the requested lifecycle filter and unknown-term policy. */
 export function matchesTerm(course: MoodleCourse, filter: MoodleTermFilter): boolean {
