@@ -38,7 +38,7 @@ test('excludes library and token sources and refuses baseline increases on disk'
 });
 
 test('accepts token radii and catches physical corners and numeric styles', () => {
-  assert.equal(inspect('.x { border-radius: calc(var(--r-md) - 2px); border-top-left-radius: var(--r-sm) 8px; }').radius, 0);
+  assert.equal(inspect('.x { border-radius: calc(var(--r-md) - 2px); border-top-left-radius: var(--r-sm) 8px; }').radius, 1);
   for (const corner of ['top-left', 'top-right', 'bottom-left', 'bottom-right']) {
     assert.equal(inspect(`.x { border-${corner}-radius: 8px; }`).radius, 1);
   }
@@ -98,4 +98,21 @@ test('covers literal colors in utility, shorthand, and SVG fixtures', () => {
     '.x { content: "#fff plain text"; }',
     '.x { background: url(#abc); }',
   ]) assert.equal(inspect(source).color, 0, source);
+});
+
+test('accepts zero resets and requires every radius length to use tokens', () => {
+  for (const key of ['border-radius', 'borderRadius', 'border-top-left-radius']) {
+    for (const value of ['0', '0px', 'var(--r-sm)', 'calc(var(--r-md) - 2px)']) {
+      assert.equal(inspect(`.x { ${key}: ${value}; }`).radius, 0, `${key}: ${value}`);
+      assert.equal(inspect(`const style = {'${key}': '${value}'}`, false).radius, 0);
+    }
+    for (const value of ['var(--r-sm) 8px', '.5rem', '.5em', '8px']) {
+      assert.equal(inspect(`.x { ${key}: ${value}; }`).radius, 1, `${key}: ${value}`);
+      assert.equal(inspect(`const style = {'${key}': '${value}'}`, false).radius, 1);
+    }
+  }
+  for (const value of ['0', '0px'])
+    assert.equal(inspect(`<div className="rounded-[${value}]" />`, false).radius, 0);
+  for (const value of ['.5rem', '.5em'])
+    assert.equal(inspect(`<div className="rounded-[${value}]" />`, false).radius, 1);
 });
