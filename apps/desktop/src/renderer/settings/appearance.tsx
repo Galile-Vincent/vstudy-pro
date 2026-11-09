@@ -2,13 +2,14 @@
 import { DocumentSettings } from './documents';
 import { track } from '../analytics';
 import { useEffect, useRef, useState } from 'react';
-import { Copy, Pencil, Plus, Check } from 'lucide-react';
+import { Copy, Pencil, Plus, Check, Trash2 } from 'lucide-react';
 import { type Settings } from '../../shared';
 import { builtinThemes, resolveTheme, type ThemePack } from '../../shared/themes';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { ToggleGroup, ToggleGroupItem } from '../components/ui/toggle-group';
 import { Select } from '../components/select';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
 import { Button } from '../components/ui/button';
 import { SettingsGroup, SettingsRow } from './layout';
 import { applyAppearance } from './apply-appearance';
@@ -20,6 +21,8 @@ export function AppearanceSection() {
   const [settings, setSettings] = useState<Settings>();
   const pending = useRef<Promise<void>>(Promise.resolve());
   const [error, setError] = useState('');
+  const [deleting, setDeleting] = useState<ThemePack>();
+  const [message, setMessage] = useState('');
   const [editor, setEditor] = useState<ThemePack>();
   const [transfer, setTransfer] = useState<ThemePack | 'import'>();
   useEffect(() => {
@@ -41,9 +44,13 @@ export function AppearanceSection() {
     pending.current = operation.then(() => undefined);
     return operation;
   };
-  const saveTheme = async (theme: ThemePack) => {
+  const saveTheme = async (theme: ThemePack, select = true) => {
     const latest = await desktop.invoke('settings:get', {});
-    return update({ themeId: theme.id, customThemes: [...latest.customThemes.filter(t => t.id !== theme.id), theme] });
+    if (latest.customThemes.length >= 30 && !latest.customThemes.some(t => t.id === theme.id)) {
+      throw new Error('THEME_LIMIT');
+    }
+    return update({ ...(select ? {themeId: theme.id} : {}),
+      customThemes: [...latest.customThemes.filter(t => t.id !== theme.id), theme] });
   };
   const toggles = (field: 'uiScale' | 'density' | 'readerSize', values: readonly (string | number)[]) => (
     <ToggleGroup type="single" size="sm" aria-label={tr(`settings:${field}`)} value={String(settings?.[field] ?? '')}
@@ -101,6 +108,7 @@ export function AppearanceSection() {
             {settings.themeId === pack.id && <Check className="theme-check" aria-hidden="true"/>}
           </button>
           <div className="theme-card-tools">
+            {settings.customThemes.some(t => t.id === pack.id) && <button type="button" aria-label={tr('themes:delete_named',{name:pack.name})} onClick={() => setDeleting(pack)}><Trash2/></button>}
             {settings.customThemes.some(t => t.id === pack.id) && <button type="button" aria-label={tr('themes:edit_named',{name:pack.name})} onClick={() => setEditor(pack)}><Pencil/></button>}
             <button type="button" aria-label={tr('themes:export_named',{name:pack.name})} onClick={() => setTransfer({...pack,id:`custom-${crypto.randomUUID()}`})}><Copy/></button>
           </div>
@@ -114,14 +122,28 @@ export function AppearanceSection() {
           {slider('contrast')}
           {slider('glassOpacity')}
           <SettingsRow label={tr('themes:custom')} description={tr('themes:custom_hint')}>
-            <Button size="sm" variant="secondary" onClick={() => setEditor({...theme, id:`custom-${crypto.randomUUID()}`,name:tr('themes:untitled')})}><Pencil/>{tr('themes:create')}</Button>
-            <Button size="sm" variant="secondary" onClick={() => setTransfer('import')}><Plus/>{tr('themes:add')}</Button>
+            <Button size="sm" variant="secondary" disabled={settings.customThemes.length >= 30} onClick={() => setEditor({...theme, id:`custom-${crypto.randomUUID()}`,name:tr('themes:untitled')})}><Pencil/>{tr('themes:create')}</Button>
+            <Button size="sm" variant="secondary" disabled={settings.customThemes.length >= 30} onClick={() => setTransfer('import')}><Plus/>{tr('themes:add')}</Button>
           </SettingsRow>
         </SettingsGroup>
       </div>
     </details>
+    {settings.customThemes.length >= 30 && <p role="status">{tr('themes:limit')}</p>}
+    {message && <p role="status">{message}</p>}
+    {deleting && <Dialog open onOpenChange={open => {if (!open) setDeleting(undefined);}}>
+      <DialogContent><DialogTitle>{tr('themes:delete_named',{name:deleting.name})}</DialogTitle>
+        <DialogDescription>{tr('themes:delete_copy',{name:deleting.name})}</DialogDescription>
+        <Button variant="secondary" onClick={() => setDeleting(undefined)}>{tr('common:cancel')}</Button>
+        <Button variant="destructive" onClick={() => void (async () => {
+          const active = settings.themeId === deleting.id;
+          const saved = await update({customThemes:settings.customThemes.filter(t => t.id !== deleting.id),
+            ...(active ? {themeId:'vstudy'} : {})});
+          if (saved) {setDeleting(undefined);if (active) setMessage(tr('themes:deleted_default'));}
+        })()}>{tr('common:delete')}</Button>
+      </DialogContent>
+    </Dialog>}
     {error && <p role="alert">{error}</p>}
     {editor && <ThemeEditor theme={editor} settings={settings} onClose={() => setEditor(undefined)} onSave={saveTheme}/>}
-    {transfer && <ThemeTransfer theme={transfer} onClose={() => setTransfer(undefined)} onSave={saveTheme}/>}
+    {transfer && <ThemeTransfer theme={transfer} existing={settings.customThemes} onClose={() => setTransfer(undefined)} onSave={theme => saveTheme(theme, false)}/>}
   </div>;
 }

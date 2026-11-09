@@ -78,5 +78,12 @@
   "token_course-start": "コースのグラデーション開始",
   "token_course-end": "コースのグラデーション終了",
   "custom": "カスタムテーマ",
-  "custom_hint": "テーマを作成、またはファイルから読み込みます。"
+  "custom_hint": "テーマを作成、またはファイルから読み込みます。",
+  "limit": "カスタムテーマの上限（30 個）に達しました。",
+  "delete_named": "{{name}}を削除",
+  "delete_copy": "「{{name}}」を削除しますか？使用中の場合は標準テーマに戻ります。",
+  "deleted_default": "テーマを削除し、標準の VStudy テーマに戻しました。",
+  "save_failed": "テーマを保存できませんでした。再試行してください。",
+  "overwrite": "「{{name}}」を置き換えますか？",
+  "overwrite_copy": "この ID のテーマは既に存在します。置き換えますか？"
 }

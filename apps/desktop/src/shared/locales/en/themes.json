@@ -78,5 +78,12 @@
   "token_course-start": "Course gradient start",
   "token_course-end": "Course gradient end",
   "custom": "Custom themes",
-  "custom_hint": "Create a theme or import a theme file."
+  "custom_hint": "Create a theme or import a theme file.",
+  "limit": "Limit of 30 custom themes reached.",
+  "delete_named": "Delete {{name}}",
+  "delete_copy": "Delete “{{name}}”? If active, VStudy will use the default theme.",
+  "deleted_default": "Theme deleted. The default VStudy theme is now active.",
+  "save_failed": "Could not save the theme. Try again.",
+  "overwrite": "Replace “{{name}}”?",
+  "overwrite_copy": "A custom theme with this id already exists. Replace it?"
 }

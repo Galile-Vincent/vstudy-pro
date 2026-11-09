@@ -4,6 +4,7 @@ import { type Settings } from '../../shared';
 import { builtinThemes, contrastFailures, importTheme, tokenNames, type ThemePack, type ColorScheme } from '../../shared/themes';
 import { tr } from '../../shared/i18n';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
+import { Button } from '../components/ui/button';
 import { ThemePreview } from './theme-preview';
 import { applyAppearance, applyTheme } from './apply-appearance';
 
@@ -45,15 +46,22 @@ export function ThemeEditor({theme,settings,onClose,onSave}: ThemeActions & { th
   </DialogContent></Dialog>;
 }
 
-export function ThemeTransfer({theme,onClose,onSave}: ThemeActions & { theme: ThemePack | 'import' }) {
+export function ThemeTransfer({theme,onClose,onSave,existing=[]}: ThemeActions & { theme: ThemePack | 'import'; existing?: ThemePack[] }) {
   const exporting=theme !== 'import';
+  const [overwrite,setOverwrite] = useState<ThemePack>();
+  const limited = existing.length >= 30;
   const [json,setJson] = useState(exporting ? JSON.stringify(theme,null,2) : '');
   const [error,setError] = useState('');
   const [message,setMessage] = useState('');
   const [saving,setSaving] = useState(false);
   const save = async () => {
     setSaving(true);
-    try { if (await onSave(importTheme(json))) onClose(); else setError(tr('errors:generic')); }
+    try {
+      const parsed = importTheme(json);
+      if (existing.some(t => t.id === parsed.id)) {setOverwrite(parsed);return;}
+      if (limited) {setError(tr('themes:limit'));return;}
+      if (await onSave(parsed)) onClose(); else setError(tr('themes:save_failed'));
+    }
     catch { setError(tr('themes:invalid')); }
     finally { setSaving(false); }
   };
@@ -65,6 +73,18 @@ export function ThemeTransfer({theme,onClose,onSave}: ThemeActions & { theme: Th
       void file.text().then(value => {setJson(value);setError('');}).catch(() => setError(tr('themes:invalid')));
     }}/></label>}
     <label className="theme-field">{tr('themes:json')}<textarea aria-label={tr('themes:json')} value={json} readOnly={exporting} maxLength={32768} rows={14} onChange={e => {setJson(e.target.value);setError('');}}/></label>
+    {limited && <p role="status">{tr('themes:limit')}</p>}
+    {overwrite && <Dialog open onOpenChange={open => {if (!open) setOverwrite(undefined);}}>
+      <DialogContent><DialogTitle>{tr('themes:overwrite',{name:overwrite.name})}</DialogTitle>
+        <DialogDescription>{tr('themes:overwrite_copy')}</DialogDescription>
+        <Button variant="secondary" onClick={() => setOverwrite(undefined)}>{tr('common:cancel')}</Button>
+        <Button onClick={() => void (async () => {
+          try {if (await onSave(overwrite)) onClose();else setError(tr('themes:save_failed'));}
+          catch {setError(tr('themes:save_failed'));}
+          setOverwrite(undefined);
+        })()}>{tr('themes:save')}</Button>
+      </DialogContent>
+    </Dialog>}
     {error && <p role="alert">{error}</p>}{message && <p role="status">{message}</p>}
     <footer><button type="button" onClick={onClose}>{tr('common:cancel')}</button>{exporting ? <>
       <button type="button" onClick={() => {void navigator.clipboard.writeText(json).then(() => setMessage(tr('themes:copied'))).catch(() => setError(tr('themes:copy_hint')));}}>{tr('themes:copy')}</button>
@@ -72,6 +92,6 @@ export function ThemeTransfer({theme,onClose,onSave}: ThemeActions & { theme: Th
         const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
         const a=document.createElement('a');a.href=url;a.download=`${theme.id}.json`;a.click();setTimeout(() => URL.revokeObjectURL(url),1000);
       }}>{tr('themes:download')}</button>
-    </> : <button type="button" className="primary" disabled={saving || !json.trim()} onClick={() => void save()}>{tr('themes:import')}</button>}</footer>
+    </> : <button type="button" className="primary" disabled={saving || limited || !json.trim()} onClick={() => void save()}>{tr('themes:import')}</button>}</footer>
   </DialogContent></Dialog>;
 }
