@@ -140,6 +140,33 @@ it('shows pending, running and failed step states with specific recovery', async
   expect(document.querySelector('.ai-cli-recovery')?.textContent).toContain('date and network');
 });
 
+const progress = () => document.querySelector('.ai-cli-live');
+const wait = (ms: number) => act(async () => { await new Promise(resolve => setTimeout(resolve, ms)); });
+
+it('announces running and completed installs once through one persistent live region', async () => {
+  fixture.hold(true); await mount(); await click('Install');
+  const region = progress()!;
+  expect(region.getAttribute('role')).toBe('status');
+  expect(region.textContent).toBe(i18n.t('ai-cli:announce_running', { step: i18n.t('ai-cli:step_install') }));
+  expect(document.querySelector('.ai-cli-chip')?.textContent).toBe(i18n.t('ai-cli:status_installing'));
+  expect(document.querySelectorAll('.ai-cli-live')).toHaveLength(1);
+  const changes: string[] = [];
+  new MutationObserver(() => changes.push(region.textContent ?? '')).observe(region, { childList: true, characterData: true, subtree: true });
+  fixture.hold(false); await wait(400);
+  expect(progress()).toBe(region);
+  expect(region.textContent).toBe(i18n.t('ai-cli:announce_done', { step: i18n.t('ai-cli:step_install') }));
+  expect(changes).toEqual([i18n.t('ai-cli:announce_done', { step: i18n.t('ai-cli:step_install') })]);
+  expect(document.querySelectorAll('[role=status]:not(.ai-cli-live)')).not.toContain(document.querySelector('.ai-cli-success'));
+});
+
+it('leaves the progress region quiet on failure so only the recovery alert speaks', async () => {
+  fixture.hold(true); await mount(); await click('Install');
+  fixture.fail('certificate'); fixture.hold(false); await wait(400);
+  expect(progress()?.textContent).toBe('');
+  expect(document.querySelectorAll('[role=alert]')).toHaveLength(1);
+  expect(document.querySelector('[role=alert]')?.classList.contains('ai-cli-recovery')).toBe(true);
+});
+
 it('previews compatible updates and one-click rollback without disturbing existing chats', async () => {
   Object.assign(fixture.tools[0]!, { consented: true, tested: true, managed: true, version: '1.0.0', latestVersion: '2.0.0', status: 'update-available', releaseNotesUrl: 'https://example.com/release' });
   await mount(); await click('Review update to 2.0.0');
