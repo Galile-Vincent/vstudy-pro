@@ -878,7 +878,7 @@ function CoursesBody({
           ) : (
             <div className="moodle-empty">
               <Brand/>
-              <h2>{tr("moodle:course_unavailable")}</h2>
+              <h1>{tr("moodle:course_unavailable")}</h1>
               <Button variant="outline" onClick={() => onCourse()}>
                 {tr("moodle:all_courses")}
               </Button>
