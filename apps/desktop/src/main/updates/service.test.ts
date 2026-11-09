@@ -205,3 +205,8 @@ it('preserves an offer when a quiet check emits and rejects', async () => {
   });
   await service.check(false); expect(service.snapshot().state).toEqual(offer);
 });
+it('does not classify remote YAML text or arbitrary Squirrel mentions as integrity', () => {
+  expect(updateError({code:'ERR_UPDATER_INVALID_UPDATE_INFO',message:'Squirrel signature'})).toBe('failed');
+  expect(updateError(new Error('Squirrel connection failed'))).toBe('failed');
+  expect(updateError(new Error('New version is not signed by the application owner'))).toBe('integrity');
+});

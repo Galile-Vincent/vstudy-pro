@@ -45,3 +45,8 @@ it('rejects payloads larger than two GiB', () => {
   expect(() => provider.resolveFiles({version:'0.4.5',releaseDate:'',path:'VStudy-Pro-0.4.5-mac-arm64.zip',sha512:'a'.repeat(86)+'==',
     files:[{url:'VStudy-Pro-0.4.5-mac-arm64.zip',sha512:'a'.repeat(86)+'==',size:2**31+1}]})).toThrow();
 });
+it('maps a missing channel file to the updater channel error code', async () => {
+  const provider = new UpdateProvider({provider:'custom'}, {} as never,
+    {platform:'darwin',executor:{request:async()=>{throw {statusCode:404};}} as never,isUseMultipleRangeRequest:false});
+  await expect(provider.getLatestVersion()).rejects.toMatchObject({code:'ERR_UPDATER_CHANNEL_FILE_NOT_FOUND'});
+});

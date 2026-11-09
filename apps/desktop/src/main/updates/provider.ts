@@ -17,7 +17,14 @@ export class UpdateProvider extends GenericProvider {
   override async getLatestVersion() {
     const name = this.platform === 'darwin' ? 'latest-mac.yml' : 'latest.yml';
     const url = new URL(`${updateFeed}/${name}`);
-    const raw = await this.httpRequest(url);
+    let raw: string | null;
+    try { raw = await this.httpRequest(url); }
+    catch (error) {
+      if ((error as {statusCode?:number})?.statusCode === 404) {
+        throw Object.assign(new Error('No update feed yet'), {code:'ERR_UPDATER_CHANNEL_FILE_NOT_FOUND'});
+      }
+      throw error;
+    }
     const info = parseFeed(raw ?? '', this.platform === 'darwin' ? 'mac-arm64.zip' : 'win-x64.exe');
     this.resolveFiles(info);
     return info;
