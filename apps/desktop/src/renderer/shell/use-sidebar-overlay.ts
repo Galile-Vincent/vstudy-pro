@@ -22,8 +22,10 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
       const next = position === 'absolute' || position === 'fixed';
       probeShell.remove();
       setOverlay(next);
-      const toggle = document.querySelector<HTMLElement>('.shell-toggle');
-      const top = toggle?.closest('header')?.getBoundingClientRect().bottom ?? 0;
+      const top = Math.max(0, ...Array.from(
+        document.querySelectorAll<HTMLElement>('.app-tabs, .shell-topbar'),
+      ).filter(element => element.getClientRects().length)
+        .map(element => element.getBoundingClientRect().bottom));
       sidebar?.style.setProperty('--sidebar-overlay-top', `${top}px`);
       if (next && !wasOverlay) close();
       wasOverlay = next;
@@ -38,6 +40,8 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
     if (shell) layout.observe(shell, { attributes: true, attributeFilter: ['data-view'] });
     const topbar = document.querySelector('.shell-topbar');
     if (topbar) resize.observe(topbar);
+    const tabs = document.querySelector('.app-tabs');
+    if (tabs) resize.observe(tabs);
     window.addEventListener('resize', measure);
     measure();
     return () => { observer.disconnect(); layout.disconnect(); resize.disconnect(); window.removeEventListener('resize', measure); };
@@ -48,7 +52,14 @@ export function useSidebarOverlay(close: () => void, visible: boolean) {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
       event.preventDefault();
       close();
-      document.querySelector<HTMLElement>('.shell-toggle')?.focus();
+      const toggles = document.querySelectorAll<HTMLElement>(
+        '.shell-toggle, .workspace .app-header button[aria-label]',
+      );
+      const label = document.querySelector('.shell-toggle')?.getAttribute('aria-label');
+      const toggle = Array.from(toggles).find(element =>
+        element.getAttribute('aria-label') === label && element.getClientRects().length,
+      );
+      (toggle ?? document.querySelector<HTMLElement>('[role=tab][aria-selected=true]'))?.focus();
     };
     window.addEventListener('keydown', escape);
     return () => window.removeEventListener('keydown', escape);

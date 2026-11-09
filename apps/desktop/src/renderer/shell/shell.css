@@ -36,7 +36,7 @@
   width:min(85vw,var(--sidebar-width)); background:var(--surface); box-shadow:var(--elevation-floating);
 }
 @media(max-width:800px) { .app-shell .shell-sidebar { width:var(--sidebar-compact-width); padding:var(--space-2); } .app-shell .shell-topbar { padding-inline:var(--space-4); } }
-@media(max-width:999px) { .app-shell[data-view=workspace] .shell-sidebar:not([hidden]) { position:absolute; z-index:40; inset:0 auto 0 0; width:var(--sidebar-width); background:var(--surface); box-shadow:var(--elevation-floating); } }
+@media(max-width:999px) { .app-shell[data-view=workspace]:not([data-sidebar-overlay=true]) .shell-sidebar:not([hidden]) { position:absolute; z-index:40; inset:0 auto 0 0; width:var(--sidebar-width); background:var(--surface); box-shadow:var(--elevation-floating); } }
 /* The frame stays still while the content changes beneath it. */
 ::view-transition-group(vt-sidebar),::view-transition-group(vt-topbar) { animation-duration:var(--motion-base); animation-timing-function:var(--ease-out-soft); }
 ::view-transition-old(vt-sidebar),::view-transition-old(vt-topbar) { animation:none; }
