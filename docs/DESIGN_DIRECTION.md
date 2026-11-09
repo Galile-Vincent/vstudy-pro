@@ -57,6 +57,8 @@ Theme keys map to CSS properties of the same name. `sidebar` maps to `--sidebar-
 
 ## Component library
 
+An `interactive` Card is one whole-card action. Its content must be text only: no headings, nested buttons, or links.
+
 Shared components live in `apps/desktop/src/renderer/components/ui` and export from its index. Pages compose Card, PageHeader, Section, Toolbar, ListRow, EmptyState, Stat, FormField and segmented tabs. PageContainer owns desktop gutters and the content measure. Pages do not restyle cards or create feature card, panel or tile classes. Row actions stay outside the row button. FormField supplies control attributes through its child function. Spread those attributes onto the labeled control.
 
 Add a component when multiple pages repeat the same structure. Keep its API small. Use theme, spacing, radius and type tokens. Supply visible copy from the caller. Add behavior tests and a gallery example. Update the reviewed vendor manifest for library changes. Existing pages migrate in separate changes.
