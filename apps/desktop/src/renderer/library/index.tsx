@@ -1255,6 +1255,7 @@ export function LibraryView() {
                     }}/>
 {grid ? <><div className="document-cell">
                     <div className="document-info">
+                      {item.pinned && <Pin role="img" aria-label={tr("library:pinned")} />}
                       <Button variant="ghost"
                         className="document-title"
                         tabIndex={-1}
