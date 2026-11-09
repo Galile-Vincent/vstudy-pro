@@ -119,9 +119,8 @@ export function UploadCard({
         dragDepth.current++;
         setDragging(true);
       }}
-      onDragLeave={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) resetDrag();
-        else if (--dragDepth.current <= 0) resetDrag();
+      onDragLeave={() => {
+        if (--dragDepth.current <= 0) resetDrag();
       }}
       onDragEnd={resetDrag}
       onDragOver={(e) => {
