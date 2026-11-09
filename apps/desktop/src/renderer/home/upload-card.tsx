@@ -1,3 +1,5 @@
+import { Card, Section, Toolbar } from '../components/ui';
+import type { ReactNode } from 'react';
 import { FormField } from '../components/ui/form-field';
 import { Button } from '../components/ui/button';
 import { Select } from "../components/select";
@@ -11,7 +13,7 @@ import { tr } from '../../shared/i18n';
 import { useOptionalNavigation } from '../shell';
 import { desktop } from '../bridge';
 import { errorText, statusText } from '../status';
-export function UploadCard({ folders = [], onImported, showSample = true, showOpen = true }: { showOpen?: boolean; showSample?: boolean; folders?: z.infer<typeof folderSchema>[]; onImported?: (document: Document) => void }) {
+export function UploadCard({ folders = [], onImported, showSample = true, showOpen = true, title, footer }: { title?: string; footer?: ReactNode; showOpen?: boolean; showSample?: boolean; folders?: z.infer<typeof folderSchema>[]; onImported?: (document: Document) => void }) {
   useTranslation();
   const navigation = useOptionalNavigation();
   const [imported, setImported] = useState<Document>();
@@ -19,6 +21,8 @@ export function UploadCard({ folders = [], onImported, showSample = true, showOp
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [dragging, setDragging] = useState(false);
+  const dragDepth = useRef(0);
   const lock = useRef(false);
   const owned = useRef(new Set<string>());
   useEffect(() => desktop.onDocumentProgress?.(event => { if (lock.current || owned.current.has(event.documentId)) setMessage(event.code ? statusText({code:event.code,params:event.params ?? {}}) : tr('home:converting')); }), []);
@@ -42,12 +46,8 @@ export function UploadCard({ folders = [], onImported, showSample = true, showOp
     } catch (error) { setError(errorText(error)); setMessage(''); }
     finally { setBusy(false); lock.current = false; }
   };
-  return <div className="home-upload" onDragOver={e => { e.preventDefault(); e.stopPropagation(); }} onDrop={e => {
-    e.preventDefault(); e.stopPropagation();
-    if (lock.current) return;
-    const paths = Array.from(e.dataTransfer.files, file => desktop.getPathForFile?.(file) ?? '');
-    if (paths.length && paths.every(Boolean)) void upload(paths); else setError(tr('home:drop_error'));
-  }}>
+  const Root = title ? Card : 'div';
+  const content = <>
     <Upload aria-hidden="true"/><p>{tr('home:upload_hint')}</p>
     <p>{tr('onboarding:file_help')}</p>
     {!!folders.length && <FormField label={tr('home:destination')}>
@@ -57,10 +57,40 @@ export function UploadCard({ folders = [], onImported, showSample = true, showOp
         {folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
       </Select>}
     </FormField>}
-    <Button variant="outline" className="primary" disabled={busy} onClick={() => void upload()}>{tr('home:choose_file')}</Button>
-    {showSample && <Button variant="outline" className="ghost" disabled={busy} onClick={() => void upload(undefined, true)}>{tr('onboarding:sample')}</Button>}
-
-    {showOpen && imported && navigation && <Button variant="outline" onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>{tr('home:open_imported', { title: imported.title })}</Button>}
-    {busy && <progress aria-label={tr('home:importing')}/>}{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
-  </div>;
+    <div className="flex flex-col gap-[var(--space-2)]">
+      <Toolbar className="gap-[var(--space-2)]" left={<>
+        <Button disabled={busy} onClick={() => void upload()}>{tr('home:choose_file')}</Button>
+        {showSample && <Button variant="ghost" disabled={busy}
+          onClick={() => void upload(undefined, true)}>{tr('onboarding:sample')}</Button>}
+      </>}/>
+      {(busy || message || error) && <div className="flex flex-col gap-[var(--space-2)]">
+        {busy && <progress aria-label={tr('home:importing')}/>}
+        {message && <p role="status">{message}</p>}
+        {error && <p role="alert">{error}</p>}
+      </div>}
+    </div>
+    {showOpen && imported && navigation && <Button variant="outline"
+      onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>
+      {tr('home:open_imported', { title: imported.title })}
+    </Button>}
+    {footer}
+  </>;
+  return <Root {...(title ? { variant: 'flat' as const } : {})}
+    className={title ? "home-upload min-w-0 p-[var(--space-6)]" : "home-upload"}
+    style={dragging ? { background: 'var(--active)' } : undefined}
+    data-dragging={dragging}
+    onDragEnter={e => { e.preventDefault(); dragDepth.current++; setDragging(true); }}
+    onDragLeave={() => { if (--dragDepth.current <= 0) setDragging(false); }} onDragOver={e => { e.preventDefault(); e.stopPropagation(); }} onDrop={e => {
+    e.preventDefault(); e.stopPropagation();
+    dragDepth.current = 0; setDragging(false);
+    if (lock.current) return;
+    const paths = Array.from(e.dataTransfer.files, file => desktop.getPathForFile?.(file) ?? '');
+    if (paths.length && paths.every(Boolean)) void upload(paths); else setError(tr('home:drop_error'));
+  }}>
+    {title ? <Section title={<span className="grid">
+      <span className={dragging ? 'invisible [grid-area:1/1]' : '[grid-area:1/1]'}>{title}</span>
+      <span className={dragging ? '[grid-area:1/1]' : 'invisible [grid-area:1/1]'}
+        aria-hidden={!dragging}>{tr('home:drop_to_import')}</span>
+    </span>}>{content}</Section> : content}
+  </Root>;
 }
