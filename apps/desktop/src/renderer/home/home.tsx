@@ -15,7 +15,7 @@ import { useFormat } from '../i18n';
 import { AnimatedText } from '../motion/animated-text';
 import { UploadCard } from './upload-card';
 import './home.css';
-import { Card as SurfaceCard, PageContainer, PageHeader, Section, Stat } from '../components/ui';
+import { Card as SurfaceCard, PageContainer, PageHeader, Section, Stat, ListRow } from '../components/ui';
 import { Button } from '../components/ui/button';
 import { Skeleton } from '../components/ui/skeleton';
 import { Progress } from '../components/ui/progress';
@@ -36,7 +36,9 @@ export function Sparkline({ series }: { series: Dashboard['series'] }) {
 }
 export function Streak({ streak }: { streak: Dashboard['streak'] }) {
   const fmt = useFormat();
-  return <><strong className="home-stat">{tr('home:streak_days', { count: streak.current, formatted: fmt.number(streak.current) })}</strong><p>{tr(streak.today ? 'home:studied_today' : 'home:today_invitation')}</p><ul className="streak-days">{streak.days.slice(-7).map(d => <li key={d.date} data-studied={d.studied} title={d.date} data-today={d.date === new Intl.DateTimeFormat("en-CA").format(new Date())}><span aria-hidden="true">{d.studied ? '●' : '○'}</span><small>{new Intl.DateTimeFormat(globalThis.document?.documentElement.lang || 'en', { weekday: 'narrow', timeZone:'UTC' }).format(new Date(d.date + 'T12:00:00Z'))}</small><span className="motion-sr">{tr(d.studied ? 'home:day_studied' : 'home:day_rest', { date: d.date })}</span></li>)}</ul><Tooltip><TooltipTrigger asChild><small className="muted" tabIndex={0}>{tr('home:best', { count: streak.best, formatted: fmt.number(streak.best) })}</small></TooltipTrigger><TooltipContent>{tr('home:streak_definition')}</TooltipContent></Tooltip></>;
+  return <><Stat label={tr(streak.today ? 'home:studied_today' : 'home:today_invitation')}
+    value={<strong>{tr('home:streak_days', { count: streak.current, formatted: fmt.number(streak.current) })}</strong>}/>
+    <ul className="streak-days">{streak.days.slice(-7).map(d => <li key={d.date} data-studied={d.studied} title={d.date} data-today={d.date === new Intl.DateTimeFormat("en-CA").format(new Date())}><span aria-hidden="true">{d.studied ? '●' : '○'}</span><small>{new Intl.DateTimeFormat(globalThis.document?.documentElement.lang || 'en', { weekday: 'narrow', timeZone:'UTC' }).format(new Date(d.date + 'T12:00:00Z'))}</small><span className="motion-sr">{tr(d.studied ? 'home:day_studied' : 'home:day_rest', { date: d.date })}</span></li>)}</ul><Tooltip><TooltipTrigger asChild><small className="muted" tabIndex={0}>{tr('home:best', { count: streak.best, formatted: fmt.number(streak.best) })}</small></TooltipTrigger><TooltipContent>{tr('home:streak_definition')}</TooltipContent></Tooltip></>;
 }
 function Pins({ kind, items, onOpen, refresh, onError }: { kind: 'documents' | 'folders'; items: { id: string; title: string }[]; onOpen: (id: string) => void; refresh: () => void; onError: () => void }) {
   const reorder = async (from: number, to: number) => {
@@ -81,14 +83,38 @@ export function Home({ navigate, onUsage, onFolder, name, initialData, guidance 
 
     {error && <div role="alert">{error}<Button variant="ghost" onClick={refresh}>{tr('common:retry')}</Button></div>}
     {!data ? !error && <div className="home-grid" role="status" aria-busy="true" aria-label={tr('home:loading')}>{Array.from({ length: 6 }, (_, i) => <Skeleton className="home-card home-skeleton" key={i}/>)}</div> : <div className="home-grid">
-      {!!data.recentDocuments.length && <Card title={tr('home:continue')} className="home-recent-section">
-        <div className="home-recent-grid">{data.recentDocuments.slice(0, 6).map((recent, index) => <article key={recent.document.id} className={`home-reading-card${index === 0 ? ' home-continue' : ''}`}>
-          <DocumentArt id={recent.document.id} kind={recent.document.sourceName.split('.').pop()?.toUpperCase() ?? 'MD'}/>
-          <div className="art-reader-reading-info"><span className="art-reader-kicker">{tr('art-reader:collection')}</span><h3 lang={contentLanguage(recent.document.title) ?? 'en'}>{recent.document.title}</h3>
-          {recent.lastChat && <p className="home-snippet">{plainText(recent.lastChat)}</p>}
-          <Button variant="ghost" className="home-reading-action" aria-label={`${tr('home:continue')}: ${recent.document.title}`} onClick={() => navigate('workspace', recent.document.id)}>{tr('home:continue')}<ArrowUpRight size={16} aria-hidden="true"/></Button></div>
-        </article>)}</div>
-      </Card>}
+      {!!data.recentDocuments.length && <Section title={tr('home:continue')}>
+        <div className="flex flex-col gap-[var(--space-2)]">
+          {data.recentDocuments.slice(0, 6).map((recent, index) => {
+            const title = recent.document.title;
+            const thumbnail = <span className="home-recent-thumbnail">
+              <DocumentArt id={recent.document.id}
+                kind={recent.document.sourceName.split('.').pop()?.toUpperCase() ?? 'MD'}/>
+            </span>;
+            const snippet = recent.lastChat && <span className="line-clamp-2">
+              {plainText(recent.lastChat)}
+            </span>;
+            const action = <Button variant={index === 0 ? 'default' : 'ghost'}
+              aria-label={`${tr('home:continue')}: ${title}`}
+              onClick={() => navigate('workspace', recent.document.id)}>
+              {index === 0 ? tr('home:resume') : tr('home:continue')}
+              <ArrowUpRight size={16} aria-hidden="true"/>
+            </Button>;
+            return index === 0 ? <SurfaceCard key={recent.document.id} variant="flat"
+              className="flex-row items-center gap-[var(--space-3)] p-[var(--space-3)]">
+              {thumbnail}
+              <div className="min-w-0 flex-1">
+                <h3 className="font-medium break-words" lang={contentLanguage(title) ?? 'en'}>{title}</h3>
+                <p className="text-[var(--muted)]">{snippet}</p>
+              </div>
+              {action}
+            </SurfaceCard> : <ListRow key={recent.document.id} leading={thumbnail}
+              title={<span className="break-words" lang={contentLanguage(title) ?? 'en'}>{title}</span>}
+              subtitle={snippet} actions={action}
+              onClick={() => navigate('workspace', recent.document.id)}/>;
+          })}
+        </div>
+      </Section>}
       <div className="art-reader-launchpad">
         <UploadCard title={tr('home:upload')} folders={folders} onImported={refresh}
           footer={<Button variant="ghost" className="justify-start" onClick={() => navigate('library')}>

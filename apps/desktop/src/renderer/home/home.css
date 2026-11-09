@@ -42,3 +42,8 @@
 @media(prefers-contrast:more),(forced-colors:active) {
   .home-page [data-slot=card] { outline:1px solid var(--ink); }
 }
+
+.home-recent-thumbnail { display:block; flex-shrink:0; }
+.home-recent-thumbnail .art-reader-cover { width:48px; height:48px; }
+.home-page [data-slot=list-row] { min-width:0; }
+.home-page [data-slot=list-row] button { white-space:normal; height:auto; }
