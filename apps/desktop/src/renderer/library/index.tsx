@@ -3,9 +3,8 @@ import { virtualWindow } from './window';
 import { localDate, dayBound, validDay } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
-import { Brand } from '../components/brand';
-import { DocumentArt } from '../shell/document-art';
 import type { CSSProperties } from 'react';
+import { PageContainer, PageHeader, Toolbar, FormField, EmptyState, Card } from '../components/ui';
 import { Badge } from '../components/ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
 import './ui3.css';
@@ -26,7 +25,6 @@ import {
   useSyncExternalStore,
 } from "react";
 import {
-  FileText,
   Search,
   Pin,
   MoreHorizontal,
@@ -109,9 +107,19 @@ type RowProps = {
   height: number; offset: number; columns: number; tabRow: boolean;
   selected: boolean; folderId: string | null | undefined; place: string;
   language: string; locale: string | undefined; page: number | undefined;
+  measure: (id: string, height: number) => void;
   total: number | undefined; render: () => React.ReactNode;
 };
-const DocumentRow = memo(function DocumentRow({render}: RowProps) {
+const DocumentRow = memo(function DocumentRow({render, item, grid, measure}: RowProps) {
+  useLayoutEffect(() => {
+    if (!grid) return;
+    const element = document.getElementById(`library-document-${item.document.id}`)!;
+    const update = () => measure(item.document.id, element.getBoundingClientRect().height);
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    update();
+    return () => observer.disconnect();
+  }, [grid, item.document.id, measure]);
   return render();
 }, (previous, next) => (Object.keys(previous) as (keyof RowProps)[])
   .every(key => key === "render" || previous[key] === next[key]));
@@ -626,7 +634,7 @@ export function LibraryView() {
   }, [loading, grid, items.length > 0, showFolders]);
 
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const baseHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : (rowRem || 2.75) * (textScale || 16);
+  const baseHeight = grid ? 10 * (textScale || 16) : (rowRem || 2.75) * (textScale || 16);
   const rowHeight = baseHeight;
   const columns = grid ? Math.max(1, Math.floor(viewportWidth / 280)) : 1;
   const [statusHeights, setStatusHeights] = useState<Record<string, number>>({});
@@ -634,7 +642,13 @@ export function LibraryView() {
     if (height <= 0) return;
     setStatusHeights(current => current[id] === height ? current : {...current, [id]: height});
   }, []);
-  const itemHeight = (item: Item) => rowHeight + (item.document.status === "ready"
+  const [cardHeights, setCardHeights] = useState<Record<string, number>>({});
+  const measureCard = useCallback((id: string, height: number) => {
+    if (height <= 0) return;
+    setCardHeights(current => current[id] === height ? current : {...current, [id]: height});
+  }, []);
+  const itemHeight = (item: Item) => grid && cardHeights[item.document.id]
+    ? cardHeights[item.document.id]! : rowHeight + (item.document.status === "ready"
     ? 0 : statusHeights[item.document.id] ?? 80 * (textScale || 16) / 16);
   const layout = useMemo(() => {
     const offsets = [0];
@@ -645,7 +659,7 @@ export function LibraryView() {
       offsets.push(offsets[offsets.length - 1]! + height);
     }
     return { offsets, heights };
-  }, [shown, columns, rowHeight, statusHeights, textScale]);
+  }, [shown, columns, rowHeight, statusHeights, cardHeights, textScale, grid]);
   const rowContext = useRef({ shown, items, layout, columns, rowHeight, grid, selected, selectedSet });
   rowContext.current = { shown, items, layout, columns, rowHeight, grid, selected, selectedSet };
   const {start, end} = virtualWindow(
@@ -725,6 +739,7 @@ export function LibraryView() {
         </Button>
     </div>
   );
+  const DocumentSurface = grid ? Card : "div";
   const liveRegion = (
     <div className="library-live" aria-live="polite">
         {dateError ? tr('library:dateRangeInvalid') : notice || recoveryNotice || tr('library:loaded', {
@@ -734,7 +749,7 @@ export function LibraryView() {
       </div>
   );
   return (
-    <section
+    <PageContainer
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
@@ -747,13 +762,20 @@ export function LibraryView() {
           );
       }}
       className="library-view"
+      role="region"
       aria-label={tr("common:library")}
     >
-      <div className="library-title">
-        <div>
-          <h1 ref={heading} tabIndex={-1}>{openGroup ? openGroup.name ?? tr("library:unfiled") : (folderPath(folders, query.folderId) || route.title || tr("common:library"))}</h1>
-          <p className="muted">{tr("library:documentCount", { count: items.length, formatted: format.number(items.length) + (cursor ? "+" : "") })}</p>
-        </div>
+      <PageHeader
+        ref={element => {
+          heading.current = element?.querySelector('h1') ?? null;
+          heading.current?.setAttribute('tabindex', '-1');
+        }}
+        title={openGroup ? openGroup.name ?? tr("library:unfiled") : (folderPath(folders, query.folderId) || route.title || tr("common:library"))}
+        description={tr("library:documentCount", {
+          count: items.length,
+          formatted: format.number(items.length) + (cursor ? "+" : ""),
+        })}
+        actions={
         <Button variant="outline" className="primary"
           hidden={!loading && !items.length && !text && !filters.length}
           data-testid="import-document"
@@ -761,8 +783,9 @@ export function LibraryView() {
         >
           {tr("common:import_document")}
         </Button>
-      </div>
-      <div className="library-toolbar" hidden={!loading && !items.length && !text && !filters.length && !query.folderId}>
+        }
+      />
+      <Toolbar className="library-toolbar" hidden={!loading && !items.length && !text && !filters.length && !query.folderId} left={<>
         {viewKey === "all" && !query.folderId && <LibraryModeToggle mode={mode} onChange={chooseMode} />}
         <label className="library-search">
           <Search aria-hidden="true" />
@@ -776,13 +799,12 @@ export function LibraryView() {
         </label>
         <Popover open={filtersOpen} onOpenChange={setFiltersOpen}><PopoverTrigger asChild>
           <Button variant="outline" className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel"><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</Button></PopoverTrigger>
-          <PopoverContent id="library-filter-panel" aria-label={tr("library:filters")} align="start" className="filter-panel">
+          <PopoverContent id="library-filter-panel" aria-label={tr("library:filters")} align="start" collisionPadding={16} className="filter-panel">
             {(
               ["type", "status", "converter", "tagId", "folderId"] as const
             ).map((key) => (
-              <label key={key}>
-                {tr(`library:${key}`)}
-                <Select
+              <FormField key={key} label={tr(`library:${key}`)}>
+                {control => <Select {...control}
                   aria-label={tr(`library:${key}`)}
                   value={String(query[key] ?? "")}
                   onChange={(e) =>
@@ -823,12 +845,12 @@ export function LibraryView() {
                             {tr(`library:${v}`)}
                           </option>
                         ))}
-                </Select>
-              </label>
+                </Select>}
+              </FormField>
             ))}
             {(["subfolders", "hasChats", "pinned"] as const).map((key) => (
-              <label key={key}>
-                <Checkbox
+              <FormField key={key} label={tr(`library:${key}`)}>
+                {control => <Checkbox {...control} style={{width:40, height:40}}
                   checked={query[key] ?? false}
                   onChange={(e) =>
                     setQuery((q) => ({
@@ -836,25 +858,32 @@ export function LibraryView() {
                       [key]: e.target.checked || undefined,
                     }))
                   }
-                />
-                {tr(`library:${key}`)}
-              </label>
+                />}
+              </FormField>
             ))}
-            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:localDate(query.addedAfter),addedBefore:localDate(query.addedBefore)});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
+            <FormField label={tr("library:addedAfter")}>{control => <Select {...control} aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:localDate(query.addedAfter),addedBefore:localDate(query.addedBefore)});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
-            </Select></label>
-            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} aria-invalid={dateError} value={dateDraft[key]} onChange={e => updateDate(key,e.target.value)}/></label>)}
-            {dateError && <p>{tr("library:dateRangeInvalid")}</p>}
-            <label>{tr("library:size")}<Select aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
+            </Select>}</FormField>
+            {customDates && (["addedAfter", "addedBefore"] as const).map(key => (
+              <FormField key={key} label={tr(`library:${key}`)}
+                error={dateError ? tr("library:dateRangeInvalid") : undefined}>
+                {control => <Input {...control} type="date"
+                  aria-label={tr(`library:${key}`)} value={dateDraft[key]}
+                  onChange={e => updateDate(key, e.target.value)} />}
+              </FormField>
+            ))}
+            <FormField label={tr("library:size")}>{control => <Select {...control} aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
-            </Select></label>
+            </Select>}</FormField>
             {!showFolders && compactToolbar && <div className="filter-view"><span>{tr("library:sort")}</span>{viewControls}</div>}
-            <footer><Button variant="outline" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
+            {filters.length > 0 && <footer><Button variant="outline" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button></footer>}
           </PopoverContent>
         </Popover>
         {!showFolders && !compactToolbar && viewControls}
-      </div>
+      </>} />
       <div className="filter-chips">
+        {filters.length > 0 && !filtersOpen && <Button variant="outline"
+          className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button>}
         {filters.map(([key, value]) => (
           <Button variant="outline"
             key={key}
@@ -880,9 +909,6 @@ export function LibraryView() {
         ))}
         {filters.length > 0 && (
           <>
-            <Button variant="outline" className="ghost" onClick={clearFilters}>
-              {tr("library:clearFilters")}
-            </Button>
             <Button variant="outline" className="ghost"
               onClick={async () => {
                 const name = await prompt(tr("library:saveFilter"));
@@ -955,15 +981,16 @@ export function LibraryView() {
           ))}
         </div>
       ) : !items.length ? (
-        <div className="empty library-empty">
-          <Brand/>
-          <h2>
-            {tr(
-              `library:empty_${text ? "search" : filters.length ? "filter" : query.folderId ? "folder" : "library"}`,
-              { query: text })}
-          </h2>
-          <p>{tr(text ? "library:searchHint" : filters.length ? "library:filterHint" : "library:emptyHint")}</p>
-          <Button variant="outline"
+        <EmptyState
+          className="library-empty"
+          headingLevel={2}
+          title={tr(
+            `library:empty_${text ? "search" : filters.length ? "filter" : query.folderId ? "folder" : "library"}`,
+            {query:text},
+          )}
+          description={tr(text ? "library:searchHint" : filters.length ? "library:filterHint" : "library:emptyHint")}
+          action={<>
+          <Button
             onClick={() =>
               text
                 ? setText("")
@@ -981,7 +1008,8 @@ export function LibraryView() {
             )}
           </Button>
           {!text && !filters.length && <Button variant="outline" className="ghost" onClick={() => void run(async () => { await desktop.invoke('documents:importSample',{language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}); changed(); })}>{tr('onboarding:sample')}</Button>}
-        </div>
+          </>}
+        />
       ) : showFolders ? (
         <div className="library-folders">
           <FolderGrid groups={groups} formatNumber={format.number} onOpen={selectFolder} />
@@ -1046,12 +1074,13 @@ export function LibraryView() {
               const height = itemHeight(item);
               const offset = layout.offsets[lane]!;
               return <DocumentRow key={d.id} item={item} index={index}
-                count={shown.length} grid={grid} height={height} offset={offset}
+                count={shown.length} grid={grid} measure={measureCard} height={height} offset={offset}
                 columns={columns} tabRow={tabRow === d.id} selected={selectedSet.has(d.id)}
                 folderId={query.folderId} place={placeOf(item)} language={language}
                 locale={i18n.resolvedLanguage} page={progress[d.id]?.page}
                 total={progress[d.id]?.total} render={() => (
-                <div
+                <DocumentSurface
+                  {...(grid ? {variant:"flat" as const} : {})}
                   id={`library-document-${d.id}`}
                   data-index={index}
                   role="listitem"
@@ -1065,16 +1094,16 @@ export function LibraryView() {
                   tabIndex={tabRow === d.id ? 0 : -1}
                   onFocus={() => { setActiveRow(d.id);  }}
                   onMouseEnter={() => {  }}
-                  className={`library-document ${grid ? "document-card" : ""}`}
+                  className="library-document"
                   style={{
-                    height,
-                    minHeight: height,
+                    height: grid ? undefined : height,
+                    minHeight: grid ? baseHeight : height,
                     rowGap: !grid && d.status !== "ready" ? 0 : undefined,
                     gridTemplateRows: !grid && d.status !== "ready" ? `${rowHeight}px max-content` : undefined,
                     position: "absolute",
                     top: offset,
-                    left: `${((index % columns) * 100) / columns}%`,
-                    width: `${100 / columns}%`,
+                    insetInlineStart: `${((index % columns) * 100) / columns}%`,
+                    width: grid ? `calc(${100 / columns}% - 16px)` : "100%",
                   }}
                   draggable
                   onDragStart={(e) => {
@@ -1225,10 +1254,10 @@ export function LibraryView() {
                       setSelected(current => event.target.checked
                         ? [...current, d.id] : current.filter(id => id !== d.id));
                     }}/>
-{grid ? <><DocumentArt id={d.id} kind={d.sourceName.split('.').pop()?.toUpperCase() ?? 'MD'}/><div className="document-cell">
-                    <FileText className="document-glyph" aria-hidden="true" />
+{grid ? <><div className="document-cell">
                     <div className="document-info">
-                      <Button variant="outline"
+                      {item.pinned && <Pin role="img" aria-label={tr("library:pinned")} />}
+                      <Button variant="ghost"
                         className="document-title"
                         tabIndex={-1}
                         lang={contentLanguage(d.title)}
@@ -1241,8 +1270,7 @@ export function LibraryView() {
                         {!query.folderId && <span className="document-course">{placeOf(item)}</span>}
                         <span>{d.sourceName.split('.').pop()?.toUpperCase()}</span>
                         {item.pageCount != null && <span>{tr("library:pages", {count:item.pageCount, formatted:format.number(item.pageCount)})}</span>}
-                        <span>{formatSize(item.sizeBytes, document.documentElement.lang)}</span>
-                        <span>{format.date(d.createdAt)}</span>
+                        <span>{formatSize(item.sizeBytes, document.documentElement.lang, true)}</span>
 
                       </div>
                       {item.snippet && (
@@ -1259,21 +1287,6 @@ export function LibraryView() {
 
                       </div>
                     </div>
-                    <Button variant="outline"
-                      aria-label={`${tr("library:pin")}: ${d.title}`}
-                      tabIndex={-1}
-                      aria-pressed={item.pinned}
-                      onClick={() =>
-                        void run(() =>
-                          desktop.invoke("library:documents:pin", {
-                            documentId: d.id,
-                            pinned: !item.pinned,
-                          }),
-                        )
-                      }
-                    >
-                      <Pin />
-                    </Button>
                     <Button variant="outline"
                       aria-label={tr("library:actions", { name: d.title })}
                       tabIndex={-1}
@@ -1310,7 +1323,7 @@ export function LibraryView() {
                       value={progress[d.id]?.page} max={progress[d.id]?.total}
                       aria-label={tr('common:conversion_progress')}/>}
                   </StatusBlock>}
-                </div>
+                </DocumentSurface>
               )} />;
             })}
           </div>
@@ -1344,6 +1357,6 @@ export function LibraryView() {
       )}
       <LibraryMenus busy={busy} moveNotice={notice} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
       {promptDialog}
-    </section>
+    </PageContainer>
   );
 }
