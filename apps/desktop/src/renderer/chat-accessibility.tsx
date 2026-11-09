@@ -41,7 +41,7 @@ export const CopyAnswerButton: FC = () => {
 };
 
 
-function ToolAnnouncement() {
+export function ToolAnnouncement() {
   useTranslation();
   const running = useAuiState(state => state.thread.isRunning);
   const activeMessageId = useAuiState(state => state.thread.isRunning ? state.thread.messages.at(-1)?.id : undefined);
@@ -49,8 +49,9 @@ function ToolAnnouncement() {
     message.role !== 'assistant' ? [] : message.content.flatMap(part => {
       if (part.type !== 'tool-call') return [];
       const status = part.isError ? 'failed' : part.result !== undefined ? 'finished'
-        : message.status?.type === 'incomplete' ? 'failed'
-        : message.status?.type === 'running' ? 'started' : 'finished';
+        : message.status?.type === 'incomplete'
+          ? message.status.reason === 'cancelled' ? 'cancelled' : 'failed'
+        : message.status?.type === 'running' ? 'started' : 'waiting';
       return [{id: `${message.id}:${part.toolCallId}`, messageId: message.id, name: part.toolName, status}];
     }))));
   const seen = useRef<Map<string, string> | null>(null);

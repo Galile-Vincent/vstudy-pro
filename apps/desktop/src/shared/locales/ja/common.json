@@ -372,6 +372,8 @@
   "reload_application": "アプリを再読み込み",
   "scrollable_code": "横スクロールできるコードブロック",
   "tool_started": "ツール {{tool}} を開始しました",
+  "tool_cancelled": "ツール {{tool}} をキャンセルしました",
+  "tool_waiting": "ツール {{tool}} はあなたの操作を待っています",
   "tool_finished": "ツール {{tool}} が完了しました",
   "tool_failed": "ツール {{tool}} が失敗しました"
 }

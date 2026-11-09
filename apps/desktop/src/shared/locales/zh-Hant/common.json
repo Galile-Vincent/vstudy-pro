@@ -372,6 +372,8 @@
   "reload_application": "重新載入應用程式",
   "scrollable_code": "可水平捲動的程式碼區塊",
   "tool_started": "工具 {{tool}} 已開始",
+  "tool_cancelled": "工具 {{tool}} 已取消",
+  "tool_waiting": "工具 {{tool}} 正在等待你",
   "tool_finished": "工具 {{tool}} 已完成",
   "tool_failed": "工具 {{tool}} 執行失敗"
 }

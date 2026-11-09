@@ -372,6 +372,8 @@
   "reload_application": "Reload application",
   "scrollable_code": "Scrollable code block",
   "tool_started": "Tool {{tool}} started",
+  "tool_cancelled": "Tool {{tool}} cancelled",
+  "tool_waiting": "Tool {{tool}} waiting for you",
   "tool_finished": "Tool {{tool}} finished",
   "tool_failed": "Tool {{tool}} failed"
 }
