@@ -50,3 +50,12 @@ it.each([['ja', 'auto', 'ja'], ['en', 'ja', 'ja'], ['zh-Hant', 'auto', 'zh-Hant'
   fireEvent.click(screen.getByRole('button', { name: (ui === 'en' ? en : ui === 'ja' ? ja : zhHant).generate_note }));
   await waitFor(() => expect(invoke).toHaveBeenCalledWith('review:artifact:generate', expect.objectContaining({ locale: expected })));
 });
+it.each(['en', 'zh-Hant', 'ja'])('formats saved artifact dates in app language %s', async language => {
+  await i18n.changeLanguage(language);
+  setup('en');
+  render(<ArtifactPanel courseId="course" kind="note" selection={null} />);
+  await screen.findByRole('button', { name: 'A note' });
+  expect(document.querySelector('time')?.textContent).toBe(
+    new Intl.DateTimeFormat(language).format(new Date(artifact.createdAt)),
+  );
+});

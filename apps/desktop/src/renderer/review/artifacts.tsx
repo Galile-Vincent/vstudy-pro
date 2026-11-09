@@ -6,6 +6,7 @@ import type { Document } from "../../shared/domain";
 import type { studyScopeSchema } from "../../shared/review-artifacts";
 import { tr } from "../../shared/i18n";
 import { describeAssumption } from "../../shared/review-assumptions";
+import { useFormat } from "../i18n";
 import { desktop } from "../bridge";
 import { DocumentMarkdown } from "../lazy-reader";
 import { Button } from "../components/ui/button";
@@ -28,6 +29,7 @@ export function ArtifactPanel({
   onConfirmed?: (() => void) | undefined;
 }) {
   const { i18n } = useTranslation();
+  const format = useFormat();
   const page = useReviewPage(
     useCallback(
       (cursor?: Cursor) =>
@@ -466,7 +468,7 @@ export function ArtifactPanel({
                 )}
               </span>
               <time dateTime={a.createdAt}>
-                {new Date(a.createdAt).toLocaleDateString()}
+                {format.date(a.createdAt)}
               </time>
             </li>
           ))}
