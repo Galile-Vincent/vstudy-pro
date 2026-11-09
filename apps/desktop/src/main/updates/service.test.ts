@@ -39,13 +39,15 @@ it('checks, offers, downloads with consent, clamps progress, and installs only w
   expect(service.snapshot().state).toEqual({status:'ready',version:'0.4.5'});
   service.install(); expect(updater.quitAndInstall).toHaveBeenCalledOnce();
 });
-it('stays idle offline, throttles manual checks, and returns idle when current', async () => {
+it('reports offline manual checks and keeps successful timestamps', async () => {
   const {service, updater, offline, advance} = setup();
   await service.check(); updater.emit('update-not-available');
   expect(service.snapshot().state.status).toBe('idle');
   await service.check(); expect(updater.checkForUpdates).toHaveBeenCalledTimes(1);
   advance(); await service.check(); updater.emit('update-not-available');
-  offline(); advance(); await service.check(); expect(updater.checkForUpdates).toHaveBeenCalledTimes(2);
+  offline(); advance(); const previous = service.snapshot().lastCheckedAt;
+  await service.check(); expect(service.snapshot().state).toEqual({status:'error',code:'offline'});
+  expect(service.snapshot().lastCheckedAt).toBe(previous);
 });
 it('schedules at 15 seconds and six hours, persists opt-out, and disposes', async () => {
   vi.useFakeTimers();
@@ -87,4 +89,13 @@ it('handles download rejection, offline consent, malformed metadata and illegal 
   expect(second.service.snapshot().state).toEqual({status:'error',code:'failed'});
   const third = setup(); await third.service.check(); third.updater.emit('update-available',{version:'0.4.5'}); third.offline(); await third.service.download();
   expect(third.service.snapshot().state).toEqual({status:'error',code:'offline'});
+});
+
+it('manual checks bypass automatic interval after a short cooldown', async () => {
+  const {service,updater} = setup();
+  await service.check(); updater.emit('update-not-available');
+  vi.spyOn(Date, 'now').mockReturnValue(1_010_000);
+  Reflect.set(service, 'lastManualAttempt', 0);
+  await service.check(); expect(updater.checkForUpdates).toHaveBeenCalledTimes(2);
+  vi.restoreAllMocks();
 });

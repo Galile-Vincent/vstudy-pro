@@ -8,6 +8,10 @@ export class Updates {
   private state: UpdateState;
   private lastCheckedAt: number | null = null;
   private automatic: boolean;
+  private lastManualAttempt = -Infinity;
+  private lastAttempt = -Infinity;
+  private result: UpdateSnapshot['result'];
+  private manual = false;
   private listeners = new Set<(snapshot: UpdateSnapshot) => void>();
   private timer: ReturnType<typeof setTimeout>;
   private interval: ReturnType<typeof setInterval>;
@@ -31,27 +35,40 @@ export class Updates {
     on('download-progress', (info: {percent:number}) => this.dispatch({type:'progress', percent:info.percent}));
     on('update-downloaded', (info: {version:string}) => this.dispatch({type:'ready', version:info.version}));
     on('error', (error: Error) => this.dispatch({type:'error', code:updateError(error)}));
-    this.timer = setTimeout(() => { if (this.automatic) void this.check(); }, 15_000);
-    this.interval = setInterval(() => { if (this.automatic) void this.check(); }, 6 * 60 * 60_000);
+    this.timer = setTimeout(() => { if (this.automatic) void this.check(false); }, 15_000);
+    this.interval = setInterval(() => { if (this.automatic) void this.check(false); }, 6 * 60 * 60_000);
   }
   snapshot = (): UpdateSnapshot => ({state:this.state, currentVersion:this.options.version,
-    lastCheckedAt:this.lastCheckedAt, automatic:this.automatic});
+    lastCheckedAt:this.lastCheckedAt, automatic:this.automatic, ...(this.result ? {result:this.result} : {})});
   subscribe(listener: (snapshot: UpdateSnapshot) => void) {
     this.listeners.add(listener); return () => { this.listeners.delete(listener); };
   }
   private emit() { for (const listener of this.listeners) listener(this.snapshot()); }
   private dispatch(event: UpdateEvent) {
+    if (event.type === 'available' || event.type === 'current') {
+      this.lastCheckedAt = (this.options.now ?? Date.now)();
+      if (this.manual) this.result = event.type === 'current' ? 'current' : 'checked';
+    }
     try { this.state = reduceUpdate(this.state, event); }
     catch { this.state = {status:'error', code:'failed'}; }
     if (event.type === 'error') this.updater.autoInstallOnAppQuit = false;
     this.emit();
   }
-  async check() {
+  async check(manual = true) {
     if (!['idle', 'error', 'available'].includes(this.state.status)) return this.snapshot();
-    if (!this.options.online()) return this.snapshot();
+    this.manual = manual;
+    if (!this.options.online()) {
+      if (manual) { this.result = 'offline'; this.dispatch({type:'error',code:'offline'}); }
+      return this.snapshot();
+    }
     const now = (this.options.now ?? Date.now)();
-    if (this.lastCheckedAt !== null && now - this.lastCheckedAt < 600_000) return this.snapshot();
-    this.lastCheckedAt = now;
+    if (manual && now - this.lastManualAttempt < 3000) {
+      this.result = 'cooldown'; this.emit(); return this.snapshot();
+    }
+    if (!manual && now - this.lastAttempt < 600_000) return this.snapshot();
+    if (manual) this.lastManualAttempt = now;
+    this.lastAttempt = now;
+    this.result = undefined;
     this.dispatch({type:'check'});
     recordEgress('app_update_check', 'https://github.com/ava-apple/vstudy-pro/releases/latest/download');
     try { await this.updater.checkForUpdates(); }

@@ -20,6 +20,7 @@ export function UpdateSettings() {
         || snapshot.state.status === 'unsupported'} onClick={() => void desktop.invoke('updates:check', {})}>
         {tr('updates:check')}</Button>
     </SettingsRow>
+    {snapshot?.result && <p role="status">{tr(`updates:${snapshot.result}`)}</p>}
     {snapshot?.state.status === 'unsupported' && <SettingsRow label={tr('updates:unsupported')}>
       <Button variant="link" onClick={() => void desktop.invoke('shell:openExternal',
         {url:'https://vstudy.vcstudio.app/download'})}>{tr('updates:download')}</Button>

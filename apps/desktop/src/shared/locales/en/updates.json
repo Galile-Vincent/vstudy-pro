@@ -13,5 +13,9 @@
   "unsupported": "Download the latest version",
   "notes": "What’s new",
   "retry": "Try again",
-  "download": "Download"
+  "download": "Download",
+  "current": "You’re up to date",
+  "checked": "Checked just now",
+  "offline": "You’re offline",
+  "cooldown": "Please wait a few seconds before checking again"
 }

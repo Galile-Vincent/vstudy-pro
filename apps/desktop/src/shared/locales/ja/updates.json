@@ -13,5 +13,9 @@
   "unsupported": "最新バージョンをダウンロード",
   "notes": "更新内容",
   "retry": "再試行",
-  "download": "ダウンロード"
+  "download": "ダウンロード",
+  "current": "最新バージョンです",
+  "checked": "今確認しました",
+  "offline": "オフラインです",
+  "cooldown": "数秒待ってから再確認してください"
 }
