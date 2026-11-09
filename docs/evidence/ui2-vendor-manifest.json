@@ -139,7 +139,7 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread.aui.tsx",
       "registrySha256": "a3bffd8e670e51a48eedb6cf0a5ea884ffc1d212cc28e2a8bf31f7a7961399da",
-      "patchedSha256": "1889dbd31a95d3b83d1b3354d3c25a0e9a4764ca014e066ba18e2c77d30e56aa",
+      "patchedSha256": "a3bf20ac3fe4e393f0f83b1cf9198514210c4ebe39abeda25b21d57b3f3195c6",
       "patch": "docs/vendor-patches/assistant-ui--elements--thread.aui.tsx.patch",
       "reason": "Retain localized slots, grouping and history IDs. Dock ViewportFooter outside the scrolling viewport and add a ThreadNotice slot for inline provider setup."
     },
