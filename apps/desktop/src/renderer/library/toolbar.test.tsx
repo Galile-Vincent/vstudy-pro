@@ -137,3 +137,18 @@ it('rejects a five digit year without breaking rendering',async()=>{
  expect(document.querySelector('.library-live')?.textContent).toBe(tr('library:dateRangeInvalid'));
  expect(screen.getByText('notes')).toBeTruthy();
 });
+
+it('labels every filter above its control and offers one clear action', async () => {
+  state.route.query = {status:'ready'};
+  const toolbar = await mount(false);
+  fireEvent.click(within(toolbar).getByTestId('library-filters'));
+  const panel = await screen.findByRole('dialog', {name:tr('library:filters')});
+  const fields = panel.querySelectorAll('[data-slot=form-field]');
+  expect(fields).toHaveLength(10);
+  for (const field of fields) {
+    const label = field.querySelector('label')!;
+    expect(label).toBe(field.firstElementChild);
+    expect(document.getElementById(label.htmlFor)).toBeTruthy();
+  }
+  expect(screen.getAllByRole('button', {name:tr('library:clearFilters')})).toHaveLength(1);
+});

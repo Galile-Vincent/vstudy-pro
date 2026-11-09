@@ -1,13 +1,21 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
 import { recovery } from './recovery';
+import type { ComponentProps } from 'react';
+import type { Card } from '../components/ui';
 import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
 import { i18n, tr } from '../../shared/i18n';
 const state=vi.hoisted(()=>({invoke:vi.fn(),art:vi.fn(),open:vi.fn(),route:{view:'library',query:{}}}));
-vi.mock('../shell/document-art',()=>({DocumentArt:({id}:{id:string})=>{state.art(id);return <span/>;}}));
+vi.mock('../components/ui', async importOriginal => {
+ const actual = await importOriginal<typeof import('../components/ui')>();
+ return {...actual, Card:(props:ComponentProps<typeof Card>) => {
+   state.art(props.id?.replace('library-document-', ''));
+   return <actual.Card {...props}/>;
+ }};
+});
 vi.mock('../document-open',()=>({openDocument:async(id:string,open:()=>void)=>{state.open(id);open();}}));
 vi.mock('../bridge',()=>({desktop:{invoke:state.invoke}}));
 vi.mock('../shell',()=>({useNavigate:()=>({route:state.route,navigate:vi.fn()})}));
@@ -186,7 +194,7 @@ it.each([false, true])('keeps recovery outside optional metadata (grid %s)', asy
  expect(retry.closest('.document-meta,.document-added')).toBeNull();
  const entry=retry.closest<HTMLElement>('.library-document')!;
  expect(entry.style.position).toBe('absolute');
- expect(parseFloat(entry.style.height)).toBeGreaterThan(grid ? 300 : 64);
+ expect(parseFloat(entry.style.height)).toBeGreaterThan(grid ? 160 : 64);
  expect(entry.style.minHeight).toBe(entry.style.height);
 });
 
@@ -520,9 +528,9 @@ it('measures a tall status block without stretching ready grid neighbours', asyn
  vi.spyOn(status,'getBoundingClientRect').mockReturnValue({height:180} as DOMRect);
  act(()=>observers.find(observer=>observer.target===status)?.callback());
  const failedRow=status.closest<HTMLElement>('.library-document')!;
- expect(parseFloat(failedRow.style.height)).toBe(480);
- expect(parseFloat(screen.getByText('ready',{selector:'button'}).closest<HTMLElement>('.library-document')!.style.height)).toBe(300);
- expect(parseFloat(screen.getByText('next',{selector:'button'}).closest<HTMLElement>('.library-document')!.style.top)).toBeGreaterThanOrEqual(480);
+ expect(parseFloat(failedRow.style.height)).toBe(340);
+ expect(parseFloat(screen.getByText('ready',{selector:'button'}).closest<HTMLElement>('.library-document')!.style.height)).toBe(160);
+ expect(parseFloat(screen.getByText('next',{selector:'button'}).closest<HTMLElement>('.library-document')!.style.top)).toBeGreaterThanOrEqual(340);
  vi.stubGlobal('ResizeObserver',class{observe(){}unobserve(){}disconnect(){}});
 });
 

@@ -4,7 +4,7 @@ import { localDate, dayBound, validDay } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import type { CSSProperties } from 'react';
-import { PageContainer, PageHeader, Toolbar, FormField, EmptyState } from '../components/ui';
+import { PageContainer, PageHeader, Toolbar, FormField, EmptyState, Card } from '../components/ui';
 import { Badge } from '../components/ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
 import './ui3.css';
@@ -624,7 +624,7 @@ export function LibraryView() {
   }, [loading, grid, items.length > 0, showFolders]);
 
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const baseHeight = grid ? 12 * (textScale || 16) : (rowRem || 2.75) * (textScale || 16);
+  const baseHeight = grid ? 10 * (textScale || 16) : (rowRem || 2.75) * (textScale || 16);
   const rowHeight = baseHeight;
   const columns = grid ? Math.max(1, Math.floor(viewportWidth / 280)) : 1;
   const [statusHeights, setStatusHeights] = useState<Record<string, number>>({});
@@ -723,6 +723,7 @@ export function LibraryView() {
         </Button>
     </div>
   );
+  const DocumentSurface = grid ? Card : "div";
   const liveRegion = (
     <div className="library-live" aria-live="polite">
         {dateError ? tr('library:dateRangeInvalid') : notice || recoveryNotice || tr('library:loaded', {
@@ -781,7 +782,7 @@ export function LibraryView() {
         </label>
         <Popover open={filtersOpen} onOpenChange={setFiltersOpen}><PopoverTrigger asChild>
           <Button variant="outline" className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel"><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</Button></PopoverTrigger>
-          <PopoverContent id="library-filter-panel" aria-label={tr("library:filters")} align="start" className="filter-panel">
+          <PopoverContent id="library-filter-panel" aria-label={tr("library:filters")} align="start" collisionPadding={16} className="filter-panel">
             {(
               ["type", "status", "converter", "tagId", "folderId"] as const
             ).map((key) => (
@@ -832,7 +833,7 @@ export function LibraryView() {
             ))}
             {(["subfolders", "hasChats", "pinned"] as const).map((key) => (
               <FormField key={key} label={tr(`library:${key}`)}>
-                {control => <Checkbox {...control}
+                {control => <Checkbox {...control} style={{width:40, height:40}}
                   checked={query[key] ?? false}
                   onChange={(e) =>
                     setQuery((q) => ({
@@ -1053,7 +1054,8 @@ export function LibraryView() {
                 folderId={query.folderId} place={placeOf(item)} language={language}
                 locale={i18n.resolvedLanguage} page={progress[d.id]?.page}
                 total={progress[d.id]?.total} render={() => (
-                <div
+                <DocumentSurface
+                  {...(grid ? {variant:"flat" as const} : {})}
                   id={`library-document-${d.id}`}
                   data-index={index}
                   role="listitem"
@@ -1067,7 +1069,7 @@ export function LibraryView() {
                   tabIndex={tabRow === d.id ? 0 : -1}
                   onFocus={() => { setActiveRow(d.id);  }}
                   onMouseEnter={() => {  }}
-                  className={`library-document ${grid ? "document-card" : ""}`}
+                  className="library-document"
                   style={{
                     height,
                     minHeight: height,
@@ -1076,7 +1078,7 @@ export function LibraryView() {
                     position: "absolute",
                     top: offset,
                     left: `${((index % columns) * 100) / columns}%`,
-                    width: `${100 / columns}%`,
+                    width: grid ? `calc(${100 / columns}% - 16px)` : "100%",
                   }}
                   draggable
                   onDragStart={(e) => {
@@ -1229,7 +1231,7 @@ export function LibraryView() {
                     }}/>
 {grid ? <><div className="document-cell">
                     <div className="document-info">
-                      <Button variant="outline"
+                      <Button variant="ghost"
                         className="document-title"
                         tabIndex={-1}
                         lang={contentLanguage(d.title)}
@@ -1242,8 +1244,7 @@ export function LibraryView() {
                         {!query.folderId && <span className="document-course">{placeOf(item)}</span>}
                         <span>{d.sourceName.split('.').pop()?.toUpperCase()}</span>
                         {item.pageCount != null && <span>{tr("library:pages", {count:item.pageCount, formatted:format.number(item.pageCount)})}</span>}
-                        <span>{formatSize(item.sizeBytes, document.documentElement.lang)}</span>
-                        <span>{format.date(d.createdAt)}</span>
+                        <span>{formatSize(item.sizeBytes, document.documentElement.lang, true)}</span>
 
                       </div>
                       {item.snippet && (
@@ -1296,7 +1297,7 @@ export function LibraryView() {
                       value={progress[d.id]?.page} max={progress[d.id]?.total}
                       aria-label={tr('common:conversion_progress')}/>}
                   </StatusBlock>}
-                </div>
+                </DocumentSurface>
               )} />;
             })}
           </div>

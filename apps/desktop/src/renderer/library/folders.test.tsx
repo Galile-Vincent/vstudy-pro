@@ -89,7 +89,7 @@ describe('library folders view', () => {
     const results = await screen.findByRole('list', { name: tr('library:documents') });
     const courses = Array.from(results.querySelectorAll('.document-course')).map((e) => e.textContent);
     expect(courses).toEqual(['電子電路', '電子電路', '邏輯設計', tr('library:unfiled')]);
-    const first = results.querySelector<HTMLElement>('.document-card')!;
+    const first = results.querySelector<HTMLElement>('[data-slot=card]')!;
     expect(first.textContent).toContain(tr('library:pages', { count: 3, formatted: '3' }));
     first.focus();
     fireEvent.keyDown(first, { key: 'ArrowRight' });

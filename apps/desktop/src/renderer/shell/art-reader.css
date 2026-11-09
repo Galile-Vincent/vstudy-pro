@@ -2,7 +2,6 @@
 :root {
   --art-reader-radius:20px;
   --art-reader-control:10px;
-  --art-reader-card-height:280px;
   --art-reader-ring:color-mix(in oklab,var(--ink) 8%,transparent);
   --art-reader-shadow:var(--glass-shadow);
   --art-reader-glass:color-mix(in oklab,var(--glass-tint) var(--glass-opacity),transparent);
