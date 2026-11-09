@@ -505,15 +505,15 @@ function CoursesBody({
                 className="moodle-file-actions"
                 title={tr("moodle:open_file", {name: f.name})}
                 leading={<FileText />}
-                subtitle={<span aria-hidden="true">
-                  {new Intl.NumberFormat(i18n.resolvedLanguage, {
+                subtitle={<span>
+                  {" "}{new Intl.NumberFormat(i18n.resolvedLanguage, {
                     style: "unit", unit: "megabyte", maximumFractionDigits: 1,
                   }).format(f.size / 1000000)}
-                  <span className="ms-2">{f.module}</span>
+                  <span className="ms-2">{" "}{f.module}</span>
                 </span>}
                 disabled={!!opening}
                 onClick={() => void openFile(f.id)}
-                meta={<span aria-hidden="true">{tr(opening === f.id ? "moodle:converting" : f.documentId ? "moodle:ready" : "moodle:not_opened")}</span>}
+                meta={<span>{" "}{tr(opening === f.id ? "moodle:converting" : f.documentId ? "moodle:ready" : "moodle:not_opened")}</span>}
                 actions={
               <Button variant="ghost" size="icon" aria-label={`${tr('webview:open')}: ${f.name}`} title={tr('webview:open')} onClick={() => openMoodle(detail!.course.accountId,{kind:'file',fileId:f.id})}><ArrowUpRight /></Button>
                 }

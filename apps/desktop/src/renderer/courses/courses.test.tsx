@@ -194,7 +194,7 @@ describe("Courses", () => {
     await mount(api, courseId, onDocument);
     await tab("Files");
     const file = (await api.course(courseId)).files[0]!;
-    const fileRow = getByRole(host, 'button', {name:`Open file: ${file.name}`});
+    const fileRow = getByRole(host, 'button', {name: name => name.startsWith(`Open file: ${file.name}`)});
     expect(fileRow.textContent).toContain(file.name);
     expect(getByRole(host, 'button', {name:`Open in Moodle: ${file.name}`}).title).toBe('Open in Moodle');
     expect(
@@ -1301,4 +1301,23 @@ it("nests empty deadline messages below group headings", async () => {
     expect(getAllByRole(group, "heading", {level: 3})).toHaveLength(1);
     expect(getByRole(group, "heading", {level: 4}).textContent).toBe("No deadlines here. Take a breath.");
   }
+});
+
+it.each([true, false])("includes file metadata in the open button name (ready=%s)", async ready => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  const file = detail.files[0]!;
+  file.documentId = ready ? "document" : null;
+  api.course = async () => detail;
+  await mount(api, detail.course.id);
+  await tab("Files");
+  const size = new Intl.NumberFormat("en", {
+    style: "unit", unit: "megabyte", maximumFractionDigits: 1,
+  }).format(file.size / 1000000);
+  const button = getByRole(host, "button", {
+    name: name => [
+      `Open file: ${file.name}`, size, file.module, ready ? "Ready" : "Not opened",
+    ].every(text => name.includes(text)),
+  });
+  expect(button.textContent).toContain(file.module);
 });
