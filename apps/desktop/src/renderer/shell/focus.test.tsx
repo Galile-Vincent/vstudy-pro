@@ -139,3 +139,15 @@ it('anchors overlays below the tabs and restores a visible workspace toggle', as
     expect(document.activeElement).toBe(visibleToggle);
   } finally { style.remove(); rects.mockRestore(); bounds.mockRestore(); }
 });
+
+it('focuses the active tab after closing an inactive tab with its close button', async () => {
+  const tabs = [1, 2, 3].map(index => createTab(
+    `00000000-0000-4000-8000-00000000000${index}`, { view: 'home' }, index,
+  ));
+  saveTabs(localStorage, { version: 1, activeId: tabs[0]!.id, tabs });
+  await mount();
+  const close = host.querySelectorAll<HTMLButtonElement>('.app-tab-close')[1]!;
+  await act(async () => { close.focus(); close.click(); });
+  expect(host.querySelectorAll('[role=tab]')).toHaveLength(2);
+  expect(document.activeElement?.id).toBe(`tab-${tabs[0]!.id}`);
+});

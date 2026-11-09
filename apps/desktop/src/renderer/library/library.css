@@ -115,7 +115,6 @@ html[data-input-modality=keyboard] .library-view .library-search:has(:focus-visi
 .folder-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .folder-node[aria-selected=true],.folder-node[data-over=true] { background:var(--active); font-weight:600; }
 .folder-node[data-over=true] { outline:2px solid var(--focus); outline-offset:-2px; }
-.folder-node button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
 .folder-node input { min-width:0; width:100%; }
 .folder-node .expanded { transform:rotate(90deg); }
 .folder-node svg { flex-shrink:0; }

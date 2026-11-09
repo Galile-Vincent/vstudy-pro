@@ -127,7 +127,7 @@ export function AppShell({
   const activateTab = (id: string) => { capture(); setTransientRoute({}); dispatch({ type: 'activate', id, now: Date.now() }); };
   const focusAfterClose = useRef(false);
   const closeTab = (id: string) => {
-    focusAfterClose.current = id === tabsRef.current.activeId;
+    focusAfterClose.current = true;
     capture();
     setTransientRoute({});
     dispatch({ type: 'close', id, fallback: createTab(crypto.randomUUID(), { view: 'home' }, Date.now()) });
@@ -136,7 +136,7 @@ export function AppShell({
     if (!focusAfterClose.current) return;
     focusAfterClose.current = false;
     (document.getElementById(`tab-${tabs.activeId}`) ?? document.getElementById('shell-content'))?.focus();
-  }, [tabs.activeId]);
+  }, [tabs.activeId, tabs.tabs.length]);
   const reorderTabs = (ids: string[]) => dispatch({ type: 'reorder', ids });
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1199px)');

@@ -136,7 +136,7 @@ export function LibrarySidebar() {
   const treeEnd = treeStart + Math.ceil((treeRef.current?.clientHeight || 400)/32)+4;
   return (
     <SidebarGroup>
-  <SidebarGroupLabel>{tr('art-reader:collection')}</SidebarGroupLabel>
+  <SidebarGroupLabel asChild><h2>{tr('art-reader:collection')}</h2></SidebarGroupLabel>
   <nav
     className="library-smart"
     aria-label={tr('library:smartViews')}
