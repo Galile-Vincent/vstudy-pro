@@ -6,7 +6,7 @@ import { WEBSITE_URL } from '../shared/website';
 import { tr } from '../shared/i18n';
 import { desktop } from './bridge';
 import { Button } from './components/ui/button';
-import { ListRow, Toolbar } from './components/ui';
+import { Toolbar } from './components/ui';
 import { Switch } from './components/ui/switch';
 import { SettingsGroup, SettingsRow } from './settings/layout';
 import './analytics.css';
@@ -38,11 +38,13 @@ export function ConsentChoice({ onChoose, busy = false }: { onChoose: (enabled: 
 }
 export function ConsentSaved({ enabled, onOpenPrivacy, busy = false }: { enabled: boolean; onOpenPrivacy: () => void; busy?: boolean }) {
   return (
-    <ListRow
-      title={tr('analytics:saved_state', { state: tr(enabled ? 'analytics:state_on' : 'analytics:state_off') })}
-      subtitle={tr('analytics:saved_hint')}
-      actions={<Button variant="link" disabled={busy} onClick={onOpenPrivacy}>{tr('analytics:open_privacy')}</Button>}
-    />
+    <div className="grid gap-[var(--space-1)]">
+      <Toolbar
+        left={<strong>{tr('analytics:saved_state', { state: tr(enabled ? 'analytics:state_on' : 'analytics:state_off') })}</strong>}
+        right={<Button variant="link" disabled={busy} onClick={onOpenPrivacy}>{tr('analytics:open_privacy')}</Button>}
+      />
+      <p className="text-[var(--muted)]">{tr('analytics:saved_hint')}</p>
+    </div>
   );
 }
 export async function completeAnalyticsOnboarding(enabled: boolean, input: import('../shared/analytics').Onboarding) {
