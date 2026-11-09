@@ -13,7 +13,7 @@ import { useCliTools } from './use-tools';
 import { useCliAction } from './use-action';
 import { ActionPreview } from './preview';
 import { ProviderChoice } from './choice';
-import { ManualInstall, ManualInstallReason } from './manual-install';
+import { ManualInstall, ManualInstallReason, manualNoticeText, type ManualNotice } from './manual-install';
 const CliTerminal = lazy(() => import('./terminal').then(module => ({ default: module.CliTerminal })));
 import { SetupRecovery } from './recovery';
 import { AdvancedShell } from './preferences';
@@ -32,6 +32,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [updatePlan, setUpdatePlan] = useState<CliActionPlan>();
+  const [manualResult, setManualResult] = useState<{ provider: CliProvider; notice: ManualNotice }>();
   const runner = useCliAction(refresh);
   useEffect(() => { if (loaded && !selectedProvider) setProvider(provider); }, [loaded, selectedProvider, provider]);
   const tool = tools.find(item => item.provider === provider);
@@ -57,6 +58,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
   const doneStep = setupSteps.find(item => runner.session?.actionId.startsWith(`${item}-`));
   const announcement = running && !tool?.tested && step !== 'login' ? tr('ai-cli:announce_running', { step: tr(`ai-cli:step_${step}`) })
     : !failed && runner.session?.phase === 'succeeded' && doneStep && doneStep !== 'login' ? tr(doneStep === 'test' ? 'ai-cli:test_success' : 'ai-cli:announce_done', { step: tr(`ai-cli:step_${doneStep}`) }) : '';
+  const reportManual = (notice: ManualNotice | undefined) => setManualResult(notice ? { provider, notice } : undefined);
   const review = async (actionId: CliActionId) => {
     await runner.preview(actionId);
     requestAnimationFrame(() => document.getElementById('ai-cli-preview')?.focus());
@@ -86,6 +88,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
     <DialogContent showCloseButton={false} className="ai-cli-sheet" aria-describedby="ai-cli-intro" onPointerDownOutside={event => event.preventDefault()}>
       <header className="ai-cli-header"><div><DialogTitle className="ai-cli-title">{tr('ai-cli:title')}</DialogTitle><DialogDescription id="ai-cli-intro">{tr('ai-cli:intro')}</DialogDescription></div><Button variant="ghost" aria-label={tr('ai-cli:close')} onClick={close}><X size={20} aria-hidden="true" /></Button></header>
       <div className="ai-cli-scroll">
+        <div className="ai-cli-manual-live" role="status">{manualResult?.provider === provider && <p>{manualNoticeText(manualResult.notice)}</p>}</div>
         {loadError && <div role="alert"><p>{tr('ai-cli:load_error')}</p><Button variant="secondary" onClick={() => void refresh()}>{tr('ai-cli:retry')}</Button></div>}
         {!loaded && !loadError && <p role="status">{tr('ai-cli:loading')}</p>}
         {tool && <>
@@ -108,7 +111,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
             {!tool.consented && !manualStep && <p>{tr('ai-cli:first_click_consent', { action: tr(`ai-cli:step_${step}`), provider: cliNames[provider] })}</p>}
             {runner.busy && <p role="status">{tr('ai-cli:preparing')}</p>}
             {runner.externalOpened && <p role="status">{tr('ai-cli:own_terminal_opened')}</p>}
-            {manualStep && <ManualInstall key={provider} provider={provider} required busy={busy} onCheck={refresh} />}
+            {manualStep && <ManualInstall key={provider} provider={provider} required busy={busy} onCheck={refresh} onNotice={reportManual} />}
             {runner.plan && (!manualStep || runner.plan.actionId === 'advanced-shell') && (tool.consented || runner.plan.actionId === 'advanced-shell') && <ActionPreview key={runner.plan.token} plan={runner.plan} hideAction={!!failed} busy={busy} run={runner.run} guided={/^(install|login|test)-/.test(runner.plan.actionId)} />}
             {!failed && !runner.plan && !busy && tool.consented && !tool.tested && !manualStep && <Button variant="secondary" onClick={() => void start()}>{tr(`ai-cli:step_${step}`)}</Button>}
             {running && <Button variant="secondary" onClick={() => void runner.close(false).catch(() => setLocalError(true))}>{tr('ai-cli:cancel')}</Button>}
@@ -136,7 +139,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
           {tool.status === 'update-available' && tool.manualUpdateRequired && <p role="status">{tr('ai-cli:manual_update')}</p>}
           </>}
         <ProviderChoice />
-        {!manualStep && <ManualInstall key={provider} provider={provider} busy={busy} onCheck={refresh} />}
+        {!manualStep && <ManualInstall key={provider} provider={provider} busy={busy} onCheck={refresh} onNotice={reportManual} />}
         <AdvancedShell busy={busy} onPreview={() => void review('advanced-shell')} />
         <details className="ai-cli-help"><summary>{tr('ai-cli:ask_title')}</summary><p>{tr('ai-cli:ask_body')}</p><blockquote>{tr('ai-cli:school_request', { provider: cliNames[provider] })}</blockquote><Button variant="secondary" onClick={() => void navigator.clipboard.writeText(tr('ai-cli:school_request', { provider: cliNames[provider] })).then(() => setCopied(true)).catch(() => setLocalError(true))}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_request')}</Button></details>
           <Button variant="link" onClick={() => void runner.close().then(() => { onClose(); window.dispatchEvent(new CustomEvent('vstudy:open-settings', { detail: { tab: 'providers' } })); }).catch(() => setLocalError(true))}>{tr('ai-cli:api_options')}</Button>

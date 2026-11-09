@@ -296,7 +296,23 @@ it('checks installed files again and moves to sign-in without running the newly 
   expect(runs()).toHaveLength(0);
 });
 
-const live = () => [...document.querySelectorAll('.ai-cli-manual [role=status]')].map(node => node.textContent).join('|');
+const live = () => [...document.querySelectorAll('.ai-cli-manual-live')].map(node => node.textContent).join('|');
+
+it('keeps the found announcement in one persistent region when the required panel gives way to sign-in', async () => {
+  Object.assign(fixture.tools[2]!, { consented: true, manualInstallRequired: true });
+  await mount(<AiCliSetup initialProvider="agy" onClose={close} />);
+  const region = document.querySelector('.ai-cli-manual-live')!;
+  expect(region.getAttribute('role')).toBe('status');
+  expect(document.querySelector('.ai-cli-action-area .ai-cli-manual')).not.toBeNull();
+  Object.assign(fixture.tools[2]!, { path: '/newly/installed/agy', version: '2.0.0', status: 'installed-not-signed-in' });
+  await click('Check again');
+  expect(document.querySelector('.ai-cli-action-area .ai-cli-manual')).toBeNull();
+  expect(document.querySelector('.ai-cli-steps [aria-current=step]')?.textContent).toContain('Sign in');
+  expect(document.querySelectorAll('.ai-cli-manual-live')).toHaveLength(1);
+  expect(document.querySelector('.ai-cli-manual-live')).toBe(region);
+  expect(region.textContent).toBe(i18n.t('ai-cli:manual_found_version', { version: '2.0.0' }));
+  expect(live()).toBe(i18n.t('ai-cli:manual_found_version', { version: '2.0.0' }));
+});
 
 it('announces that a ready tool was found when it is checked again', async () => {
   Object.assign(fixture.tools[0]!, { consented: true, tested: true, managed: true, version: '1.2.3', path: '/bin/claude', status: 'ready' });
