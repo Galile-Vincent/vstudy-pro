@@ -102,5 +102,11 @@
   "about_hint": "What the app does, with a sample to try.",
   "text_reading": "Text and reading",
   "advanced": "Advanced",
-  "api_keys": "API keys"
+  "api_keys": "API keys",
+  "event_claude_quota": "Claude quota check",
+  "event_ai_cli_download": "AI tool download",
+  "event_ai_cli_login": "AI tool sign-in",
+  "event_ai_cli_status": "AI tool status check",
+  "event_moodle_request": "Moodle request",
+  "event_unknown": "Network request"
 }

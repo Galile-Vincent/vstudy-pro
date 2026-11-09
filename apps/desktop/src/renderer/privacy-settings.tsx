@@ -6,13 +6,15 @@ import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { tr } from '../shared/i18n';
+import { useFormat } from './i18n';
+import { i18n, tr } from '../shared/i18n';
 import type { IpcResponse } from '../shared';
 import { desktop } from './bridge';
 import { errorText } from './status';
 
 export function PrivacySettings() {
   useTranslation();
+  const fmt = useFormat();
   const [events, setEvents] = useState<IpcResponse<'settings:networkActivity'>>([]);
   const [idle, setIdle] = useState<number | string>('');
   const [offline, setOffline] = useState<boolean>();
@@ -48,13 +50,13 @@ export function PrivacySettings() {
           </Button>
         </SettingsRow>
         {events.length ? (
-          events.map((event, index) => (
-            <div className="network-event" key={index}>
+          events.map(event => (
+            <div className="network-event" key={JSON.stringify(event)}>
               <time dateTime={event.at}>
-                {new Date(event.at).toLocaleString(document.documentElement.lang)}
+                {fmt.date(event.at,{dateStyle:'medium',timeStyle:'short'})}
               </time>
               <span>
-                {tr(`settings:event_${event.what}`)} · {event.to}
+                {tr(i18n.exists(`settings:event_${event.what}`) ? `settings:event_${event.what}` : 'settings:event_unknown')} · {event.to}
               </span>
             </div>
           ))

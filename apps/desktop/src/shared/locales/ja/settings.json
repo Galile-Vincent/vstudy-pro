@@ -102,5 +102,11 @@
   "about_hint": "機能の紹介とサンプルを試せます。",
   "text_reading": "文字と読書",
   "advanced": "詳細設定",
-  "api_keys": "API キー"
+  "api_keys": "API キー",
+  "event_claude_quota": "Claude 使用量の確認",
+  "event_ai_cli_download": "AI ツールのダウンロード",
+  "event_ai_cli_login": "AI ツールへのログイン",
+  "event_ai_cli_status": "AI ツールの状態確認",
+  "event_moodle_request": "Moodle リクエスト",
+  "event_unknown": "ネットワークリクエスト"
 }

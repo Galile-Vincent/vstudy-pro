@@ -102,5 +102,11 @@
   "about_hint": "了解功能，並試用範例。",
   "text_reading": "文字與閱讀",
   "advanced": "進階",
-  "api_keys": "API 金鑰"
+  "api_keys": "API 金鑰",
+  "event_claude_quota": "Claude 配額檢查",
+  "event_ai_cli_download": "AI 工具下載",
+  "event_ai_cli_login": "AI 工具登入",
+  "event_ai_cli_status": "AI 工具狀態檢查",
+  "event_moodle_request": "Moodle 請求",
+  "event_unknown": "網路請求"
 }
