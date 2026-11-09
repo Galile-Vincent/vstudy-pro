@@ -63,3 +63,12 @@ it('removes only a known term prefix and an exactly matching teacher suffix', as
   expect(title('1151')).toBe('1151');
   expect(displayTitle({...metadata,teachers:[{zh:null,en:'A. Example (Guest)'}],title:{zh:null,en:'1151 Seminar-A. Example (Guest)'}},'en')).toBe('Seminar');
 });
+
+it("D2 selects class labels by locale with an available-text fallback", async () => {
+  const { identity } = (await createMockMoodleApi().overview()).courses[0]!;
+  const value = {...identity, classLabel: {zh: "資訊二乙", en: "CS 2B"}};
+  expect(displayClass(value, "en")).toBe("CS 2B");
+  expect(displayClass(value, "zh-Hant")).toBe("資訊二乙");
+  expect(displayClass(value, "ja")).toBe("資訊二乙");
+  expect(displayClass({...value, classLabel: {zh: null, en: "CS"}}, "ja")).toBe("CS");
+});

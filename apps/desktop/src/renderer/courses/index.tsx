@@ -676,7 +676,7 @@ function CoursesBody({
               <CourseHead
                 title={displayTitle(detail.course.identity, lang, detail.course.fullName)}
                 chip={[detail.course.identity.term, detail.course.identity.code].filter(Boolean).join(" · ")}
-                people={[displayTeachers(detail.course.identity, lang), displayClass(detail.course.identity)].filter(Boolean)}
+                people={[displayTeachers(detail.course.identity, lang), displayClass(detail.course.identity, lang)].filter(Boolean)}
                 sync={tr('storage:cached_'+(detail.cacheState ?? 'stale')) + ' · ' + (detail.lastSyncedAt ? tr('storage:last_synced',{time:relative(detail.lastSyncedAt)}) : tr('storage:never_synced'))}
                 fullName={detail.course.fullName}
                 syncing={syncing}
