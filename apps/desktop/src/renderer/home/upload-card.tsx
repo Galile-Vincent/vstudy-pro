@@ -39,7 +39,7 @@ export function UploadCard({ folders = [], onImported, showSample = true, showOp
       documents.forEach(d => { owned.current.add(d.id); setImported(d); onImported?.(d); });
       setMessage(documents.length ? tr('home:imported') : '');
       window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed'));
-    } catch (error) { setError(sample ? tr('errors:generic') : errorText(error)); setMessage(''); }
+    } catch (error) { setError(errorText(error)); setMessage(''); }
     finally { setBusy(false); lock.current = false; }
   };
   return <div className="home-upload" onDragOver={e => { e.preventDefault(); e.stopPropagation(); }} onDrop={e => {

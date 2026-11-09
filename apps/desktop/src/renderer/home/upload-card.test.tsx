@@ -43,3 +43,10 @@ it('holds one lock while a sample import is pending, including drops', async () 
     paths: ['/tmp/notes.pdf'], folderId: null,
   });
 });
+
+it.each(['Choose a file', 'Try a sample document'])('shows actionable errors from %s', async name => {
+  invoke.mockRejectedValue({ code: 'errors.disk_full', params: {} });
+  render(<UploadCard />);
+  fireEvent.click(screen.getByRole('button', { name }));
+  expect((await screen.findByRole('alert')).textContent).toBe(i18n.t('errors:disk_full'));
+});
