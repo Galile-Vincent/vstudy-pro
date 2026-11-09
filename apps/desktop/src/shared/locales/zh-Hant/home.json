@@ -61,5 +61,6 @@
   "file_help": "選擇 PDF、EPUB、文字或 Office 檔案。Office 檔案須小於 50 MB。掃描的 PDF 可能需要先辨識文字。",
   "drop_to_import": "放開以匯入",
   "resume": "繼續閱讀",
-  "resume_title": "繼續閱讀《{{title}}》"
+  "resume_title": "繼續閱讀《{{title}}》",
+  "drop_busy": "請等待目前的匯入完成，再次拖放檔案。"
 }
