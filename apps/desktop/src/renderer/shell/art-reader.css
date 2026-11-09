@@ -239,3 +239,11 @@ html[data-theme=contrast] .art-reader-cover::after { display:none; }
 
 .app-shell .shell-sidebar .art-reader-profile > button,
 .app-shell .shell-sidebar .subscription-meters header > button { width:32px; min-width:32px; height:32px; padding:6px; flex:0 0 32px; }
+
+.shell-sidebar .subscription-meters,
+.shell-sidebar .subscription-meters header strong { font-size:var(--type-xs); }
+.shell-sidebar .subscription-meters small,
+.shell-sidebar .subscription-window > span { font-size:.625rem; }
+
+.shell-sidebar button { font-size:var(--type-sm); }
+.shell-sidebar [data-slot=sidebar-group-label] { font-size:.6875rem; }
