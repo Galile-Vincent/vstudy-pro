@@ -5,6 +5,7 @@ import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import { Brand } from '../components/brand';
 import type { CSSProperties } from 'react';
+import { PageContainer, PageHeader, Toolbar } from '../components/ui';
 import { Badge } from '../components/ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
 import './ui3.css';
@@ -732,7 +733,7 @@ export function LibraryView() {
       </div>
   );
   return (
-    <section
+    <PageContainer
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
@@ -747,11 +748,17 @@ export function LibraryView() {
       className="library-view"
       aria-label={tr("common:library")}
     >
-      <div className="library-title">
-        <div>
-          <h1 ref={heading} tabIndex={-1}>{openGroup ? openGroup.name ?? tr("library:unfiled") : (folderPath(folders, query.folderId) || route.title || tr("common:library"))}</h1>
-          <p className="muted">{tr("library:documentCount", { count: items.length, formatted: format.number(items.length) + (cursor ? "+" : "") })}</p>
-        </div>
+      <PageHeader
+        ref={element => {
+          heading.current = element?.querySelector('h1') ?? null;
+          heading.current?.setAttribute('tabindex', '-1');
+        }}
+        title={openGroup ? openGroup.name ?? tr("library:unfiled") : (folderPath(folders, query.folderId) || route.title || tr("common:library"))}
+        description={tr("library:documentCount", {
+          count: items.length,
+          formatted: format.number(items.length) + (cursor ? "+" : ""),
+        })}
+        actions={
         <Button variant="outline" className="primary"
           hidden={!loading && !items.length && !text && !filters.length}
           data-testid="import-document"
@@ -759,8 +766,9 @@ export function LibraryView() {
         >
           {tr("common:import_document")}
         </Button>
-      </div>
-      <div className="library-toolbar" hidden={!loading && !items.length && !text && !filters.length && !query.folderId}>
+        }
+      />
+      <Toolbar className="library-toolbar" hidden={!loading && !items.length && !text && !filters.length && !query.folderId} left={<>
         {viewKey === "all" && !query.folderId && <LibraryModeToggle mode={mode} onChange={chooseMode} />}
         <label className="library-search">
           <Search aria-hidden="true" />
@@ -851,7 +859,7 @@ export function LibraryView() {
           </PopoverContent>
         </Popover>
         {!showFolders && !compactToolbar && viewControls}
-      </div>
+      </>} />
       <div className="filter-chips">
         {filters.map(([key, value]) => (
           <Button variant="outline"
@@ -1326,6 +1334,6 @@ export function LibraryView() {
       )}
       <LibraryMenus busy={busy} moveNotice={notice} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
       {promptDialog}
-    </section>
+    </PageContainer>
   );
 }
