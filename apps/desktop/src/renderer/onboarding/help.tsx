@@ -1,7 +1,7 @@
 /** Global Help entry points and contextual, profile-local learning guidance. */
 import { Card, Section } from '../components/ui';
 import { Brand } from '../components/brand';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, CircleHelp, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
@@ -29,10 +29,19 @@ export function HelpMenu() {
 export function LearningHelp() {
   useTranslation();
   const [view, setView] = useState<HelpView>();
+  const { route } = useNavigate();
+  const navigating = useRef(false);
+  const focusDestination = () => {
+    document.querySelector<HTMLElement>('#shell-content[role=main]')?.focus();
+  };
+  useEffect(() => {
+    if (navigating.current && route?.view === 'library' && !view) focusDestination();
+  }, [route?.view, view]);
   const [lesson, setLesson] = useState<Lesson>('school');
   useEffect(() => {
     const show = (event: Event) => {
       const next = (event as CustomEvent<HelpView>).detail;
+      navigating.current = false;
       setView(next);
       try { markLearned('help'); } catch { /* Help must open when profile storage is unavailable. */ }
     };
@@ -41,8 +50,10 @@ export function LearningHelp() {
   }, []);
   if (view === 'setup') return <Onboarding onComplete={() => setView(undefined)}/>;
   if (view === 'checklist') return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}>
-    <DialogContent aria-describedby={undefined}>
-      <GettingStarted detailed dialogTitle onNavigate={() => setView(undefined)}/>
+    <DialogContent aria-describedby={undefined} onCloseAutoFocus={event => {
+      if (navigating.current) { event.preventDefault(); focusDestination(); }
+    }}>
+      <GettingStarted detailed dialogTitle onNavigate={() => { navigating.current = true; setView(undefined); }}/>
     </DialogContent>
   </Dialog>;
   if (!view) return null;
