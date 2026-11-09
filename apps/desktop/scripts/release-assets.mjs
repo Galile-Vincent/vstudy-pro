@@ -1,4 +1,5 @@
 /** Stage architecture-specific release assets and assemble a complete, checksum-verified release. */
+import {parseFeed} from '../src/main/updates/validate.mjs';
 import { parseUpdateInfo } from 'electron-updater/out/providers/Provider.js';
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
@@ -123,7 +124,7 @@ export async function assembleAssets({ version, input, output, notes, scope = 'r
       if (!(await stat(join(output, file))).size) throw new Error(`Missing update asset: ${file}`);
     }
     const feed = await readFile(join(output, metadata), 'utf8');
-    const info = parseUpdateInfo(feed, metadata, new URL('https://github.com/'));
+    const info = parseFeed(feed, payload.slice(`VStudy-Pro-${version}-`.length));
     const hash = await digest(join(output,payload),'sha512','base64');
     const size = (await stat(join(output,payload))).size;
     if (info.version !== version || info.path !== payload || info.sha512 !== hash ||
