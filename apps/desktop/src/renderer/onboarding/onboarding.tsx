@@ -1,6 +1,5 @@
 /** Resumable first-run sequence. School and appearance setup stay with their owning features. */
 import { useCallback, type ReactNode } from 'react';
-import { Check } from 'lucide-react';
 import { acquisitionSource, type AcquisitionSource } from '../../shared/analytics';
 import { AnalyticsDisclosure, ConsentChoice, ConsentSaved, completeAnalyticsOnboarding } from '../analytics-ui';
 import { Newsletter } from '../newsletter';
@@ -32,7 +31,6 @@ function ChoiceCard({ name, value, checked, disabled, onChange, onReselect, titl
 }) {
   return <label className="onboarding-choice" data-selected={checked}>
     <input
-      className="onboarding-choice-input"
       type="radio"
       name={name}
       value={value}
@@ -43,7 +41,6 @@ function ChoiceCard({ name, value, checked, disabled, onChange, onReselect, titl
     />
     {children}
     <span className="onboarding-choice-copy"><strong lang={lang}>{title}</strong>{description && <small>{description}</small>}</span>
-    <span className="onboarding-choice-check" aria-hidden="true">{checked && <Check size={14}/>}</span>
   </label>;
 }
 
@@ -211,7 +208,7 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
                 onChange={() => void chooseAppearance({ uiScale: value })}
                 title={`${value}%`}
               >
-                <span className="onboarding-type-sample" aria-hidden="true" style={{ fontSize: `${value / 5}px` }}>{typeSample}</span>
+                <span className="onboarding-type-sample" aria-hidden="true" style={{ fontSize: `${value / 6}px` }}>{typeSample}</span>
               </ChoiceCard>
             ))}
           </fieldset>
@@ -277,7 +274,6 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
         )}
         {(step !== 'privacy' || consent.kind === 'decided') && (
           <Button
-            className="primary"
             disabled={busy || (step === 'start' && progress.goal === 'sample' && !imported)}
             onClick={() => step === 'start' ? void exit(true, 'goal') : move(steps[index + 1]!)}
           >
