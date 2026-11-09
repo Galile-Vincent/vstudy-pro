@@ -3,6 +3,7 @@ import type { CliActionSession, CliFailure, CliToolState } from '../../shared/ai
 import { classifySetupError, setupDiagnostic, setupErrors } from '../../shared/ai-setup-errors';
 import { desktopPlatform } from '../../shared/platform';
 import { tr } from '../../shared/i18n';
+import { Toolbar } from '../components/ui';
 import { Button } from '../components/ui/button';
 import { cliNames } from './model';
 
@@ -22,8 +23,10 @@ export function SetupRecovery({ failure, tool, session, busy, onAction }: {
   return <div className="ai-cli-recovery" role="alert">
     <strong>{tr(classified === 'unknown' && failure !== 'unknown' ? `ai-cli:failure_${failure}` : `ai-cli:error_title_${issue.title}`)}</strong>
     <p>{tr(`ai-cli:error_next_${issue.next}`)}</p>
-    <div className="ai-cli-actions"><Button variant="secondary" disabled={busy || !tool.consented} onClick={() => onAction(issue.action)}>{tr('ai-cli:retry')}</Button>
-    <Button variant="ghost" onClick={() => void copy()}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_details')}</Button></div>
+    <Toolbar left={<>
+      <Button variant="secondary" disabled={busy || !tool.consented} onClick={() => onAction(issue.action)}>{tr('ai-cli:retry')}</Button>
+      <Button variant="ghost" onClick={() => void copy()}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_details')}</Button>
+    </>} />
     {copyError && <p>{tr('ai-cli:copy_error')}</p>}
   </div>;
 }

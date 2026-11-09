@@ -5,6 +5,7 @@ import { Check, X } from 'lucide-react';
 import type { CliActionId, CliActionPlan, CliProvider } from '../../shared/ai-cli';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
+import { Badge, EmptyState, Toolbar } from '../components/ui';
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
 import { aiCliChanged } from './entry';
@@ -92,7 +93,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
             <DialogTitle className="ai-cli-title">{tr('ai-cli:title')}</DialogTitle>
             <DialogDescription id="ai-cli-intro">{tr('ai-cli:intro')}</DialogDescription>
           </div>
-          <Button variant="ghost" aria-label={tr('ai-cli:close')} onClick={close}><X size={20} aria-hidden="true" /></Button>
+          <Button variant="ghost" size="icon" aria-label={tr('ai-cli:close')} onClick={close}><X size={20} aria-hidden="true" /></Button>
         </header>
         <div className="ai-cli-scroll">
           <div className="ai-cli-manual-live" role="status">{manualResult?.provider === provider && <p>{manualNoticeText(manualResult.notice)}</p>}</div>
@@ -106,7 +107,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
           {tool && <>
             <div className="ai-cli-tool-heading">
               <strong>{cliNames[provider]}</strong>
-              <span className="ai-cli-chip" data-status={displayStatus}>{tr(`ai-cli:status_${displayStatus}`)}</span>
+              <Badge variant="secondary" className="ai-cli-chip" data-status={displayStatus}>{tr(`ai-cli:status_${displayStatus}`)}</Badge>
               <span className="ai-cli-live" role="status">{announcement}</span>
             </div>
             <ol className="ai-cli-steps" aria-label={tr('ai-cli:steps')}>
@@ -126,11 +127,14 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
               })}
             </ol>
             <div className="ai-cli-workarea">
-              <div className={`ai-cli-instructions${tool.tested ? ' ai-cli-complete' : ''}`}>
-                {tool.tested && <Check className="ai-cli-complete-icon" size={28} aria-hidden="true" />}
-                <h2>{tr(tool.tested ? 'ai-cli:ready_title' : `ai-cli:heading_${step}`)}</h2>
-                {manualStep ? <ManualInstallReason key={provider} provider={provider} /> : <p>{tr(tool.tested ? 'ai-cli:ready_body' : `ai-cli:instruction_${provider}_${step}`)}</p>}
-              </div>
+              {tool.tested ? (
+                <EmptyState headingLevel={2} icon={<Check className="text-[var(--success)]" size={28} />} title={tr('ai-cli:ready_title')} description={tr('ai-cli:ready_body')} />
+              ) : (
+                <div className="ai-cli-instructions">
+                  <h2>{tr(`ai-cli:heading_${step}`)}</h2>
+                  {manualStep ? <ManualInstallReason key={provider} provider={provider} /> : <p>{tr(`ai-cli:instruction_${provider}_${step}`)}</p>}
+                </div>
+              )}
               <div className="ai-cli-action-area" aria-busy={busy}>
                 {!tool.consented && !manualStep && <Button className="ai-cli-consent" disabled={busy} onClick={() => void start()}>{tr(`ai-cli:step_${step}`)}</Button>}
                 {!tool.consented && !manualStep && <p>{tr('ai-cli:first_click_consent', { action: tr(`ai-cli:step_${step}`), provider: cliNames[provider] })}</p>}
@@ -182,13 +186,13 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
               <section className="ai-cli-maintenance" aria-label={tr('ai-cli:manage')}>
                 <h3>{tr('ai-cli:manage')}</h3>
                 <p>{tr('ai-cli:new_chats')}</p>
-                <div className="ai-cli-actions">
+                <Toolbar left={<>
                   <Button variant="secondary" disabled={busy || !tool.consented || (!tool.version && !tool.path)} onClick={() => void review(`status-${provider}`)}>{tr('ai-cli:check_status')}</Button>
                   <Button variant="ghost" disabled={busy || !tool.consented || (!tool.version && !tool.path)} onClick={() => void review(`login-${provider}`)}>{tr('ai-cli:sign_in_again')}</Button>
                   {updatePlan?.available && <Button variant="secondary" disabled={busy} onClick={() => void review(`update-${provider}`)}>{tr('ai-cli:update', { version: tool.latestVersion })}</Button>}
                   {tool.managed && tool.previousVersion && <Button variant="secondary" disabled={busy || !tool.consented} onClick={() => void review(`rollback-${provider}`)}>{tr('ai-cli:rollback', { version: tool.previousVersion })}</Button>}
                   {tool.releaseNotesUrl && <Button variant="link" disabled={busy} onClick={() => void desktop.invoke('shell:openExternal', { url: tool.releaseNotesUrl! }).catch(() => setLocalError(true))}>{tr('ai-cli:release_notes')}</Button>}
-                </div>
+                </>} />
                 {updatePlan && !updatePlan.available && <p>{tr(`ai-cli:failure_${updatePlan.reason ?? 'unsupported'}`)}</p>}
               </section>
               {tool.status === 'update-available' && tool.manualUpdateRequired && <p role="status">{tr('ai-cli:manual_update')}</p>}
