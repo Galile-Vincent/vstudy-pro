@@ -87,7 +87,7 @@ describe("Courses", () => {
     });
     await mount(api);
     expect(host.querySelector(".moodle-due-link")?.textContent).toBe(
-      "Amplifier lab report",
+      "Weekly reflection",
     );
     expect(host.querySelectorAll(".moodle-course-card")).toHaveLength(1);
     expect(host.querySelector(".moodle-course-card")?.textContent).toContain(
@@ -95,7 +95,7 @@ describe("Courses", () => {
     );
     expect(host.querySelector(".moodle-course-card progress")).toBeNull();
     expect(host.querySelector('.moodle-course-card [id$="-unread"]')?.textContent).toBe('2 unread');
-    expect(host.querySelector(".moodle-due-list")?.textContent).toContain('Amplifier lab report');
+    expect(host.textContent).toContain('Amplifier lab report');
     expect(host.textContent).not.toContain('No deadlines this week');
   });
   it("groups course header actions behind one primary action, refresh and an overflow menu", async () => {
@@ -130,7 +130,8 @@ describe("Courses", () => {
     expect(refresh.disabled).toBe(false);
     await mount(api);
     expect(host.querySelector(".planner-entry")).not.toBeNull();
-    expect(host.querySelector(".moodle-header")?.textContent).toContain("Connect school");
+    expect(host.querySelector("[data-slot=page-header]")?.textContent).not.toContain("Connect school");
+    expect(host.textContent).toContain("Connect another school");
   });
   it("preserves detail tab selection, arrow navigation, and panel associations", async () => {
     const api = createMockMoodleApi();
@@ -859,9 +860,7 @@ describe("Courses view switch", () => {
 
   it("keeps the repeated column labels out of the accessibility tree", async () => {
     await mount(createMockMoodleApi());
-    const row = host.querySelector(".course-heading-row")!;
-    expect(row.getAttribute("aria-hidden")).toBe("true");
-    expect(row.querySelectorAll(".course-column-headings")).toHaveLength(2);
+    expect(host.querySelector(".course-heading-row")).toBeNull();
   });
 });
 
@@ -926,5 +925,17 @@ it("keeps all four filters with zero counts and associated empty panels", async 
   expect(tabs[1]!.textContent).toContain("0");
   await act(async () => tabs[1]!.focus());
   expect(host.querySelector('[role=tabpanel] [data-slot=empty-state]')).not.toBeNull();
-  expect(tabs[1]!.getAttribute('aria-controls')).toBe(host.querySelector('[role=tabpanel]')?.id);
+  expect(tabs[1]!.getAttribute('aria-controls')).toBe(host.querySelector('[role=tabpanel][data-state=active]')?.id);
+});
+
+it("retains a one-column grid fallback and separate course actions", async () => {
+  await mount(createMockMoodleApi());
+  const grid = host.querySelector<HTMLElement>(".moodle-grid[data-view]")!;
+  await act(async () => getByRole(host, "button", { name: "Cards" }).click());
+  expect(grid.className).toContain("min(100%,22rem)");
+  const card = grid.querySelector('[data-slot=card]')!;
+  expect(card.getAttribute("data-variant")).toBe("flat");
+  expect(card.tagName).toBe("DIV");
+  expect(card.querySelector("button button")).toBeNull();
+  expect(host.querySelector('[data-slot=page-header] h1')?.className).not.toContain("break-all");
 });
