@@ -4,6 +4,7 @@
   "sources": "教材",
   "source_hint": "変換済みPDFを最大8件選択。各文書の先頭6,000バイトを使用します。",
   "no_documents": "ライブラリでPDFを変換してください。",
+  "configuration": "試験の設定",
   "prompt": "何を練習しますか？",
   "prompt_hint": "重要な概念、計算問題、特定の章など…",
   "question_types": "形式ごとの問題数",

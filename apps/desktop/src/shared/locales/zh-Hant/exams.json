@@ -4,6 +4,7 @@
   "sources": "來源教材",
   "source_hint": "最多選擇 8 份已轉換的 PDF，每份使用前 6,000 位元組。",
   "no_documents": "先在資料庫轉換一份 PDF。",
+  "configuration": "考試設定",
   "prompt": "想練習哪些內容？",
   "prompt_hint": "指定重點觀念、計算題或章節…",
   "question_types": "各題型題數",
