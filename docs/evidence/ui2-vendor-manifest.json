@@ -286,9 +286,9 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/sidebar.tsx",
       "registrySha256": "546f6900af7d9102bdcb6157c0e52c289cdede0e9d624c506fda66d3d8039be0",
-      "patchedSha256": "b8ac6c4ec774665e190cd6459a91cc15e705efa9f761c206ce826c26c6e52e61",
+      "patchedSha256": "5cc0362d34442fd1229cd42debebccaa0f104f1e85f55703fad297d0aedea1a9",
       "patch": "docs/vendor-patches/ui--sidebar.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility. Translate accessible labels."
+      "reason": "Resolve the registry cn helper to the existing local utility. Translate accessible labels. Support a controlled inline sidebar at mobile widths without a separate sheet state."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/skeleton.tsx",

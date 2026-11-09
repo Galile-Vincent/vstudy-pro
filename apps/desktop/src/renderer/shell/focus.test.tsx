@@ -96,3 +96,16 @@ it('closes the visible sidebar with Escape and restores toggle focus', async () 
   expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(true);
   expect(document.activeElement).toBe(toggle);
 });
+
+it.each([700, 900, 1280])('shares shortcut and toggle state at %ipx', async width => {
+  vi.stubGlobal('innerWidth', width);
+  vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('767') ? width < 768 : width < 1200, addEventListener() {}, removeEventListener() {} }));
+  await mount();
+  const toggle = host.querySelector<HTMLButtonElement>('.shell-toggle')!;
+  const initial = toggle.getAttribute('aria-expanded');
+  await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', ctrlKey: true, cancelable: true })));
+  expect(toggle.getAttribute('aria-expanded')).not.toBe(initial);
+  expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(toggle.getAttribute('aria-expanded') === 'false');
+  await act(async () => toggle.click());
+  expect(toggle.getAttribute('aria-expanded')).toBe(initial);
+});
