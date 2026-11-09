@@ -4,6 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { onboardingForward, onboardingConsent } from './helpers/onboarding.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const evidence = resolve(root, '../../docs/evidence/onboarding/design-pass');
@@ -97,8 +98,8 @@ for (const scheme of ['dark', 'light']) {
         assert.equal(size.horizontalOverflow, false, `${scheme}/${step} horizontal overflow`);
       }
       if (step === 'start' || (languageOnly && step === 'language')) break;
-      if (step === 'privacy') await page.locator('.analytics-choices button').last().click();
-      else await page.locator('.onboarding footer .primary').click();
+      if (step === 'privacy') await onboardingConsent(page).click();
+      else await onboardingForward(page).click();
     }
     assert.equal(new Set(sizes.filter(row => row.scheme === scheme).map(row => `${row.width}x${row.height}`)).size, 1, 'dialog size stays constant');
   } finally {

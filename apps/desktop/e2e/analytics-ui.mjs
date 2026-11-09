@@ -3,6 +3,7 @@ import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
+import { onboardingForward } from './helpers/onboarding.mjs';
 const evidence = resolve('node_modules/.cache/analytics-ui');
 await mkdir(evidence, {recursive:true});
 const results=[];
@@ -30,7 +31,7 @@ for (const language of ['en','zh-Hant','ja']) for (const colorScheme of ['light'
     await page.locator('.onboarding footer').getByRole('button',{name:onboarding.back,exact:true}).click();
     assert.equal(await page.getByRole('button',{name:copy.share,exact:true}).isDisabled(),true);
     assert.equal(await page.getByRole('button',{name:copy.decline,exact:true}).isDisabled(),true);
-    await page.locator('.onboarding footer .primary').click();
+    await onboardingForward(page).click();
     await page.getByRole('button',{name:onboarding.later,exact:true}).click();
     await page.locator('.onboarding').waitFor({state:'detached'});
     const state=await page.evaluate(()=>window.desktop.invoke('analytics:getState',{}));
@@ -62,7 +63,7 @@ for (const language of ['en','zh-Hant','ja']) for (const colorScheme of ['light'
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_ANALYTICS_ENABLE:'',VSTUDY_NEWSLETTER_URL:'https://example.org/subscribe',VSTUDY_NEWSLETTER_ORIGINS:'https://example.org'}});
   const page=await app.firstWindow();await page.locator('.onboarding').waitFor();
   // Configured newsletter: no request is made during this validation.
-  for(let i=0;i<3;i++)await page.locator('.onboarding footer .primary').click();
+  for(let i=0;i<3;i++)await onboardingForward(page).click();
   const email=page.locator('input[type=email]');await email.waitFor();
   assert.equal(await page.locator('input[type=checkbox]').count(),0);
   const subscribe=page.getByRole('button',{name:'Subscribe',exact:true});

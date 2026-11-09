@@ -7,6 +7,7 @@ import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {DatabaseSync} from 'node:sqlite';
 import {join,resolve} from 'node:path';
+import { onboardingForward } from './helpers/onboarding.mjs';
 const round=process.env.VSTUDY_UI2_ROUND??'final',full=round==='final';
 const output=temporaryPath(`vstudy-ui2/${round}`);await mkdir(output,{recursive:true});
 const dir=await mkdtemp(join(tmpdir(),'ui2-')),screenshots=[],checks=[],errors=[];let app;
@@ -40,7 +41,7 @@ try {
   const start=page.locator('.chat-start button.primary');if(await start.count())await start.click();
   const input=page.locator('.aui-composer-input');await input.waitFor();await input.blur();await shot('composer-idle');await input.click();await shot('composer-pointer');assert.equal(await page.locator('[data-slot=aui_composer-shell]').evaluate(e=>window.getComputedStyle(e).outlineStyle),'none');assert.equal(await input.evaluate(e=>window.getComputedStyle(e).borderTopWidth),'0px');assert.equal(await page.locator('[data-slot=aui_composer-shell]').evaluate(e=>window.getComputedStyle(e).borderTopWidth),'0px','Composer floats without an outer field border');assert.notEqual(await page.locator('[data-slot=aui_composer-shell]').evaluate(e=>window.getComputedStyle(e).boxShadow),'none','Composer has floating elevation');await page.keyboard.press('Tab');await page.keyboard.press('Shift+Tab');await shot('composer-keyboard');assert.equal(await page.locator('[data-slot=aui_composer-shell]').evaluate(e=>window.getComputedStyle(e).outlineWidth),'2px');
   await route('home');await page.locator('#welcome-entry').click();await page.locator('.welcome').waitFor();await shot('welcome');
-  await route('home');await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:false});});await page.reload();await page.locator('.onboarding').waitFor();await shot('onboarding');for(let step=1;step<4;step++){await page.locator('.onboarding footer .primary').click();await shot(`onboarding-${step}`);}
+  await route('home');await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:false});});await page.reload();await page.locator('.onboarding').waitFor();await shot('onboarding');for(let step=1;step<4;step++){await onboardingForward(page).click();await shot(`onboarding-${step}`);}
  }
 } finally {await mkdir('../../docs/evidence',{recursive:true});await writeFile(`../../docs/evidence/ui2-screenshots${full?'':'-'+round}.json`,JSON.stringify({round,screenshots,checks,errors},null,2)+'\n');await app?.close();await rm(dir,{recursive:true,force:true});}
 assert.deepEqual(errors,[]);assert.deepEqual(checks.filter(c=>c.violations.length),[],'axe violations');console.log(`${screenshots.length} screenshots and audits passed`);
