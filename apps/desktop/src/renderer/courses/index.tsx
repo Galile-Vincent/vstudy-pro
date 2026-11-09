@@ -1,3 +1,4 @@
+import { flushSync } from 'react-dom';
 import { catalogDeadlines } from './deadline-groups';
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
@@ -124,7 +125,6 @@ export function CoursesView() {
   const { route, navigate } = useNavigate();
   return (
     <Courses
-      key={route.courseId ?? "home"}
       api={api}
       courseId={route.courseId}
       connectOnMount={route.connectSchool}
@@ -168,7 +168,6 @@ function CoursesBody({
   const [showUpdates, setShowUpdates] = useState(false);
   const [allDue, setAllDue] = useState(false);
   const updatesTrigger = useRef<HTMLButtonElement>(null);
-  const disconnectPending = useRef(false);
   const connectTrigger = useRef<HTMLButtonElement>(null);
   const disconnectTrigger = useRef<HTMLButtonElement>(null);
   const disconnectSchool = useRef<string | undefined>(undefined);
@@ -183,17 +182,6 @@ function CoursesBody({
   }, [showPlanner]);
   const openMoodle = useMoodleWebview();
   const [overview, setOverview] = useState<MoodleOverview>();
-  useEffect(() => {
-    if (!disconnectPending.current) return;
-    disconnectPending.current = false;
-    const target = overview?.accounts.length
-      ? pageRef.current?.querySelector('h1') : connectTrigger.current;
-    if (target instanceof HTMLElement) {
-      target.tabIndex = -1;
-      target.focus();
-      if (target === connectTrigger.current) target.removeAttribute('tabindex');
-    }
-  }, [overview]);
   const [orderSnapshot,setOrderSnapshot] = useState<{data:MoodleOverview;now:number}>();
   const [sortPreferences,setSortPreferences] = useState<CourseSortPreferences>({});
   const [pinBusy,setPinBusy] = useState<string>();
@@ -224,22 +212,27 @@ function CoursesBody({
   const [opening, setOpening] = useState<string>();
   const [agentRequest, setAgentRequest] = useState(0);
   const refreshSequence = useRef(0);
-  const refresh = useCallback(async (reorder = false) => {
+  const refresh = useCallback(async (reorder = false, immediate = false) => {
     const sequence = ++refreshSequence.current;
     const [next, course] = await Promise.all([
       api.overview(),
-      courseId ? api.course(courseId) : Promise.resolve(undefined),
+      courseId && !immediate ? api.course(courseId) : Promise.resolve(undefined),
     ]);
     const summaries = next.summaries ?? [];
     if (sequence !== refreshSequence.current) return;
-    if (reorder) {prepareMovement.current();setOrderSnapshot({data:next,now:Date.now()});}
-    setOverview(next);
-    setDetail(course);
-    setHomeDetails(summaries);
+    const update = () => {
+      if (reorder) {prepareMovement.current();setOrderSnapshot({data:next,now:Date.now()});}
+      setOverview(next);
+      setDetail(course);
+      setHomeDetails(summaries);
+    };
+    if (immediate) flushSync(update);
+    else update();
+    return next;
   }, [api, courseId]);
   useEffect(() => {
     let current = true;
-    setLoading(true);
+    setLoading(!!courseId || !overview);
     setDetail(undefined);
     setTab("content");
     setAgentRequest(0);
@@ -306,13 +299,18 @@ function CoursesBody({
     }
   };
   const disconnect = async (accountId: string) => {
-    disconnectPending.current = true;
     setConfirmDisconnect(undefined);
     try {
       await api.disconnect(accountId);
-      if (courseId) onCourse();
-      else await refresh(true);
-    } catch { disconnectPending.current = false; failure(); }
+      const next = await refresh(true, true);
+      if (courseId) flushSync(() => onCourse());
+      const target = !next?.accounts.length ? connectTrigger.current
+        : pageRef.current?.querySelector(courseId ? 'h2' : 'h1');
+      if (target instanceof HTMLElement) {
+        if (target !== connectTrigger.current) target.tabIndex = -1;
+        target.focus();
+      }
+    } catch { failure(); }
   };
   const openFile = async (fileId: string, action?: DocumentAction) => {
     setOpening(fileId);
@@ -365,7 +363,7 @@ function CoursesBody({
       deadline={deadline}
       reminders={reminders}
       api={api}
-      onChange={refresh}
+      onChange={async () => { await refresh(); }}
       onError={failure}
     />
   );
@@ -867,7 +865,7 @@ function CoursesBody({
                   detail={detail}
                   api={api}
                   requested={agentRequest}
-                  onChange={refresh}
+                  onChange={async () => { await refresh(); }}
                   onError={failure}
                 />
               </div>
@@ -1207,7 +1205,7 @@ function CoursesBody({
           )
         )}
         <Dialog open={!!confirmDisconnect} onOpenChange={open => { if (!open) setConfirmDisconnect(undefined); }}>
-          <DialogContent onCloseAutoFocus={event => { event.preventDefault(); if (!disconnectPending.current) disconnectTrigger.current?.focus(); }}>
+          <DialogContent onCloseAutoFocus={event => { event.preventDefault(); disconnectTrigger.current?.focus(); }}>
             <DialogHeader>
               <DialogTitle>{tr("moodle:disconnect_title", { school: disconnectSchool.current ?? tr("moodle:this_school") })}</DialogTitle>
               <DialogDescription asChild><div className="grid gap-2"><p>{tr("moodle:disconnect_removes")}</p><p>{tr("moodle:disconnect_keeps")}</p></div></DialogDescription>
@@ -1223,7 +1221,7 @@ function CoursesBody({
           open={connect}
           onOpenChange={setConnect}
           api={api}
-          onConnected={() => refresh(true)}
+          onConnected={async () => { await refresh(true); }}
         />
       </PageContainer>
     </div>
