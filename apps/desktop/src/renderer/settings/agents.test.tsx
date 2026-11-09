@@ -167,3 +167,13 @@ it('shows only the twenty newest activity entries even when input arrives out of
   expect(view.host.textContent).toContain('Showing the latest 20');
   expect(view.host.querySelector('.agents-activity')?.textContent).not.toContain('Agent 4');
 });
+
+it.each([20,21])('only announces hidden activity when %i entries exceed the limit', async count => {
+  state.activity = Array.from({length:count}, (_,index) => ({
+    id:`activity-${index}`, at:new Date(Date.UTC(2026,0,index+1)).toISOString(),
+    clientName:`Agent ${index}`, tool:'list_courses', accountId:null, status:'OK', args:{},
+  }));
+  await mount();
+  expect(view.host.querySelectorAll('.agents-activity > li')).toHaveLength(20);
+  expect(view.host.textContent?.includes(tr('agents:latest_activity',{count:20}))).toBe(count > 20);
+});

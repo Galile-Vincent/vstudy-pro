@@ -1,5 +1,5 @@
 {
-  "latest_activity": "顯示最近 20 筆",
+  "latest_activity": "顯示最近 {{count}} 筆",
   "title": "代理程式",
   "description": "透過 VStudy 讓全域代理程式存取課程。由你選擇帳號與權限，每次寫入都須經你核准。",
   "master": "允許代理程式連線",

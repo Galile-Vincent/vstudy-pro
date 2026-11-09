@@ -11,11 +11,13 @@ import { AgentConnect } from './agents-connect';
 import { useAgents } from './agents-state';
 import './agents.css';
 
+const ACTIVITY_LIMIT = 20;
+
 export function AgentsSettings() {
   useTranslation('agents');
   const agents = useAgents();
   const [connecting, setConnecting] = useState(false);
-  const activity = [...(agents.state?.activity ?? [])].sort((a,b) => Date.parse(b.at) - Date.parse(a.at)).slice(0,20);
+  const activity = [...(agents.state?.activity ?? [])].sort((a,b) => Date.parse(b.at) - Date.parse(a.at)).slice(0,ACTIVITY_LIMIT);
   const status = (value: string) => {
     const key = `agents:status_${value.toLowerCase()}`;
     return i18n.exists(key) ? tr(key) : tr('agents:unknown_status');
@@ -49,7 +51,7 @@ export function AgentsSettings() {
       <section className="agents-section" aria-labelledby="agents-activity-title">
         <h3 id="agents-activity-title">{tr('agents:activity')}</h3><p className="agents-muted">{tr('agents:activity_help')}</p>
         {!activity.length && <EmptyState headingLevel={4} title={tr('agents:no_activity')} />}
-        {agents.state.activity.length >= 20 && <p className="agents-muted">{tr('agents:latest_activity')}</p>}
+        {agents.state.activity.length > ACTIVITY_LIMIT && <p className="agents-muted">{tr('agents:latest_activity',{count:ACTIVITY_LIMIT})}</p>}
         <ol className="agents-activity">{activity.map(item => <li key={item.id}><Card variant="flat" className="gap-[var(--space-2)] p-[var(--space-3)]">
           <ListRow className="flex-wrap" title={item.clientName} meta={<AgentDate value={item.at} />} />
           <dl className="agents-details">
