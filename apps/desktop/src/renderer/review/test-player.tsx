@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { IpcResponse } from '../../shared/ipc';
 import { EXAM_COURSE_ID } from '../../shared/review-artifacts';
 import { tr } from '../../shared/i18n';
@@ -12,7 +12,7 @@ desktop.onDraftFlushRequest?.(flushDraftQueues);
 type Artifact = NonNullable<IpcResponse<'review:artifact:get'>>;
 type Attempt = IpcResponse<'review:attempt:start'>;
 
-export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetake: (attemptId: string) => void }) {
+export function TestPlayer({ artifact, onRetake, actions }: { artifact: Artifact; onRetake: (attemptId: string) => void; actions?: ReactNode }) {
  const [attempt, setAttempt] = useState<Attempt | null>(null);
  const [index, setIndex] = useState(0);
  const [drafts, setDrafts] = useState<Record<string, Answer>>({});
@@ -133,7 +133,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
   busy={busy} failed={failed} draftError={draftError} explanations={explanations} gradedEarlier={gradedEarlier === item?.id}
   onDraft={setDraft} onMove={move} onSubmit={submit} onResults={setResults} onExplain={explainItem}
   onReport={itemId=>{if(attempt)void run(async()=>setAttempt(await desktop.invoke('review:attempt:report-bad',{attemptId:attempt.id,itemId})));}}
-  onRetry={()=>{if(retryAction.current)void run(retryAction.current);}}
+  onRetry={()=>{if(retryAction.current)void run(retryAction.current);}} actions={actions}
  />;
  return <section className="review-test-player" aria-busy={busy}>
   {attempt && <div role="status">{draftError && <p>{tr('review:draft_save_failed')}</p>}</div>}

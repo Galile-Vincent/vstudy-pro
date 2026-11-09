@@ -234,7 +234,7 @@ export function Home({
   );
   const displayName = name ?? settings?.displayName;
   return (
-    <PageContainer as="main" className="home-page">
+    <PageContainer as="main" className="home-page" data-tab-scroll="">
       <div className="home-content">
         <PageHeader
           leading={<Brand />}

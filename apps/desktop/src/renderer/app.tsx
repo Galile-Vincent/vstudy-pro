@@ -61,7 +61,7 @@ function Views() {
   }, []);
   return <SurfaceErrorBoundary resetKeys={[JSON.stringify(route)]}>{route.view === "welcome" ? (<Suspense fallback={null}><Tour /></Suspense>) : route.view === "moodle" && route.accountId && route.target ? (<MoodleWebviewPane tabId={activeTabId} accountId={route.accountId} target={route.target} onClose={()=>closeTab(activeTabId)} onDocument={id=>navigate({view:"workspace",documentId:documentIdSchema.parse(id)})} onReconnect={()=>navigate({view:"courses",connectSchool:true})}/>) : route.view === "hosted-chat" && route.provider ? (<HostedChat provider={route.provider}/>) : route.view === "workspace" ? (
     <Workspace key={route.documentId} />
-  ) : route.view === "ai-chats" ? (<WebChatHub/>) : route.view === "exams" ? (<ExamsView/>) : route.view === "review" ? (<ReviewView/>) : route.view === "history" ? (<HistoryView/>) : route.view === "courses" ? (
+  ) : route.view === "ai-chats" ? (<WebChatHub/>) : route.view === "exams" ? (<ExamsView onOpenLibrary={() => navigate("library")} />) : route.view === "review" ? (<ReviewView/>) : route.view === "history" ? (<HistoryView/>) : route.view === "courses" ? (
     <CoursesView />
   ) : route.view === "library" ? (
     <LibraryView key={JSON.stringify(route.query)} />
