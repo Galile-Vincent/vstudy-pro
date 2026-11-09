@@ -44,7 +44,7 @@ it('uses singular English study and unpriced-call labels', async () => {
  expect(i18n.t('usage:unknown_calls',{count:1})).toBe('1 call unpriced; total is a lower bound.');
 });
 
-it('uses one Resume action and at most five recent rows without a nested main', async () => {
+it('uses one Resume action and at most five recent rows with exactly one main', async () => {
   await i18n.changeLanguage('en');
   const recentDocuments = Array.from({ length: 8 }, (_, index) => ({
     document: { id: `doc-${index}`, title: `Notes ${index}`, sourceName: 'notes.pdf' },
@@ -54,7 +54,7 @@ it('uses one Resume action and at most five recent rows without a nested main', 
     navigate={() => {}} onUsage={() => {}}/>);
   const dom = document.createElement('div');
   dom.innerHTML = markup;
-  expect(getRoles(dom).main).toBeUndefined();
+  expect(getRoles(dom).main).toHaveLength(1);
   const resume = dom.querySelector('button[aria-label]')!;
   expect(getByRole(dom, 'button', { name: new RegExp(`^${resume.textContent!.trim()}`) })).toBe(resume);
   expect(markup.match(/data-slot="list-row"/g)).toHaveLength(5);
