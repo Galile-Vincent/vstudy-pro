@@ -1038,3 +1038,16 @@ it('chooses Past initially and preserves a later user choice on refresh', async 
   await act(async () => getByRole(host, 'button', {name: /Refresh/}).click());
   expect(tabs[3]!.getAttribute('aria-selected')).toBe('true');
 });
+
+it('uses level three deadline groups below Due soon and body empty copy', async () => {
+  const api = createMockMoodleApi();
+  await mount(api);
+  const section = getByRole(host, 'heading', {name: /^Due soon/, level: 2}).closest('section')!;
+  expect(section.querySelectorAll('h2')).toHaveLength(1);
+  expect(section.querySelector('h3')).toBeTruthy();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, upcoming: []});
+  await mount({...api});
+  expect(getByRole(host, 'heading', {name: /^Due soon/}).closest('section')?.querySelector('p')?.textContent)
+    .toBe('No deadlines due in the next 7 days.');
+});
