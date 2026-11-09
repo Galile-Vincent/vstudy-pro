@@ -873,7 +873,7 @@ function CoursesBody({
               </Button>
             </div>
           )
-        ) : overview?.courses.length ? (
+        ) : overview && (overview.courses.length > 0 || overview.accounts.some(account => account.syncedAt)) ? (
           <div className="flex min-w-0 flex-col gap-6">
     <Section title={tr("moodle:your_courses")} count={overview.courses.length}>
       <Tabs

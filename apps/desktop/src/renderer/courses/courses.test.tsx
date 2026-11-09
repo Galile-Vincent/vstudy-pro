@@ -926,6 +926,10 @@ it("keeps all four filters with zero counts and associated empty panels", async 
   await act(async () => tabs[1]!.focus());
   expect(host.querySelector('[role=tabpanel] [data-slot=empty-state]')).not.toBeNull();
   expect(tabs[1]!.getAttribute('aria-controls')).toBe(host.querySelector('[role=tabpanel][data-state=active]')?.id);
+  api.overview = async () => ({...overview, courses: []});
+  await mount({...api});
+  expect(host.querySelectorAll('.moodle-term-tabs [role=tab]')).toHaveLength(4);
+  expect(host.querySelector('[data-slot=empty-state]')).not.toBeNull();
 });
 
 it("retains a one-column grid fallback and separate course actions", async () => {
