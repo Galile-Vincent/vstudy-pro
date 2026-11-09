@@ -369,5 +369,6 @@
   "uploading": "上傳中",
   "reload": "重新載入",
   "copy_diagnostics": "複製診斷資訊",
-  "reload_application": "重新載入應用程式"
+  "reload_application": "重新載入應用程式",
+  "scrollable_code": "可水平捲動的程式碼區塊"
 }

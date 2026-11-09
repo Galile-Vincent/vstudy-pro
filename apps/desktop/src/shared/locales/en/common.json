@@ -369,5 +369,6 @@
   "uploading": "Uploading",
   "reload": "Reload",
   "copy_diagnostics": "Copy diagnostics",
-  "reload_application": "Reload application"
+  "reload_application": "Reload application",
+  "scrollable_code": "Scrollable code block"
 }
