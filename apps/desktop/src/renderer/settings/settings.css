@@ -661,30 +661,15 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   min-height: 0;
 }
 
-/* Narrow windows: tab list becomes a scrolling row above the pane. */
-@container settings-shell (max-width: 40rem) {
-  .settings-body[data-slot=tabs] {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: 44px minmax(0, 1fr);
-  }
-}
+.settings-section-select[data-slot=select-trigger] { display:none; }
 
-@container settings (max-width: 40rem) {
-  .settings-tabs[data-slot=tabs-list] {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    height: 44px;
-    overflow-x: auto;
-    border-inline-end: 0;
-    padding: var(--space-1);
-  }
-  .settings-tabs [data-slot=tabs-trigger] {
-    width: auto;
-  }
-  .settings-pane {
-    grid-column: 1 / -1;
-    padding: var(--space-4) var(--space-4) var(--space-6);
-  }
+@container settings-shell (width < 40rem) {
+  .settings-header { gap:var(--space-2); padding-inline:var(--space-4); height:auto; min-height:56px; }
+  .settings-header h2 { flex:none; }
+  .settings-section-select[data-slot=select-trigger] { display:flex; flex:1; min-width:0; max-width:16rem; margin-inline-start:auto; }
+  .settings-body[data-slot=tabs] { grid-template-columns:minmax(0,1fr); }
+  .settings-tabs[data-slot=tabs-list] { display:none; }
+  .settings-pane { padding:var(--space-4) var(--space-4) var(--space-6); }
 }
 
 @container settings-pane (max-width: 34rem) {
