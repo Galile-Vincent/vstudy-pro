@@ -4,7 +4,6 @@ import { localDate, dayBound, validDay } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import { Brand } from '../components/brand';
-import { DocumentArt } from '../shell/document-art';
 import type { CSSProperties } from 'react';
 import { Badge } from '../components/ui/badge';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
@@ -26,7 +25,6 @@ import {
   useSyncExternalStore,
 } from "react";
 import {
-  FileText,
   Search,
   Pin,
   MoreHorizontal,
@@ -626,7 +624,7 @@ export function LibraryView() {
   }, [loading, grid, items.length > 0, showFolders]);
 
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const baseHeight = grid ? parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--art-reader-card-height")) : (rowRem || 2.75) * (textScale || 16);
+  const baseHeight = grid ? 12 * (textScale || 16) : (rowRem || 2.75) * (textScale || 16);
   const rowHeight = baseHeight;
   const columns = grid ? Math.max(1, Math.floor(viewportWidth / 280)) : 1;
   const [statusHeights, setStatusHeights] = useState<Record<string, number>>({});
@@ -1225,8 +1223,7 @@ export function LibraryView() {
                       setSelected(current => event.target.checked
                         ? [...current, d.id] : current.filter(id => id !== d.id));
                     }}/>
-{grid ? <><DocumentArt id={d.id} kind={d.sourceName.split('.').pop()?.toUpperCase() ?? 'MD'}/><div className="document-cell">
-                    <FileText className="document-glyph" aria-hidden="true" />
+{grid ? <><div className="document-cell">
                     <div className="document-info">
                       <Button variant="outline"
                         className="document-title"
@@ -1259,21 +1256,6 @@ export function LibraryView() {
 
                       </div>
                     </div>
-                    <Button variant="outline"
-                      aria-label={`${tr("library:pin")}: ${d.title}`}
-                      tabIndex={-1}
-                      aria-pressed={item.pinned}
-                      onClick={() =>
-                        void run(() =>
-                          desktop.invoke("library:documents:pin", {
-                            documentId: d.id,
-                            pinned: !item.pinned,
-                          }),
-                        )
-                      }
-                    >
-                      <Pin />
-                    </Button>
                     <Button variant="outline"
                       aria-label={tr("library:actions", { name: d.title })}
                       tabIndex={-1}

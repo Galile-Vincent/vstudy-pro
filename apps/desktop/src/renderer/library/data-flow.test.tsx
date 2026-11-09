@@ -589,3 +589,14 @@ it('places each named container above the elements its rules style', async () =>
  }
  expect([...covered].sort()).toEqual(['docs','library-page']);
 });
+
+it.each([null, 'false', 'true'])('uses list by default and retains saved grid preference %s', async preference => {
+  if (preference !== null) localStorage.setItem('library-grid', preference);
+  state.invoke.mockImplementation(async channel => channel === 'library:documents:list'
+    ? {items:[row('Document')], nextCursor:null} : []);
+  mount();
+  const results = await screen.findByRole('list', {name:tr('library:documents')});
+  expect(results.getAttribute('data-view')).toBe(preference === 'true' ? 'grid' : 'list');
+  fireEvent.click(screen.getByRole('button', {name:tr('library:viewToggle')}));
+  expect(results.getAttribute('data-view')).toBe(preference === 'true' ? 'list' : 'grid');
+});

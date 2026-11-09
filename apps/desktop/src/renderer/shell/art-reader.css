@@ -101,19 +101,6 @@
 .art-reader-cover-type { position:absolute; bottom:var(--space-4); left:var(--space-5); z-index:1; background:var(--surface); color:var(--ink); padding:var(--space-1) var(--space-2); font-size:var(--type-xs); font-weight:500; border-radius:var(--r-pill); }
 .art-reader-reading-info { display:flex; flex-direction:column; align-items:flex-start; gap:var(--space-3); padding:var(--space-5); width:100%; flex:1; }
 .art-reader-reading-info > .art-reader-kicker { color:var(--muted); }
-.app-shell .library-view { background:transparent; }
-.app-shell .library-toolbar { background:transparent; }
-.app-shell .library-results[data-view=grid] .document-card { padding:0; min-height:calc(var(--art-reader-card-height) - 16px); border:0; border-radius:var(--art-reader-radius); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden; }
-.library-results[data-view=grid] .document-card > .art-reader-cover { height:104px; min-height:104px; flex:none; }
-.library-results[data-view=grid] .document-card > .document-cell { display:flex; padding:var(--space-4); align-items:start; gap:var(--space-2); }
-.library-results[data-view=grid] .document-glyph { display:none; }
-.library-results[data-view=grid] .document-card .document-title { white-space:normal; font-size:1.0625rem; line-height:1.3; font-weight:600; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; padding:0; height:auto; background:transparent; border:0; }
-.library-results[data-view=grid] .document-card .document-meta { font-size:var(--type-xs); margin-top:var(--space-3); }
-.library-results[data-view=grid] .document-card .document-meta > span { overflow:hidden; text-overflow:ellipsis; max-width:100%; }
-.library-results[data-view=grid] .document-card .document-forms:empty { display:none; }
-.library-results[data-view=grid] .document-card .document-info { min-width:0; }
-.library-results[data-view=grid] .document-card .document-meta > span:nth-child(n+4) { display:none; }
-.library-results[data-view=grid] .document-card .document-meta { display:flex; flex-wrap:wrap; gap:var(--space-2); }
 @media(max-width:1100px) {
   .app-shell .workspace .app-header { padding-inline:var(--space-3); gap:var(--space-2); }
   .workspace .app-header [data-testid=import-document] { display:none; }
@@ -139,18 +126,11 @@ html[data-theme=contrast] .art-reader-cover { background:var(--subtle); }
 html[data-theme=contrast] .art-reader-assistant-mark { background:var(--surface); outline:1px solid var(--line); }
 html[data-reduced-transparency=true] { --art-reader-glass:var(--surface); }
 
-.app-shell .library-results[data-view=grid] .document-card[data-selected=true] { background:var(--active); box-shadow:inset 0 0 0 2px var(--accent-color); }
-.app-shell .library-results[data-view=grid] .document-card .document-cell > button { min-width:36px; min-height:36px; color:var(--ink); background:var(--art-reader-glass); backdrop-filter:var(--material-filter); border-radius:var(--art-reader-control); }
 .art-reader-context { display:flex; align-items:center; gap:var(--space-2); min-width:0; color:var(--muted); font-size:var(--type-xs); padding:var(--space-1) var(--space-2); }
 .art-reader-context svg { flex:none; }
 .art-reader-context span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .app-shell .workspace .art-reader-welcome h2 { text-wrap:pretty; }
 @keyframes art-reader-enter { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-.app-shell .library-results[data-view=grid] .document-card { transition:transform 180ms var(--art-reader-ease); }
-.app-shell .library-results[data-view=grid] .document-card:hover { background:var(--glass-fill-hover); }
-.app-shell .library-results[data-view=grid] .document-card:active { transform:scale(.985); }
-.app-shell .library-results[data-view=grid] .document-card:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
-@media(prefers-reduced-motion:reduce) { .app-shell .library-results[data-view=grid] .document-card { transition:none; } .app-shell .library-results[data-view=grid] .document-card:hover,.app-shell .library-results[data-view=grid] .document-card:active { transform:none; } }
 
 @media(max-width:1199px) { .app-shell[data-view=workspace]:not([data-sidebar-overlay=true]) .shell-sidebar:not([hidden]) { position:absolute; z-index:40; inset:0 auto 0 0; width:var(--sidebar-width); background:var(--sidebar-surface); box-shadow:var(--glass-shadow-float); } }
 html[data-theme=contrast] .art-reader-cover::after { display:none; }

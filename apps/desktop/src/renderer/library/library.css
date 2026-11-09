@@ -75,19 +75,6 @@ html[data-input-modality=keyboard] .library-view .library-search:has(:focus-visi
 .document-forms { display:flex; gap:var(--space-2); font-size:var(--type-sm); overflow:hidden; }
 .document-forms:empty { display:none; }
 .document-glyph { color:var(--muted); box-sizing:content-box; padding:var(--space-2); border-radius:var(--r-sm); background:color-mix(in oklab, var(--ink) 5%, var(--surface)); margin:0; }
-.document-card { display:block; align-self:start; border:0; border-radius:var(--r-md); background:var(--surface); }
-.library-results[data-view=grid] { background:transparent; border:0; box-shadow:none; }
-.library-results[data-view=grid] .document-card { box-shadow:none; }
-.document-card:hover { background:color-mix(in oklab, var(--ink) 2%, var(--surface)); }
-.document-card[data-selected=true],.document-card[data-selected=true]:hover { background:var(--active); }
-.document-card .document-glyph { margin-bottom:var(--space-3); }
-.document-card .document-title { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; white-space:normal; line-height:1.35; }
-.document-card .document-meta { margin-block:var(--space-2); }
-.document-cell { display:contents; }
-.document-card .document-cell > button { position:absolute; top:var(--space-3); right:var(--space-2); border-radius:var(--r-sm); }
-.document-card .document-cell > button:nth-last-child(2) { right:calc(var(--space-8) + var(--space-2)); }
-.document-card .document-cell > button:hover { background:var(--active); }
-.document-card .document-cell > button[aria-pressed=true] { color:var(--ink); background:var(--active); }
 .bulk-bar { position:absolute; bottom:var(--space-8); align-self:center; z-index:10; display:flex; align-items:center; gap:var(--space-2); padding:var(--space-2); flex-wrap:wrap; background:var(--surface); border:0; border-radius:var(--r-md); box-shadow:var(--elevation-floating); }
 .bulk-bar > span { padding-inline:var(--space-2); font-size:var(--type-base); font-weight:500; }
 .bulk-bar button { border:0; background:transparent; border-radius:var(--r-sm); }

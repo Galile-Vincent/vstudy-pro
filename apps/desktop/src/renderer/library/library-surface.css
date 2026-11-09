@@ -93,12 +93,6 @@ html[data-input-modality=keyboard] .course-folder:focus-visible,.course-folder:f
 @media(prefers-contrast:more) { .library-view .library-mode,.library-view-controls .app-select,.library-view .folder-crumbs .folder-back-button { border:1px solid var(--ink); box-shadow:none; } }
 @media(forced-colors:active) { .library-view .library-mode,.library-view-controls .app-select,.library-view .folder-crumbs .folder-back-button { border:1px solid CanvasText; } }
 
-/* Card meta wraps without leaving a separator at the start of a line. */
-.app-shell .library-results[data-view=grid] .document-card .document-meta { gap:var(--space-1) var(--space-4); overflow:hidden; }
-.app-shell .library-results[data-view=grid] .document-card .document-meta > span { position:relative; overflow:visible; }
-.app-shell .library-results[data-view=grid] .document-card .document-meta > span + span::before { position:absolute; inset-inline-start:calc(var(--space-4) / -2 - .25em); margin:0; }
-.library-results[data-view=grid] .document-card .document-title { background:transparent; box-shadow:none; }
-.app-shell .library-results .library-document .document-title { background:transparent; backdrop-filter:none; box-shadow:none; }
 @container library-page (width < 36rem) { .library-view .library-toolbar { flex-wrap:wrap; } .library-view .library-search { flex-basis:100%; order:3; } }
 
 .library-view .library-mode { height:auto; min-height:46px; }
@@ -118,3 +112,14 @@ html[data-input-modality=keyboard] .course-folder:focus-visible,.course-folder:f
   .library-toolbar > .library-search { grid-column:1 / -1; grid-row:2; width:100%; min-width:0; }
   .library-toolbar > .library-view-controls { grid-column:1 / -1; flex-wrap:wrap; }
 }
+
+.library-results[data-view=grid] .library-document { padding:var(--space-4); gap:var(--space-2); }
+.library-results[data-view=grid] .document-cell { display:flex; align-items:start; gap:var(--space-2); min-width:0; }
+.library-results[data-view=grid] .document-info { flex:1; min-width:0; }
+.library-results[data-view=grid] .document-title { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; white-space:normal; height:auto; padding:0; text-align:start; background:transparent; box-shadow:none; }
+.library-results[data-view=grid] .document-meta { flex-wrap:wrap; white-space:normal; gap:var(--space-2); }
+.library-results[data-view=grid] .document-course { flex-basis:100%; }
+.library-results[data-view=grid] .document-course + span::before { content:none; }
+.library-results[data-view=grid] .document-cell > button { flex:none; padding:var(--space-2); }
+.library-results[data-view=grid] .library-document[data-selected=true] { background:var(--active); }
+.library-results[data-view=grid] .library-document:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
