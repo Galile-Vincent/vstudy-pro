@@ -370,5 +370,8 @@
   "reload": "Reload",
   "copy_diagnostics": "Copy diagnostics",
   "reload_application": "Reload application",
-  "scrollable_code": "Scrollable code block"
+  "scrollable_code": "Scrollable code block",
+  "tool_started": "Tool {{tool}} started",
+  "tool_finished": "Tool {{tool}} finished",
+  "tool_failed": "Tool {{tool}} failed"
 }

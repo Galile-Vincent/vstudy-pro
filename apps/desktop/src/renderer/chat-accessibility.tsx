@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAuiState } from '@assistant-ui/react';
-import { useState, useRef, useLayoutEffect, type FC } from 'react';
+import { useState, useRef, useLayoutEffect, useEffect, type FC } from 'react';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { plainText } from '../shared/plain-text';
 import { copyAnswer } from './copy-answer';
@@ -24,7 +24,7 @@ export function ChatAnnouncement() {
     const plain = plainText(text, documentCitationSchema.array().safeParse(last.metadata.custom.citations).data ?? []);
     return `${tr(last.status?.type === 'incomplete' ? last.status.reason === 'error' ? 'common:answer_error' : 'common:answer_stopped' : 'common:answer_complete')}: ${announcementExcerpt(plain)}`;
   });
-  return <span data-testid="chat-announcement" role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</span>;
+  return <><ToolAnnouncement/><span data-testid="chat-announcement" role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</span></>;
 }
 
 export const CopyAnswerButton: FC = () => {
@@ -40,3 +40,42 @@ export const CopyAnswerButton: FC = () => {
   }}>{copied ? <CheckIcon /> : <CopyIcon />}</TooltipIconButton>;
 };
 
+
+function ToolAnnouncement() {
+  useTranslation();
+  const running = useAuiState(state => state.thread.isRunning);
+  const activeMessageId = useAuiState(state => state.thread.isRunning ? state.thread.messages.at(-1)?.id : undefined);
+  const tools = useAuiState(state => JSON.stringify(state.thread.messages.flatMap(message =>
+    message.role !== 'assistant' ? [] : message.content.flatMap(part => {
+      if (part.type !== 'tool-call') return [];
+      const status = part.isError ? 'failed' : part.result !== undefined ? 'finished'
+        : message.status?.type === 'incomplete' ? 'failed'
+        : message.status?.type === 'running' ? 'started' : 'finished';
+      return [{id: `${message.id}:${part.toolCallId}`, messageId: message.id, name: part.toolName, status}];
+    }))));
+  const seen = useRef<Map<string, string> | null>(null);
+  const active = useRef(new Set<string>());
+  const [entries, setEntries] = useState<string[]>([]);
+  useEffect(() => {
+    const current = JSON.parse(tools) as {id: string; messageId: string; name: string; status: string}[];
+    if (!seen.current) {
+      seen.current = new Map(current.map(tool => [tool.id, tool.status]));
+      return;
+    }
+    if (activeMessageId) active.current.add(activeMessageId);
+    const announcements: string[] = [];
+    for (const tool of current) {
+      const previous = seen.current.get(tool.id);
+      if (previous === tool.status) continue;
+      seen.current.set(tool.id, tool.status);
+      if (!running && !active.current.has(tool.messageId)) continue;
+      active.current.add(tool.messageId);
+      announcements.push(tr(`common:tool_${tool.status}`, {tool: tool.name}));
+    }
+    if (announcements.length) setEntries(entries => [...entries, ...announcements]);
+  }, [tools, running, activeMessageId]);
+  return <div data-testid="tool-announcement" role="log" aria-live="polite"
+    aria-relevant="additions" className="sr-only">
+    {entries.map((entry, index) => <div key={index}>{entry}</div>)}
+  </div>;
+}
