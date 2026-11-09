@@ -5,7 +5,7 @@ import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { ExamPlayer } from '../exams/player';
 import { Button } from '../components/ui/button';
-import { DraftQueue, type Answer } from './draft-queue';
+import { draftQueue, type DraftQueue, type Answer } from './draft-queue';
 
 type Artifact = NonNullable<IpcResponse<'review:artifact:get'>>;
 type Attempt = IpcResponse<'review:attempt:start'>;
@@ -65,7 +65,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
    if (!opening.current || opening.current.id !== artifact.id) opening.current = { id: artifact.id, promise: desktop.invoke('review:attempt:start', { artifactId: artifact.id }).then(value=>desktop.invoke('review:attempt:get',{attemptId:value.id})) };
    let next: Attempt;
    try { next = await opening.current.promise; } catch (error) { opening.current = null; throw error; }
-   if (active) { if(exam&&next.phase!=='answering')setResults(true); setIndex(Math.max(0, items.findIndex(candidate => next.results.find(result => result.itemId === candidate.id)?.correct === null))); setAttempt(next); queue.current = new DraftQueue((itemId, answer, seq) => desktop.invoke('review:attempt:draft', { attemptId: next.id, itemId, answer, seq })); for (const [itemId, seq] of Object.entries(next.draftSeqs ?? {})) queue.current.seed(itemId, seq); draftsRef.current = { ...next.answers, ...next.drafts }; setDrafts(draftsRef.current); }
+   if (active) { if(exam&&next.phase!=='answering')setResults(true); setIndex(Math.max(0, items.findIndex(candidate => next.results.find(result => result.itemId === candidate.id)?.correct === null))); setAttempt(next); const shared = draftQueue(next.id, (itemId, answer, seq) => desktop.invoke('review:attempt:draft', { attemptId: next.id, itemId, answer, seq })); queue.current = shared; for (const [itemId, seq] of Object.entries(next.draftSeqs ?? {})) shared.seed(itemId, seq); const local = Object.entries(shared.answers()).map(([itemId, answer]) => [itemId, answer ?? next.answers[itemId] ?? null]); draftsRef.current = { ...next.answers, ...next.drafts, ...Object.fromEntries(local) }; setDrafts(draftsRef.current); }
   };
   retryAction.current = load; setBusy(true); setFailed(false);
   void load().catch(() => { if (active) setFailed(true); }).finally(() => { if (active) setBusy(false); });

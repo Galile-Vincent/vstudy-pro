@@ -2,13 +2,14 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ExamsView } from './index';
+import { resetDraftQueues } from '../review/draft-queue';
 import { TestPlayer } from '../review/test-player';
 import { fakeArtifact, fakeAttemptServer } from '../review/fake-attempt-server';
 const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock('../bridge', () => ({ desktop: { invoke } }));
 vi.mock('../../shared/i18n', () => ({ tr: (key: string) => key }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ i18n: { language: 'en' } }) }));
-afterEach(() => { cleanup(); vi.resetAllMocks(); });
+afterEach(() => { cleanup(); vi.resetAllMocks(); resetDraftQueues(); });
 
 const exam = fakeArtifact(true);
 const historyRow = { artifact: { ...exam, test: undefined }, attempt: null };

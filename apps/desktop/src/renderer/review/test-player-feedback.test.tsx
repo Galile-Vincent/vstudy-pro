@@ -7,11 +7,12 @@ import { i18n } from '../../shared/i18n';
 import en from '../../shared/locales/en/review.json';
 import ja from '../../shared/locales/ja/review.json';
 import zhHant from '../../shared/locales/zh-Hant/review.json';
+import { resetDraftQueues } from './draft-queue';
 import { TestPlayer } from './test-player';
 const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock('../bridge', () => ({ desktop: { invoke } }));
 beforeEach(async () => { await i18n.changeLanguage('en'); });
-afterEach(() => { cleanup(); vi.resetAllMocks(); });
+afterEach(() => { cleanup(); vi.resetAllMocks(); resetDraftQueues(); });
 const source = { documentId: '10000000-0000-4000-8000-000000000001', version: 'original' as const, excerptHash: 'a'.repeat(64), quote: 'Source passage' };
 const test = studyTestSchema.parse({ version: 1, items: [
  { id: 'a', conceptKey: 'chain-rule', type: 'mcq', stem: 'First question', options: ['A', 'B'], answer: 1, explanation: 'First explanation', source },

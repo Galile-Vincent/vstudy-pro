@@ -2,12 +2,13 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { resetDraftQueues } from './draft-queue';
 import { TestPlayer } from './test-player';
 import { fakeArtifact, fakeAttemptServer } from './fake-attempt-server';
 const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
 vi.mock('../bridge', () => ({ desktop: { invoke } }));
 vi.mock('../../shared/i18n', () => ({ tr: (key: string) => key }));
-afterEach(() => { cleanup(); vi.resetAllMocks(); });
+afterEach(() => { cleanup(); vi.resetAllMocks(); resetDraftQueues(); });
 
 const modes = [['review', false], ['exam', true]] as const;
 

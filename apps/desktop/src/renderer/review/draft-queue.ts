@@ -5,7 +5,7 @@ const DRAFT_DELAY_MS = 500;
 const DRAFT_RETRY_MS = 3000;
 
 /** Writes the latest answer per question, in order; an older write can never replace a newer capture. */
-export class DraftQueue {
+class DraftQueue {
  private readonly pending = new Map<string, { seq: number; answer: Answer }>();
  private readonly seqs = new Map<string, number>();
  private readonly listeners = new Set<(failed: boolean) => void>();
@@ -13,7 +13,7 @@ export class DraftQueue {
  private timer: ReturnType<typeof setTimeout> | undefined;
  failed = false;
 
- constructor(private readonly send: Send) {}
+ constructor(private readonly send: Send, private readonly onIdle: () => void) {}
 
  seed(itemId: string, seq: number) { this.seqs.set(itemId, Math.max(this.seqs.get(itemId) ?? 0, seq)); }
 
@@ -24,11 +24,15 @@ export class DraftQueue {
   this.schedule(DRAFT_DELAY_MS);
  }
 
- drop(itemId: string) { this.pending.delete(itemId); }
+ drop(itemId: string) { this.pending.delete(itemId); this.settleIfIdle(); }
+
+ answers(): Record<string, Answer> {
+  return Object.fromEntries([...this.pending].map(([itemId, { answer }]) => [itemId, answer]));
+ }
 
  subscribe(listener: (failed: boolean) => void) {
   this.listeners.add(listener);
-  return () => { this.listeners.delete(listener); };
+  return () => { this.listeners.delete(listener); this.settleIfIdle(); };
  }
 
  flush(): Promise<void> {
@@ -57,6 +61,11 @@ export class DraftQueue {
   this.running = null;
   this.setFailed(failedIds.size > 0);
   if (failedIds.size && this.timer === undefined) this.schedule(DRAFT_RETRY_MS);
+  this.settleIfIdle();
+ }
+
+ private settleIfIdle() {
+  if (!this.pending.size && !this.running && !this.listeners.size) { clearTimeout(this.timer); this.timer = undefined; this.onIdle(); }
  }
 
  private setFailed(failed: boolean) {
@@ -64,3 +73,18 @@ export class DraftQueue {
   for (const listener of this.listeners) listener(failed);
  }
 }
+
+const queues = new Map<string, DraftQueue>();
+
+/** One queue per attempt, shared by every player of it and kept alive until its writes are saved. */
+export function draftQueue(attemptId: string, send: Send): DraftQueue {
+ let queue = queues.get(attemptId);
+ if (!queue) {
+  const created: DraftQueue = new DraftQueue(send, () => { if (queues.get(attemptId) === created) queues.delete(attemptId); });
+  queue = created; queues.set(attemptId, queue);
+ }
+ return queue;
+}
+
+export type { DraftQueue };
+export function resetDraftQueues() { queues.clear(); }
