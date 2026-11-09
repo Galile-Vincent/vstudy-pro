@@ -60,27 +60,94 @@ export function GettingStarted({ detailed = false }: { detailed?: boolean }) {
   const hasDocument = progress.done.includes('document');
   useEffect(() => {
     if (hasDocument) return;
-    const refresh = () => { void desktop.invoke('documents:list', {}).then(documents => { if (documents.some(doc => doc.status === 'ready')) markLearned('document'); }).catch(() => {}); };
-    refresh(); window.addEventListener('library-changed', refresh);
+    const refresh = () => {
+      void desktop
+        .invoke('documents:list', {})
+        .then((documents) => {
+          if (documents.some((doc) => doc.status === 'ready')) markLearned('document');
+        })
+        .catch(() => {});
+    };
+    refresh();
+    window.addEventListener('library-changed', refresh);
     const unsubscribe = desktop.onDocumentProgress?.(refresh);
-    return () => { window.removeEventListener('library-changed', refresh); unsubscribe?.(); };
+    return () => {
+      window.removeEventListener('library-changed', refresh);
+      unsubscribe?.();
+    };
   }, [hasDocument]);
   const items = ['setup', 'document', 'walkthrough', 'help'] as const;
-  if (!detailed && items.every(item => progress.done.includes(item))) {
-    return <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] p-[var(--space-3)]">
-      <span className="flex items-center gap-[var(--space-2)]">
-        <Check size={16} aria-hidden="true"/>{tr('onboarding:setup_complete')}
-      </span>
-      <Button variant="ghost" onClick={() => openLearningHelp('checklist')}>
-        {tr('onboarding:setup_help')}
-      </Button>
-    </div>;
+  if (!detailed && items.every((item) => progress.done.includes(item))) {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] p-[var(--space-3)]">
+        <span className="flex items-center gap-[var(--space-2)]">
+          <Check size={16} aria-hidden="true" />
+          {tr('onboarding:setup_complete')}
+        </span>
+        <Button variant="ghost" onClick={() => openLearningHelp('checklist')}>
+          {tr('onboarding:setup_help')}
+        </Button>
+      </div>
+    );
   }
-  return <Card variant="flat" role="region" aria-labelledby="getting-started-title" className="getting-started min-w-0 p-[var(--space-6)]"><Section title={<span id="getting-started-title">{tr('onboarding:checklist')}</span>} actions={<span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>}><p>{tr('onboarding:checklist_body')}</p>
-    <Progress className="art-reader-setup-progress" aria-label={tr('onboarding:checklist')} value={progress.done.length / items.length * 100}/><ol>{items.map(item => <li key={item} data-complete={progress.done.includes(item)}><span aria-hidden="true">{progress.done.includes(item) ? <Check size={16}/> : null}</span><Button variant="ghost" onClick={() => item === 'document' ? navigate('library') : openLearningHelp(item === 'walkthrough' ? 'walkthroughs' : item === 'help' ? 'shortcuts' : 'setup')}>{tr(`onboarding:check_${item}`)}{progress.done.includes(item) && <small>{tr('onboarding:completed')}</small>}</Button></li>)}</ol>
-    {progress.status === 'paused' && <Button variant="outline" onClick={() => { try { saveProgress({ status: 'active' }); openLearningHelp('setup'); } catch { setError(tr('onboarding:save_error')); } }}>{tr('onboarding:resume')}</Button>}
-    {error && <p role="alert">{error}</p>}
-  </Section></Card>;
+  return (
+    <Card
+      variant="flat"
+      role="region"
+      aria-labelledby="getting-started-title"
+      className="getting-started min-w-0 p-[var(--space-6)]"
+    >
+      <Section
+        title={<span id="getting-started-title">{tr('onboarding:checklist')}</span>}
+        actions={
+          <span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>
+        }
+      >
+        <p>{tr('onboarding:checklist_body')}</p>
+        <Progress
+          className="art-reader-setup-progress"
+          aria-label={tr('onboarding:checklist')}
+          value={(progress.done.length / items.length) * 100}
+        />
+        <ol>
+          {items.map((item) => (
+            <li key={item} data-complete={progress.done.includes(item)}>
+              <span aria-hidden="true">{progress.done.includes(item) ? <Check size={16} /> : null}</span>
+              <Button
+                variant="ghost"
+                onClick={() =>
+                  item === 'document'
+                    ? navigate('library')
+                    : openLearningHelp(
+                        item === 'walkthrough' ? 'walkthroughs' : item === 'help' ? 'shortcuts' : 'setup'
+                      )
+                }
+              >
+                {tr(`onboarding:check_${item}`)}
+                {progress.done.includes(item) && <small>{tr('onboarding:completed')}</small>}
+              </Button>
+            </li>
+          ))}
+        </ol>
+        {progress.status === 'paused' && (
+          <Button
+            variant="outline"
+            onClick={() => {
+              try {
+                saveProgress({ status: 'active' });
+                openLearningHelp('setup');
+              } catch {
+                setError(tr('onboarding:save_error'));
+              }
+            }}
+          >
+            {tr('onboarding:resume')}
+          </Button>
+        )}
+        {error && <p role="alert">{error}</p>}
+      </Section>
+    </Card>
+  );
 }
 export function ContextCoach({ inline = false }: { inline?: boolean }) {
   useTranslation();

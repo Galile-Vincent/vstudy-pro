@@ -50,3 +50,14 @@ it.each(['Choose a file', 'Try a sample document'])('shows actionable errors fro
   fireEvent.click(screen.getByRole('button', { name }));
   expect((await screen.findByRole('alert')).textContent).toBe(i18n.t('errors:disk_full'));
 });
+
+it('marks the entire import section during drag and restores it on leave', () => {
+  const { container } = render(<UploadCard title="Bring a document"/>);
+  const section = container.firstElementChild!;
+  fireEvent.dragEnter(section);
+  expect(section.getAttribute('data-dragging')).toBe('true');
+  expect(section.getAttribute('style')).toContain('var(--active)');
+  expect(screen.getByText('Drop to import').getAttribute('aria-hidden')).toBe('false');
+  fireEvent.dragLeave(section);
+  expect(section.getAttribute('data-dragging')).toBe('false');
+});

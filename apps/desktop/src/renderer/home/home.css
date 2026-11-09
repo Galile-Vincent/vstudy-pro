@@ -7,15 +7,7 @@
 .home-upload p { color:var(--muted); overflow-wrap:anywhere; }
 .home-upload button[data-slot=button][data-size=default],
 .home-page #welcome-entry { height:auto; white-space:normal; padding-block:var(--space-3); }
-.home-sparkline { width:100%; height:var(--space-6); color:var(--muted); }
-.home-list { list-style:none; padding:0; margin:0; }
-.home-list li { display:flex; align-items:center; gap:var(--space-1); min-width:0; }
-.home-row[data-slot=button] { flex:1; height:auto; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; text-align:start; white-space:normal; min-width:0; width:100%; padding:var(--space-3); border:0; background:transparent; overflow-wrap:anywhere; overflow:hidden; }
-.home-row strong,.home-row { font-weight:600; }
-.home-row strong,.home-row small { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.home-row strong { line-height:1.35; }
-.home-row small { color:var(--muted); }
-.home-row:hover { background:color-mix(in oklab,var(--ink) 5%,var(--surface)); }
+.home-list { list-style:none; padding:0; margin:0; display:grid; gap:var(--space-2); }
 .home-empty { color:var(--muted); margin-block:var(--space-6); }
 .home-sparkline { width:100%; height:var(--space-6); color:var(--muted); }
 .streak-days { display:flex; gap:var(--space-3); list-style:none; padding:0; margin:0; color:var(--muted); }
@@ -25,7 +17,6 @@
 .home-pins .home-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-2) var(--space-4); }
 .home-activity summary { cursor:pointer; font-size:var(--type-base); font-weight:600; color:var(--muted); border-radius:var(--r-sm); }
 .home-activity .home-list { margin-top:var(--space-4); }
-.home-activity .home-row { font-weight:400; }
 .home-skeleton { min-height:calc(var(--space-8) * 6); }
 
 .art-reader-launchpad {
@@ -44,6 +35,11 @@
 }
 
 .home-recent-thumbnail { display:block; flex-shrink:0; }
-.home-recent-thumbnail .art-reader-cover { width:48px; height:48px; }
+.home-recent-thumbnail .art-reader-cover {
+  width:calc(var(--space-6) * 2);
+  height:calc(var(--space-6) * 2);
+  min-height:0;
+}
+.home-recent-thumbnail .art-reader-cover-type { left:var(--space-1); bottom:var(--space-1); }
 .home-page [data-slot=list-row] { min-width:0; }
 .home-page [data-slot=list-row] button { white-space:normal; height:auto; }
