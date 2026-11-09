@@ -9,8 +9,9 @@ export function UpdateSettings() {
   useTranslation();
   const snapshot = useUpdates();
   return <SettingsGroup title={tr('updates:title')}>
-    <SettingsRow label={tr('updates:automatic')}>
-      <Switch aria-label={tr('updates:automatic')} checked={snapshot?.automatic ?? true}
+    <SettingsRow label={tr('updates:automatic')}
+      description={snapshot?.state.status === 'unsupported' ? tr('updates:unavailable') : undefined}>
+      <Switch disabled={snapshot?.state.status === 'unsupported'} aria-label={tr('updates:automatic')} checked={snapshot?.automatic ?? true}
         onCheckedChange={enabled => void desktop.invoke('updates:setAuto', {enabled})} />
     </SettingsRow>
     <SettingsRow label={tr('updates:version', {version:snapshot?.currentVersion ?? __APP_VERSION__})}

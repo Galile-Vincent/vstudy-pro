@@ -4,8 +4,6 @@
 .update-row > button > svg { flex-shrink:0; }
 .update-row [data-slot=progress] { flex-basis:100%; }
 .update-row [data-slot=progress-indicator] { transition:none; }
-.update-row[data-collapsed=true] > button > span { display:none; }
-.update-row[data-collapsed=true] > button:first-child { padding-inline:var(--space-2); }
 @media (forced-colors:active) {
   .update-row button { border:1px solid ButtonText; }
   .update-row [data-slot=progress] { border:1px solid CanvasText; }

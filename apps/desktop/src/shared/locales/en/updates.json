@@ -20,5 +20,8 @@
   "cooldown": "Please wait a few seconds before checking again",
   "confirm_download": "Download this update?",
   "confirm_install": "Restart and install this update?",
-  "confirm_detail": "Restart waits for conversions, imports, chats and Moodle work to finish."
+  "confirm_detail": "Restart waits for conversions, imports, chats and Moodle work to finish.",
+  "download_progress": "Downloading update",
+  "unavailable": "Automatic updates are unavailable for this build.",
+  "continue": "Continue"
 }

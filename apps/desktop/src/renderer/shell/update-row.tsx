@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Download, RefreshCw, FileText } from 'lucide-react';
+import { RefreshCw, FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import type { UpdateSnapshot } from '../../shared/updates';
@@ -17,34 +17,29 @@ export function useUpdates() {
   }, []);
   return snapshot;
 }
-export function UpdateRow({ collapsed = false }: { collapsed?: boolean }) {
+export function UpdateRow() {
   useTranslation();
   const snapshot = useUpdates();
   const state = snapshot?.state;
-  const label = !state || state.status === 'idle' ? '' : state.status === 'available'
+  const label = !state || ['idle', 'unsupported'].includes(state.status) ? '' : state.status === 'available'
     ? tr('updates:available', {version:state.version}) : state.status === 'downloading'
       ? tr('updates:downloading', {percent:state.percent}) : tr(`updates:${state.status}`);
   const action = () => {
-    if (snapshot?.installing) return;
+    if (snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading') return;
     const channel = state?.status === 'ready' ? 'updates:install'
       : state?.status === 'available' ? 'updates:download' : 'updates:check';
     void desktop.invoke(channel, {}).catch(() => {});
   };
   return <>
-    <span className="sr-only" aria-live="polite" aria-atomic="true">{label}</span>
-    {label && <div className="update-row" data-collapsed={collapsed} data-testid="update-row">
-      {state?.status === 'unsupported'
-        ? <Button variant="ghost" aria-label={label} title={label}
-          onClick={() => void desktop.invoke('shell:openExternal', {url:'https://vstudy.vcstudio.app/download'})}>
-          <Download aria-hidden="true" /><span>{label}</span>
-        </Button>
-        : <Button variant="ghost" onClick={action} aria-label={label} title={label}
-          disabled={snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading'}>
+    <span className="sr-only" aria-live="polite" aria-atomic="true">{state?.status === 'downloading' ? tr('updates:download_progress') : label}</span>
+    {label && <div className="update-row" data-testid="update-row">
+      {<Button variant="ghost" onClick={action} aria-label={label} title={label}
+          aria-disabled={snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading'}>
           <RefreshCw aria-hidden="true" /><span>{label}</span>
         </Button>}
-      {state?.status === 'available' && !collapsed && <Button variant="link" size="icon-sm" aria-label={tr('updates:notes')} title={tr('updates:notes')}
+      {state?.status === 'available' && <Button variant="link" size="icon-sm" aria-label={tr('updates:notes')} title={tr('updates:notes')}
         onClick={() => void desktop.invoke('updates:notes', {})}><FileText aria-hidden="true" /></Button>}
-      {state?.status === 'error' && !collapsed && <Button variant="link" size="sm" onClick={action}>
+      {state?.status === 'error' && <Button variant="link" size="sm" onClick={action}>
         {tr('updates:retry')}</Button>}
       {state?.status === 'downloading' && <Progress value={state.percent} aria-label={label} />}
     </div>}

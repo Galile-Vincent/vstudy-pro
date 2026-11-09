@@ -20,5 +20,8 @@
   "cooldown": "請稍候幾秒再檢查",
   "confirm_download": "下載此更新？",
   "confirm_install": "重新啟動並安裝此更新？",
-  "confirm_detail": "重新啟動會等待轉換、匯入、聊天和 Moodle 工作完成。"
+  "confirm_detail": "重新啟動會等待轉換、匯入、聊天和 Moodle 工作完成。",
+  "download_progress": "正在下載更新",
+  "unavailable": "此版本無法自動更新。",
+  "continue": "繼續"
 }

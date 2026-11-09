@@ -110,7 +110,7 @@ export function registerIpc(
     registrar.handle('updates:check', () => updates.check());
     const updateConsent = async (event:IpcMainInvokeEvent, action:'download' | 'install') => {
       const result = await showAttachedMessage({type:'question',message:tr(`updates:confirm_${action}`),
-        detail:tr('updates:confirm_detail'),buttons:[tr('common:cancel'),tr('common:continue')],
+        detail:tr('updates:confirm_detail'),buttons:[tr('common:cancel'),tr('updates:continue')],
         defaultId:0,cancelId:0}, event.sender);
       return result.response === 1 && !event.sender.isDestroyed();
     };

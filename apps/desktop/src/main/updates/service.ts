@@ -13,6 +13,7 @@ export class Updates {
   private result: UpdateSnapshot['result'];
   private manual = false;
   private installing = false;
+  private quietState: UpdateState | undefined;
   private listeners = new Set<(snapshot: UpdateSnapshot) => void>();
   private timer: ReturnType<typeof setTimeout>;
   private monitor: ReturnType<typeof setInterval>;
@@ -65,7 +66,7 @@ export class Updates {
     on('update-downloaded', (info: {version:string}) => this.dispatch({type:'ready', version:info.version}));
     on('error', (error: Error) => this.dispatch({type:'error', code:updateError(error)}));
   }
-  snapshot = (): UpdateSnapshot => ({state:this.state, currentVersion:this.options.version,
+  snapshot = (): UpdateSnapshot => ({state:this.state.status === 'checking' && this.quietState ? this.quietState : this.state, currentVersion:this.options.version,
     lastCheckedAt:this.lastCheckedAt, automatic:this.options.getAutomatic?.() ?? this.automatic, installing:this.installing, ...(this.result ? {result:this.result} : {})});
   subscribe(listener: (snapshot: UpdateSnapshot) => void) {
     this.listeners.add(listener); return () => { this.listeners.delete(listener); };
@@ -75,6 +76,9 @@ export class Updates {
     if (event.type === 'available' || event.type === 'current') {
       this.lastCheckedAt = (this.options.now ?? Date.now)();
       if (this.manual) this.result = event.type === 'current' ? 'current' : 'checked';
+    }
+    if (event.type === 'error' && !this.manual && this.state.status === 'checking') {
+      this.state = this.quietState ?? {status:'idle'}; this.quietState = undefined; this.emit(); return;
     }
     try { this.state = reduceUpdate(this.state, event); }
     catch { this.state = {status:'error', code:'failed'}; }
@@ -96,6 +100,7 @@ export class Updates {
     if (manual) this.lastManualAttempt = now;
     this.lastAttempt = now;
     this.result = undefined;
+    this.quietState = manual ? undefined : this.state;
     this.dispatch({type:'check'});
     recordEgress('app_update_check', 'https://github.com/ava-apple/vstudy-pro/releases/latest/download');
     try { await this.updater.checkForUpdates(); }
@@ -104,6 +109,7 @@ export class Updates {
   }
   async download() {
     if (this.state.status !== 'available') return this.snapshot();
+    this.manual = true; this.quietState = undefined;
     if (!this.options.online()) { this.dispatch({type:'error', code:'offline'}); return this.snapshot(); }
     recordEgress('app_update_download', 'https://github.com/ava-apple/vstudy-pro/releases/latest/download');
     this.updater.autoInstallOnAppQuit = false;

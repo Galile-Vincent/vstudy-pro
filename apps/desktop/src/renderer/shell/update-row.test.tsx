@@ -6,9 +6,9 @@ import { UpdateRow } from './update-row';
 const mock = vi.hoisted(() => ({invoke:vi.fn(),listener:undefined as ((s:UpdateSnapshot)=>void)|undefined}));
 vi.mock('../bridge', () => ({desktop:{invoke:mock.invoke,onUpdateState:(fn:(s:UpdateSnapshot)=>void) => {mock.listener=fn;return () => {mock.listener=undefined;};}}}));
 afterEach(() => {cleanup();vi.clearAllMocks();});
-function start(state:UpdateSnapshot['state'], collapsed=false) {
+function start(state:UpdateSnapshot['state']) {
   mock.invoke.mockResolvedValue({state,currentVersion:'0.4.4',automatic:true,lastCheckedAt:null});
-  return render(<UpdateRow collapsed={collapsed} />);
+  return render(<UpdateRow />);
 }
 it('keeps one live region while idle and renders no row', async () => {
   const {container} = start({status:'idle'});
@@ -29,12 +29,14 @@ it('downloads, exposes notes, announces progress, then offers restart', async ()
   await waitFor(() => expect(screen.queryByRole('progressbar')).toBeNull());
   fireEvent.click(screen.getByRole('button'));expect(mock.invoke).toHaveBeenCalledWith('updates:install',{});
 });
-it.each(['checking','error','unsupported'] as const)('renders %s accessibly when collapsed',async status => {
-  start(status === 'error' ? {status,code:'network'} : status === 'unsupported' ? {status,reason:'portable'} : {status},true);
+it('keeps checking focus and hides unsupported sidebar state',async () => {
+  start({status:'checking'});
   const button = await screen.findByRole('button');
-  expect(button.getAttribute('aria-label')).toBeTruthy();
-  if (status === 'checking') expect((button as HTMLButtonElement).disabled).toBe(true);
-  else fireEvent.click(button);
-  if(status === 'unsupported') expect(mock.invoke).toHaveBeenCalledWith('shell:openExternal',{url:'https://vstudy.vcstudio.app/download'});
-  if(status === 'error') expect(mock.invoke).toHaveBeenCalledWith('updates:check',{});
+  expect(button.getAttribute('aria-disabled')).toBe('true');
+  expect((button as HTMLButtonElement).disabled).toBe(false);
+});
+it('does not show unsupported in the sidebar',async () => {
+  start({status:'unsupported',reason:'unsigned'});
+  await waitFor(()=>expect(mock.invoke).toHaveBeenCalled());
+  expect(screen.queryByTestId('update-row')).toBeNull();
 });

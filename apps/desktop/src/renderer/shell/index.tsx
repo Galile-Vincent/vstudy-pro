@@ -392,7 +392,7 @@ export function AppShell({
         </SidebarContent>
         <SidebarFooter>
           <SubscriptionMeters compact />
-          <UpdateRow collapsed={import.meta.env.DEV && new URLSearchParams(window.location.search).get('updateCollapsed') === '1'} />
+          <UpdateRow />
           <div className="art-reader-profile">
             <span
               className="art-reader-avatar"
