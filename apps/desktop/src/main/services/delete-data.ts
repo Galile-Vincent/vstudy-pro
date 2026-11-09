@@ -1,3 +1,4 @@
+import { stopStorageForDeletion } from '../storage/maintenance';
 import { reviewWorkers } from '../review/workers';
 import { rename, readdir, rm, open, lstat, realpath } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
@@ -19,6 +20,7 @@ export function createDataDeletion(
       await markDeletionPending(root);
       scheduled = true;
       await quiesce(async () => {
+        await stopStorageForDeletion();
         await reviewWorkers.waitForIdle();
         await stop();
       });
