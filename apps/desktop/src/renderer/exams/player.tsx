@@ -116,7 +116,7 @@ export function ExamPlayer({
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     heading.current?.focus();
-  }, [index, results]);
+  }, [index, results, attempt?.id]);
   const committed =
     attempt?.results.filter((r) => r.correct !== null).length ?? 0;
   const correct = attempt?.results.filter((r) => r.correct).length ?? 0;

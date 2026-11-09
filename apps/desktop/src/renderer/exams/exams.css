@@ -106,8 +106,9 @@
   display: grid;
   gap: 24px;
 }
-.exam-player h3:focus {
-  outline: none;
+.exam-player h3:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
 }
 .exam-player h3,
 .exam-player h4,
@@ -568,4 +569,4 @@
 .exam-history-title { max-width:100%; overflow-wrap:anywhere; }
 .exam-answer-form fieldset:disabled .exam-option { opacity:.6; cursor:default; }
 
-.exam-item-feedback:focus { outline:none; }
+.exam-item-feedback:focus-visible { outline:2px solid var(--focus); outline-offset:4px; }

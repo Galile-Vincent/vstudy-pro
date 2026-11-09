@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { readFileSync } from 'node:fs';
 import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { TestPlayer } from './test-player';
@@ -133,4 +134,24 @@ it.each(modes)('reopens at the first question when every question is committed (
  invoke.mockImplementation(server.invoke);
  render(<TestPlayer artifact={fakeArtifact(exam)} onRetake={vi.fn()} />);
  expect(await screen.findByRole('heading', { name: exam ? 'exams:results' : 'Question 1' })).toBeTruthy();
+});
+
+it.each(modes)('moves focus to the question once the attempt has loaded, and again on each new question (%s)', async (_name, exam) => {
+ const server = fakeAttemptServer();
+ invoke.mockImplementation(server.invoke);
+ render(<TestPlayer artifact={fakeArtifact(exam)} onRetake={vi.fn()} />);
+ const heading = await screen.findByRole('heading', { name: 'Question 1' });
+ await waitFor(() => expect(document.activeElement).toBe(heading));
+ fireEvent.click(screen.getByLabelText(/Beta/));
+ fireEvent.click(screen.getByRole('button', { name: 'review:answer_next' }));
+ await screen.findByText('Explanation 1');
+ fireEvent.click(screen.getByRole('button', { name: 'review:next_item' }));
+ const next = await screen.findByRole('heading', { name: 'Question 2' });
+ await waitFor(() => expect(document.activeElement).toBe(next));
+});
+
+it('shows a focus indicator on the focused question heading', () => {
+ const css = readFileSync('src/renderer/exams/exams.css', 'utf8');
+ expect(css).not.toMatch(/\.exam-player h3:focus\s*\{\s*outline:\s*none/);
+ expect(css).toMatch(/\.exam-player h3:focus-visible\s*\{[^}]*outline:\s*2px solid var\(--focus\)/);
 });

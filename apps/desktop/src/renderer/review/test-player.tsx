@@ -93,7 +93,7 @@ export function TestPlayer({ artifact, onRetake }: { artifact: Artifact; onRetak
   return () => { active = false; };
   // Each player belongs to one artifact; the parent keys it by artifact id.
  }, [artifact.id]);
- useEffect(() => { heading.current?.focus(); }, [index, results]);
+ useEffect(() => { heading.current?.focus(); }, [index, results, attempt?.id]);
  useEffect(() => {
   if (locked && justSubmitted.current) { justSubmitted.current = false; feedbackRegion.current?.focus(); }
  }, [locked]);
