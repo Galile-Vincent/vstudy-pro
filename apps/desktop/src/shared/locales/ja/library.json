@@ -225,5 +225,6 @@
   "itemSelected": "選択済み",
   "itemUnselected": "未選択",
   "selectDocument": "{{name}}を選択",
-  "selectedMissing": "選択した {{count}} 件のドキュメントは存在しません"
+  "selectedMissing": "選択した {{count}} 件のドキュメントは存在しません",
+  "failedInstructions": "変換に失敗しました。Enter で再試行、Shift+Enter で開きます。"
 }

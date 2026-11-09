@@ -1046,7 +1046,7 @@ export function LibraryView() {
                   aria-label={tr("library:rowName", {
                     title:d.title,
                     selection:tr(selectedSet.has(d.id) ? "library:itemSelected" : "library:itemUnselected"),
-                  })}
+                  }) + (d.status === "failed" ? ` · ${tr("library:failedInstructions")}` : "")}
                   aria-posinset={index + 1}
                   aria-setsize={shown.length}
                   data-selected={selectedSet.has(d.id)}
@@ -1177,7 +1177,7 @@ export function LibraryView() {
                     }
                     if (e.key === "Enter") {
                       e.preventDefault();
-                      if (d.status === "failed") void run(() =>
+                      if (d.status === "failed" && !e.shiftKey) void run(() =>
                         desktop.invoke("documents:retry", {documentId:d.id}));
                       else open(item, e.metaKey || e.ctrlKey);
                     }

@@ -225,5 +225,6 @@
   "itemSelected": "Selected",
   "itemUnselected": "Not selected",
   "selectDocument": "Select {{name}}",
-  "selectedMissing": "{{count}} selected documents no longer exist"
+  "selectedMissing": "{{count}} selected documents no longer exist",
+  "failedInstructions": "Failed. Press Enter to retry; Shift+Enter to open."
 }

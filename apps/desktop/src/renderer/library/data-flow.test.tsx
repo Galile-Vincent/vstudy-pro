@@ -5,8 +5,9 @@ import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { LibraryView } from './index';
 import { TooltipProvider } from '../components/ui/tooltip';
 import { i18n, tr } from '../../shared/i18n';
-const state=vi.hoisted(()=>({invoke:vi.fn(),art:vi.fn(),route:{view:'library',query:{}}}));
+const state=vi.hoisted(()=>({invoke:vi.fn(),art:vi.fn(),open:vi.fn(),route:{view:'library',query:{}}}));
 vi.mock('../shell/document-art',()=>({DocumentArt:({id}:{id:string})=>{state.art(id);return <span/>;}}));
+vi.mock('../document-open',()=>({openDocument:async(id:string,open:()=>void)=>{state.open(id);open();}}));
 vi.mock('../bridge',()=>({desktop:{invoke:state.invoke}}));
 vi.mock('../shell',()=>({useNavigate:()=>({route:state.route,navigate:vi.fn()})}));
 vi.stubGlobal('ResizeObserver',class{observe(){}unobserve(){}disconnect(){}});
@@ -532,4 +533,16 @@ it('clears the range anchor on query change', async () => {
  await waitFor(()=>expect(state.invoke.mock.calls.some(([c,q])=>c==='library:documents:list'&&q.text==='new')).toBe(true));
  fireEvent.click(screen.getByText('third').closest('.library-document')!,{shiftKey:true});
  expect(document.querySelectorAll('[data-selected=true]')).toHaveLength(1);
+});
+
+it.each(['en','zh-Hant','ja'])('announces failed row recovery instructions (%s)', async locale => {
+ await i18n.changeLanguage(locale);
+ const failed=row('Broken');failed.document.status='failed';
+ state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[failed],nextCursor:null}:[]);
+ mount();await screen.findByText('Broken',{selector:'button'});
+ const entry=screen.getByRole('listitem',{name:name=>name.includes(tr('library:failedInstructions'))});
+ fireEvent.keyDown(entry,{key:'Enter',shiftKey:true});
+ await waitFor(()=>expect(state.open).toHaveBeenCalledWith('Broken'));
+ expect(state.invoke).not.toHaveBeenCalledWith('documents:retry',{documentId:'Broken'});
+ await i18n.changeLanguage('en');
 });

@@ -225,5 +225,6 @@
   "itemSelected": "已選取",
   "itemUnselected": "未選取",
   "selectDocument": "選取 {{name}}",
-  "selectedMissing": "{{count}} 個已選文件已不存在"
+  "selectedMissing": "{{count}} 個已選文件已不存在",
+  "failedInstructions": "轉換失敗。按 Enter 重試；按 Shift+Enter 開啟。"
 }
