@@ -20,3 +20,13 @@ for (const count of [101, 120]) {
     });
   }
 }
+
+it('orders sessions by risk, review date, age and stable key', async () => {
+  const { compareReviewUrgency } = await import('../../shared/review-artifacts');
+  const row = (key: string, risk: number, nextReviewAt: string | null, createdAt: string) =>
+    ({ key, mastery: { risk, nextReviewAt }, createdAt });
+  const rows = [row('new', 1, '2026-01-01', '2026-01-02'),
+    row('old', 1, '2026-01-01', '2026-01-01'),
+    row('late', 1, '2026-02-01', '2025-01-01'), row('urgent', 2, null, '2026-01-01')];
+  expect(rows.sort(compareReviewUrgency).map(c => c.key)).toEqual(['urgent', 'old', 'new', 'late']);
+});

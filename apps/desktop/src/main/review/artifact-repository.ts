@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { DatabaseSync, SQLInputValue } from 'node:sqlite';
 import { artifactSchema, generationRequestSchema, type GenerationRequest } from '../../shared/review-generate';
 import { studyPageInputSchema, type StudyPageInput } from '../../shared/review';
-import { EXAM_COURSE_ID, type StudyResolvedScope, type StudyTest } from '../../shared/review-artifacts';
+import { compareReviewUrgency, EXAM_COURSE_ID, type StudyResolvedScope, type StudyTest } from '../../shared/review-artifacts';
 import { PROMPT_VERSION } from './prompts';
 import { eligibleSourceSql } from './eligibility';
 import { ReviewRepository } from './repository';
@@ -61,7 +61,7 @@ export class ArtifactRepository {
             if(documents.length!==new Set(scope.documentIds).size)throw new Error('review.source_unavailable');
             return {units:[],documents,concepts:documents.map(id=>({key:id,unitId:null})),observations:[]};
         }
-        const mastery = new ReviewRepository(this.db).computeCourseMastery(courseId, this.clock());
+        const mastery = new ReviewRepository(this.db).computeCourseMastery(courseId, this.clock()).sort(compareReviewUrgency);
         weakKeys ??= new Set(mastery.filter(c => c.userState !== 'dismissed' && c.mastery.state === 'needs_review').map(c => c.key));
         const json = (values: readonly string[]) => JSON.stringify(values);
         const unitsWhere = (where: string, ...values: SQLInputValue[]) => this.db.prepare(`SELECT * FROM study_units su WHERE su.courseId=? AND ${where} ORDER BY su.ordinal,su.id`).all(courseId, ...values);

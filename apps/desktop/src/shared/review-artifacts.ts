@@ -55,3 +55,13 @@ export function isStudyAnswer(item: StudyTest['items'][number], answer: unknown)
  if(item.type==='true_false')return typeof answer==='boolean';
  return typeof answer==='string'&&answer.length<=2000;
 }
+
+export function compareReviewUrgency(
+ a: { key: string; createdAt: string; mastery: { risk: number; nextReviewAt: string | null } },
+ b: { key: string; createdAt: string; mastery: { risk: number; nextReviewAt: string | null } },
+) {
+ return b.mastery.risk - a.mastery.risk
+  || (a.mastery.nextReviewAt ?? '~').localeCompare(b.mastery.nextReviewAt ?? '~')
+  || a.createdAt.localeCompare(b.createdAt)
+  || a.key.localeCompare(b.key);
+}
