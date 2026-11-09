@@ -206,9 +206,9 @@ html[data-card-transparency=solid],html[data-theme=contrast],html[data-reduced-t
 }
 html[data-card-transparency=glass] { --glass-blur:blur(28px) saturate(1.5); }
 html[data-card-transparency=solid] { --glass-blur:none; }
-html[data-reduced-transparency=true],html[data-theme=contrast] { --glass-blur:none; --glass-fill:var(--glass-base); --glass-fill-hover:var(--glass-base); --glass-fill-float:var(--glass-base); --page-field:var(--background); }
-@media(prefers-reduced-transparency:reduce) { :root { --glass-blur:none; --glass-fill:var(--glass-base); --glass-fill-hover:var(--glass-base); --glass-fill-float:var(--glass-base); --page-field:var(--background); } }
-@media(prefers-contrast:more) { :root { --glass-blur:none; --glass-fill:var(--surface); --glass-fill-hover:var(--surface); --glass-fill-float:var(--surface); --page-field:var(--background); } }
+html[data-reduced-transparency=true],html[data-theme=contrast] { --glass-blur:none; --glass-fill:var(--glass-base); --glass-fill-hover:color-mix(in oklab,var(--ink) 6%,var(--glass-base)); --glass-fill-float:var(--glass-base); --page-field:var(--background); }
+@media(prefers-reduced-transparency:reduce) { :root { --glass-blur:none; --glass-fill:var(--glass-base); --glass-fill-hover:color-mix(in oklab,var(--ink) 6%,var(--glass-base)); --glass-fill-float:var(--glass-base); --page-field:var(--background); } }
+@media(prefers-contrast:more) { :root { --glass-blur:none; --glass-fill:var(--surface); --glass-fill-hover:color-mix(in oklab,var(--ink) 6%,var(--surface)); --glass-fill-float:var(--surface); --page-field:var(--background); } }
 
 .glass,[data-slot=card] { border:0; border-radius:var(--glass-radius); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
 .glass-pill { border:0; border-radius:var(--r-pill); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
