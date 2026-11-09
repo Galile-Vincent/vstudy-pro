@@ -12,6 +12,7 @@ export class Updates {
   private lastAttempt = -Infinity;
   private result: UpdateSnapshot['result'];
   private manual = false;
+  private checkFailed = false;
   private installing = false;
   private installError = false;
   private installTimer: ReturnType<typeof setTimeout> | undefined;
@@ -98,12 +99,17 @@ export class Updates {
   }
   private failed(error: unknown) {
     if (this.installing || this.installError && this.state.status === 'ready') { this.installFailed(); return; }
+    if (this.checkFailed) return;
+    this.checkFailed = true;
     if ((error as {code?:unknown})?.code === 'NO_STABLE_UPDATE') this.dispatch({type:'current'});
     else this.dispatch({type:'error',code:updateError(error)});
   }
   async check(manual = true) {
+    if (manual && this.state.status === 'checking' && this.quietState) {
+      this.manual = true; this.quietState = undefined; this.emit();
+    }
     if (!['idle', 'error', 'available'].includes(this.state.status)) return this.snapshot();
-    this.manual = manual;
+    this.manual = manual; this.checkFailed = false;
     if (!this.options.online()) {
       if (manual) { this.result = 'offline'; this.dispatch({type:'error',code:'offline'}); }
       return this.snapshot();

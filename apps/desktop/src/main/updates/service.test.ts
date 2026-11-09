@@ -134,7 +134,9 @@ it('treats prerelease-only feeds as no stable update',async()=>{
 it('keeps background checks and failures quiet without downloading',async()=>{
   const {service,updater}=setup();
   const seen:string[]=[];service.subscribe(value=>seen.push(value.state.status));
-  updater.checkForUpdates.mockRejectedValueOnce(new Error('net::ERR_TIMED_OUT'));
+  updater.checkForUpdates.mockImplementationOnce(async () => {
+    const error = new Error('net::ERR_TIMED_OUT'); updater.emit('error', error); throw error;
+  });
   await service.check(false);
   expect(service.snapshot().state).toEqual({status:'idle'});
   expect(service.snapshot().lastCheckedAt).toBeNull();
@@ -181,4 +183,25 @@ it('ignores automatic checks after settings reads become unavailable', async () 
   services.push(service);
   await vi.advanceTimersByTimeAsync(30_000);
   expect(updater.checkForUpdates).not.toHaveBeenCalled();
+});
+
+it('attaches manual progress to an automatic check', async () => {
+  const {service, updater} = setup();
+  let finish = () => {};
+  updater.checkForUpdates.mockImplementationOnce(() => new Promise(resolve => {finish = () => resolve(null);}));
+  const check = service.check(false);
+  expect(service.snapshot().state.status).toBe('idle');
+  void service.check();
+  expect(service.snapshot().state.status).toBe('checking');
+  updater.emit('update-not-available'); finish(); await check;
+  expect(service.snapshot().result).toBe('current');
+});
+it('preserves an offer when a quiet check emits and rejects', async () => {
+  const {service, updater, advance} = setup();
+  await service.check(); updater.emit('update-available', {version:'0.4.5'});
+  const offer = service.snapshot().state; advance();
+  updater.checkForUpdates.mockImplementationOnce(async () => {
+    const error = {code:'ENOTFOUND'}; updater.emit('error',error); throw error;
+  });
+  await service.check(false); expect(service.snapshot().state).toEqual(offer);
 });
