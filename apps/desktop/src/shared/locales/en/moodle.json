@@ -261,5 +261,9 @@
   "refresh_all_schools": "Refresh all schools",
   "disconnect_school_named": "Disconnect {{school}}",
   "pin_course_named": "Pin {{course}}",
-  "unpin_course_named": "Unpin {{course}}"
+  "unpin_course_named": "Unpin {{course}}",
+  "jump_current_week": "Jump to current week",
+  "open_deadline": "Open deadline: {{title}}",
+  "open_notification": "Open notification: {{title}}",
+  "open_original_file": "Open original file: {{title}}"
 }

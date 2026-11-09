@@ -3,7 +3,6 @@ import { catalogDeadlines } from './deadline-groups';
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
 import { Card, PageContainer, PageHeader, Section, ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
-import { Brand } from '../components/brand';
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
   useCallback,
@@ -22,7 +21,6 @@ import {
   Clock3,
   FileText,
   GraduationCap,
-  LoaderCircle,
   Inbox,
   AlarmClock,
   Mail,
@@ -45,10 +43,7 @@ import { Button } from "../components/ui/button";
 import {
   Tabs,
   TabsContent,
-  TabsList,
-  TabsTrigger,
 } from "../components/ui/tabs";
-import { Skeleton } from "../components/ui/skeleton";
 import { useMoodleApi, type MoodleApi } from "./api";
 import { Reminder } from "./reminder";
 import { CourseAssistant } from "./assistant";
@@ -198,6 +193,28 @@ function CoursesBody({
   const [connect, setConnect] = useState(!!connectOnMount);
   const [confirmDisconnect, setConfirmDisconnect] = useState<string>();
   useEffect(() => {if (reconnect) {setConnect(true);onReconnected?.();}},[reconnect,onReconnected]);
+  const [weekState, setWeekState] = useState<{
+    courseId: string;
+    open: Set<string>;
+    current: string;
+  }>({courseId: "", open: new Set(), current: ""});
+  const currentWeeks = detail?.sections.filter(section => section.current) ?? [];
+  const currentWeekKey = JSON.stringify(currentWeeks.map(section => section.id));
+  if (detail && (weekState.courseId !== detail.course.id || weekState.current !== currentWeekKey)) {
+    setWeekState({
+      courseId: detail.course.id,
+      current: currentWeekKey,
+      open: new Set([
+        ...(weekState.courseId === detail.course.id ? weekState.open : []),
+        ...currentWeeks.map(section => section.id),
+      ]),
+    });
+  }
+  const setWeekOpen = (id: string, open: boolean) => setWeekState(previous => {
+    const weeks = new Set(previous.open);
+    if (open) weeks.add(id); else weeks.delete(id);
+    return {...previous, open: weeks};
+  });
   const [tab, setTab] = useState<Tab>("content");
   const [term, setTerm] = useState<MoodleTermFilter>("current");
   const termInitialized = useRef(false);
@@ -270,8 +287,14 @@ function CoursesBody({
     const states=names.map(name => detail?.panels?.[name]);
     const retained = names.some(name => name === 'contents' || name === 'completion' ? !!detail?.sections.length : name === 'teachers' ? !!detail?.course.identity.teachers.length : name === 'assignments' || name === 'quizzes' ? !!detail?.deadlines.length : !!detail?.[name].length);
     return <>
-      {states.includes('loading') && <div role="status" aria-busy="true" aria-label={tr('moodle:loading')}>{retained ? <span className="muted">{tr('moodle:loading')}</span> : <Skeleton className="moodle-skeleton" />}</div>}
-      {states.includes('error') && <p role="alert">{tr(`moodle:panel_error_${names.map(name => detail?.panelErrors?.[name]).find(Boolean) ?? 'service'}`)} <button onClick={() => void sync()}>{tr('moodle:retry')}</button></p>}
+      {states.includes('loading') && <EmptyState
+        role="status" aria-busy="true" headingLevel={2}
+        title={tr("moodle:loading")} className={retained ? "py-2" : undefined}
+      />}
+      {states.includes('error') && <EmptyState role="alert" headingLevel={2}
+        title={tr(`moodle:panel_error_${names.map(name => detail?.panelErrors?.[name]).find(Boolean) ?? "service"}`)}
+        action={<Button onClick={() => void sync()}>{tr("moodle:retry")}</Button>}
+      />}
     </>;
   };
   const failure = () => setNotice(tr("moodle:action_error"));
@@ -372,37 +395,24 @@ function CoursesBody({
       onError={failure}
     />
   );
-  const deadlines = (items: MoodleDeadline[]) =>
+  const deadlines = (items: MoodleDeadline[], headingLevel: 3 | 4 = 3) =>
     items.length ? (
       <div className="moodle-rows">
         {items.map((d) => (
-          <div className="moodle-row" key={d.id} data-deadline-group={deadlineGroup(d)}>
-            <span className="moodle-row-icon">
-              {d.submitted ? <Check /> : <CalendarDays />}
-            </span>
-            <div className="moodle-row-main">
-              <strong>{d.title}</strong>
-              <small>
-                <span>{tr(`moodle:${d.kind}`)}</span>
-                <span aria-hidden="true"> · </span>
-                <time dateTime={d.dueAt}>{date(d.dueAt)}</time>
-                {d.submitted === null && (
-                  <span className="moodle-chip">
-                    {tr("moodle:submission_unknown")}
-                  </span>
-                )}
-                {d.submitted && (
-                  <span className="moodle-chip">{tr("moodle:submitted")}</span>
-                )}
-              </small>
-            </div>
-            <span
-              className="moodle-relative"
-              data-overdue={!d.submitted && Date.parse(d.dueAt) < Date.now()}
-            >
+          <ListRow key={d.id} data-deadline-group={deadlineGroup(d)}
+            title={d.title}
+            leading={d.submitted ? <Check /> : <CalendarDays />}
+            subtitle={<>
+              <span>{tr(`moodle:${d.kind}`)}</span>
+              <time className="ms-2" dateTime={d.dueAt}>{date(d.dueAt)}</time>
+              {d.submitted === null && <span className="moodle-chip">{tr("moodle:submission_unknown")}</span>}
+              {d.submitted && <span className="moodle-chip">{tr("moodle:submitted")}</span>}
+            </>}
+            meta={<span data-overdue={!d.submitted && Date.parse(d.dueAt) < Date.now()}>
               {d.submitted ? tr("moodle:done") : relative(d.dueAt)}
-            </span>
-            {d.url && <Button variant="ghost" aria-label={tr('webview:open')} onClick={() => {
+            </span>}
+            actions={<div className="flex flex-wrap items-center gap-2">
+            {d.url && <Button variant="ghost" aria-label={tr('moodle:open_deadline', {title: d.title})} onClick={() => {
               const course = overview?.courses.find(c => c.id === d.courseId);
               if (course && d.url) openMoodle(course.accountId,{kind:'page',url:d.url});
             }}><ArrowUpRight /></Button>}
@@ -415,11 +425,12 @@ function CoursesBody({
             >
               <CalendarDays />
             </Button>
-          </div>
+            </div>}
+          />
         ))}
       </div>
     ) : (
-      <p className="moodle-empty-inline">{tr("moodle:no_deadlines")}</p>
+      <EmptyState headingLevel={headingLevel} title={tr("moodle:no_deadlines")} />
     );
   const notifications = (
     limit?: number,
@@ -431,27 +442,16 @@ function CoursesBody({
     return items.length ? (
       <div className="moodle-notifications">
         {items.map((n) => (
-          <article
-            key={n.id}
-            className="moodle-notification"
-            data-unread={!n.read}
-          >
-            <div className="moodle-section-heading">
-              <h3>
-                {!n.read && (
-                  <span
-                    className="moodle-unread"
-                    role="img"
-                    aria-label={tr("moodle:unread")}
-                  />
-                )}
-                {n.subject}
-              </h3>
-              <time dateTime={n.createdAt}>{relative(n.createdAt)}</time>
-            </div>
-            <p>{plainText(n.body)}</p>
-            <div className="moodle-notification-actions">
-              {n.url && <Button variant="ghost" onClick={() => openMoodle(n.accountId,{kind:'page',url:n.url!})}>{tr('webview:open')}<ArrowUpRight /></Button>}
+          <ListRow key={n.id} data-unread={!n.read}
+            className="flex-col items-stretch [&>.ui-row-target]:w-full"
+            title={<span className="flex items-center gap-2">
+              {!n.read && <span className="moodle-unread" role="img" aria-label={tr("moodle:unread")} />}
+              {n.subject}
+            </span>}
+            subtitle={<span className="line-clamp-2">{plainText(n.body)}</span>}
+            meta={<time dateTime={n.createdAt}>{relative(n.createdAt)}</time>}
+            actions={<div className="flex flex-wrap gap-2">
+              {n.url && <Button variant="ghost" aria-label={tr("moodle:open_notification", {title: n.subject})} onClick={() => openMoodle(n.accountId,{kind:'page',url:n.url!})}>{tr('webview:open')}<ArrowUpRight /></Button>}
               {!n.read && (
                 <Button
                   variant="ghost"
@@ -476,12 +476,12 @@ function CoursesBody({
                 {tr("moodle:explain_prepare")}
                 <ArrowUpRight />
               </Button>
-            </div>
-          </article>
+            </div>}
+          />
         ))}
       </div>
     ) : (
-      <p className="moodle-empty-inline">{tr("moodle:no_notifications")}</p>
+      <EmptyState title={tr("moodle:no_notifications")} />
     );
   };
   const files = (limit?: number) => {
@@ -501,54 +501,28 @@ function CoursesBody({
           {items
             .filter((f) => f.section === section)
             .map((f) => (
-              <div className="moodle-file-actions" key={f.id}>
-              <button
-                type="button"
-                className="moodle-file-row"
-                title={tr("moodle:open_file", {name:f.name})}
-                aria-label={tr("moodle:open_file", {name:f.name})}
-                key={f.id}
+              <ListRow key={f.id}
+                className="moodle-file-actions"
+                title={tr("moodle:open_file", {name: f.name})}
+                leading={<FileText />}
+                subtitle={<span>
+                  {" "}{new Intl.NumberFormat(i18n.resolvedLanguage, {
+                    style: "unit", unit: "megabyte", maximumFractionDigits: 1,
+                  }).format(f.size / 1000000)}
+                  <span className="ms-2">{" "}{f.module}</span>
+                </span>}
                 disabled={!!opening}
                 onClick={() => void openFile(f.id)}
-              >
-                <span className="moodle-file-icon">
-                  <FileText />
-                  <small>{f.name.split(".").pop()?.toUpperCase()}</small>
-                </span>
-                <span className="moodle-row-main">
-                  <strong>{f.name}</strong>
-                  <small>
-                    {new Intl.NumberFormat(i18n.resolvedLanguage, {
-                      style: "unit",
-                      unit: "megabyte",
-                      maximumFractionDigits: 1,
-                    }).format(f.size / 1000000)}
-                    <span aria-hidden="true"> · </span>
-                    {f.module}
-                  </small>
-                </span>
-                <span className="moodle-chip">
-                  {tr(
-                    opening === f.id
-                      ? "moodle:converting"
-                      : f.documentId
-                        ? "moodle:ready"
-                        : "moodle:not_opened",
-                  )}
-                </span>
-                {opening === f.id ? (
-                  <LoaderCircle className="moodle-spin" />
-                ) : (
-                  <ArrowUpRight />
-                )}
-              </button>
-              <Button variant="ghost" size="icon" aria-label={`${tr('webview:open')}: ${f.name}`} title={tr('webview:open')} onClick={() => openMoodle(detail!.course.accountId,{kind:'file',fileId:f.id})}><ArrowUpRight /></Button>
-              </div>
+                meta={<span>{" "}{tr(opening === f.id ? "moodle:converting" : f.documentId ? "moodle:ready" : "moodle:not_opened")}</span>}
+                actions={
+              <Button variant="ghost" size="icon" aria-label={tr("moodle:open_original_file", {title: f.name})} title={tr('webview:open')} onClick={() => openMoodle(detail!.course.accountId,{kind:'file',fileId:f.id})}><ArrowUpRight /></Button>
+                }
+              />
             ))}
         </section>
       ))
     ) : (
-      <p className="moodle-empty-inline">{tr("moodle:no_files")}</p>
+      <EmptyState title={tr("moodle:no_files")} />
     );
   };
   if (showPlanner) return <PageContainer as="main" className="h-full overflow-auto">
@@ -556,7 +530,7 @@ function CoursesBody({
     <Planner courses={overview?.courses ?? []} deadlines={overview?.upcoming ?? []} />
   </PageContainer>;
   const header = (
-    <PageHeader title={!courseId ? tr("moodle:courses") : undefined}
+    <PageHeader title={!courseId ? tr("moodle:courses") : loading ? <span role="status">{tr("moodle:loading")}</span> : undefined}
       className="[&_h1]:whitespace-nowrap [&>div>div:last-child]:max-[1000px]:w-full"
       actions={<div className="flex flex-wrap gap-2 [&_button]:min-h-9 [&_button]:h-auto">
         {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry"
@@ -661,22 +635,14 @@ function CoursesBody({
             await refresh().catch(() => setError(true));
           }}
         /> : loading ? (
-          <div
-            className="moodle-grid"
-            role="status"
-            aria-label={tr("moodle:loading")}
-          >
-            {[0, 1, 2].map((i) => (
-              <Skeleton key={i} className="moodle-skeleton" />
-            ))}
-          </div>
+          <div aria-busy="true">{!courseId && <p role="status">{tr("moodle:loading")}</p>}</div>
         ) : courseId ? (
           detail ? (
             <>
               <CourseHead
                 title={displayTitle(detail.course.identity, lang, detail.course.fullName)}
                 chip={[detail.course.identity.term, detail.course.identity.code].filter(Boolean).join(" · ")}
-                people={[displayTeachers(detail.course.identity, lang), displayClass(detail.course.identity)].filter(Boolean)}
+                people={[displayTeachers(detail.course.identity, lang), displayClass(detail.course.identity, lang)].filter(Boolean)}
                 sync={tr('storage:cached_'+(detail.cacheState ?? 'stale')) + ' · ' + (detail.lastSyncedAt ? tr('storage:last_synced',{time:relative(detail.lastSyncedAt)}) : tr('storage:never_synced'))}
                 fullName={detail.course.fullName}
                 syncing={syncing}
@@ -695,21 +661,18 @@ function CoursesBody({
                   onValueChange={(v) => setTab(v as Tab)}
                   className="moodle-tabs"
                 >
-                  <TabsList
-                    variant="line"
+                  <SegmentedTabsList
                     aria-label={tr("moodle:course_sections")}
                   >
                     {tabs.map((key) => (
-                      <TabsTrigger key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"})}>
+                      <SegmentedTabsTrigger key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"})}>
                         {tr(`moodle:${key}`)}
-                      </TabsTrigger>
+                      </SegmentedTabsTrigger>
                     ))}
-                  </TabsList>
+                  </SegmentedTabsList>
                   <TabsContent value="content">
-                    <div className="moodle-content-summary">
-                      <section className="moodle-panel">
-                        <div className="moodle-section-heading">
-                          <h2>{tr("moodle:up_next")}</h2>
+                    <div className="grid items-start gap-6 mb-6 min-[1280px]:grid-cols-2">
+                      <Section title={tr("moodle:up_next")} actions={
                           <Button
                             variant="ghost"
                             onClick={() => setTab("deadlines")}
@@ -717,7 +680,7 @@ function CoursesBody({
                             {tr("moodle:view_all")}
                             <ChevronRight />
                           </Button>
-                        </div>
+                        }>
                         {deadlines(
                           detail.deadlines
                             .filter(
@@ -728,23 +691,24 @@ function CoursesBody({
                             .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
                             .slice(0, 1),
                         )}
-                      </section>
-                      <section className="moodle-panel">
-                        <h2>{tr("moodle:latest_updates")}</h2>
+                      </Section>
+                      <Section title={tr("moodle:latest_updates")}>
                         {notifications(3)}
-                      </section>
+                      </Section>
                     </div>
                     {panelStatus('contents','completion','teachers')}
                     {detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}
                     <CourseContent
                       detail={detail}
+                      openWeeks={weekState.open}
+                      setWeekOpen={setWeekOpen}
                       openFile={openFile}
                       onError={failure}
                     />
                   </TabsContent>
                   <TabsContent value="deadlines" aria-busy={detail.fetchState === "loading"}>
                     {panelStatus('assignments','quizzes')}
-                    <section className="moodle-panel">
+                    <section className="flex min-w-0 flex-col gap-4">
                       <div className="moodle-section-heading">
                         <h2>{tr("moodle:deadlines")}</h2>
                         <Button
@@ -780,6 +744,7 @@ function CoursesBody({
                               detail.deadlines
                                 .filter((d) => deadlineGroup(d) === group)
                                 .sort((a, b) => a.dueAt.localeCompare(b.dueAt)),
+                              4,
                             )}
                           </section>
                         ),
@@ -791,14 +756,14 @@ function CoursesBody({
                     <Announcements accountId={detail.course.accountId} items={detail.announcements} />
                   </TabsContent>
                   <TabsContent value="notifications">
-                    <section className="moodle-panel">
+                    <section className="flex min-w-0 flex-col gap-4">
                       <h2>{tr("moodle:notifications")}</h2>
                       {notifications()}
                     </section>
                   </TabsContent>
                   <TabsContent value="grades" aria-busy={detail.fetchState === "loading"}>
                     {panelStatus('grades')}
-                    <section className="moodle-panel">
+                    <section className="flex min-w-0 flex-col gap-4">
                       <h2>{tr("moodle:grades")}</h2>
                       {detail.grades.length ? (
                         <div className="moodle-table-scroll">
@@ -849,14 +814,12 @@ function CoursesBody({
                           </table>
                         </div>
                       ) : (
-                        <p className="moodle-empty-inline">
-                          {tr("moodle:no_grades")}
-                        </p>
+                        <EmptyState title={tr("moodle:no_grades")} />
                       )}
                     </section>
                   </TabsContent>
                   <TabsContent value="files">
-                    <section className="moodle-panel">
+                    <section className="flex min-w-0 flex-col gap-4">
                       <h2>{tr("moodle:files")}</h2>
                       <p className="moodle-panel-description">
                         {tr("moodle:files_hint")}
@@ -876,12 +839,12 @@ function CoursesBody({
               </div>
             </>
           ) : (
-            <div className="moodle-empty">
-              <Brand/>
-              <h1>{tr("moodle:course_unavailable")}</h1>
+            <div>
+              <PageHeader title={tr("moodle:course_unavailable")} />
+              <EmptyState headingLevel={2} title={tr("moodle:course_unavailable")} action={
               <Button variant="outline" onClick={() => onCourse()}>
                 {tr("moodle:all_courses")}
-              </Button>
+              </Button>} />
             </div>
           )
         ) : overview && (overview.courses.length > 0 || overview.accounts.some(account => account.syncedAt)) ? (

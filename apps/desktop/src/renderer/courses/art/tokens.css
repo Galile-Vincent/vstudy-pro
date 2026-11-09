@@ -1,7 +1,7 @@
 
 :root {
-  --course-radius: var(--art-reader-radius, 20px);
-  --course-control-radius: var(--art-reader-control, 10px);
+  --course-radius: var(--r-lg);
+  --course-control-radius: var(--r-sm);
   --course-glass: var(--art-reader-glass, color-mix(in oklab, var(--glass-tint) var(--glass-opacity), transparent));
   --course-shadow: var(--glass-shadow);
   --course-ease: cubic-bezier(.2,.8,.2,1);

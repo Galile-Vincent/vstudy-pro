@@ -32,7 +32,8 @@ let host: HTMLDivElement;
 ).IS_REACT_ACT_ENVIRONMENT = true;
 beforeEach(async () => {
   navigationMock.value = null;
-  vi.stubGlobal("matchMedia",vi.fn(() => ({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()})));
+  HTMLElement.prototype.getAnimations = vi.fn(() => []);
+  vi.stubGlobal("matchMedia",vi.fn(() => ({matches:false,addEventListener:vi.fn(),removeEventListener:vi.fn()})));
   await i18n.changeLanguage("en");
   host = document.createElement("div");
   document.body.append(host);
@@ -194,9 +195,9 @@ describe("Courses", () => {
     await mount(api, courseId, onDocument);
     await tab("Files");
     const file = (await api.course(courseId)).files[0]!;
-    const fileRow = getByRole(host, 'button', {name:`Open file: ${file.name}`});
-    expect(fileRow.title).toBe(`Open file: ${file.name}`);
-    expect(getByRole(host, 'button', {name:`Open in Moodle: ${file.name}`}).title).toBe('Open in Moodle');
+    const fileRow = getByRole(host, 'button', {name: name => name.startsWith(`Open file: ${file.name}`)});
+    expect(fileRow.textContent).toContain(file.name);
+    expect(getByRole(host, 'button', {name:`Open original file: ${file.name}`}).title).toBe('Open in Moodle');
     expect(
       host.querySelector("[role=tabpanel][data-state=active]")?.textContent,
     ).toContain("Practice worksheet.docx");
@@ -299,7 +300,7 @@ describe("Courses", () => {
         resolve = done;
       });
     await mount(api);
-    expect(host.querySelectorAll(".moodle-skeleton")).toHaveLength(3);
+    expect(getByRole(host, "status", {name: ""}).textContent).toContain("Loading courses");
     await act(async () =>
       resolve({
         ...overview,
@@ -367,7 +368,7 @@ describe("Courses", () => {
       "That action could not be completed.",
     );
     expect(
-      host.querySelector<HTMLButtonElement>(".moodle-file-row")?.disabled,
+      host.querySelector<HTMLButtonElement>(".moodle-file-actions button")?.disabled,
     ).toBe(false);
     api.openFile = original;
     await click("Operational amplifiers.pdf");
@@ -668,7 +669,7 @@ it("strips active HTML and token-bearing images from module sheets", async () =>
   api.course = async () => detail;
   await mount(api, detail.course.id);
   await act(async () =>
-    host.querySelector<HTMLButtonElement>(".moodle-module")!.click(),
+    host.querySelector<HTMLButtonElement>(".moodle-module button")!.click(),
   );
   const sheet = document.querySelector("[data-slot=sheet-content]")!;
   expect(sheet.textContent).toContain("Safe text");
@@ -705,7 +706,7 @@ it("shows announcement previews and opens their full safe body", async () => {
   await mount(api, (await api.overview()).courses[0]!.id);
   await tab("Announcements");
   const announcement = host.querySelector<HTMLButtonElement>(
-    ".moodle-announcement",
+    ".moodle-announcement button",
   )!;
   expect(announcement.textContent).toContain("Please review the lecture notes");
   await act(async () => announcement.click());
@@ -778,16 +779,16 @@ it('keeps retained course content in place during a background panel refresh',as
   api.course=async()=>detail;
   await mount(api,detail.course.id);
   expect(host.querySelectorAll('.moodle-module').length).toBeGreaterThan(0);
-  expect(host.querySelector('.moodle-skeleton')).toBeNull();
+  expect(getByRole(host, "heading", {level: 3, name: /This week/})).not.toBeNull();
   expect(host.querySelector('[role=status][aria-busy=true]')).not.toBeNull();
 });
-it('still shows an initial panel skeleton when course content is absent',async()=>{
+it('shows a loading state when course content is absent',async()=>{
   const api=createMockMoodleApi();
   const detail=await api.course((await api.overview()).courses[0]!.id);
   detail.panels={contents:'loading'};detail.sections=[];detail.course.identity.teachers=[];
   api.course=async()=>detail;
   await mount(api,detail.course.id);
-  expect(host.querySelector('.moodle-skeleton')).not.toBeNull();
+  expect(host.querySelector('[data-slot=empty-state][aria-busy=true]')).not.toBeNull();
 });
 
 it('keeps empty count slots, caps the visible number, and orders the accessible row name', async () => {
@@ -1103,7 +1104,7 @@ it('names the unavailable page with one h1 after course loading', async () => {
   let resolve!: (value: Awaited<ReturnType<MoodleApi['course']>>) => void;
   api.course = () => new Promise(done => {resolve = done;});
   await mount(api, id);
-  expect(queryByRole(host, 'heading', {level: 1})).toBeNull();
+  expect(getAllByRole(host, 'heading', {level: 1})).toHaveLength(1);
   await act(async () => resolve(undefined as unknown as Awaited<ReturnType<MoodleApi['course']>>));
   expect(getAllByRole(host, 'heading', {level: 1})).toHaveLength(1);
   expect(getByRole(host, 'heading', {level: 1, name: 'This course is unavailable.'})).toBeTruthy();
@@ -1210,4 +1211,177 @@ it('offers Show all when only overdue has more than five items', async () => {
   await act(async () => getByRole(section, 'button', {name: 'Show all'}).click());
   expect(section.querySelectorAll('.moodle-due-link')).toHaveLength(12);
   expect(getByRole(section, 'button', {name: 'Show less'}).getAttribute('aria-expanded')).toBe('true');
+});
+
+it("D1 exposes week headings and labelled disclosure regions", async () => {
+  const api = createMockMoodleApi();
+  await mount(api, (await api.overview()).courses[0]!.id);
+  const weeks = [...host.querySelectorAll(".moodle-week")];
+  expect(weeks.length).toBeGreaterThan(0);
+  for (const week of weeks) {
+    const heading = getByRole(week as HTMLElement, "heading", { level: 3 });
+    const button = getByRole(heading, "button");
+    const panel = document.getElementById(button.getAttribute("aria-controls")!);
+    const expanded = button.getAttribute("aria-expanded");
+    expect(["true", "false"]).toContain(expanded);
+    expect(panel?.hidden).toBe(expanded === "false");
+    expect(panel?.getAttribute("role")).toBe("region");
+    expect(panel?.getAttribute("aria-labelledby")).toBe(heading.id);
+  }
+});
+it("D3 opens at the top and explicitly jumps with focus and reduced motion", async () => {
+  const scroll = vi.fn();
+  HTMLElement.prototype.scrollIntoView = scroll;
+  const api = createMockMoodleApi();
+  await mount(api, (await api.overview()).courses[0]!.id);
+  expect(scroll).not.toHaveBeenCalled();
+  await act(async () => getByRole(host, "button", { name: "Jump to current week" }).click());
+  const heading = host.querySelector(".moodle-week[data-current=true] h3");
+  expect(document.activeElement).toBe(heading);
+  expect(scroll).toHaveBeenCalledWith({ block: "start", behavior: "smooth" });
+});
+
+it.each(["material", "announcement"])("restores focus after Escape closes the %s sheet", async kind => {
+  const api = createMockMoodleApi();
+  await mount(api, (await api.overview()).courses[0]!.id);
+  if (kind === "announcement") await tab("Announcements");
+  const trigger = host.querySelector<HTMLButtonElement>(
+    kind === "material" ? ".moodle-module button" : ".moodle-announcement button",
+  )!;
+  await act(async () => { trigger.focus(); trigger.click(); });
+  const sheet = document.querySelector<HTMLElement>("[data-slot=sheet-content]")!;
+  expect(sheet).not.toBeNull();
+  await act(async () => {
+    sheet.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+  });
+  await waitFor(() => expect(document.activeElement).toBe(trigger));
+});
+
+it("preserves opened weeks across tabs and opens a new current week", async () => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  api.course = async () => structuredClone(detail);
+  await mount(api, detail.course.id);
+  for (const index of [2, 4]) {
+    await act(async () => host.querySelectorAll<HTMLButtonElement>(".moodle-week-heading")[index]!.click());
+  }
+  await tab("Deadlines");
+  await tab("Content");
+  for (const index of [2, 4]) {
+    expect(host.querySelectorAll(".moodle-week-heading")[index]!.getAttribute("aria-expanded")).toBe("true");
+  }
+  detail.sections.forEach((section, index) => { section.current = index === 1; });
+  await act(async () => getByRole(host, "button", {name: "Refresh courses"}).click());
+  for (const index of [1, 2, 4]) {
+    expect(host.querySelectorAll(".moodle-week-heading")[index]!.getAttribute("aria-expanded")).toBe("true");
+  }
+});
+
+it.each([true, false])("expands a collapsed current week before jumping (reduced=%s)", async reduced => {
+  vi.mocked(window.matchMedia).mockReturnValue({matches: reduced} as MediaQueryList);
+  const scroll = vi.fn();
+  HTMLElement.prototype.scrollIntoView = scroll;
+  const api = createMockMoodleApi();
+  await mount(api, (await api.overview()).courses[0]!.id);
+  const heading = host.querySelector<HTMLElement>(".moodle-week[data-current=true] h3")!;
+  const disclosure = getByRole(heading, "button");
+  await act(async () => disclosure.click());
+  await act(async () => getByRole(host, "button", {name: "Jump to current week"}).click());
+  expect(disclosure.getAttribute("aria-expanded")).toBe("true");
+  expect(document.activeElement).toBe(heading);
+  expect(scroll).toHaveBeenCalledWith({block: "start", behavior: reduced ? "instant" : "smooth"});
+});
+
+it("nests empty deadline messages below group headings", async () => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  detail.deadlines = [];
+  api.course = async () => detail;
+  await mount(api, detail.course.id);
+  await tab("Deadlines");
+  expect(getAllByRole(host, "main")).toHaveLength(1);
+  expect(getAllByRole(host, "heading", {level: 1})).toHaveLength(1);
+  for (const group of host.querySelectorAll<HTMLElement>(".moodle-deadline-group")) {
+    expect(getAllByRole(group, "heading", {level: 3})).toHaveLength(1);
+    expect(getByRole(group, "heading", {level: 4}).textContent).toBe("No deadlines here. Take a breath.");
+  }
+});
+
+it.each([true, false])("includes file metadata in the open button name (ready=%s)", async ready => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  const file = detail.files[0]!;
+  file.documentId = ready ? "document" : null;
+  api.course = async () => detail;
+  await mount(api, detail.course.id);
+  await tab("Files");
+  const size = new Intl.NumberFormat("en", {
+    style: "unit", unit: "megabyte", maximumFractionDigits: 1,
+  }).format(file.size / 1000000);
+  const button = getByRole(host, "button", {
+    name: name => [
+      `Open file: ${file.name}`, size, file.module, ready ? "Ready" : "Not opened",
+    ].every(text => name.includes(text)),
+  });
+  expect(button.textContent).toContain(file.module);
+});
+
+it.each(["locked", "lazy"])("jumps safely to a %s current week after a tab round-trip", async kind => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  const current = detail.sections.find(section => section.current)!;
+  current.accessible = kind !== "locked";
+  current.modules = [];
+  api.course = async () => detail;
+  await mount(api, detail.course.id);
+  await tab("Deadlines");
+  await tab("Content");
+  await act(async () => getByRole(host, "button", {name: "Jump to current week"}).click());
+  const heading = getByRole(host, "heading", {level: 3, name: /This week/});
+  const button = getByRole(heading, "button");
+  expect(document.activeElement).toBe(heading);
+  expect(button.getAttribute("aria-expanded")).toBe(kind === "locked" ? "false" : "true");
+  const panel = document.getElementById(button.getAttribute("aria-controls")!)!;
+  expect(panel.hidden).toBe(kind === "locked");
+});
+
+it("neutralizes imported headings in week summaries and module sheets", async () => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  const current = detail.sections.find(section => section.current)!;
+  current.summaryHtml = "<h2>Imported summary</h2><h3>More summary</h3>";
+  current.modules[0]!.descriptionHtml = "<h2>Imported description</h2><h4>Details</h4>";
+  api.course = async () => detail;
+  await mount(api, detail.course.id);
+  expect(queryByRole(host, "heading", {name: "Imported summary"})).toBeNull();
+  expect(host.textContent).toContain("Imported summary");
+  await act(async () => host.querySelector<HTMLButtonElement>(".moodle-module button")!.click());
+  const sheet = document.querySelector<HTMLElement>("[data-slot=sheet-content]")!;
+  expect(queryByRole(sheet, "heading", {name: "Imported description"})).toBeNull();
+  expect(sheet.textContent).toContain("Imported description");
+});
+
+it("announces initial course loading once with exactly one heading", async () => {
+  const api = createMockMoodleApi();
+  api.course = () => new Promise(() => {});
+  await mount(api, (await api.overview()).courses[0]!.id);
+  expect(getAllByRole(host, "main")).toHaveLength(1);
+  expect(getAllByRole(host, "heading")).toHaveLength(1);
+  expect(getByRole(host, "heading", {level: 1, name: "Loading courses"})).not.toBeNull();
+  expect(getAllByRole(host, "status").filter(status => status.textContent?.includes("Loading"))).toHaveLength(1);
+});
+
+it("names external open actions for their deadline notification and file", async () => {
+  const api = createMockMoodleApi();
+  const detail = await api.course((await api.overview()).courses[0]!.id);
+  detail.deadlines[0]!.url = "https://school.test/deadline";
+  detail.notifications[0]!.url = "https://school.test/notification";
+  api.course = async () => detail;
+  await mount(api, detail.course.id);
+  await tab("Deadlines");
+  expect(getByRole(host, "button", {name: `Open deadline: ${detail.deadlines[0]!.title}`})).not.toBeNull();
+  await tab("Notifications");
+  expect(getByRole(host, "button", {name: `Open notification: ${detail.notifications[0]!.subject}`})).not.toBeNull();
+  await tab("Files");
+  expect(getByRole(host, "button", {name: `Open original file: ${detail.files[0]!.name}`})).not.toBeNull();
 });
