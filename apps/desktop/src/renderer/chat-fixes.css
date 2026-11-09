@@ -210,6 +210,7 @@
  .web-chat-local :is([data-slot=aui_composer-shell],.aui-edit-composer-root) { border:1px solid var(--ink); }
  .workspace .resize-handle::after { opacity:1; }
 }
+html[data-theme=contrast] :is(.workspace,.web-chat-local) :is([data-slot=aui_composer-shell],.aui-edit-composer-root) { border:1px solid var(--ink); }
 
 .workspace .reading-pane:focus:not(:focus-visible) { outline:none; }
 html:not([data-input-modality=keyboard]) .workspace .reading-pane:focus { outline:none; }
