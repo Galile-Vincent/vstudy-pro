@@ -68,3 +68,14 @@ it('restores Welcome entry focus only after a suspended return route commits',as
   await act(()=>vi.advanceTimersByTime(50));
   expect(document.activeElement?.id).toBe('welcome-entry');
 });
+
+import { createTab, saveTabs } from './tab-state';
+it.each(['home', 'library', 'last'] as const)('focuses the surviving target after closing into %s', async view => {
+  const first = createTab('00000000-0000-4000-8000-000000000001', { view: view === 'last' ? 'home' : view }, 1);
+  const closing = createTab('00000000-0000-4000-8000-000000000002', { view: 'home' }, 2);
+  saveTabs(localStorage, { version: 1, activeId: closing.id, tabs: view === 'last' ? [closing] : [first, createTab('00000000-0000-4000-8000-000000000003', { view }, 0), closing] });
+  await mount();
+  await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', ctrlKey: true, bubbles: true })));
+  await act(async () => vi.advanceTimersByTime(20));
+  expect(document.activeElement?.id).toEqual(view === 'last' ? 'shell-content' : 'tab-00000000-0000-4000-8000-000000000003');
+});
