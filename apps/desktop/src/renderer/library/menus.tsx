@@ -9,7 +9,8 @@ import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { LibraryDialog } from './dialog';
 import type { Item,Folder } from './model';
-export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,prompt,run,remove,moveTo,open,setMenu,setMove,setTagging}: {
+export function LibraryMenus({busy,moveNotice,menu,move,tagging,anchor,items,folders,tags,ids,prompt,run,remove,moveTo,open,setMenu,setMove,setTagging}: {
+ busy: boolean; moveNotice: string;
  menu: Item|null; move:boolean;tagging:boolean;anchor:HTMLElement|null;items:Item[];folders:Folder[];tags:Item['tags'];ids:Item['document']['id'][];
  prompt:(title:string,initial?:string)=>Promise<string|null>;
  run:(action:()=>Promise<unknown>)=>Promise<void>;
@@ -99,7 +100,7 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
             ))}
             <Button variant="ghost" onClick={()=>{navigate({view:'workspace',documentId:menu.document.id,aiParse:true});setMenu(null);}}><Sparkles/>{tr('library:ai_parse.reparse')}</Button>
             <Button variant="ghost"
-              onClick={() => void remove(ids.length ? ids : [menu.document.id])}
+              disabled={busy} onClick={() => void remove(ids.length ? ids : [menu.document.id])}
             >
               <Trash2/>{tr("library:delete")}
             </Button>
@@ -114,12 +115,13 @@ export function LibraryMenus({menu,move,tagging,anchor,items,folders,tags,ids,pr
             setMenu(null);
           }}
         >
+          {moveNotice && <p>{moveNotice}</p>}
           <div className="folder-picker">
-            <Button variant="ghost" onClick={() => void moveTo(null)}>
+            <Button variant="ghost" disabled={busy} onClick={() => void moveTo(null)}>
               {tr("library:unfiled")}
             </Button>
             {folders.map((f) => (
-              <Button variant="ghost" key={f.id} onClick={() => void moveTo(f.id)}>
+              <Button variant="ghost" key={f.id} disabled={busy} onClick={() => void moveTo(f.id)}>
                 {path(f.id)}
               </Button>
             ))}

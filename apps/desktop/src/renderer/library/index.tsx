@@ -1,3 +1,5 @@
+import { localDate, dayBound, validDay } from './dates';
+import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import { Brand } from '../components/brand';
 import { DocumentArt } from '../shell/document-art';
@@ -43,7 +45,6 @@ import {
   changed,
   reorderDestination,
   importFiles,
-  moveDocuments,
   selectedRange,
   courseName,
   groupByCourse,
@@ -63,11 +64,11 @@ function folderPath(folders: Folder[], id: string | null | undefined) {
   for (let level = 0; id && level < 8; level++) { const folder = folders.find(f => f.id === id); if (!folder) break; names.unshift(folder.name); id = folder.parentId; }
   return names.join(' › ');
 }
-export function formatSize(bytes: number | null, locale: string) {
+export function formatSize(bytes: number | null, locale: string, short = false) {
     if (bytes === null) return tr("library:unknown_size");
   const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte'] as const;
   const exponent = Math.min(3, Math.max(0, Math.floor(Math.log10(Math.max(1, bytes)) / 3)));
-  return new Intl.NumberFormat(locale, { style: 'unit', unitDisplay:'long', unit: units[exponent], maximumFractionDigits: 1 }).format(bytes / 1000 ** exponent);
+  return new Intl.NumberFormat(locale, { style: 'unit', unitDisplay:short ? 'short' : 'long', unit: units[exponent], maximumFractionDigits: 1 }).format(bytes / 1000 ** exponent);
 }
 function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpen:(event: React.MouseEvent<HTMLButtonElement>)=>void}) {
  const ref=useRef<HTMLButtonElement>(null);const [visible,setVisible]=useState(false);
@@ -118,7 +119,33 @@ export function LibraryView() {
     catch { /* Corrupt optional sort preferences must not prevent opening the library. */ }
     return {...defaults, ...sort, ...route.query};
   });
+  const clearFilters = () => {
+    setCustomDates(false);
+    setDateDraft({addedAfter:"",addedBefore:""});
+    setDateError(false);
+    setQuery(q => ({
+      ...defaults, sort: q.sort, direction: q.direction,
+      view: q.view, folderId: q.folderId, subfolders: q.subfolders,
+      text: text.trim() || undefined,
+    }));
+  };
   const [customDates,setCustomDates] = useState(false);
+  const [dateDraft, setDateDraft] = useState({
+    addedAfter: localDate(query.addedAfter),
+    addedBefore: localDate(query.addedBefore),
+  });
+  const [dateError, setDateError] = useState(false);
+  const updateDate = (key: "addedAfter" | "addedBefore", value: string) => {
+    const next = { ...dateDraft, [key]: value };
+    setDateDraft(next);
+    const invalid = !validDay(next.addedAfter) || !validDay(next.addedBefore) || !!(next.addedAfter && next.addedBefore && next.addedAfter > next.addedBefore);
+    setDateError(invalid);
+    if (!invalid) setQuery(q => ({
+      ...q,
+      addedAfter: next.addedAfter ? dayBound(next.addedAfter) : undefined,
+      addedBefore: next.addedBefore ? dayBound(next.addedBefore,true) : undefined,
+    }));
+  };
   const [filtersOpen,setFiltersOpen] = useState(false);
   const compactToolbar = useCompactToolbar();
   useEffect(() => {
@@ -154,7 +181,6 @@ export function LibraryView() {
     [tagging, setTagging] = useState(false),
     [folders, setFolders] = useState<Folder[]>([]),
     [tags, setTags] = useState<IpcResponse<"library:tags:list">>([]),
-    [undo, setUndo] = useState<(() => Promise<void>) | null>(null),
     [notice, setNotice] = useState("");
   const menuAnchor = useRef<HTMLElement | null>(null);
   const placeOf = (item: Item) => courseName(item, language) ?? (folderPath(folders, item.folderId) || tr("library:unfiled"));
@@ -286,14 +312,12 @@ export function LibraryView() {
       restoreTop.current = 0;
     }
   }, [loading]);
-  useEffect(() => {
-    if (!undo) return;
-    const timer = setTimeout(() => {
-      setUndo(null);
-      setNotice("");
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, [undo]);
+  const recoveries = useSyncExternalStore(recovery.subscribe, recovery.snapshot);
+  const latestRecovery = recoveries.at(-1);
+  const recoveryNotice = latestRecovery ? tr(latestRecovery.key, {
+    ...latestRecovery.params,
+    name: latestRecovery.params.title ?? tr('library:recoveryCount', latestRecovery.params),
+  }) : '';
   const focusAfter = useRef<string | null>(null);
   const [activeRow, setActiveRow] = useState<string>();
   const tabRow = shown.some(item => item.document.id === activeRow) ? activeRow : shown[0]?.document.id;
@@ -363,38 +387,98 @@ export function LibraryView() {
     menu && !selected.includes(menu.document.id)
       ? [menu.document.id]
       : selected;
+  const inFlight = useRef(false);
+  const [busy,setBusy] = useState(false);
   const remove = async (targets: Item["document"]["id"][]) => {
-    await run(async () => {
-      const deleted: typeof targets = [];
-      try {
-        for (const documentId of targets) {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    try { await run(async () => {
+      const failures: string[] = [];
+      const restored: Item["document"]["id"][] = [];
+      const deadline = Date.now() + 30000;
+      let deleted = 0;
+      for (const documentId of targets) {
+        try {
           await desktop.invoke("library:documents:softDelete", { documentId });
-          deleted.push(documentId);
+          deleted++;
+          restored.push(documentId);
+        } catch (error) {
+          const title = items.find(item => item.document.id === documentId)?.document.title ?? documentId;
+          failures.push(`${title}: ${errorText(error)}`);
         }
-        setNotice(tr("library:deleted", {count:deleted.length,formatted:format.number(deleted.length)}));
-      } finally {
-        if (deleted.length) setUndo(() => async () => {
-          for (const documentId of deleted) await desktop.invoke("library:documents:restore", { documentId });
-          changed();
-        });
       }
+      if (restored.length) recovery.add('library:recoveryDeleted', async () => {
+        try {
+          const results = await Promise.allSettled(restored.map(documentId =>
+            desktop.invoke('library:documents:restore', {documentId})));
+          const failure = results.find(result => result.status === 'rejected');
+          if (failure?.status === 'rejected') throw failure.reason;
+        } finally { changed(); }
+      }, deadline, {
+        count: restored.length,
+        title: restored.length === 1
+          ? items.find(item => item.document.id === restored[0])?.document.title ?? restored[0]
+          : undefined,
+      });
+      setNotice(failures.length ? tr("library:deletePartial", {
+        succeeded: format.number(deleted), total: format.number(targets.length),
+        failed: format.number(failures.length), reasons: failures.join("; "),
+      }) : "");
     });
     setMenu(null);
+    } finally { inFlight.current = false; setBusy(false); }
+  };
+  const moveItems = useRef<Item[]>([]);
+  const openMove = (value: boolean) => {
+    if (value) setNotice("");
+    if (value) moveItems.current = items.filter(item => ids.includes(item.document.id));
+    setMove(value);
   };
   const moveTo = async (folderId: Folder["id"] | null) => {
-    const previous = items.filter((i) => ids.includes(i.document.id));
-    await run(() => moveDocuments(ids, folderId));
-    setNotice(tr("library:moved"));
-    setUndo(() => async () => {
-      for (const i of previous)
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setBusy(true);
+    try {
+    const targets = moveItems.current;
+    const failures: string[] = [];
+    const remaining: Item[] = [];
+    const restored: Item[] = [];
+    const deadline = Date.now() + 30000;
+    let moved = 0;
+    for (const item of targets) {
+      try {
         await desktop.invoke("library:documents:move", {
-          documentIds: [i.document.id],
-          folderId: i.folderId,
+          documentIds: [item.document.id], folderId,
         });
-      changed();
+        moved++;
+        restored.push(item);
+      } catch (error) {
+        remaining.push(item);
+        failures.push(`${item.document.title}: ${errorText(error)}`);
+      }
+    }
+    if (restored.length) recovery.add('library:recoveryMoved', async () => {
+      try {
+        const results = await Promise.allSettled(restored.map(item =>
+          desktop.invoke('library:documents:move', {
+            documentIds: [item.document.id], folderId: item.folderId,
+          })));
+        const failure = results.find(result => result.status === 'rejected');
+        if (failure?.status === 'rejected') throw failure.reason;
+      } finally { changed(); }
+    }, deadline, {
+      count: restored.length,
+      title: restored.length === 1 ? restored[0]!.document.title : undefined,
     });
-    setMove(false);
-    setMenu(null);
+    moveItems.current = remaining;
+    setNotice(failures.length ? tr("library:movePartial", {
+      succeeded: format.number(moved), total: format.number(targets.length),
+      failed: format.number(failures.length), reasons: failures.join("; "),
+    }) : "");
+    if (moved || failures.length) changed();
+    if (!failures.length) { setMove(false); setMenu(null); }
+    } finally { inFlight.current = false; setBusy(false); }
   };
   const reorder = async (item: Item, delta: number) => {
     const destination = reorderDestination(items, items.indexOf(item), delta);
@@ -482,6 +566,14 @@ export function LibraryView() {
           {grid ? <LayoutGrid /> : <List />}
         </Button>
     </div>
+  );
+  const liveRegion = (
+    <div className="library-live" aria-live="polite">
+        {dateError ? tr('library:dateRangeInvalid') : notice || recoveryNotice || tr('library:loaded', {
+          count: items.length, formatted: format.number(items.length),
+        })}
+        {!dateError && !notice && latestRecovery && ` · ${tr('library:recoveryAction', {number: latestRecovery.sequence})}`}
+      </div>
   );
   return (
     <section
@@ -590,15 +682,16 @@ export function LibraryView() {
                 {tr(`library:${key}`)}
               </label>
             ))}
-            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setCustomDates(true);return;} setCustomDates(false); setQuery(q => ({...q, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
+            <label>{tr("library:addedAfter")}<Select aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:localDate(query.addedAfter),addedBefore:localDate(query.addedBefore)});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
             </Select></label>
-            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} value={query[key]?.slice(0,10) ?? ''} onChange={e => setQuery(q => ({...q,[key]:e.target.value ? new Date(e.target.value).toISOString() : undefined}))}/></label>)}
+            {customDates && (["addedAfter","addedBefore"] as const).map(key => <label key={key}>{tr(`library:${key}`)}<Input type="date" aria-label={tr(`library:${key}`)} aria-invalid={dateError} value={dateDraft[key]} onChange={e => updateDate(key,e.target.value)}/></label>)}
+            {dateError && <p>{tr("library:dateRangeInvalid")}</p>}
             <label>{tr("library:size")}<Select aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select></label>
             {!showFolders && compactToolbar && <div className="filter-view"><span>{tr("library:sort")}</span>{viewControls}</div>}
-            <footer><Button variant="outline" className="ghost" onClick={() => setQuery(defaults)}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
+            <footer><Button variant="outline" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button><Button variant="outline" className="secondary" onClick={() => setFiltersOpen(false)}>{tr("library:close")}</Button></footer>
           </PopoverContent>
         </Popover>
         {!showFolders && !compactToolbar && viewControls}
@@ -607,20 +700,29 @@ export function LibraryView() {
         {filters.map(([key, value]) => (
           <Button variant="outline"
             key={key}
-            onClick={() => setQuery((q) => ({ ...q, [key]: undefined }))}
+            onClick={() => {
+              if (key === 'addedAfter' || key === 'addedBefore') {
+                setDateDraft(draft => ({...draft,[key]:''}));
+                setDateError(false);
+              }
+              setQuery(q => ({...q,[key]:undefined}));
+            }}
           >
             {tr(`library:${key}`)}:{" "}
             {typeof value === "boolean"
               ? tr("library:yes")
               : (folders.find((f) => f.id === value)?.name ??
                 tags.find((t) => t.id === value)?.name ??
-                (["status", "type"].includes(key) ? tr(`library:${value}`) : String(value)))}{" "}
+                (["status", "type", "converter"].includes(key) ? tr(`library:${value}`)
+                  : ["addedAfter", "addedBefore"].includes(key) ? format.date(String(value))
+                  : ["minSize", "maxSize"].includes(key) ? formatSize(Number(value), language, true)
+                  : String(value)))}{" "}
             <X size={12} aria-hidden="true" />
           </Button>
         ))}
         {filters.length > 0 && (
           <>
-            <Button variant="outline" className="ghost" onClick={() => setQuery({ ...defaults, ...route.query })}>
+            <Button variant="outline" className="ghost" onClick={clearFilters}>
               {tr("library:clearFilters")}
             </Button>
             <Button variant="outline" className="ghost"
@@ -652,7 +754,7 @@ export function LibraryView() {
           <Button variant="outline"
             onClick={async () => {
               setMenu(null);
-              setMove(true);
+              openMove(true);
             }}
           >
             {tr("library:move")}
@@ -670,7 +772,7 @@ export function LibraryView() {
           >
             {tr("library:pin")}
           </Button>
-          <Button variant="outline" onClick={() => void remove(selected)}>
+          <Button variant="outline" disabled={busy} onClick={() => void remove(selected)}>
             {tr("library:delete")}
           </Button>
           <Button variant="outline" onClick={() => setSelected([])}>
@@ -708,7 +810,7 @@ export function LibraryView() {
               text
                 ? setText("")
                 : filters.length
-                  ? setQuery(defaults)
+                  ? clearFilters()
                   : void run(() => importFiles(query.folderId ?? null))
             }
           >
@@ -1025,31 +1127,27 @@ export function LibraryView() {
         </div>
         </>
       )}
-      <div className="library-live" aria-live="polite">
-        {tr("library:loaded", {
-          count: items.length,
-          formatted: format.number(items.length),
-        })}
-      </div>
-      {notice && (
-        <div className="library-toast" role="status">
-          {notice}
-          {undo && (
+      {liveRegion}
+      {(notice || recoveryNotice) && (
+        <div className="library-toast">
+          {notice || recoveryNotice}
+          {notice && <Button variant="ghost" onClick={() => setNotice("")}>{tr("library:close")}</Button>}
+          {recoveries.length > 0 && (
             <Button variant="outline"
+              aria-label={`${tr("library:undo")}: ${recoveryNotice}`}
               onClick={() =>
                 void run(async () => {
-                  await undo();
-                  setUndo(null);
+                  await recovery.undo();
                   setNotice("");
                 })
               }
             >
-              {tr("library:undo")}
+              {tr("library:undo")}{recoveries.length > 1 ? ` (${format.number(recoveries.length)})` : ""}
             </Button>
           )}
         </div>
       )}
-      <LibraryMenus menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={setMove} setTagging={setTagging}/>
+      <LibraryMenus busy={busy} moveNotice={notice} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
       {promptDialog}
     </section>
   );

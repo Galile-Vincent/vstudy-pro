@@ -93,3 +93,18 @@ it('reports the course a document was saved from and tolerates damaged course da
   expect(byId(plain.id).course).toBeNull();
   expect(byId(other.id).course).toBeNull();
 });
+
+it('rejects deletion of missing documents instead of offering false recovery',()=>{
+ const {lib}=fixture();expect(()=>lib.softDelete(randomUUID())).toThrow('Document not found');
+});
+it('keeps independent deletion deadlines and never extends a repeated deletion',()=>{
+ const {lib,s,doc}=fixture();
+ const second=s.documents.insert({...doc,id:randomUUID() as never,sourceHash:'b'.repeat(64)});
+ lib.softDelete(doc.id);
+ const original=new Date(Date.now()-31000).toISOString();
+ s.db.prepare('UPDATE documents SET deletedAt=? WHERE id=?').run(original,doc.id);
+ lib.softDelete(second.id);lib.softDelete(doc.id);
+ expect(s.db.prepare('SELECT deletedAt FROM documents WHERE id=?').get(doc.id)?.deletedAt).toBe(original);
+ expect(()=>lib.restore(doc.id)).toThrow('expired');lib.restore(second.id);
+ lib.purge();expect(s.documents.get(doc.id)).toBeNull();expect(s.documents.get(second.id)).toBeDefined();
+});
