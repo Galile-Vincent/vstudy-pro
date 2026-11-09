@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { builtinThemes, themePreferencesSchema, type ThemePreferences } from '../../shared/themes';
 import { applyTheme, previewTheme } from '../settings/apply-appearance';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, CardAction, PageContainer, PageHeader, Section, Toolbar, ListRow, EmptyState, Stat, FormField, Tabs, TabsContent, SegmentedTabsList, SegmentedTabsTrigger, Button, Badge, Input, Separator, ToggleGroup, ToggleGroupItem } from '../components/ui';
@@ -38,9 +38,4 @@ export default function DesignGallery() {
     <Section title={copy.tabs}><Tabs defaultValue="one"><SegmentedTabsList aria-label={copy.tabs}><SegmentedTabsTrigger value="one">{copy.rest}</SegmentedTabsTrigger><SegmentedTabsTrigger value="two">{copy.selected}</SegmentedTabsTrigger><SegmentedTabsTrigger value="three" disabled>{copy.disabled}</SegmentedTabsTrigger></SegmentedTabsList><TabsContent value="one">{copy.hint}</TabsContent><TabsContent value="two">{copy.meta}</TabsContent></Tabs></Section>
     <Section title={copy.action}><Toolbar left={<>{(['default','secondary','outline','ghost','link','destructive'] as const).map(variant => <Button key={variant} variant={variant}>{variant}</Button>)}</>} right={<Button disabled>{copy.disabled}</Button>}/><Separator/><ToggleGroup type="single" defaultValue="one" aria-label={copy.tabs}><ToggleGroupItem value="one">{copy.selected}</ToggleGroupItem><ToggleGroupItem value="two">{copy.rest}</ToggleGroupItem><ToggleGroupItem value="three" disabled>{copy.disabled}</ToggleGroupItem></ToggleGroup><Toolbar left={<>{(['default','secondary','outline','ghost','link','destructive'] as const).map(variant => <Badge key={variant} variant={variant}>{variant}</Badge>)}</>}/><Card><CardHeader><CardTitle>{copy.title}</CardTitle><CardAction>{action}</CardAction></CardHeader></Card></Section>
   </PageContainer>;
-}
-export function DesignRoute({ children }: {children:ReactNode}) {
-  const [hash,setHash] = useState(location.hash);
-  useEffect(() => { const update = () => setHash(location.hash); window.addEventListener('hashchange',update); return () => window.removeEventListener('hashchange',update); }, []);
-  return hash === '#/design' ? <DesignGallery/> : children;
 }
