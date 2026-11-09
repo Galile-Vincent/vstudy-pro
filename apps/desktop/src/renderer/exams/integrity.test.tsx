@@ -16,7 +16,8 @@ const historyRow = { artifact: { ...exam, test: undefined }, attempt: null };
 function bridge(options: { history?: () => unknown } = {}) {
  const server = fakeAttemptServer();
  invoke.mockImplementation(async (channel: string, request: Record<string, unknown>) => {
-  if (channel === 'documents:list' || channel === 'providers:list') return [];
+  if (channel === 'documents:list') return [{ id: 'doc', title: 'Doc', status: 'ready' }];
+  if (channel === 'providers:list') return [];
   if (channel === 'review:exam:history') return options.history ? options.history() : { items: [historyRow], nextCursor: null };
   if (channel === 'review:artifact:get') return exam;
   return server.invoke(channel, request);

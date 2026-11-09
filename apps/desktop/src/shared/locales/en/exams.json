@@ -4,6 +4,7 @@
   "sources": "Source documents",
   "source_hint": "Select up to 8 converted PDFs. Sources use the first 6,000 bytes of each document.",
   "no_documents": "Convert a PDF in your library to get started.",
+  "empty_title": "No converted documents yet",
   "configuration": "Exam configuration",
   "prompt": "What would you like to practice?",
   "prompt_hint": "Focus on key concepts, worked problems, or a particular chapter…",

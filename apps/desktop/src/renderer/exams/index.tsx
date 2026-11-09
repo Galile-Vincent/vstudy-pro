@@ -7,6 +7,7 @@ import { tr } from "../../shared/i18n";
 import { desktop } from "../bridge";
 import {
   Button,
+  EmptyState,
   FormField,
   Input,
   PageContainer,
@@ -28,9 +29,11 @@ const initialCounts = {
   cloze: 2,
   true_false: 2,
 };
-export function ExamsView() {
+export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
   const { i18n } = useTranslation();
-  const [documents, setDocuments] = useState<IpcResponse<"documents:list">>([]),
+  const [documents, setDocuments] = useState<IpcResponse<
+      "documents:list"
+    > | null>(null),
     [providers, setProviders] = useState<IpcResponse<"providers:list">>([]);
   const [selected, setSelected] = useState<string[]>([]),
     [prompt, setPrompt] = useState(""),
@@ -140,7 +143,7 @@ export function ExamsView() {
     setArtifact(value);
     history.retry();
   };
-  const ready = documents.filter((d) => d.status === "ready");
+  const ready = documents?.filter((d) => d.status === "ready") ?? [];
   return (
     <PageContainer as="main" className="exams-view">
       <PageHeader
@@ -177,7 +180,16 @@ export function ExamsView() {
         }
       />
       {error && <p role="alert">{error}</p>}
-      {!artifact && mode === "setup" && (
+      {!artifact && mode === "setup" && documents && !ready.length && (
+        <EmptyState
+          headingLevel={2}
+          icon={<FileText size={32} />}
+          title={tr("exams:empty_title")}
+          description={tr("exams:no_documents")}
+          action={<Button onClick={onOpenLibrary}>{tr("common:library")}</Button>}
+        />
+      )}
+      {!artifact && mode === "setup" && ready.length > 0 && (
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -210,7 +222,6 @@ export function ExamsView() {
                   </label>
                 ))}
               </div>
-              {!ready.length && <p>{tr("exams:no_documents")}</p>}
             </Section>
             <Section title={tr("exams:configuration")}>
               <FormField label={tr("exams:prompt")}>
@@ -401,7 +412,7 @@ export function ExamsView() {
             items={history.items}
             busy={busy}
             documentTitle={(id) =>
-              documents.find((d) => d.id === id)?.title ?? id
+              documents?.find((d) => d.id === id)?.title ?? id
             }
             onOpen={(id) =>
               void run(async () =>

@@ -315,3 +315,21 @@ it("keeps a failed deletion recoverable inside the dialog", async () => {
   fireEvent.click(screen.getByRole("button", { name: "exams:delete_named" }));
   expect(within(screen.getByRole("dialog")).queryByRole("alert")).toBeNull();
 });
+
+it("guides to the Library and hides configuration until a document is ready", async () => {
+  setup();
+  const base = invoke.getMockImplementation()!;
+  invoke.mockImplementation(async (channel: string, ...args: unknown[]) =>
+    channel === "documents:list"
+      ? [{ id: "doc", title: "Physics PDF", status: "converting" }]
+      : base(channel, ...args),
+  );
+  const onOpenLibrary = vi.fn();
+  render(<ExamsView onOpenLibrary={onOpenLibrary} />);
+  expect(
+    (await screen.findByRole("heading", { level: 2 })).textContent,
+  ).toBe("exams:empty_title");
+  expect(screen.queryByLabelText("exams:prompt")).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "common:library" }));
+  expect(onOpenLibrary).toHaveBeenCalledTimes(1);
+});
