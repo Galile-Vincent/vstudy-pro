@@ -10,8 +10,9 @@ import { tr } from '../../shared/i18n';
 import type { IpcResponse } from '../../shared/ipc';
 import type { Conversation, Message } from '../../shared/domain';
 import type { Providers } from '../providers';
-import { Button } from '../components/ui/button';
-export function DesktopChat({active}:{active:boolean}) {
+import { Button, Toolbar } from '../components/ui';
+import type { ReactNode } from 'react';
+export function DesktopChat({active,launcher}:{active:boolean;launcher?:ReactNode}) {
   useTranslation();
   const {initial,update}=useTabPresentation(useNavigate());
   const restored=initial?.kind==='app'?initial:undefined;
@@ -34,7 +35,7 @@ export function DesktopChat({active}:{active:boolean}) {
     try {const next=await desktop.invoke('conversations:create',{scope:'general',providerId:provider.config.id,modelId:provider.models[0]!.id});setConversation(next);setMessages([]);setCursor(null);setDraft('');try{localStorage.setItem('vstudy-web-chat-conversation',next.id);}catch{/* Optional persistence. */}}catch{setFailed(true);}finally{setBusy(false);}
   };
   const model=async(value:string)=>{if(!conversation)return;const slash=value.indexOf('/');try{setConversation(await desktop.invoke('conversations:model',{conversationId:conversation.id,providerId:value.slice(0,slash) as Conversation['providerId'],modelId:value.slice(slash+1)}));}catch{setFailed(true);}};
-  return <div className="web-chat-local chat-pane"><div className="web-chat-toolbar"><span>{tr('web-chat:desktop_hint')}</span><Button variant="ghost" disabled={busy} onClick={()=>void start()}><Plus/>{tr('web-chat:new')}</Button></div>
+  return <div className="web-chat-local chat-pane"><Toolbar className="gap-[var(--space-4)]" left={launcher} right={<Button variant="ghost" disabled={busy} onClick={()=>void start()}><Plus/>{tr('web-chat:new')}</Button>}/>
     {failed && <p role="alert">{tr('web-chat:desktop_error')}</p>}
     {conversation ? <Chat key={conversation.id} conversation={conversation} history={messages} historyCursor={cursor} autoFocus={false} draft={draft} onDraft={setDraft} selection={null} onClearSelection={()=>{}} providers={providers} model={conversation.providerId+'/'+conversation.modelId} onModel={value=>void model(value)} onSettings={settings} onProvidersChanged={refresh} onUsage={settings}/> : <div className="web-chat-empty"><h2>{tr('web-chat:desktop')}</h2><p>{tr('web-chat:desktop_hint')}</p><Button disabled={busy || !active} onClick={()=>void start()}>{tr('web-chat:new')}</Button></div>}
   </div>;
