@@ -34,7 +34,7 @@ import { createWindowsStatePersistence } from "./mcp/windows-state";
 import { createSecretStore } from "./services/secrets";
 import { developmentCsp, isAppUrl, productionCsp } from "./security";
 
-import { createDataDeletion, cleanupDeletedData } from "./services/delete-data";
+import { createDataDeletion, cleanupDeletedData, finishPendingDeletion } from "./services/delete-data";
 import { createIpcRegistrar } from "./ipc/register";
 import { assetHandler } from "./assets";
 import { isPathWithin } from './platform/paths';
@@ -245,6 +245,16 @@ if (ownsApplication) void app.whenReady().then(async () => {
   if (process.platform === 'win32') app.setAppUserModelId('com.vstudy.pro');
   startupStage = 'recovery';
   const userData = app.getPath("userData");
+  const deletionFinished = await finishPendingDeletion(userData, async partitions => {
+    for (const current of [session.defaultSession,
+      ...partitions.map(name => session.fromPath(join(userData,'Partitions',name)))]) {
+      await current.clearStorageData();
+      await current.clearCache();
+      await current.clearAuthCache();
+      await current.closeAllConnections();
+      current.flushStorageData();
+    }
+  }, log);
   void cleanupDeletedData(userData, log);
   mkdirSync(userData, { recursive: true });
   await rollbackRestoreStartup(userData);
@@ -344,6 +354,9 @@ if (ownsApplication) void app.whenReady().then(async () => {
   analytics()?.track('app_performance_sample',{startup_ms:Math.round(performance.now()-analyticsStartup)});
   if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
+  if (!deletionFinished) void dialog.showMessageBox(window!, {
+    type:'warning', message:tr('settings:delete_pending'),
+  }).catch(error => log({phase:'delete-notice-failed',error}));
   startupComplete = true;
   resolveAppReady(true);
 }).catch(async error => {

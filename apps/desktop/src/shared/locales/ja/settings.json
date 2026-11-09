@@ -109,11 +109,12 @@
   "event_ai_cli_status": "AI ツールの状態確認",
   "event_moodle_request": "Moodle リクエスト",
   "event_unknown": "ネットワークリクエスト",
-  "delete_failed": "データを移動できませんでした: {{reason}}。データはそのままです。VStudy を再起動します。",
+  "delete_failed": "削除はアプリの再起動時に完了します。ファイルがロックされている場合は次回起動時に再試行します。{{reason}}",
   "delete_failed_permission": "アプリデータを削除できませんでした。アクセスが拒否されました。ファイルの権限を確認して再試行してください。",
   "delete_failed_busy": "アプリデータを削除できませんでした。ファイルが使用中です。他のアプリを閉じて再試行してください。",
   "delete_failed_files": "すべてのアプリデータファイルを削除できませんでした。空き容量を確認して再試行してください。",
   "remove_key_title": "{{name}} のキーを削除しますか？",
   "remove_key_copy": "このプロバイダーを使うにはキーの再入力が必要です。",
-  "provider_action": "{{action}} — {{name}}"
+  "provider_action": "{{action}} — {{name}}",
+  "delete_pending": "一部のデータを削除できませんでした。アプリの再起動時に再試行します。"
 }

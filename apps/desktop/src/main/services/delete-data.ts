@@ -1,5 +1,5 @@
 import { reviewWorkers } from '../review/workers';
-import { rename, readdir, rm } from 'node:fs/promises';
+import { rename, readdir, rm, open, lstat, realpath } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 
@@ -17,7 +17,11 @@ export function createDataDeletion(
       reviewWorkers.suspend('delete-all');
       await reviewWorkers.waitForIdle();
       await stop();
-      await rename(root, `${root}.deleting-${Date.now()}-${randomUUID()}`);
+      if (process.platform === 'win32') await markDeletionPending(root);
+      else {
+        try { await rename(root, `${root}.deleting-${Date.now()}-${randomUUID()}`); }
+        catch (error) { await markDeletionPending(root); await report(error); }
+      }
     } catch (error) {
       reviewWorkers.resume('delete-all');
       await report(error);
@@ -38,4 +42,58 @@ export async function cleanupDeletedData(
       catch (error) { log({phase:'delete-cleanup-failed',error}); }
     }));
   } catch (error) { log({phase:'delete-cleanup-failed',error}); }
+}
+
+const removeOptions = {recursive:true, force:true, maxRetries:5, retryDelay:200};
+const ownedNames = new Set([
+  'secrets.json', 'providers.json', 'executable-pins.json', 'library',
+  'ai-tools', 'converter-venv', 'converter-python', 'mcp', 'logs', 'tmp', 'fts-check.json',
+  'window-state.json', 'window-state.json.tmp', 'restore-pending.json',
+  'restore-startup.json',
+]);
+function ownedEntry(name: string): boolean {
+  const temporary = /^(.*)\.[0-9a-f-]{36}\.tmp$/.exec(name);
+  if (temporary && ownedNames.has(temporary[1]!)) return true;
+  return ownedNames.has(name) || /^vstudy\.sqlite(?:-(?:wal|shm|journal))?$/.test(name)
+    || /^moodle(?:$|[-.])/.test(name) || /^\.(?:backup|restore|download)-/.test(name);
+}
+export async function markDeletionPending(root: string): Promise<void> {
+  const file = await open(root + '.delete-pending', 'w', 0o600);
+  try {
+    await file.writeFile(JSON.stringify({token:randomUUID(), timestamp:Date.now()}));
+    await file.sync();
+  } finally { await file.close(); }
+  if (process.platform !== 'win32') {
+    const parent = await open(dirname(root), 'r');
+    try { await parent.sync(); } finally { await parent.close(); }
+  }
+}
+export async function finishPendingDeletion(
+  root: string,
+  clearSessions: (partitions: string[]) => Promise<void>,
+  log: (event: {phase:string;error:unknown}) => void,
+): Promise<boolean> {
+  try { await lstat(root + '.delete-pending'); }
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return true;
+    log({phase:'delete-pending-failed',error}); return false;
+  }
+  try {
+    const target = await realpath(root);
+    let partitions: string[] = [];
+    try {
+      const directory = join(target, 'Partitions');
+      if ((await lstat(directory)).isSymbolicLink()) throw Error('Unsafe session directory');
+      partitions = (await readdir(directory)).filter(name => !name.includes('/') && !name.includes('\\'));
+      for (const name of partitions) {
+        if ((await lstat(join(directory,name))).isSymbolicLink()) throw Error('Unsafe session partition');
+      }
+    } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+    for (const name of await readdir(target)) {
+      if (ownedEntry(name)) await rm(join(target, name), removeOptions);
+    }
+    await clearSessions(partitions);
+    await rm(root + '.delete-pending', {force:true});
+    return true;
+  } catch (error) { log({phase:'delete-pending-failed',error}); return false; }
 }

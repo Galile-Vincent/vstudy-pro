@@ -109,11 +109,12 @@
   "event_ai_cli_status": "AI tool status check",
   "event_moodle_request": "Moodle request",
   "event_unknown": "Network request",
-  "delete_failed": "Could not move your data: {{reason}}. Your data is intact. VStudy will restart.",
+  "delete_failed": "Deletion will finish when the app restarts. If files remain locked, it will retry on the next start. {{reason}}",
   "delete_failed_permission": "Could not delete app data: access was denied. Check file permissions and try again.",
   "delete_failed_busy": "Could not delete app data: files are in use. Close other apps and try again.",
   "delete_failed_files": "Could not remove all app data files. Check available disk space and try again.",
   "remove_key_title": "Remove the key for {{name}}?",
   "remove_key_copy": "You will need to enter a key again to use this provider.",
-  "provider_action": "{{action}} — {{name}}"
+  "provider_action": "{{action}} — {{name}}",
+  "delete_pending": "Some data could not be removed. Deletion will retry when the app restarts."
 }

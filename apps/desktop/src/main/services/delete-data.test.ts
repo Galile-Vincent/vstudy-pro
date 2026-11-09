@@ -1,10 +1,10 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { createDataDeletion, cleanupDeletedData } from './delete-data';
-const io = vi.hoisted(() => ({rename:vi.fn(),rm:vi.fn(),readdir:vi.fn()}));
+const io = vi.hoisted(() => ({rename:vi.fn(),rm:vi.fn(),readdir:vi.fn(),open:vi.fn()}));
 const workers = vi.hoisted(() => ({suspend:vi.fn(),waitForIdle:vi.fn(),resume:vi.fn()}));
 vi.mock('node:fs/promises', () => io);
 vi.mock('../review/workers', () => ({reviewWorkers:workers}));
-beforeEach(() => {vi.resetAllMocks();});
+beforeEach(() => {vi.resetAllMocks(); io.open.mockResolvedValue({writeFile:vi.fn(),sync:vi.fn(),close:vi.fn()});});
 function setup() {
   const stop=vi.fn(), report=vi.fn(), relaunch=vi.fn();
   return {stop,report,relaunch,run:createDataDeletion('/owned',stop,report,relaunch)};
@@ -16,7 +16,7 @@ it.each(['EACCES','EPERM','EBUSY'])('preserves all data on rename failure %s and
   expect(s.stop).toHaveBeenCalledOnce();
   expect(io.rm).not.toHaveBeenCalled();
   expect(s.report).toHaveBeenCalledWith(expect.objectContaining({code}));
-  expect(workers.resume).toHaveBeenCalledWith('delete-all');
+  expect(io.open).toHaveBeenCalledWith('/owned.delete-pending','w',0o600);
   expect(s.relaunch).toHaveBeenCalledOnce();
 });
 it('quiesces before one atomic rename and relaunches without deleting', async () => {

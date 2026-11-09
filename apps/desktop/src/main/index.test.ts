@@ -23,7 +23,7 @@ const electron = await vi.hoisted(async () => {
   }
   const app = Object.assign(new EventEmitter(), {
     isPackaged: false, whenReady: () => Promise.resolve(), getPath: () => '/tmp/vstudy-startup-unit-test',
-    enableSandbox: vi.fn(), exit: vi.fn(), quit: vi.fn(), relaunch: vi.fn(), setAppUserModelId: vi.fn(),
+    releaseSingleInstanceLock:vi.fn(), enableSandbox: vi.fn(), exit: vi.fn(), quit: vi.fn(), relaunch: vi.fn(), setAppUserModelId: vi.fn(),
   });
   return {
     app, dialog: { showMessageBox: vi.fn(async () => ({ response: 1 })) }, BrowserWindow: Window, nativeTheme: new EventEmitter(), safeStorage: {}, ipcMain: { removeHandler: vi.fn() },
@@ -40,7 +40,7 @@ vi.mock('./db', () => ({ openStore: () => ({ settings: { get: () => ({}) }, clos
 vi.mock('./ipc', () => ({ registerIpc: (...args:unknown[]) => mocks.registerIpc(...args) }));
 vi.mock('./ipc/register', () => ({ createIpcRegistrar: () => ({ handle: vi.fn() }) }));
 vi.mock('./services/secrets', () => ({ createSecretStore: vi.fn() }));
-vi.mock('./services/delete-data', () => ({ createDataDeletion: vi.fn(() => vi.fn()), cleanupDeletedData: vi.fn() }));
+vi.mock('./services/delete-data', () => ({ createDataDeletion: vi.fn(() => vi.fn()), cleanupDeletedData: vi.fn(async () => true), finishPendingDeletion: vi.fn(async () => true) }));
 vi.mock('./assets', () => ({ assetHandler: vi.fn() }));
 vi.mock('./theme', () => ({ applyNativeTheme: vi.fn(), nativeBackground: () => '#ffffff' }));
 vi.mock('./moodle/sso-protocol', () => ({ initializeMoodleProtocol: mocks.initialize }));
@@ -51,7 +51,7 @@ vi.mock('./logging', () => ({ log: mocks.log, stopFileLogging: vi.fn(), copyDiag
 vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage, showStartupError: mocks.fatal }));
 vi.mock('./window-state', () => ({readWindowState: () => ({width:1200,height:800,maximized:false}), trackWindowState:vi.fn()}));
 vi.mock('./shutdown', () => ({ coordinateShutdown: () => vi.fn() }));
-vi.mock('./ownership', () => ({ acquireOwnership: (_app: unknown, _window: unknown, restore: () => void) => { mocks.restore = restore; return true; } }));
+vi.mock('./ownership', async importOriginal => ({...await importOriginal<typeof import('./ownership')>(), acquireOwnership: (_app: unknown, _window: unknown, restore: () => void) => { mocks.restore = restore; return true; } }));
 vi.mock('./i18n', () => ({ tr: (key: string) => key }));
 vi.mock('./packaged-smoke', () => ({ runPackagedSmoke: vi.fn() }));
 
