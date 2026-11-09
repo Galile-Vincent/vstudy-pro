@@ -161,6 +161,7 @@ function WeeklySection({
   }, [section.current]);
   return (
     <section ref={ref} className="moodle-week" data-current={section.current}>
+      <h3 id={`week-heading-${section.id}`} tabIndex={-1}>
       <button
         className="moodle-week-heading"
         aria-expanded={section.accessible ? open : false}
@@ -185,8 +186,11 @@ function WeeklySection({
           <span className="moodle-chip">{tr("moodle:this_week")}</span>
         )}
       </button>
+      </h3>
+      <div id={`week-${section.id}`} role="region"
+        aria-labelledby={`week-heading-${section.id}`} hidden={!open || !section.accessible}>
       {open && section.accessible && (
-        <div id={`week-${section.id}`}>
+        <>
           {section.summaryHtml && <SafeCourseHtml html={section.summaryHtml} />}
           {section.modules.map((module) => {
             const Icon = icons[module.kind] ?? BookOpen;
@@ -232,8 +236,9 @@ function WeeklySection({
               </button>
             );
           })}
-        </div>
+        </>
       )}
+      </div>
     </section>
   );
 }
