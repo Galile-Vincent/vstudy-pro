@@ -242,7 +242,7 @@ export function ScopePicker({
           {error && (
             <p role="alert">
               {tr("review:error")}{" "}
-              <Button
+              <Button variant="secondary"
                 type="button"
                 onClick={() =>
                   page ? page.retry() : setReload((value) => value + 1)
@@ -272,7 +272,7 @@ export function ScopePicker({
             <p>{tr("review:scope_empty")}</p>
           )}
           {page?.cursor && (
-            <Button type="button" disabled={page.loading} onClick={page.more}>
+            <Button variant="secondary" type="button" disabled={page.loading} onClick={page.more}>
               {tr("review:load_more")}
             </Button>
           )}

@@ -59,7 +59,7 @@ function PageState({
       {page.error && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button onClick={page.retry}>{tr("review:retry")}</Button>
+          <Button variant="secondary" onClick={page.retry}>{tr("review:retry")}</Button>
         </p>
       )}
       {page.loading && <p role="status">{tr("review:loading")}</p>}
@@ -68,11 +68,11 @@ function PageState({
           headingLevel={2}
           icon={<BookOpen aria-hidden="true" />}
           title={tr(`review:${empty}`)}
-          action={<Button onClick={page.retry}>{tr("review:retry")}</Button>}
+          action={<Button variant="secondary" onClick={page.retry}>{tr("review:retry")}</Button>}
         />
       )}
       {page.cursor && (
-        <Button disabled={page.loading} onClick={page.more}>
+        <Button variant="secondary" disabled={page.loading} onClick={page.more}>
           {tr("review:load_more")}
         </Button>
       )}
@@ -266,7 +266,7 @@ export function ReviewView() {
       {actionError && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button
+          <Button variant="secondary"
             onClick={() => {
               if (failedAction.current) void mutate(failedAction.current);
             }}
@@ -388,13 +388,13 @@ function CourseTools({
             onChange={(e) => setTitle(e.target.value)}
           />
         </label>
-        <Button disabled={busy || !title.trim()} type="submit">
+        <Button variant="secondary" disabled={busy || !title.trim()} type="submit">
           {tr("review:create_course")}
         </Button>
       </form>
       {course && (
         <>
-          <Button
+          <Button variant="secondary"
             disabled={busy}
             onClick={() =>
               void run(() =>
@@ -409,7 +409,7 @@ function CourseTools({
           >
             {tr("review:archive")}
           </Button>
-          <Button
+          <Button variant="secondary"
             disabled={busy}
             onClick={() =>
               void run(async () =>
@@ -448,7 +448,7 @@ function CourseTools({
       {failed && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button
+          <Button variant="secondary"
             onClick={() => {
               if (failedAction.current) void run(failedAction.current);
             }}
@@ -497,7 +497,7 @@ function Inbox({
       {failed && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button
+          <Button variant="secondary"
             onClick={() => {
               setFailed(false);
               page.retry();
@@ -536,7 +536,7 @@ function Inbox({
                 ))}
               </select>
             </label>
-            <Button
+            <Button variant="secondary"
               disabled={busy}
               onClick={() =>
                 void run(() =>
@@ -621,7 +621,7 @@ function Recent({
       {paused.length > 0 && (
         <p role="status">
           {tr("review:budget")}{" "}
-          <Button
+          <Button variant="secondary"
             disabled={busy}
             onClick={() =>
               void mutate(async () => {
@@ -682,10 +682,10 @@ function Recent({
                     onChange={(e) => setText(e.target.value)}
                   />
                 </label>
-                <Button type="submit" disabled={busy || !text.trim()}>
+                <Button variant="secondary" type="submit" disabled={busy || !text.trim()}>
                   {tr("review:save")}
                 </Button>
-                <Button type="button" onClick={() => setEdit(null)}>
+                <Button variant="secondary" type="button" onClick={() => setEdit(null)}>
                   {tr("review:cancel")}
                 </Button>
               </form>
@@ -699,7 +699,7 @@ function Recent({
               </Button>
             )}
             <div className="review-actions">
-              <Button
+              <Button variant="secondary"
                 disabled={busy}
                 onClick={() => {
                   setEdit(job.id);
@@ -708,7 +708,7 @@ function Recent({
               >
                 {tr("review:edit")}
               </Button>
-              <Button
+              <Button variant="secondary"
                 disabled={busy}
                 onClick={() =>
                   void mutate(
@@ -727,7 +727,7 @@ function Recent({
                 <span>
                   {tr(`review:job_${job.status}`)}
                   {job.status === "failed" && (
-                    <Button
+                    <Button variant="secondary"
                       disabled={busy}
                       onClick={() =>
                         void mutate(() =>
@@ -802,7 +802,7 @@ function Weak({
           </h2>
           <p>{tr("review:weak_help")}</p>
         </div>
-        <Button
+        <Button variant="default"
           disabled={!items.length}
           onClick={() =>
             artifacts(
@@ -837,13 +837,13 @@ function Weak({
               }
               actions={
                 <div className="review-actions">
-                  <Button onClick={() => artifacts("note", [c.key], [c.label])}>
+                  <Button variant="secondary" onClick={() => artifacts("note", [c.key], [c.label])}>
                     {tr("review:make_note")}
                   </Button>
-                  <Button onClick={() => artifacts("test", [c.key], [c.label])}>
+                  <Button variant="secondary" onClick={() => artifacts("test", [c.key], [c.label])}>
                     {tr("review:make_test")}
                   </Button>
-                  <Button
+                  <Button variant="secondary"
                     disabled={busy}
                     onClick={() =>
                       remove(index, () =>
@@ -926,10 +926,10 @@ function Weak({
                     onChange={(e) => setLabel(e.target.value)}
                   />
                 </label>
-                <Button disabled={busy || !label.trim()} type="submit">
+                <Button variant="secondary" disabled={busy || !label.trim()} type="submit">
                   {tr("review:save")}
                 </Button>
-                <Button type="button" onClick={() => finishRename(c.id)}>
+                <Button variant="secondary" type="button" onClick={() => finishRename(c.id)}>
                   {tr("review:cancel")}
                 </Button>
               </form>
@@ -942,7 +942,7 @@ function Weak({
       {weak.error && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button onClick={weak.retry}>{tr("review:retry")}</Button>
+          <Button variant="secondary" onClick={weak.retry}>{tr("review:retry")}</Button>
         </p>
       )}
       {!weak.loading && !weak.error && !items.length && (
@@ -1003,7 +1003,7 @@ function EvidencePage({
             <li key={o.id}>
               <p>{o.weaknessNote}</p>
               <blockquote>{o.evidenceQuote}</blockquote>
-              <Button onClick={() => open(o.conversationId, o.userMessageId)}>
+              <Button variant="secondary" onClick={() => open(o.conversationId, o.userMessageId)}>
                 {tr("review:open_evidence")}
               </Button>
             </li>

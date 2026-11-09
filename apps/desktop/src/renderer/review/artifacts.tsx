@@ -272,7 +272,7 @@ export function ArtifactPanel({
             ))}
           </select>
         </label>
-        <Button
+        <Button variant="default"
           disabled={
             busy ||
             artifact?.status === "generating" ||
@@ -290,7 +290,7 @@ export function ArtifactPanel({
       {!choices.length && (
         <p>
           {tr("review:choose_provider")}{" "}
-          <Button onClick={() => void loadProviders()}>
+          <Button variant="secondary" onClick={() => void loadProviders()}>
             {tr("review:retry")}
           </Button>
         </p>
@@ -298,7 +298,7 @@ export function ArtifactPanel({
       {failed && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button
+          <Button variant="secondary"
             onClick={() =>
               void run(async () => {
                 if (active.current.artifactId)
@@ -322,7 +322,7 @@ export function ArtifactPanel({
           {artifact.status === "generating" ? (
             <div role="status">
               <p>{tr(`review:stage_${stage}`)}</p>
-              <Button
+              <Button variant="secondary"
                 disabled={busy}
                 onClick={() =>
                   void run(async () => {
@@ -344,7 +344,7 @@ export function ArtifactPanel({
                   `review:${artifact.status === "interrupted" ? "interrupted" : errorKey}`,
                 )}
               </p>
-              <Button disabled={busy} onClick={() => void run(retry)}>
+              <Button variant="secondary" disabled={busy} onClick={() => void run(retry)}>
                 {tr("review:retry")}
               </Button>
             </div>
@@ -358,7 +358,7 @@ export function ArtifactPanel({
                 onNotice={setNotice}
               />
               <div className="review-actions">
-                <Button
+                <Button variant="secondary"
                   disabled={busy}
                   onClick={() =>
                     void run(async () => {
@@ -389,7 +389,7 @@ export function ArtifactPanel({
             />
           )}
           <div className="review-actions">
-            <Button
+            <Button variant="secondary"
               disabled={busy || artifact.status === "generating"}
               onClick={() => setDeleting(true)}
             >
@@ -403,10 +403,10 @@ export function ArtifactPanel({
               aria-describedby="review-delete-copy"
             >
               <p id="review-delete-copy">{tr("review:delete_artifact_copy")}</p>
-              <Button autoFocus onClick={() => setDeleting(false)}>
+              <Button variant="secondary" autoFocus onClick={() => setDeleting(false)}>
                 {tr("review:cancel")}
               </Button>
-              <Button
+              <Button variant="secondary"
                 disabled={busy}
                 onClick={() =>
                   void run(async () => {
@@ -436,7 +436,7 @@ export function ArtifactPanel({
       {page.error && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button onClick={page.retry}>{tr("review:retry")}</Button>
+          <Button variant="secondary" onClick={page.retry}>{tr("review:retry")}</Button>
         </p>
       )}
       {!page.loading &&
@@ -449,7 +449,7 @@ export function ArtifactPanel({
           .filter((a) => a.kind === kind)
           .map((a) => (
             <li key={a.id}>
-              <Button
+              <Button variant="secondary"
                 disabled={busy}
                 onClick={() => void run(() => choose(a.id))}
               >
@@ -467,7 +467,7 @@ export function ArtifactPanel({
           ))}
       </ul>
       {page.cursor && (
-        <Button disabled={page.loading} onClick={page.more}>
+        <Button variant="secondary" disabled={page.loading} onClick={page.more}>
           {tr("review:load_more")}
         </Button>
       )}
