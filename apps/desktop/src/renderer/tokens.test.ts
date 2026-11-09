@@ -53,3 +53,22 @@ it('keeps library focus distinct from selected outlines in contrast modes', () =
   expect(focus?.[1]).toContain('outline-offset:2px');
   expect(library.indexOf(focus![0])).toBeGreaterThan(library.lastIndexOf('outline:thin solid var(--ink)'));
 });
+
+it('excludes sheets from floating surfaces and contrast selector lists', () => {
+  const contexts: string[] = [];
+  for (const match of css.matchAll(/([^{}]+)([{}])/g)) {
+    if (match[2] === '}') {
+      contexts.pop();
+      continue;
+    }
+    const selector = match[1]!.trim();
+    const contrast = [...contexts, selector].some(value =>
+      /prefers-contrast|forced-colors|data-theme=contrast/.test(value));
+    const floating =
+      /data-slot=(?:popover|dropdown-menu|select|dialog|tooltip)-content/.test(selector) ||
+      /\.(?:settings-dialog|model-popover|conversation-list-popover|select-popup)\b/.test(selector);
+    if (contrast || floating)
+      expect(selector).not.toMatch(/\[data-slot=["']?sheet-content["']?\]/);
+    contexts.push(selector);
+  }
+});
