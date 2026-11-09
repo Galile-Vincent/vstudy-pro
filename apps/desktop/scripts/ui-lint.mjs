@@ -36,19 +36,26 @@ export function inspect(source, css = true) {
   );
   const namedColors =
     /\b(?:aliceblue|antiquewhite|aqua|aquamarine|azure|beige|bisque|black|blanchedalmond|blue|blueviolet|brown|burlywood|cadetblue|chartreuse|chocolate|coral|cornflowerblue|cornsilk|crimson|cyan|darkblue|darkcyan|darkgoldenrod|darkgray|darkgreen|darkgrey|darkkhaki|darkmagenta|darkolivegreen|darkorange|darkorchid|darkred|darksalmon|darkseagreen|darkslateblue|darkslategray|darkslategrey|darkturquoise|darkviolet|deeppink|deepskyblue|dimgray|dimgrey|dodgerblue|firebrick|floralwhite|forestgreen|fuchsia|gainsboro|ghostwhite|gold|goldenrod|gray|green|greenyellow|grey|honeydew|hotpink|indianred|indigo|ivory|khaki|lavender|lavenderblush|lawngreen|lemonchiffon|lightblue|lightcoral|lightcyan|lightgoldenrodyellow|lightgray|lightgreen|lightgrey|lightpink|lightsalmon|lightseagreen|lightskyblue|lightslategray|lightslategrey|lightsteelblue|lightyellow|lime|limegreen|linen|magenta|maroon|mediumaquamarine|mediumblue|mediumorchid|mediumpurple|mediumseagreen|mediumslateblue|mediumspringgreen|mediumturquoise|mediumvioletred|midnightblue|mintcream|mistyrose|moccasin|navajowhite|navy|oldlace|olive|olivedrab|orange|orangered|orchid|palegoldenrod|palegreen|paleturquoise|palevioletred|papayawhip|peachpuff|peru|pink|plum|powderblue|purple|rebeccapurple|red|rosybrown|royalblue|saddlebrown|salmon|sandybrown|seagreen|seashell|sienna|silver|skyblue|slateblue|slategray|slategrey|snow|springgreen|steelblue|tan|teal|thistle|tomato|turquoise|violet|wheat|white|whitesmoke|yellow|yellowgreen)\b/gi;
+  const countColors = (value) => {
+    const colors = value
+      .replace(/url\([^)]*\)/gi, '')
+      .replace(/var\([^)]*\)/g, '');
+    counts.color +=
+      (colors.match(/#[\da-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch)\(/gi) ?? []).length +
+      (colors.match(namedColors) ?? []).length;
+    return true;
+  };
   property(
-    'color|background[\\w-]*|border[\\w-]*[Cc]olor|border-color|outline-color|outlineColor|fill|stroke|box-shadow|boxShadow|text-shadow|textShadow|caret-color|caretColor|accent-color|accentColor',
-    (value) => {
-      const literals =
-        value
-          .replace(/var\([^)]*\)/g, '')
-          .match(/#[\da-f]{3,8}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch)\(/gi) ?? [];
-      const names = value.replace(/var\([^)]*\)/g, '').match(namedColors) ?? [];
-      counts.color += literals.length + names.length;
-      return true;
-    },
+    'color|background[\\w-]*|border[\\w-]*|outline[\\w-]*|(?:-webkit-)?text-fill-color|WebkitTextFillColor|fill|stroke|box-shadow|boxShadow|text-shadow|textShadow|caret-color|caretColor|accent-color|accentColor',
+    countColors,
     'color',
   );
+  for (const match of text.matchAll(/(?:bg|text|border|shadow|outline|fill|stroke)-\[([^\]]+)\]/g))
+    countColors(match[1]);
+  if (!css) {
+    for (const match of text.matchAll(/\b(?:fill|stroke)\s*=\s*(?:\{\s*)?(?:"([^"]*)"|'([^']*)')/g))
+      countColors(match[1] ?? match[2]);
+  }
   property(
     '(?:-webkit-)?backdrop-filter|backdropFilter',
     (value) => token(value) || value === 'none',
