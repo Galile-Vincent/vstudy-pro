@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ExamsView } from './index';
 import { TestPlayer } from '../review/test-player';
 import { fakeArtifact, fakeAttemptServer } from '../review/fake-attempt-server';
@@ -55,4 +55,30 @@ it('does not show loading next to the error when the attempt fails to load', asy
  fireEvent.click(screen.getByRole('button', { name: 'review:retry' }));
  expect(await screen.findByRole('heading', { name: 'Question 1' })).toBeTruthy();
  expect(screen.queryByRole('alert')).toBeNull();
+});
+
+it('goes back to setup, not history, after opening an exam from history', async () => {
+ bridge();
+ render(<ExamsView />);
+ fireEvent.click(screen.getByRole('button', { name: 'exams:history' }));
+ fireEvent.click(await screen.findByRole('button', { name: 'exams:reopen_named' }));
+ await screen.findByRole('heading', { name: 'Question 1' });
+ fireEvent.click(screen.getByRole('button', { name: 'exams:back' }));
+ expect(await screen.findByText('exams:sources')).toBeTruthy();
+ expect(screen.queryByRole('heading', { name: 'exams:history' })).toBeNull();
+ expect(screen.getByRole('button', { name: 'exams:new_exam' }).getAttribute('aria-pressed')).toBe('true');
+});
+
+it('keeps an unsent draft across a History round trip', async () => {
+ const server = bridge();
+ render(<ExamsView />);
+ fireEvent.click(screen.getByRole('button', { name: 'exams:history' }));
+ fireEvent.click(await screen.findByRole('button', { name: 'exams:reopen_named' }));
+ fireEvent.click(await screen.findByLabelText(/Beta/));
+ fireEvent.click(screen.getByRole('button', { name: 'exams:back' }));
+ await waitFor(() => expect(server.state.drafts.q1).toBe(1));
+ fireEvent.click(screen.getByRole('button', { name: 'exams:history' }));
+ fireEvent.click(await screen.findByRole('button', { name: 'exams:reopen_named' }));
+ expect(((await screen.findByLabelText(/Beta/)) as HTMLInputElement).checked).toBe(true);
+ expect(server.called('review:attempt:commit')).toHaveLength(0);
 });

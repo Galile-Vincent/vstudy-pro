@@ -308,6 +308,7 @@ export function ExamsView() {
               disabled={busy}
               onClick={() => {
                 setArtifact(null);
+                setMode("setup");
                 history.retry();
               }}
             >
