@@ -1,16 +1,33 @@
+import { Card, Section, Toolbar } from '../components/ui';
+import type { ReactNode } from 'react';
+import { FormField } from '../components/ui/form-field';
 import { Button } from '../components/ui/button';
-import { Select } from "../components/select";
+import { Select } from '../components/select';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Upload } from 'lucide-react';
 import type { Document } from '../../shared';
 import type { z } from 'zod';
 import type { folderSchema } from '../../shared/library';
-import { tr } from '../../shared/i18n';
+import { tr, systemLanguage } from '../../shared/i18n';
 import { useOptionalNavigation } from '../shell';
 import { desktop } from '../bridge';
 import { errorText, statusText } from '../status';
-export function UploadCard({ folders = [], onImported, showSample = true, showOpen = true }: { showOpen?: boolean; showSample?: boolean; folders?: z.infer<typeof folderSchema>[]; onImported?: (document: Document) => void }) {
+export function UploadCard({
+  folders = [],
+  onImported,
+  showSample = true,
+  showOpen = true,
+  title,
+  footer,
+}: {
+  title?: string;
+  footer?: ReactNode;
+  showOpen?: boolean;
+  showSample?: boolean;
+  folders?: z.infer<typeof folderSchema>[];
+  onImported?: (document: Document) => void;
+}) {
   useTranslation();
   const navigation = useOptionalNavigation();
   const [imported, setImported] = useState<Document>();
@@ -18,36 +35,183 @@ export function UploadCard({ folders = [], onImported, showSample = true, showOp
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [announcement, setAnnouncement] = useState(0);
+  const [dropError, setDropError] = useState(false);
+  const clearDropError = () => {
+    if (dropError) { setError(''); setDropError(false); }
+  };
+  const [dragging, setDragging] = useState(false);
+  const dragDepth = useRef(0);
   const lock = useRef(false);
   const owned = useRef(new Set<string>());
-  useEffect(() => desktop.onDocumentProgress?.(event => { if (lock.current || owned.current.has(event.documentId)) setMessage(event.code ? statusText({code:event.code,params:event.params ?? {}}) : tr('home:converting')); }), []);
-  const upload = async (paths?: string[]) => {
-    if (lock.current) return;
-    lock.current = true; setBusy(true); setError(''); setMessage(tr('home:importing'));
-    try {
-      const results = paths ? await desktop.invoke('documents:importPaths', { paths, folderId: folders.find(f => f.id === folderId)?.id ?? null }) : null;
-      const documents = results ? results.flatMap(r => r.ok ? [r.document] : []) : [await desktop.invoke('documents:import', {folderId: folders.find(f => f.id === folderId)?.id ?? null})].filter((d): d is Document => !!d);
-      const failed = results?.find(r => !r.ok);
-      if (failed && !failed.ok) setError(errorText(new Error(failed.error)));
-      if (folderId && documents.length) await desktop.invoke('library:documents:move', { documentIds: documents.map(d => d.id), folderId: folders.find(f => f.id === folderId)!.id });
-      documents.forEach(d => { owned.current.add(d.id); setImported(d); onImported?.(d); });
-      setMessage(documents.length ? tr('home:imported') : '');
-      window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed'));
-    } catch (error) { setError(errorText(error)); setMessage(''); }
-    finally { setBusy(false); lock.current = false; }
+  useEffect(
+    () =>
+      desktop.onDocumentProgress?.((event) => {
+        if (lock.current || owned.current.has(event.documentId))
+          setMessage(event.code ? statusText({ code: event.code, params: event.params ?? {} }) : tr('home:converting'));
+      }),
+    []
+  );
+  const resetDrag = () => {
+    dragDepth.current = 0;
+    setDragging(false);
   };
-  return <div className="home-upload" onDragOver={e => { e.preventDefault(); e.stopPropagation(); }} onDrop={e => {
-    e.preventDefault(); e.stopPropagation();
-    const paths = Array.from(e.dataTransfer.files, file => desktop.getPathForFile?.(file) ?? '');
-    if (paths.length && paths.every(Boolean)) void upload(paths); else setError(tr('home:drop_error'));
-  }}>
-    <Upload aria-hidden="true"/><p>{tr('home:upload_hint')}</p>
-    <p>{tr('onboarding:file_help')}</p>
-    <label>{tr('home:destination')}<Select value={folderId} onChange={e => setFolderId(e.target.value)} disabled={busy}><option value="">{tr('library:unfiled')}</option>{folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}</Select></label>
-    <Button variant="outline" className="primary" disabled={busy} onClick={() => void upload()}>{tr('home:choose_file')}</Button>
-    {showSample && <Button variant="outline" className="ghost" disabled={busy} onClick={() => { setError(''); setMessage(''); setBusy(true); void desktop.invoke('documents:importSample', {language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}).then(d => { setImported(d); onImported?.(d); setMessage(tr('home:imported')); window.dispatchEvent(new Event('activity-updated')); window.dispatchEvent(new Event('library-changed')); }).catch(() => setError(tr('errors:generic'))).finally(() => setBusy(false)); }}>{tr('onboarding:sample')}</Button>}
-
-    {showOpen && imported && navigation && <Button variant="outline" onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>{tr('home:open_imported', { title: imported.title })}</Button>}
-    {busy && <progress aria-label={tr('home:importing')}/>}{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}
-  </div>;
+  useEffect(() => {
+    window.addEventListener('blur', resetDrag);
+    window.addEventListener('dragend', resetDrag);
+    return () => {
+      window.removeEventListener('blur', resetDrag);
+      window.removeEventListener('dragend', resetDrag);
+    };
+  }, []);
+  const upload = async (paths?: string[], sample = false) => {
+    clearDropError();
+    if (lock.current) return;
+    const destination = folders.find((folder) => folder.id === folderId)?.id ?? null;
+    resetDrag();
+    lock.current = true;
+    setBusy(true);
+    setError('');
+    setMessage(tr('home:importing'));
+    try {
+      const results = paths
+        ? await desktop.invoke('documents:importPaths', {
+            paths,
+            folderId: destination,
+          })
+        : null;
+      const documents = results
+        ? results.flatMap((r) => (r.ok ? [r.document] : []))
+        : [
+            await (sample
+              ? desktop.invoke('documents:importSample', {
+                  language: systemLanguage(document.documentElement.lang),
+                })
+              : desktop.invoke('documents:import', {
+                  folderId: destination,
+                })),
+          ].filter((d): d is Document => !!d);
+      const failed = results?.find((r) => !r.ok);
+      if (failed && !failed.ok) setError(errorText(new Error(failed.error)));
+      if (destination && documents.length)
+        await desktop.invoke('library:documents:move', {
+          documentIds: documents.map((d) => d.id),
+          folderId: destination,
+        });
+      documents.forEach((d) => {
+        owned.current.add(d.id);
+        setImported(d);
+        onImported?.(d);
+      });
+      setMessage(documents.length ? tr('home:imported') : '');
+      window.dispatchEvent(new Event('activity-updated'));
+      window.dispatchEvent(new Event('library-changed'));
+    } catch (error) {
+      setError(errorText(error));
+      setMessage('');
+    } finally {
+      setBusy(false);
+      lock.current = false;
+    }
+  };
+  return (
+    <Card
+      variant="flat"
+      className="home-upload min-w-0 p-[var(--space-6)]"
+      data-dragging={dragging}
+      onDragEnter={(e) => {
+        clearDropError();
+        if (busy || !e.dataTransfer.types.includes('Files')) return;
+        e.preventDefault();
+        dragDepth.current++;
+        setDragging(true);
+      }}
+      onDragLeave={() => {
+        if (--dragDepth.current <= 0) resetDrag();
+      }}
+      onDragEnd={resetDrag}
+      onDragOver={(e) => {
+        if (!e.dataTransfer.types.includes('Files')) return;
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onDrop={(e) => {
+        if (!e.dataTransfer.types.includes('Files')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        resetDrag();
+        setAnnouncement(value => value + 1);
+        if (lock.current) {
+          setMessage(tr('home:drop_busy'));
+          return;
+        }
+        const paths = Array.from(e.dataTransfer.files, (file) => desktop.getPathForFile?.(file) ?? '');
+        if (paths.length && paths.every(Boolean)) void upload(paths);
+        else { setError(tr('home:drop_error')); setDropError(true); }
+      }}
+    >
+      <Section title={
+        <span className="grid">
+          <span className={dragging ? 'invisible [grid-area:1/1]' : '[grid-area:1/1]'}>{title ?? tr('home:upload')}</span>
+          <span className={dragging ? '[grid-area:1/1]' : 'invisible [grid-area:1/1]'} aria-hidden={!dragging}>
+            {tr('home:drop_to_import')}
+          </span>
+        </span>
+      }>
+        <Upload aria-hidden="true" />
+        <p>{tr('home:upload_hint')}</p>
+        <p>{tr('onboarding:file_help')}</p>
+        {!!folders.length && (
+          <FormField label={tr('home:destination')}>
+            {(control) => (
+              <Select
+                {...control}
+                aria-label={tr('home:destination')}
+                value={folderId}
+                onChange={(e) => setFolderId(e.target.value)}
+                disabled={busy}
+              >
+                <option value="">{tr('library:unfiled')}</option>
+                {folders.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}
+                  </option>
+                ))}
+              </Select>
+            )}
+          </FormField>
+        )}
+        <div className="flex flex-col gap-[var(--space-2)]">
+          <Toolbar
+            className="gap-[var(--space-2)]"
+            left={
+              <>
+                <Button disabled={busy} onClick={() => void upload()}>
+                  {tr('home:choose_file')}
+                </Button>
+                {showSample && (
+                  <Button variant="ghost" disabled={busy} onClick={() => void upload(undefined, true)}>
+                    {tr('onboarding:sample')}
+                  </Button>
+                )}
+              </>
+            }
+          />
+          <div role="status" className="flex flex-col gap-[var(--space-2)]">
+            {busy && <progress aria-label={tr('home:importing')} />}
+            <div key={announcement}>
+              {error && <div role="alert">{error}</div>}
+              {message && <div>{message}</div>}
+            </div>
+          </div>
+        </div>
+        {showOpen && imported && navigation && (
+          <Button variant="outline" onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>
+            {tr('home:open_imported', { title: imported.title })}
+          </Button>
+        )}
+        {footer}
+      </Section>
+    </Card>
+  );
 }

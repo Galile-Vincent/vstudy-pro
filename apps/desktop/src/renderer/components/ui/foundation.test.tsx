@@ -82,3 +82,15 @@ it('supports contextual empty-state heading levels', () => {
     expect(screen.getByRole('heading', { level }).textContent).toBe('Empty');
   }
 });
+
+it('does not describe ordinary row actions as toggles', () => {
+  render(<ListRow title="Open notes" onClick={() => {}} />);
+  expect(screen.getByRole('button', { name: 'Open notes' }).hasAttribute('aria-pressed')).toBe(false);
+});
+
+it('marks a current button without making it a toggle', () => {
+  render(<ListRow title="Current" selected aria-current="page" onClick={() => {}} />);
+  const row = screen.getByRole('button', { name: 'Current' });
+  expect(row.getAttribute('aria-current')).toBe('page');
+  expect(row.hasAttribute('aria-pressed')).toBe(false);
+});

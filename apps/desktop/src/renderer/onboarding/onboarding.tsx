@@ -98,7 +98,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
   const addSample = async () => {
     setBusy(true); setError('');
     try {
-      const language = document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en';
+      const language = systemLanguage(document.documentElement.lang);
       const sample = await desktop.invoke('documents:importSample', { language });
       setImported(sample);
       saveProgress({ documentId: sample.id, done: [...new Set([...progress.done, 'document' as const])] });

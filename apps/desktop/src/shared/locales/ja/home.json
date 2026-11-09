@@ -58,5 +58,9 @@
   "best_other": "最長：{{formatted}} 日",
   "how_to_use": "使い方",
   "open_imported": "{{title}}を開く",
-  "file_help": "PDF、EPUB、テキスト、Officeファイルを選びます。Officeファイルは50 MB未満にしてください。スキャンしたPDFは先に文字認識が必要な場合があります。"
+  "file_help": "PDF、EPUB、テキスト、Officeファイルを選びます。Officeファイルは50 MB未満にしてください。スキャンしたPDFは先に文字認識が必要な場合があります。",
+  "drop_to_import": "ドロップしてインポート",
+  "resume": "再開",
+  "resume_title": "再開：{{title}}",
+  "drop_busy": "読み込みが完了してから、もう一度ファイルをドロップしてください。"
 }

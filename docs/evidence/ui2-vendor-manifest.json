@@ -258,9 +258,9 @@
     {
       "path": "apps/desktop/src/renderer/components/ui/progress.tsx",
       "registrySha256": "cf5de49b1c6d9ba6753d1d2f62820c543935cf426b8af8b49b277cfda6cc2c5b",
-      "patchedSha256": "8a61b1b60ca25beac02305bce36dc0ee0d168a1f3c4d0d5ce6f1dac928da9884",
+      "patchedSha256": "2fd866791c06cdcb6aee5631a6c8e3ff24fe3105f0d2f8e04bdf7c92eccf4dbd",
       "patch": "docs/vendor-patches/ui--progress.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
+      "reason": "Resolve the local cn helper and forward determinate value/max with proportional indicator geometry."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/select.tsx",
@@ -373,7 +373,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/foundation.test.tsx",
-      "sha256": "f276d37467f4fb720a303976000cc3b3e00522998fef637f027cee5ba2c78c2c",
+      "sha256": "6adef30ec45c907d4632ce26562bfda0b94687d7bad376e65564fc0ecedfe773",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -383,12 +383,12 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/list-row.tsx",
-      "sha256": "d91d84c08e266b1183ce0425cb4885a9e390b8823166caaf099c60bcc2edc691",
+      "sha256": "f976bcf4312361146fcfe6148b026930ba56a2013a086f78a488cd5c9afcef03",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
-      "sha256": "9b2b3b67643108f6fb144492d0b866f56192f7df37d19c57bed2c2c01a2e17c4",
+      "sha256": "46f2b261c5a26eaf0de0227086d34b128710863278fbd5bdb24d93b2c62c0f3d",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {

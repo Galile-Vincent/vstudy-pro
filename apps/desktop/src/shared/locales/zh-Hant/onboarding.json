@@ -143,5 +143,7 @@
   "step_privacy": "使用分析",
   "step_privacy_body": "由您決定。無論選擇哪一項，都能使用所有學習功能。",
   "detected": "已偵測",
-  "preview_passage": "用自己的話解釋一個概念。"
+  "preview_passage": "用自己的話解釋一個概念。",
+  "setup_complete": "設定完成",
+  "setup_help": "說明"
 }
