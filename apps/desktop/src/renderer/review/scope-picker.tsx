@@ -17,12 +17,14 @@ export function ScopePicker({
   selection,
   onChange,
   onBoundedChange,
+  revision = 0,
   needsSourceSelection,
   size = "standard",
   onSizeChange,
 }: {
   courseId: string;
   selection: Selection | null;
+  revision?: number;
   onBoundedChange?: ((message: string) => void) | undefined;
   onChange: (scope: ReviewScope | null) => void;
   needsSourceSelection?: boolean;
@@ -128,7 +130,7 @@ export function ScopePicker({
     onBoundedChange?.("");
     if (scope) void desktop.invoke("review:scope:preview", { courseId, scope })
       .then((resolved) => {
-        if (current && resolved.omittedConcepts) onBoundedChange?.(
+        if (current && (resolved.totalConcepts ?? 0) >= MAX_REVIEW_CONCEPTS) onBoundedChange?.(
           tr("review:bounded_session", {
             count: resolved.omittedConcepts,
             selected: resolved.conceptKeys.length,
@@ -137,7 +139,7 @@ export function ScopePicker({
         );
       }).catch(() => {});
     return () => { current = false; };
-  }, [courseId, scope, onBoundedChange]);
+  }, [courseId, scope, onBoundedChange, revision]);
   function toggle(
     value: string,
     old: string[],

@@ -89,3 +89,30 @@ it('offers all blueprint sizes and reports a changed selection',async()=>{
  expect(screen.getByRole('option',{name:'review:scope_short'})).toBeTruthy();
  expect(screen.getByRole('option',{name:'review:scope_standard'})).toBeTruthy();
 });
+for (const count of [101, 120]) {
+  it.each(['weak', 'units', 'documents', 'dates'])(`previews the bounded %s scope for ${count} concepts`, async kind => {
+    fixture(); const respond = invoke.getMockImplementation()!;
+    invoke.mockImplementation(async (channel: string, input: never) => channel === 'review:scope:preview'
+      ? { conceptKeys: Array.from({ length: 100 }, (_, i) => `c${i}`), totalConcepts: count, omittedConcepts: count - 100 }
+      : respond(channel, input));
+    const announce = vi.fn();
+    render(<ScopePicker courseId="course" selection={null} onChange={vi.fn()} onBoundedChange={announce} />);
+    fireEvent.change(screen.getByLabelText('review:scope_kind'), { target: { value: kind } });
+    if (kind === 'units') fireEvent.click(await screen.findByLabelText('Cell transport'));
+    if (kind === 'documents') fireEvent.click(await screen.findByLabelText('Biology notes'));
+    if (kind === 'dates') {
+      fireEvent.change(screen.getByLabelText('review:scope_from'), { target: { value: '2026-11-01' } });
+      fireEvent.change(screen.getByLabelText('review:scope_to'), { target: { value: '2026-11-03' } });
+    }
+    await waitFor(() => expect(announce).toHaveBeenLastCalledWith('review:bounded_session'));
+    expect(screen.queryByText('review:bounded_session')).toBeNull();
+  });
+}
+it('rejects 101 explicit concepts until the selection returns to 100', async () => {
+  fixture(); const change = vi.fn();
+  const keys = Array.from({ length: 101 }, (_, i) => `key${i}`);
+  render(<ScopePicker courseId="course" selection={{ courseId: 'course', conceptKeys: keys, labels: keys }} onChange={change} />);
+  await waitFor(() => expect(change).toHaveBeenLastCalledWith(null));
+  fireEvent.click(await screen.findByLabelText('key100'));
+  await waitFor(() => expect(change).toHaveBeenLastCalledWith({ kind: 'concepts', conceptKeys: keys.slice(0, 100) }));
+});

@@ -316,6 +316,7 @@ export function ReviewView() {
             <ArtifactPanel
               key={courseId + "note"}
               courseId={courseId}
+              revision={revision}
               onBoundedChange={noteBounded}
               kind="note"
               selection={selection}
@@ -325,10 +326,11 @@ export function ReviewView() {
             <ArtifactPanel
               key={courseId + "test"}
               courseId={courseId}
+              revision={revision}
               onBoundedChange={testBounded}
               kind="test"
               selection={selection}
-              onConfirmed={reload}
+              onConfirmed={() => { pendingFocus.current = ["review-test-heading"]; reload(); }}
             />
           </TabsContent>
         </Tabs>
@@ -781,6 +783,7 @@ function Weak({
 }) {
   const [editing, setEditing] = useState<string | null>(null),
     [label, setLabel] = useState("");
+  const leavingRow = useRef(false);
   const renameTarget = useRef<string | null>(null);
   const renameInput = useRef<HTMLInputElement>(null);
   const finishRename = (id: string) => {
@@ -861,13 +864,18 @@ function Weak({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" onCloseAutoFocus={(event) => {
+                      if (leavingRow.current) {
+                        event.preventDefault();
+                        leavingRow.current = false;
+                        document.getElementById("review-note-heading")?.focus();
+                      }
                       if (renameTarget.current === c.id) {
                         event.preventDefault();
                         renameTarget.current = null;
                         renameInput.current?.focus();
                       }
                     }}>
-                      <DropdownMenuItem onSelect={() => artifacts("note", [c.key], [c.label])}>
+                      <DropdownMenuItem onSelect={() => { leavingRow.current = true; artifacts("note", [c.key], [c.label]); }}>
                         {tr("review:make_note")}
                       </DropdownMenuItem>
                       <DropdownMenuItem

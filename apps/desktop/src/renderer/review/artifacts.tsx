@@ -24,10 +24,12 @@ export function ArtifactPanel({
   selection,
   onConfirmed,
   onBoundedChange,
+  revision = 0,
 }: {
   courseId: string;
   kind: "note" | "test";
   selection: ReviewSelection | null;
+  revision?: number;
   onBoundedChange?: (message: string) => void;
   onConfirmed?: (() => void) | undefined;
 }) {
@@ -256,6 +258,7 @@ export function ArtifactPanel({
         selection={selection}
         onChange={setScope}
         onBoundedChange={onBoundedChange}
+        revision={revision}
         size={size}
         onSizeChange={setSize}
         needsSourceSelection={
