@@ -863,8 +863,14 @@ export function LibraryView() {
             <FormField label={tr("library:addedAfter")}>{control => <Select {...control} aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:localDate(query.addedAfter),addedBefore:localDate(query.addedBefore)});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
             </Select>}</FormField>
-            {customDates && (["addedAfter","addedBefore"] as const).map(key => <FormField key={key} label={tr(`library:${key}`)}>{control => <Input {...control} type="date" aria-label={tr(`library:${key}`)} aria-invalid={dateError} value={dateDraft[key]} onChange={e => updateDate(key,e.target.value)}/>}</FormField>)}
-            {dateError && <p>{tr("library:dateRangeInvalid")}</p>}
+            {customDates && (["addedAfter", "addedBefore"] as const).map(key => (
+              <FormField key={key} label={tr(`library:${key}`)}
+                error={dateError ? tr("library:dateRangeInvalid") : undefined}>
+                {control => <Input {...control} type="date"
+                  aria-label={tr(`library:${key}`)} value={dateDraft[key]}
+                  onChange={e => updateDate(key, e.target.value)} />}
+              </FormField>
+            ))}
             <FormField label={tr("library:size")}>{control => <Select {...control} aria-label={tr("library:size")} value={query.minSize === 10000000 ? 'large' : query.minSize === 1000000 ? 'medium' : query.maxSize ? 'small' : ''} onChange={e => setQuery(q => ({...q,minSize:e.target.value === 'large' ? 10000000 : e.target.value === 'medium' ? 1000000 : undefined,maxSize:e.target.value === 'small' ? 1000000 : e.target.value === 'medium' ? 10000000 : undefined}))}>
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select>}</FormField>

@@ -79,6 +79,13 @@ it('shows a reversed custom range error and never submits an impossible range',a
  await waitFor(()=>expect(state.invoke.mock.calls.some(([c,q])=>c==='library:documents:list' && q.addedAfter && q.addedBefore)).toBe(true));
  fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:'2026-11-02'}});
  await waitFor(()=>expect(document.querySelector('.library-live')?.textContent).toContain(tr('library:dateRangeInvalid')));
+ const alerts = within(panel).getAllByRole('alert');
+ expect(alerts).toHaveLength(2);
+ for (const key of ['addedAfter', 'addedBefore']) {
+  const input = within(panel).getByLabelText(tr(`library:${key}`), {selector:'input'});
+  expect(input.getAttribute('aria-invalid')).toBe('true');
+  expect(alerts.some(alert => alert.id === input.getAttribute('aria-describedby'))).toBe(true);
+ }
  for(const [channel,q] of state.invoke.mock.calls){if(channel==='library:documents:list' && q.addedBefore && q.addedAfter)expect(q.addedAfter<=q.addedBefore).toBe(true);}
 });
 
