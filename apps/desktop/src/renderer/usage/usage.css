@@ -36,8 +36,8 @@
 }
 
 .composer-usage:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+  outline: var(--focus-outline-width, 2px) solid var(--focus-color, var(--focus));
+  outline-offset: var(--focus-outline-offset, 2px);
 }
 
 /* Simple meter without outlines */
@@ -318,7 +318,11 @@
   border-bottom: 0;
 }
 
-.usage-trend svg { width:100%; height:124px; }
+.usage-trend svg {
+  width: 100%;
+  aspect-ratio: 16 / 5;
+  height: auto;
+}
 
 .usage-dashboard .subscription-meters { padding:0; }
 .subscription-meters { padding:8px; font-size:12px; min-width:0; }

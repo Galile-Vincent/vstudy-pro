@@ -47,10 +47,10 @@ it('uses Usage and an unknown value when no current data exists', async () => {
   let resolve!: (rows: SubscriptionUsage[]) => void;
   vi.mocked(desktop.invoke).mockReturnValue(new Promise<SubscriptionUsage[]>(done => { resolve = done; }));
   localStorage.setItem(key, 'true');
-  render(<SubscriptionMeters compact />);
-  expect(screen.getByRole('status').textContent).toBe('Usage…');
+  const { container } = render(<SubscriptionMeters compact />);
+  expect(container.querySelector('small[role="status"]')?.textContent).toBe('Usage…');
   await act(async () => resolve([]));
-  await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
+  await waitFor(() => expect(container.querySelector('small[role="status"]')).toBeNull());
   expect(screen.getByText('Usage')).toBeTruthy();
   expect(screen.getByText('—')).toBeTruthy();
   expect(screen.getByRole('progressbar').getAttribute('aria-valuetext')).toBe('Unknown');

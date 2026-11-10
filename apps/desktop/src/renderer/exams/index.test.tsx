@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import {
   cleanup,
   fireEvent,
@@ -16,6 +16,10 @@ vi.mock("../../shared/i18n", () => ({ tr: (key: string) => key }));
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ i18n: { language: "en" } }),
 }));
+beforeEach(() => {
+  HTMLDialogElement.prototype.showModal ??= function() { this.open = true; };
+  HTMLDialogElement.prototype.close ??= function() { this.open = false; };
+});
 afterEach(() => {
   cleanup();
   vi.resetAllMocks();

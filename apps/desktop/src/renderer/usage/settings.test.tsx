@@ -31,6 +31,6 @@ it('labels the budget fields and saves their values', async () => {
     'settings:set',
     expect.objectContaining({ monthlyBudgetUsd: 12.5, monthlyTokenBudget: 5000, warnAtPercent: 70 }),
   );
-  expect(screen.getByRole('status').textContent).toBe('Usage settings saved');
+  expect(container.querySelector('p[role="status"]')?.textContent).toBe('Usage settings saved');
   expect(container.querySelector('h1, main')).toBeNull();
 });

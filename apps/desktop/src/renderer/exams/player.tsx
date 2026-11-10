@@ -11,17 +11,20 @@ import {
 } from "lucide-react";
 import {
   Badge,
-  Button,
   FormField,
   Input,
-  SegmentedTabsList,
-  SegmentedTabsTrigger,
   Stat,
-  Tabs,
-  TabsContent,
   Toolbar,
 } from "../components/ui";
 import { Progress } from "../components/ui/progress";
+import {
+  Button,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+  Tab,
+  TabList,
+} from "@astryxdesign/core";
 import { useExamFormat } from "./format";
 import { useFooterInset } from "./footer-inset";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -144,12 +147,11 @@ export function ExamPlayer({
       <Button
         variant="secondary"
         size="sm"
-        disabled={busy}
+        isDisabled={busy}
+        label={tr("exams:ask_ai")}
+        icon={<Sparkles aria-hidden="true" size={16} />}
         onClick={() => onExplain(id)}
-      >
-        <Sparkles aria-hidden="true" />
-        {tr("exams:ask_ai")}
-      </Button>
+      />
       {explanations[id] && (
         <div className="exam-explanation" role="status">
           {explanations[id]}
@@ -159,48 +161,48 @@ export function ExamPlayer({
   );
   return (
     <section className="exam-player" aria-busy={busy}>
-      <Toolbar
-        left={
-          <h2 className="text-[length:var(--type-lg)] font-medium">
-            {artifact.title}
-          </h2>
-        }
-        center={
-          attempt &&
-          !results &&
-          item && (
-            <>
-              <span className="font-medium">
-                {tr("review:item_progress", {
-                  current: index + 1,
-                  total: items.length,
-                })}
-              </span>
-              <Badge variant="secondary">{tr(`exams:${item.type}`)}</Badge>
-              <Progress
-                className="h-1.5 w-24"
-                value={(committed / items.length) * 100}
-                aria-label={tr("exams:progress")}
-                aria-valuenow={Math.round((committed / items.length) * 100)}
-                aria-valuetext={`${committed}/${items.length}`}
-              />
-              <span className="text-[var(--muted)]">
-                {tr("exams:answered", {
-                  answered: committed,
-                  total: items.length,
-                })}
-              </span>
-            </>
-          )
-        }
-        right={actions}
-      />
+      <LayoutHeader>
+        <Toolbar
+          left={
+            <h2 className="text-[length:var(--type-lg)] font-medium">
+              {artifact.title}
+            </h2>
+          }
+          center={
+            attempt &&
+            !results &&
+            item && (
+              <>
+                <span className="font-medium">
+                  {tr("review:item_progress", {
+                    current: index + 1,
+                    total: items.length,
+                  })}
+                </span>
+                <Badge variant="secondary">{tr(`exams:${item.type}`)}</Badge>
+                <Progress
+                  className="h-1.5 w-24"
+                  value={(committed / items.length) * 100}
+                  aria-label={tr("exams:progress")}
+                  aria-valuenow={Math.round((committed / items.length) * 100)}
+                  aria-valuetext={`${committed}/${items.length}`}
+                />
+                <span className="text-[var(--muted)]">
+                  {tr("exams:answered", {
+                    answered: committed,
+                    total: items.length,
+                  })}
+                </span>
+              </>
+            )
+          }
+          right={actions}
+        />
+      </LayoutHeader>
       {failed && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button variant="secondary" disabled={busy} onClick={onRetry}>
-            {tr("review:retry")}
-          </Button>
+          <Button variant="secondary" isDisabled={busy} label={tr("review:retry")} onClick={onRetry} />
         </p>
       )}
       {!attempt && !failed && <p role="status">{tr("review:loading")}</p>}
@@ -285,91 +287,104 @@ export function ExamPlayer({
             <h4 className="text-[length:var(--type-lg)] font-medium">
               {tr("exams:question_breakdown")}
             </h4>
-            <Tabs
+            <TabList
+              role="tablist"
               value={filter}
-              onValueChange={(value) => setFilter(value as typeof filter)}
-              className="gap-[var(--space-3)]"
+              onChange={(value) => setFilter(value as typeof filter)}
+              aria-label={tr("exams:question_breakdown")}
             >
-              <SegmentedTabsList>
-                <SegmentedTabsTrigger value="all">
-                  {tr("exams:filter_all")}
-                </SegmentedTabsTrigger>
-                <SegmentedTabsTrigger value="incorrect">
-                  {tr("exams:filter_incorrect")}
-                </SegmentedTabsTrigger>
-              </SegmentedTabsList>
-              <TabsContent value={filter}>
-                <ol className="exam-breakdown">
-                  {items.map((question, i) => {
-                    const result = attempt.results.find(
-                        (r) => r.itemId === question.id,
-                      ),
-                      full = result?.feedback;
-                    if (filter === "incorrect" && result?.correct !== false)
-                      return null;
-                    return (
-                      <li key={question.id}>
-                        <details className="group">
-                          <summary>
-                            <span className="min-w-0 flex-1">
-                              <span className="block text-[var(--muted)]">
-                                {tr("exams:question_number", { number: i + 1 })}{" "}
-                                · {tr(`exams:${question.type}`)}
-                              </span>
-                              <span className="block font-medium">
-                                {question.stem
-                                  .replaceAll("{{blank}}", "_____")
-                                  .trim()}
-                              </span>
+              <Tab
+                id="tab-all"
+                value="all"
+                label={tr("exams:filter_all")}
+                panelId="panel-breakdown"
+                onFocus={() => setFilter("all")}
+                onMouseDown={() => setFilter("all")}
+              />
+              <Tab
+                id="tab-incorrect"
+                value="incorrect"
+                label={tr("exams:filter_incorrect")}
+                panelId="panel-breakdown"
+                onFocus={() => setFilter("incorrect")}
+                onMouseDown={() => setFilter("incorrect")}
+              />
+            </TabList>
+            <div
+              role="tabpanel"
+              id="panel-breakdown"
+              aria-labelledby={`tab-${filter}`}
+            >
+              <ol className="exam-breakdown">
+                {items.map((question, i) => {
+                  const result = attempt.results.find(
+                      (r) => r.itemId === question.id,
+                    ),
+                    full = result?.feedback;
+                  if (filter === "incorrect" && result?.correct !== false)
+                    return null;
+                  return (
+                    <li key={question.id}>
+                      <details className="group">
+                        <summary>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-[var(--muted)]">
+                              {tr("exams:question_number", { number: i + 1 })}{" "}
+                              · {tr(`exams:${question.type}`)}
                             </span>
-                            <State correct={result?.correct ?? null} />
-                            <ChevronDown
-                              className="size-4 shrink-0 group-open:rotate-180"
-                              aria-hidden="true"
+                            <span className="block font-medium">
+                              {question.stem
+                                .replaceAll("{{blank}}", "_____")
+                                .trim()}
+                            </span>
+                          </span>
+                          <State correct={result?.correct ?? null} />
+                          <ChevronDown
+                            className="size-4 shrink-0 group-open:rotate-180"
+                            aria-hidden="true"
+                          />
+                        </summary>
+                        {full && (
+                          <div>
+                            <AnswerReview
+                              item={full}
+                              answer={attempt.answers[question.id]}
+                              correct={result?.correct ?? null}
                             />
-                          </summary>
-                          {full && (
-                            <div>
-                              <AnswerReview
-                                item={full}
-                                answer={attempt.answers[question.id]}
-                                correct={result?.correct ?? null}
-                              />
-                              <div className="exam-built-in">
-                                <h5>{tr("exams:explanation")}</h5>
-                                <p>{full.explanation}</p>
-                              </div>
-                              {explain(question.id)}
+                            <div className="exam-built-in">
+                              <h5>{tr("exams:explanation")}</h5>
+                              <p>{full.explanation}</p>
                             </div>
-                          )}
-                        </details>
-                      </li>
-                    );
-                  })}
-                </ol>
-                {filter === "incorrect" &&
-                  !attempt.results.some((r) => r.correct === false) && (
-                    <p className="text-[var(--muted)]">
-                      {tr("exams:no_incorrect")}
-                    </p>
-                  )}
-              </TabsContent>
-            </Tabs>
+                            {explain(question.id)}
+                          </div>
+                        )}
+                      </details>
+                    </li>
+                  );
+                })}
+              </ol>
+              {filter === "incorrect" &&
+                !attempt.results.some((r) => r.correct === false) && (
+                  <p className="text-[var(--muted)]">
+                    {tr("exams:no_incorrect")}
+                  </p>
+                )}
+            </div>
           </section>
           <Button
             variant="secondary"
             className="justify-self-start"
+            label={tr("review:review_answers")}
+            icon={<ArrowLeft aria-hidden="true" size={16} />}
             onClick={() => onResults(false)}
-          >
-            <ArrowLeft aria-hidden="true" />
-            {tr("review:review_answers")}
-          </Button>
+          />
         </>
       ) : (
         attempt &&
         item && (
           <>
-            <h3 ref={heading} tabIndex={-1} className="exam-question-stem">
+            <LayoutContent className="max-w-2xl mx-auto w-full flex flex-col gap-[var(--space-6)]">
+              <h3 ref={heading} tabIndex={-1} className="exam-question-stem">
               {item.stem.replaceAll("{{blank}}", "_____").trim()}
             </h3>
             {!locked ? (
@@ -512,71 +527,72 @@ export function ExamPlayer({
                     <Button
                       variant="ghost"
                       size="sm"
-                      disabled={busy || feedback.reportedBad}
+                      isDisabled={busy || Boolean(feedback.reportedBad)}
                       onClick={() => onReport(item.id)}
-                    >
-                      {tr(
+                      label={tr(
                         feedback.reportedBad
                           ? "review:question_reported"
                           : "review:report_bad_question",
                       )}
-                    </Button>
+                    />
                   </>
                 )}
               </section>
             )}
-            <footer className="exam-footer" ref={footerInset}>
-              <div className="flex-[1_1_16rem] text-[var(--muted)]">
-                <div role="status">
-                  {draftError && <p>{tr("review:draft_save_failed")}</p>}
+            </LayoutContent>
+            <LayoutFooter>
+              <footer className="exam-footer" ref={footerInset}>
+                <div className="flex-[1_1_16rem] text-[var(--muted)]">
+                  <div role="status">
+                    {draftError && <p>{tr("review:draft_save_failed")}</p>}
+                  </div>
+                  {!locked && <p>{tr("review:commit_notice")}</p>}
                 </div>
-                {!locked && <p>{tr("review:commit_notice")}</p>}
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                disabled={busy || index === 0}
-                onClick={() => onMove(index - 1)}
-              >
-                <ArrowLeft aria-hidden="true" />
-                {tr("review:previous_item")}
-              </Button>
-              {attempt.phase !== "answering" && (
                 <Button
                   type="button"
-                  variant="secondary"
-                  onClick={() => onResults(true)}
-                >
-                  {tr("review:view_results")}
-                  <ArrowRight aria-hidden="true" />
-                </Button>
-              )}
-              {locked && index < items.length - 1 && (
-                <Button type="button" onClick={() => onMove(index + 1)}>
-                  {tr("review:next_item")}
-                  <ArrowRight aria-hidden="true" />
-                </Button>
-              )}
-              {!locked && (
-                <Button
-                  type="submit"
-                  form="exam-answer"
-                  disabled={
-                    busy ||
-                    draft === null ||
-                    draft === "" ||
-                    (Array.isArray(draft) && !draft.length)
-                  }
-                >
-                  {tr(
-                    index === items.length - 1
-                      ? "review:finish_test"
-                      : "review:answer_next",
-                  )}
-                  <ArrowRight aria-hidden="true" />
-                </Button>
-              )}
-            </footer>
+                  variant="ghost"
+                  isDisabled={busy || index === 0}
+                  onClick={() => onMove(index - 1)}
+                  icon={<ArrowLeft aria-hidden="true" />}
+                  label={tr("review:previous_item")}
+                />
+                {attempt.phase !== "answering" && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => onResults(true)}
+                    endContent={<ArrowRight aria-hidden="true" />}
+                    label={tr("review:view_results")}
+                  />
+                )}
+                {locked && index < items.length - 1 && (
+                  <Button
+                    type="button"
+                    onClick={() => onMove(index + 1)}
+                    endContent={<ArrowRight aria-hidden="true" />}
+                    label={tr("review:next_item")}
+                  />
+                )}
+                {!locked && (
+                  <Button
+                    type="submit"
+                    form="exam-answer"
+                    isDisabled={
+                      busy ||
+                      draft === null ||
+                      draft === "" ||
+                      (Array.isArray(draft) && !draft.length)
+                    }
+                    endContent={<ArrowRight aria-hidden="true" />}
+                    label={tr(
+                      index === items.length - 1
+                        ? "review:finish_test"
+                        : "review:answer_next",
+                    )}
+                  />
+                )}
+              </footer>
+            </LayoutFooter>
           </>
         )
       )}

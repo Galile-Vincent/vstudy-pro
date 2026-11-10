@@ -1,6 +1,6 @@
 import { SubscriptionMeters } from './subscriptions';
 import { Select } from '../components/select';
-import { Button } from '../components/ui/button';
+import { Button } from '@astryxdesign/core';
 import { Stat, Toolbar } from '../components/ui';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
@@ -38,6 +38,7 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
         </span>
       </figcaption>
       <svg
+        className="w-full aspect-[16/5]"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
         aria-label={tr(
@@ -246,9 +247,12 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
                 <option value="last30days">{tr('common:last_30_days')}</option>
                 <option value="day">{tr('common:today')}</option>
               </Select>
-              <Button variant="secondary" size="sm" onClick={() => setRevision((r) => r + 1)}>
-                {tr('common:refresh_usage')}
-              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                label={tr('common:refresh_usage')}
+                onClick={() => setRevision((r) => r + 1)}
+              />
             </>
           }
         />

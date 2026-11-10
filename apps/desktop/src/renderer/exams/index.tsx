@@ -6,7 +6,6 @@ import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
 import { desktop } from "../bridge";
 import {
-  Button,
   EmptyState,
   FormField,
   Input,
@@ -15,9 +14,9 @@ import {
   Section,
   Toolbar,
 } from "../components/ui";
+import { Button, TextArea } from "@astryxdesign/core";
 import { ExamHistory } from "./history";
 import { useFooterInset } from "./footer-inset";
-import { Textarea } from "../components/ui/textarea";
 import { TestPlayer } from "../review/test-player";
 import { useReviewPage, type Cursor } from "../review/paging";
 import "./exams.css";
@@ -149,15 +148,14 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
   const leave = (
     <Button
       variant="ghost"
-      disabled={busy}
+      isDisabled={busy}
+      label={tr("exams:back")}
       onClick={() => {
         setArtifact(null);
         setMode("setup");
         history.retry();
       }}
-    >
-      {tr("exams:back")}
-    </Button>
+    />
   );
   const ready = documents?.filter((d) => d.status === "ready") ?? [];
   return (
@@ -173,25 +171,23 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
             <Button
               variant={mode === "setup" && !artifact ? "secondary" : "ghost"}
               aria-pressed={mode === "setup" && !artifact}
+              label={tr("exams:new_exam")}
               onClick={() => {
                 setArtifact(null);
                 setMode("setup");
                 history.retry();
               }}
-            >
-              {tr("exams:new_exam")}
-            </Button>
+            />
             <Button
               variant={mode === "history" && !artifact ? "secondary" : "ghost"}
               aria-pressed={mode === "history" && !artifact}
+              label={tr("exams:history")}
               onClick={() => {
                 setArtifact(null);
                 setMode("history");
                 history.retry();
               }}
-            >
-              {tr("exams:history")}
-            </Button>
+            />
           </nav>
         }
       />
@@ -202,7 +198,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
           icon={<FileText size={32} />}
           title={tr("exams:empty_title")}
           description={tr("exams:no_documents")}
-          action={<Button onClick={onOpenLibrary}>{tr("common:library")}</Button>}
+          action={onOpenLibrary ? <Button label={tr("common:library")} onClick={onOpenLibrary} /> : undefined}
         />
       )}
       {!artifact && mode === "setup" && ready.length > 0 && (
@@ -240,18 +236,14 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
               </div>
             </Section>
             <Section title={tr("exams:configuration")}>
-              <FormField label={tr("exams:prompt")}>
-                {(field) => (
-                  <Textarea
-                    {...field}
-                    maxLength={4000}
-                    rows={2}
-                    value={prompt}
-                    placeholder={tr("exams:prompt_hint")}
-                    onChange={(e) => setPrompt(e.target.value)}
-                  />
-                )}
-              </FormField>
+              <TextArea
+                label={tr("exams:prompt")}
+                maxLength={4000}
+                rows={2}
+                value={prompt}
+                placeholder={tr("exams:prompt_hint")}
+                onChange={(val) => setPrompt(val)}
+              />
               <fieldset className="flex flex-col gap-[var(--space-3)]">
                 <legend className="mb-[var(--space-3)] font-medium">
                   {tr("exams:question_types")}
@@ -344,16 +336,16 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
             <div className="exam-footer" ref={footerInset}>
               <Button
                 type="submit"
-                disabled={
+                variant="primary"
+                isDisabled={
                   busy ||
                   !selected.length ||
                   total < 1 ||
                   total > 40 ||
                   !choices.length
                 }
-              >
-                {tr("exams:generate")}
-              </Button>
+                label={tr("exams:generate")}
+              />
             </div>
           </fieldset>
         </form>
@@ -380,6 +372,8 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
             <div role="status">
               <p>{tr("review:stage_generating")}</p>
               <Button
+                variant="secondary"
+                label={tr("review:cancel")}
                 onClick={() =>
                   void run(async () => {
                     await desktop.invoke("review:artifact:cancel", {
@@ -393,9 +387,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
                     history.retry();
                   })
                 }
-              >
-                {tr("review:cancel")}
-              </Button>
+              />
             </div>
           ) : (
             <p role="alert">
@@ -410,7 +402,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
           {history.error && (
             <p role="alert">
               {tr("exams:history_error")}{" "}
-              <Button onClick={history.retry}>{tr("review:retry")}</Button>
+              <Button variant="secondary" label={tr("review:retry")} onClick={history.retry} />
             </p>
           )}
           {!history.items.length && !history.loading && !history.error && (
@@ -448,7 +440,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
             }}
           />
           {history.cursor && (
-            <Button onClick={history.more}>{tr("review:load_more")}</Button>
+            <Button variant="secondary" label={tr("review:load_more")} onClick={history.more} />
           )}
         </Section>
       )}
