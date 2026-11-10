@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import './test-platform';
 import { act, useState } from "react";
 import { getByRole, getAllByRole, queryByRole, waitFor } from "@testing-library/dom";
 import { createRoot, type Root } from "react-dom/client";

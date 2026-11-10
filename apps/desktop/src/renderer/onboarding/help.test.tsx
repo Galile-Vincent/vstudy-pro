@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import '../astryx-test-dom';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { GettingStarted, HelpMenu, LearningHelp, openLearningHelp } from './help';

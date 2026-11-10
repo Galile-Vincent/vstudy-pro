@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import '../astryx-test-dom';
 import { getRoles, getByRole } from '@testing-library/react';
 import { renderToStaticMarkup as render } from 'react-dom/server';
 import { TooltipProvider } from '../components/ui/tooltip';

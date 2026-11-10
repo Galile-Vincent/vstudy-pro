@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import '../courses/test-platform';
 /** User-visible search behavior, stale results, safe highlighting and undo actions. */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';

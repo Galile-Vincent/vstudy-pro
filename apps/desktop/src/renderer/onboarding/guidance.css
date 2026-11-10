@@ -1,6 +1,6 @@
 /* Learning surfaces inherit the product palette and remain readable without animation. */
 .learning-help-trigger { margin-inline-start:auto; }
-.learning-body { display:grid; gap:var(--space-4); padding:var(--space-4) var(--space-6) var(--space-6); }
+.learning-body { min-height:0; overflow:auto; display:grid; gap:var(--space-4); padding:var(--space-4) var(--space-6) var(--space-6); }
 .learning-dialog[data-compact] { --learning-width:520px; }
 .learning-dialog[data-compact] > [data-slot=section] > :first-child { padding-inline-end:var(--space-6); }
 

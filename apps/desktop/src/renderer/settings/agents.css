@@ -63,7 +63,7 @@
   color: var(--ink);
   user-select: text;
 }
-.agents-dialog { border: 1px solid var(--color-border); border-radius: var(--radius-container); }
+.agents-dialog { border: 1px solid var(--line-strong); border-radius: var(--radius-container); }
 .dialog-body { display: grid; gap: var(--spacing-4); padding: var(--spacing-4) var(--spacing-6) var(--spacing-6); }
 .dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--spacing-2); }
 .agents-dialog.agents-consent-dialog { overflow: hidden; }
@@ -72,7 +72,7 @@
 .agents-selection fieldset { display: grid; gap: var(--space-2); min-width: 0; padding: 0; border: 0; }
 .agents-choice { min-width: 0; }
 .agents-expiry { display: grid; gap: var(--space-2); }
-.agents-expiry input { border: 1px solid var(--color-border); border-radius: var(--radius-element); background: var(--color-background-surface); color: var(--color-text-primary); padding: var(--spacing-2) var(--spacing-3); min-height: 40px; }
+.agents-expiry input { border: 1px solid var(--line-strong); border-radius: var(--radius-element); background: var(--color-background-surface); color: var(--color-text-primary); padding: var(--spacing-2) var(--spacing-3); min-height: 40px; }
 .agents-client-name { font-size: var(--type-md); font-weight: 600; }
 .agents-code { display: block; text-align: center; background: var(--subtle); border-radius: var(--radius-container); padding: var(--space-5); font-family: var(--font-mono); font-size: var(--type-xl); font-weight: 600; letter-spacing: .12em; user-select: all; }
 .agents-risk { color: var(--warning); }

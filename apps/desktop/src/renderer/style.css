@@ -53,7 +53,7 @@ a:focus-visible {
 input:not([data-slot]):not([cmdk-input]):not([class*="astryx-"]),
 select:not([data-slot]) {
   color: inherit;
-  border: 0;
+  border: 1px solid var(--line-strong);
   border-radius: var(--r-sm);
   padding: 6px 10px;
   background: color-mix(in oklab, var(--ink) 5%, var(--surface));
@@ -930,7 +930,7 @@ h3 {
 @custom-variant data-open (&:where([data-state="open"], [data-open]:not([data-open="false"])));
 
 @custom-variant data-closed (&:where([data-state="closed"], [data-closed]:not([data-closed="false"])));
-:root { --primary:var(--accent-color); --primary-foreground:var(--accent-foreground); --secondary:var(--subtle); --secondary-foreground:var(--ink); --muted-foreground:var(--muted); --accent:var(--active); --accent-foreground:var(--ink); --border:var(--hairline); --input:var(--hairline); --ring:var(--focus); --radius:var(--r-sm); --card:var(--surface-card); --card-foreground:var(--ink); --popover:var(--surface-card-strong); --popover-foreground:var(--ink); --sidebar:var(--sidebar-surface); --sidebar-foreground:var(--ink); --sidebar-primary:var(--accent-color); --sidebar-primary-foreground:var(--accent-foreground); --sidebar-accent:var(--active); --sidebar-accent-foreground:var(--ink); --sidebar-border:var(--hairline); --sidebar-ring:var(--focus); }
+:root { --primary:var(--accent-color); --primary-foreground:var(--accent-foreground); --secondary:var(--subtle); --secondary-foreground:var(--ink); --muted-foreground:var(--muted); --accent:var(--active); --accent-foreground:var(--ink); --border:var(--hairline); --input:var(--line-strong); --ring:var(--focus); --radius:var(--r-sm); --card:var(--surface-card); --card-foreground:var(--ink); --popover:var(--surface-card-strong); --popover-foreground:var(--ink); --sidebar:var(--sidebar-surface); --sidebar-foreground:var(--ink); --sidebar-primary:var(--accent-color); --sidebar-primary-foreground:var(--accent-foreground); --sidebar-accent:var(--active); --sidebar-accent-foreground:var(--ink); --sidebar-border:var(--hairline); --sidebar-ring:var(--focus); }
 [data-slot=sidebar-wrapper] { min-height:0; height:100%; }
 .folder-node[aria-selected=true] { border-inline-start:0; box-shadow:none; background:var(--active); }
 .model-controls { display:flex; align-items:center; gap:var(--space-1); min-width:0; }

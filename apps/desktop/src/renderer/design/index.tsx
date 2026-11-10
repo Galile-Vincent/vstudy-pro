@@ -69,7 +69,7 @@ export default function DesignGallery() {
   useEffect(() => {
     const root = document.documentElement;
     const style = root.getAttribute('style');
-    const attributes = ['data-theme', 'data-scheme', 'data-card-transparency', 'class'].map(
+    const attributes = ['data-theme', 'data-scheme', 'class'].map(
       (name) => [name, root.getAttribute(name)] as const,
     );
     return () => {

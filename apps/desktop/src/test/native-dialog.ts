@@ -1,17 +1,27 @@
-// jsdom has no top layer: emulate the native dialog and popover methods Astryx calls.
-const dialog = typeof HTMLDialogElement === 'undefined' ? undefined : HTMLDialogElement.prototype;
-if (dialog) {
-  dialog.show ??= function show(this: HTMLDialogElement) { this.setAttribute('open', ''); };
-  dialog.showModal ??= function showModal(this: HTMLDialogElement) { this.setAttribute('open', ''); };
-  dialog.close ??= function close(this: HTMLDialogElement) {
-    if (!this.hasAttribute('open')) return;
+const previousFocus = new WeakMap<HTMLDialogElement, Element | null>();
+if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.showModal) {
+  HTMLDialogElement.prototype.show = function () { this.setAttribute('open', ''); };
+  HTMLDialogElement.prototype.showModal = function () {
+    previousFocus.set(this, document.activeElement);
+    this.setAttribute('open', '');
+  };
+  HTMLDialogElement.prototype.close = function () {
     this.removeAttribute('open');
+    const previous = previousFocus.get(this);
+    if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
     this.dispatchEvent(new Event('close'));
   };
 }
-const element = typeof HTMLElement === 'undefined' ? undefined : HTMLElement.prototype;
-if (element) {
-  element.showPopover ??= function showPopover(this: HTMLElement) { this.setAttribute('data-popover-open', ''); };
-  element.hidePopover ??= function hidePopover(this: HTMLElement) { this.removeAttribute('data-popover-open'); };
-  element.togglePopover ??= function togglePopover(this: HTMLElement) { this.toggleAttribute('data-popover-open'); return this.hasAttribute('data-popover-open'); };
+if (typeof HTMLElement !== 'undefined' && !HTMLElement.prototype.showPopover) {
+  HTMLElement.prototype.showPopover = function () { this.setAttribute('data-test-popover-open', ''); this.style.display = 'block'; };
+  HTMLElement.prototype.hidePopover = function () { this.removeAttribute('data-test-popover-open'); this.style.display = 'none'; };
+  HTMLElement.prototype.togglePopover = function (force) {
+    const open = force ?? !this.hasAttribute('data-test-popover-open');
+    if (open) this.showPopover(); else this.hidePopover();
+    return open;
+  };
+}
+
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} };
 }

@@ -52,6 +52,7 @@ try {
  // Both row menus share the same collision-aware host, including context clicks.
  for(let i=0;i<8;i++) {const p=join(directory,`menu-${i}.md`);await writeFile(p,`Document ${i}`);await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},p);await page.evaluate(()=>window.desktop.invoke('documents:import',{}));}
  await page.locator('.shell-sidebar').getByRole('button',{name:'All documents',exact:true}).click();
+ await page.getByRole('radio',{name:'All files',exact:true}).click();
  await page.locator('.library-document').first().waitFor();
  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setSize(960,800));
  for(const grid of [false,true]) {
@@ -76,8 +77,16 @@ try {
  await page.getByRole('menuitem',{name:'Re-parse with AI',exact:true}).click();await panel.waitFor();checks++;await audit();
  await page.screenshot({path:join(evidence,'panel-200-percent.png')});
  for(const [language,title] of [['zh-Hant','用 AI 重新解析'],['ja','AIで再解析']]) {
-  await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language});},language);
-  await page.reload();await panel.getByRole('heading',{name:title,exact:true}).waitFor();await panel.waitFor();await audit();
+  await page.evaluate(() => window.dispatchEvent(new window.Event('vstudy:open-settings')));
+  await page.getByTestId('language').click();
+  await page.getByRole('option',{name:language==='zh-Hant'?'繁體中文':'日本語',exact:true}).click();
+  await page.waitForFunction(language=>document.documentElement.lang===language,language);
+  await page.keyboard.press('Escape');
+  await page.locator('.settings-dialog[open]').waitFor({state:'hidden'});
+  if (!await panel.isVisible()) {
+    await page.getByRole('button',{name:title,exact:true}).first().click();
+  }
+  await panel.getByRole('heading',{name:title,exact:true}).waitFor();await audit();
  }
  assert.deepEqual(errors,[]);
  console.log(JSON.stringify({result:'PASS',checks,axeScans,axeViolations:0,evidence,liveProviders:0}));

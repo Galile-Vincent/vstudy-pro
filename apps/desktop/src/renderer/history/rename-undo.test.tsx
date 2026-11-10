@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import '../courses/test-platform';
 /** Undo restores an untitled conversation without persisting a translated placeholder. */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';

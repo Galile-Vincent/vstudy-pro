@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import '../courses/test-platform';
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi } from "vitest";

@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import '../courses/test-platform';
 import { readFileSync } from 'node:fs';
 import { recovery } from './recovery';
 import type { ComponentProps } from 'react';

@@ -13,7 +13,7 @@ export function AiParsePanel(p:AiParsePanelProps) {
  const invalid=p.scope==='range' && (!Number.isInteger(p.startPage) || !Number.isInteger(p.endPage) || p.startPage<1 || p.endPage>p.pageCount || p.startPage>p.endPage);
  const busy=p.state.status==='running';
  return <section className="text-sm space-y-3" aria-label={p.t('library:ai_parse.title')}>
-  <h3 className="font-medium">{p.t('library:ai_parse.title')}</h3><p>{p.pageCount} {p.t('library:pageCount')}</p>{p.modelPicker}
+  <h2 className="font-medium">{p.t('library:ai_parse.title')}</h2><p>{p.pageCount} {p.t('library:pageCount')}</p>{p.modelPicker}
   <select aria-label={p.t('library:ai_parse.scope')} value={p.scope} onChange={e=>p.onScope(e.target.value==='range'?'range':e.target.value==='preview'?'preview':'all')} disabled={busy} className="rounded-md border px-2 py-1">
    {(['all','range','preview'] as const).map(scope=><option key={scope} value={scope}>{p.t('library:ai_parse.'+scope)}</option>)}
   </select>

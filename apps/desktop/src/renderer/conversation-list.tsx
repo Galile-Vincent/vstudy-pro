@@ -7,7 +7,7 @@ import type { Conversation } from '../shared';
 import { desktop } from './bridge';
 import { useOptionalNavigation } from './shell';
 import { HistorySearch } from './history/search';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from './components/ui/dialog';
+import { Dialog, DialogHeader } from '@astryxdesign/core';
 export function ConversationList({ current, onSelect, onNew, canCreate }: {
   current: Conversation | null;
   onSelect: (conversation: Conversation, messageId?: string) => void;
@@ -18,7 +18,7 @@ export function ConversationList({ current, onSelect, onNew, canCreate }: {
   const navigation = useOptionalNavigation();
   const [open, setOpen] = useState(false), [error, setError] = useState(false);
   return <><button aria-label={tr('common:conversations')} className="conversation-trigger" onClick={() => setOpen(true)}><span>{tr('common:conversations')}</span><ChevronDown size={12}/></button>
-  <Dialog open={open} onOpenChange={setOpen}><DialogContent className="history-dialog"><DialogTitle>{tr('history:title')}</DialogTitle><DialogDescription>{tr('history:subtitle')}</DialogDescription>
+  <Dialog isOpen={open} onOpenChange={setOpen} className="history-dialog" aria-label={tr('history:title')}><DialogHeader title={tr('history:title')} subtitle={tr('history:subtitle')} onOpenChange={setOpen} />
    {canCreate && <button onClick={() => { void onNew().then(() => setOpen(false)).catch(() => setError(true)); }}>{tr('common:new_chat')}</button>}
    {error && <p role="alert">{tr('history:error')}</p>}
    <HistorySearch compact documentId={current?.scope !== 'course' && current?.scope !== 'general' ? current?.documentId : undefined} courseId={current?.scope === 'course' ? current.courseId : undefined} onOpen={(hit, messageId) => {
@@ -33,6 +33,6 @@ export function ConversationList({ current, onSelect, onNew, canCreate }: {
         setOpen(false);
       } }).catch(() => setError(true));
     }}/>
-  </DialogContent></Dialog>
+  </Dialog>
  </>;
 }

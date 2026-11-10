@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import '../courses/test-platform';
 /** History page structure: one main, one h1, labelled filters, flat rows without nested controls. */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';

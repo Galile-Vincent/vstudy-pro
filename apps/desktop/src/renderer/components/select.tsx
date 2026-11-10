@@ -32,6 +32,7 @@ export function Select({
     <Selector
       {...props}
       label={label}
+      aria-label={label}
       isLabelHidden
       options={options}
       value={value ?? ''}

@@ -56,7 +56,7 @@ function extraViews({ page, go, settings, documents }) {
     'overlay-help-checklist': ()=>help('checklist'),
     'overlay-help-setup': ()=>help('setup'),
     'overlay-new-tab-menu': async()=>{await go({view:'home'},home);await page.locator('.app-tabs-add').click();await page.locator('.app-tabs-menu').waitFor();},
-    'overlay-model-picker': async()=>{await reader();await page.getByRole('combobox',{name:'Model',exact:true}).click();await page.getByRole('listbox').waitFor();},
+    'overlay-model-picker': async()=>{await reader();await page.getByRole('combobox',{name:'Model',exact:true}).first().click();await page.getByRole('listbox').waitFor();},
     'overlay-library-new-folder': async()=>{await go({view:'library'},'.course-folder');await page.getByRole('button',{name:'New folder',exact:true}).first().click();await dialog().waitFor();},
     'overlay-folder-options': async()=>{await go({view:'library'},'.course-folder');await page.getByRole('button',{name:'Folder options: Course notes',exact:true}).click();await dialog().waitFor();},
     'overlay-subscription-usage': async()=>{

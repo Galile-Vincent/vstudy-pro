@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import '../courses/test-platform';
 /** Deleting inside an accumulated, paginated list keeps neighbour focus and the loaded pages. */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';

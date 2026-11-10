@@ -36,7 +36,8 @@ export function ThemeEditor({theme,settings,onClose,onSave}: ThemeActions & { th
     return () => applyAppearance(restore.current);
   }, [draft,scheme,settings]);
   const controlTheme=builtinThemes.find(t=>t.id===settings.themeId) ?? builtinThemes[0]!;
-  const controlStyle=Object.fromEntries(Object.entries(controlTheme[scheme]).map(([key,value])=>[`--${key==='sidebar'?'sidebar-surface':key}`,value])) as CSSProperties;
+  const controlStyle=Object.fromEntries(Object.entries(controlTheme[scheme]).map(([key,value])=>[`--${key==='sidebar'?'sidebar-surface':key==='line'?'line-strong':key}`,value])) as CSSProperties & Record<`--${string}`, string>;
+  controlStyle['--line'] = 'color-mix(in oklab,var(--ink) 10%,transparent)';
   const warnings = (['light','dark'] as const).flatMap(s => contrastFailures(draft[s]).map(w => `${tr(`themes:${s}`)} ${w}`));
   const save = async () => {
     setSaving(true);

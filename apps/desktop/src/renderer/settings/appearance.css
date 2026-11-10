@@ -3,7 +3,7 @@
 .appearance-layout .scheme-card { display:grid; gap:var(--space-2); padding:var(--space-2); background:var(--color-background-card); color:var(--ink); border:1px solid var(--color-border); border-radius:var(--radius-container); text-align:start; transition:background-color 150ms var(--ease-standard),border-color 150ms var(--ease-standard); }
 .appearance-layout .scheme-card .theme-preview { aspect-ratio:2.4; border:0; }
 .scheme-card-label { display:flex; align-items:center; justify-content:space-between; gap:var(--space-2); padding-inline:var(--space-1); font-size:var(--type-base); font-weight:500; }
-.scheme-card-check { display:grid; place-items:center; width:16px; height:16px; flex:none; border:1px solid var(--line); border-radius:var(--radius-full); }
+.scheme-card-check { display:grid; place-items:center; width:16px; height:16px; flex:none; border:1px solid var(--line-strong); border-radius:var(--radius-full); }
 .scheme-card-check svg { width:11px; height:11px; }
 .scheme-card[aria-pressed=true] .scheme-card-check { background:var(--ink); border-color:var(--ink); color:var(--surface); }
 .themes-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr)); gap:var(--space-2); }

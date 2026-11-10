@@ -263,3 +263,5 @@ html:not([data-input-modality=keyboard]) .workspace .reading-pane:focus { outlin
  .app-shell .workspace.workspace .aui-composer-input { min-height:40px; }
  .app-shell .workspace.workspace .aui-thread-viewport-footer { padding-block:var(--spacing-2); }
 }
+
+[data-slot=model-selector-item] > svg { width:var(--space-5); height:var(--space-5); flex:none; }

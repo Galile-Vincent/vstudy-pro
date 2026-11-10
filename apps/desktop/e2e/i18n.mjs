@@ -33,9 +33,9 @@ for(const language of ['en','zh-Hant','ja']) {
     await page.emulateMedia({colorScheme});
     await page.screenshot({path:`${evidence}/${language}-${width}-${colorScheme}-chat.png`,animations:'disabled'});
     assert.equal(await page.locator('body').evaluate(e=>e.scrollWidth<=window.innerWidth),true,'window has no horizontal overflow');
-    if(await page.locator('.workspace-tabs').isVisible())await page.locator('.workspace-tabs button').nth(1).click();await page.locator('[data-slot=model-selector-trigger]').click();
-    await page.locator('[cmdk-input]').waitFor();
-    await page.locator('[cmdk-item]').first().waitFor();
+    if(await page.locator('.workspace-tabs').isVisible())await page.locator('.workspace-tabs button').nth(1).click();await page.locator('[data-slot=model-selector-trigger]').first().click();
+    await page.locator('[data-slot=model-selector-search]').waitFor();
+    await page.locator('[role=option]').first().waitFor();
     await page.screenshot({path:`${evidence}/${language}-${width}-${colorScheme}-picker.png`,animations:'disabled'});
     await page.keyboard.press('Escape');
     await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();await page.locator('.settings-dialog[open] .settings-tabs [role=tab]').first().click();

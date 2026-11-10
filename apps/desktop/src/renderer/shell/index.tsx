@@ -1,8 +1,6 @@
 import { AppShell as AstryxAppShell, MobileNav, SideNav } from '@astryxdesign/core';
 import { ShellBrand, ShellDestinations, ShellFooter } from './shell-nav';
 import { ShellChrome } from './shell-chrome';
-import { SidebarProvider } from '../components/ui/sidebar';
-import { TooltipProvider } from '../components/ui/tooltip';
 import { mergeTabPresentation, activeTab, currentRoute, createTab, loadTabs, saveTabs, tabReducer, type TabAction } from './tab-state';
 import { MAX_APP_TABS, type TabSet, type TabRoute } from '../../shared/app-tabs';
 import { HistorySwipeNavigation, hasNavigationOverlay } from './history-swipe-navigation';
@@ -214,9 +212,7 @@ export function AppShell({
     }, 0);
   }, [route.view]);
   const navigation = (
-    <SidebarProvider mobileSheet={false} open onOpenChange={() => {}} className="contents min-h-0">
       <ShellDestinations route={route} navigate={navigate} openTab={openTab} library={sidebar} />
-    </SidebarProvider>
   );
   return (
     <NavigationContext.Provider
@@ -270,7 +266,6 @@ export function AppShell({
     closeWelcome,
   }}
 >
-  <TooltipProvider delayDuration={0}>
   <AstryxAppShell
     className="app-shell"
     data-view={route.view}
@@ -306,7 +301,6 @@ export function AppShell({
       </div>
     </div>
   </AstryxAppShell>
-  </TooltipProvider>
 </NavigationContext.Provider>
   );
 }

@@ -1,13 +1,13 @@
 .document-original { overflow:auto; padding:0 16px 32px; height:100%; outline-offset:-3px; }
 .original-toolbar { position:sticky; top:8px; z-index:2; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; padding:8px; border:1px solid var(--line); border-radius:var(--radius-container); background:var(--surface); box-shadow:var(--shadow-med); }
 .original-toolbar label { white-space:nowrap; font-size:12px; }
-.original-toolbar input { width:50px; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-element); }
+.original-toolbar input { width:50px; color:var(--ink); background:var(--surface); border:1px solid var(--line-strong); border-radius:var(--radius-element); }
 .original-hint { font-size:12px; color:var(--muted); text-align:center; margin:16px 0; }
 .original-page { position:relative; width:100%; margin:auto; border:1px solid var(--color-border); box-shadow:none; }
 .original-page img { display:block; width:100%; height:auto; }
 .original-capture { position:absolute; inset:0; cursor:crosshair; touch-action:none; }
 .original-capture-rect { position:absolute; border:2px solid var(--accent-color); background:color-mix(in srgb,var(--accent-color) 15%,transparent); pointer-events:none; }
-.document-context-chip { display:flex; align-items:center; gap:8px; padding:8px; margin:8px 0; border:1px solid var(--line); border-radius:12px; background:var(--surface); font-size:12px; }
+.document-context-chip { display:flex; align-items:center; gap:8px; padding:8px; margin:8px 0; border:1px solid var(--line-strong); border-radius:12px; background:var(--surface); font-size:12px; }
 .document-context-chip img { width:64px; height:44px; object-fit:contain; background:var(--surface); border-radius:4px; }
 .document-context-chip span { flex:1; overflow-wrap:anywhere; }
 .document-context-chip button { flex-shrink:0; }

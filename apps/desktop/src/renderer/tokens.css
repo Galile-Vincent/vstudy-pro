@@ -114,6 +114,8 @@ button,summary { min-inline-size:var(--space-6); min-block-size:var(--space-6); 
 
 .markdown[data-citation-layout] > * { content-visibility:visible; }
 input[type="checkbox"] { accent-color:var(--accent-color); }
+.astryx-segmented-control { border:1px solid var(--line-strong); }
+.astryx-segmented-control-item,.astryx-switch-thumb { box-shadow:none; }
 
 /* Typography, scale, and density are independent of the selected theme. */
 :root {
@@ -146,7 +148,7 @@ html:lang(ja) { --font-ui:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",syst
 }
 
 /* Surfaces. Resting containers are flat: surface tone, 1px hairline, container radius, no shadow, no blur. */
-:root { --surface-opacity:100%; --page-field:var(--background); }
+:root { --page-field:var(--background); }
 .glass,.glass-pill,.glass-lift,[data-slot=card] { border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); box-shadow:none; }
 .glass-pill { border-radius:var(--r-pill); }
 .glass-lift { transition:background-color var(--motion-fast) var(--ease-standard); }
@@ -208,10 +210,11 @@ html[data-theme=contrast] :is([data-slot=card],[data-slot=popover-content],[data
  --color-accent-muted:var(--active);
  --color-border:var(--line);
  --color-border-emphasized:var(--line-strong);
+ --color-track:var(--line-strong);
  --color-neutral:var(--subtle);
  --color-overlay:var(--overlay);
- --color-overlay-hover:var(--active);
- --color-overlay-pressed:var(--active);
+ --color-overlay-hover:color-mix(in oklab,var(--ink) 6%,transparent);
+ --color-overlay-pressed:color-mix(in oklab,var(--ink) 10%,transparent);
  --color-skeleton:var(--subtle);
  --color-shadow:var(--shadow-soft);
  --color-error:var(--danger);

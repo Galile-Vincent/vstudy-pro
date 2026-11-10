@@ -3,10 +3,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-container);
   overflow: hidden;
-  /* Astryx paints hover and press as a layer above the label, so the tint must be translucent.
-     tokens.css maps these to the opaque --active, which hides tab labels on hover. */
-  --color-overlay-hover: color-mix(in oklab, var(--ink) 6%, transparent);
-  --color-overlay-pressed: color-mix(in oklab, var(--ink) 10%, transparent);
+
 }
 
 .settings-body {
@@ -26,7 +23,7 @@
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: var(--line) transparent;
+  scrollbar-color: var(--line-strong) var(--surface);
   min-width: 0;
   min-height: 0;
   padding: var(--spacing-6) var(--spacing-4) var(--spacing-8);
