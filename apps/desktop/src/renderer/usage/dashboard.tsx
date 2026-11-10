@@ -1,5 +1,6 @@
 import { SubscriptionMeters } from './subscriptions';
-import { Button, Selector } from '@astryxdesign/core';
+import { Button } from '@astryxdesign/core';
+import { Select } from '../components/select';
 import { Stat, Toolbar } from '../components/ui';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
@@ -236,18 +237,16 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
         <Toolbar
           left={
             <>
-              <Selector
-                  label={tr('common:usage_period')}
-                  isLabelHidden
-                  value={period}
-                  onChange={(value) => setPeriod(value as typeof period)}
-                  options={[
-                    { value: 'all', label: tr('common:all_time') },
-                    { value: 'month', label: tr('common:this_month') },
-                    { value: 'last30days', label: tr('common:last_30_days') },
-                    { value: 'day', label: tr('common:today') },
-                  ]}
-                />
+              <Select
+                aria-label={tr('common:usage_period')}
+                value={period}
+                onChange={(event) => setPeriod(event.target.value as typeof period)}
+              >
+                <option value="all">{tr('common:all_time')}</option>
+                <option value="month">{tr('common:this_month')}</option>
+                <option value="last30days">{tr('common:last_30_days')}</option>
+                <option value="day">{tr('common:today')}</option>
+              </Select>
               <Button
                 variant="secondary"
                 size="sm"
@@ -289,17 +288,15 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
             <Toolbar
               left={<strong>{tr('common:breakdown')}</strong>}
               right={
-                <Selector
-                  label={tr('common:group_usage_by')}
-                  isLabelHidden
+                <Select
+                  aria-label={tr('common:group_usage_by')}
                   value={by}
-                  onChange={(value) => setBy(value as typeof by)}
-                  options={[
-                    { value: 'provider', label: tr('common:provider') },
-                    { value: 'model', label: tr('common:model') },
-                    { value: 'document', label: tr('common:document') },
-                  ]}
-                />
+                  onChange={(event) => setBy(event.target.value as typeof by)}
+                >
+                  <option value="provider">{tr('common:provider')}</option>
+                  <option value="model">{tr('common:model')}</option>
+                  <option value="document">{tr('common:document')}</option>
+                </Select>
               }
             />
             <div className="usage-breakdown">
