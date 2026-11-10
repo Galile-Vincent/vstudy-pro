@@ -1,17 +1,13 @@
 /** Global Help entry points and contextual, profile-local learning guidance. */
-import { Card, ListRow, SegmentedTabsList, SegmentedTabsTrigger, Section, Tabs, TabsContent } from '../components/ui';
+import { Button, Card, Dialog, DialogHeader, DropdownMenu, IconButton, Popover, SegmentedControl, SegmentedControlItem } from '@astryxdesign/core';
+import { ListRow, Section } from '../components/ui';
 import { Brand } from '../components/brand';
 import { useEffect, useRef, useState } from 'react';
 import { Check, CircleHelp, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
-import { Button } from '../components/ui/button';
-import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 import { Progress } from '../components/ui/progress';
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip';
 import { useNavigate } from '../shell';
 import { Onboarding } from './onboarding';
 import { isInsideDialog, returnFocusTo } from './return-focus';
@@ -25,7 +21,13 @@ export function openLearningHelp(view: HelpView) {
 }
 export function HelpMenu() {
   useTranslation();
-  return <DropdownMenu><Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><Button variant="ghost" className="learning-help-trigger"><CircleHelp size={16}/>{tr('onboarding:help')}</Button></DropdownMenuTrigger></TooltipTrigger><TooltipContent>{tr('onboarding:help_hint')}</TooltipContent></Tooltip><DropdownMenuContent align="end">{(['setup', 'walkthroughs', 'shortcuts'] as const).map(view => <DropdownMenuItem key={view} onSelect={() => openLearningHelp(view)}>{tr(`onboarding:help_${view}`)}</DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>;
+  return <DropdownMenu
+    placement="below"
+    alignment="end"
+    hasChevron={false}
+    button={{ label: tr('onboarding:help'), variant: 'ghost', size: 'sm', icon: <CircleHelp size={16}/>, tooltip: tr('onboarding:help_hint'), className: 'learning-help-trigger' }}
+    items={(['setup', 'walkthroughs', 'shortcuts'] as const).map(view => ({ label: tr(`onboarding:help_${view}`), onClick: () => openLearningHelp(view) }))}
+  />;
 }
 export function LearningHelp() {
   useTranslation();
@@ -52,41 +54,25 @@ export function LearningHelp() {
     window.addEventListener('vstudy:learning-help', show);
     return () => window.removeEventListener('vstudy:learning-help', show);
   }, []);
+  const close = () => { setView(undefined); window.setTimeout(() => restoreFocus(new Event('close')), 0); };
   if (view === 'setup') return <Onboarding onComplete={() => setView(undefined)} onCloseAutoFocus={restoreFocus}/>;
-  if (view === 'checklist') return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}>
-    <DialogContent className="learning-dialog" data-compact aria-describedby={undefined} onCloseAutoFocus={event => {
-      if (navigating.current) { event.preventDefault(); focusDestination(); } else restoreFocus(event);
-    }}>
-      <GettingStarted detailed dialogTitle onNavigate={() => { navigating.current = true; setView(undefined); }}/>
-    </DialogContent>
+  if (view === 'checklist') return <Dialog isOpen onOpenChange={open => { if (!open) { if (navigating.current) focusDestination(); else close(); setView(undefined); } }} width={560} className="learning-dialog" aria-label={tr('onboarding:checklist')}>
+    <GettingStarted detailed dialogTitle onNavigate={() => { navigating.current = true; setView(undefined); window.setTimeout(focusDestination, 0); }}/>
   </Dialog>;
   if (!view) return null;
   return (
-    <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}>
-      <DialogContent
-        className="learning-dialog"
-        aria-describedby={undefined}
-        showCloseButton={false}
-        onCloseAutoFocus={restoreFocus}
-      >
-        <Brand lockup/>
-        <header>
-          <DialogTitle>{tr(`onboarding:help_${view}`)}</DialogTitle>
-          <Button variant="ghost" size="icon" aria-label={tr('common:close')} onClick={() => setView(undefined)}>
-            <X size={18}/>
-          </Button>
-        </header>
+    <Dialog isOpen onOpenChange={open => { if (!open) close(); }} width={640} className="learning-dialog">
+      <DialogHeader title={tr(`onboarding:help_${view}`)} startContent={<Brand lockup/>} onOpenChange={open => { if (!open) close(); }}/>
+      <div className="learning-body">
         {view === 'walkthroughs' ? (
           <>
             <p>{tr('onboarding:walkthroughs_body')}</p>
-            <Tabs value={lesson} onValueChange={value => setLesson(value as Lesson)}>
-              <SegmentedTabsList aria-label={tr('onboarding:help_walkthroughs')}>
-                {lessons.map(item => (
-                  <SegmentedTabsTrigger key={item} value={item}>{tr(`onboarding:lesson_${item}`)}</SegmentedTabsTrigger>
-                ))}
-              </SegmentedTabsList>
-              <TabsContent value={lesson}><Walkthrough key={lesson} lesson={lesson}/></TabsContent>
-            </Tabs>
+            <SegmentedControl label={tr('onboarding:help_walkthroughs')} value={lesson} onChange={value => setLesson(value as Lesson)}>
+              {lessons.map(item => (
+                <SegmentedControlItem key={item} value={item} label={tr(`onboarding:lesson_${item}`)}/>
+              ))}
+            </SegmentedControl>
+            <Walkthrough key={lesson} lesson={lesson}/>
           </>
         ) : (
           <>
@@ -101,7 +87,7 @@ export function LearningHelp() {
             </dl>
           </>
         )}
-      </DialogContent>
+      </div>
     </Dialog>
   );
 }
@@ -134,20 +120,18 @@ export function GettingStarted({ detailed = false, dialogTitle = false, onNaviga
   const items = ['setup', 'document', 'walkthrough', 'help'] as const;
   if (!detailed && items.every((item) => progress.done.includes(item))) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] p-[var(--space-3)]">
-        <span className="flex items-center gap-[var(--space-2)]">
+      <div className="flex flex-wrap items-center gap-[var(--space-3)]">
+        <span className="flex items-center gap-[var(--space-2)] text-[var(--muted)]">
           <Check size={16} aria-hidden="true" />
           {tr('onboarding:setup_complete')}
         </span>
-        <Button variant="ghost" onClick={() => openLearningHelp('checklist')}>
-          {tr('onboarding:setup_help')}
-        </Button>
+        <Button variant="ghost" label={tr('onboarding:setup_help')} onClick={() => openLearningHelp('checklist')}/>
       </div>
     );
   }
   const body = (
     <Section
-      title={dialogTitle ? <DialogTitle asChild><span>{tr('onboarding:checklist')}</span></DialogTitle> : tr('onboarding:checklist')}
+      title={tr('onboarding:checklist')}
       actions={<span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>}
     >
       <p>{tr('onboarding:checklist_body')}</p>
@@ -178,7 +162,8 @@ export function GettingStarted({ detailed = false, dialogTitle = false, onNaviga
       </div>
       {progress.status === 'paused' && (
         <Button
-          variant="outline"
+          variant="secondary"
+          label={tr('onboarding:resume')}
           onClick={() => {
             try {
               saveProgress({ status: 'active' });
@@ -187,14 +172,12 @@ export function GettingStarted({ detailed = false, dialogTitle = false, onNaviga
               setError(tr('onboarding:save_error'));
             }
           }}
-        >
-          {tr('onboarding:resume')}
-        </Button>
+        />
       )}
       {error && <p role="alert">{error}</p>}
     </Section>
   );
-  return dialogTitle ? body : <Card variant="flat" className="min-w-0 p-[var(--space-6)]">{body}</Card>;
+  return dialogTitle ? body : <Card padding={6}>{body}</Card>;
 }
 export function ContextCoach({ inline = false }: { inline?: boolean }) {
   useTranslation();
@@ -204,11 +187,12 @@ export function ContextCoach({ inline = false }: { inline?: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const kind = route.view === 'workspace' ? 'workspace' : route.view === 'courses' ? 'courses' : null;
   if (!kind || progress.dismissed.includes(kind) || (kind === 'workspace' && !inline)) return null;
-  if (kind === 'workspace') return <Popover><PopoverTrigger asChild><Button variant="ghost" size="sm" className="art-reader-coach-trigger"><CircleHelp size={15}/>{tr('art-reader:tip')}</Button></PopoverTrigger><PopoverContent align="start" className="art-reader-coach">
+  const dismiss = () => { try { saveProgress({ dismissed: [...progress.dismissed, kind] }); } catch { setError(tr('onboarding:save_error')); } };
+  if (kind === 'workspace') return <Popover alignment="start" label={tr('art-reader:tip')} content={<div className="art-reader-coach">
     <strong>{tr('onboarding:coach_workspace')}</strong><p>{tr('onboarding:coach_workspace_body')}</p>
-    <Button variant="link" onClick={() => openLearningHelp('walkthroughs')}>{tr('onboarding:help_walkthroughs')}</Button>
-    <Button variant="ghost" size="icon" aria-label={tr('onboarding:dismiss_tip')} onClick={() => { try { saveProgress({ dismissed: [...progress.dismissed, kind] }); } catch { setError(tr('onboarding:save_error')); } }}><X size={16}/></Button>
+    <Button variant="ghost" label={tr('onboarding:help_walkthroughs')} onClick={() => openLearningHelp('walkthroughs')}/>
+    <IconButton variant="ghost" label={tr('onboarding:dismiss_tip')} icon={<X size={16}/>} onClick={dismiss}/>
     {error && <p role="alert">{error}</p>}
-  </PopoverContent></Popover>;
-  return <aside className="context-coach" aria-label={tr('onboarding:tip')}><div><details open={expanded} onToggle={event => setExpanded(event.currentTarget.open)}><summary><strong>{tr(`onboarding:coach_${kind}`)}</strong></summary><p>{tr(`onboarding:coach_${kind}_body`)}</p></details><Button variant="ghost" onClick={() => openLearningHelp('walkthroughs')}>{tr('onboarding:help_walkthroughs')}</Button>{error && <p role="alert">{error}</p>}</div><Tooltip><TooltipTrigger asChild><Button variant="ghost" aria-label={tr('onboarding:dismiss_tip')} onClick={() => { try { saveProgress({ dismissed: [...progress.dismissed, kind] }); } catch { setError(tr('onboarding:save_error')); } }}><X size={16}/></Button></TooltipTrigger><TooltipContent>{tr('onboarding:dismiss_tip')}</TooltipContent></Tooltip></aside>;
+  </div>}><Button variant="ghost" size="sm" className="art-reader-coach-trigger" label={tr('art-reader:tip')} icon={<CircleHelp size={15}/>}/></Popover>;
+  return <aside className="context-coach" aria-label={tr('onboarding:tip')}><div><details open={expanded} onToggle={event => setExpanded(event.currentTarget.open)}><summary><strong>{tr(`onboarding:coach_${kind}`)}</strong></summary><p>{tr(`onboarding:coach_${kind}_body`)}</p></details><Button variant="ghost" label={tr('onboarding:help_walkthroughs')} onClick={() => openLearningHelp('walkthroughs')}/>{error && <p role="alert">{error}</p>}</div><IconButton variant="ghost" label={tr('onboarding:dismiss_tip')} tooltip={tr('onboarding:dismiss_tip')} icon={<X size={16}/>} onClick={dismiss}/></aside>;
 }

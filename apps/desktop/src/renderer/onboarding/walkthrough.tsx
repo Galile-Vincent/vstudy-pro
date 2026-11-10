@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { BookOpen, Check, GraduationCap, MessageCircle, Pause, Play, RotateCcw, Search, TextSelect } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
-import { Button } from '../components/ui/button';
+import { Button } from '@astryxdesign/core';
 import { markLearned } from './progress';
 import './guidance.css';
 import './history-guidance';
@@ -60,13 +60,13 @@ export function Walkthrough({ lesson }: { lesson: Lesson }) {
           <span>{index < frame ? <Check size={16}/> : index + 1}</span><strong>{tr(`${lesson === 'history' ? 'ux' : 'onboarding'}:${lesson}_visual_${index}`)}</strong>
         </div>)}
       </div>
-      <div className="walkthrough-track" key={frame}><span /></div>
+      <progress className="walkthrough-track" value={frame + 1} max={3} aria-label={tr('onboarding:caption_step', { current: frame + 1, total: 3 })} />
     </div>
     <p className="walkthrough-caption" aria-live="polite">{tr('onboarding:caption_step', { current: frame + 1, total: 3 })} {tr(`${lesson === 'history' ? 'ux' : 'onboarding'}:${lesson}_caption_${frame}`)}</p>
     <div className="learning-actions">
-      <Button variant="outline" onClick={() => { if (frame === 2) { setFrame(0); setPlaying(true); } else setPlaying(value => !value); }}>{playing && frame < 2 ? <Pause size={16}/> : <Play size={16}/>}{tr(playing && frame < 2 ? 'onboarding:pause' : 'onboarding:play')}</Button>
-      <Button variant="ghost" onClick={() => { setFrame(0); setPlaying(!reduced); }}><RotateCcw size={16}/>{tr('onboarding:replay_clip')}</Button>
-      <Button variant="ghost" disabled={frame === 2} onClick={() => { setPlaying(false); setFrame(value => Math.min(2, value + 1)); }}>{tr('onboarding:next_caption')}</Button>
+      <Button variant="secondary" icon={playing && frame < 2 ? <Pause size={16}/> : <Play size={16}/>} label={tr(playing && frame < 2 ? 'onboarding:pause' : 'onboarding:play')} onClick={() => { if (frame === 2) { setFrame(0); setPlaying(true); } else setPlaying(value => !value); }}/>
+      <Button variant="ghost" icon={<RotateCcw size={16}/>} label={tr('onboarding:replay_clip')} onClick={() => { setFrame(0); setPlaying(!reduced); }}/>
+      <Button variant="ghost" label={tr('onboarding:next_caption')} isDisabled={frame === 2} onClick={() => { setPlaying(false); setFrame(value => Math.min(2, value + 1)); }}/>
     </div>
     <details className="walkthrough-transcript" open={reduced || undefined}><summary>{tr('onboarding:all_instructions')}</summary><ol>{[0, 1, 2].map(index => <li key={index}>{tr(`${lesson === 'history' ? 'ux' : 'onboarding'}:${lesson}_caption_${index}`)}</li>)}</ol></details>
     <details className="recorded-example"><summary>{tr('onboarding:recorded_video')}</summary><p>{tr('onboarding:recorded_body')}</p><video controls preload="none" playsInline aria-label={tr(`onboarding:lesson_${lesson}`)} src={recording.video}>

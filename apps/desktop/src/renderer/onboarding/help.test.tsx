@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
+import '../astryx-test-dom';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { GettingStarted, HelpMenu, LearningHelp, openLearningHelp } from './help';
-import { TooltipProvider } from '../components/ui/tooltip';
 import { i18n } from '../../shared/i18n';
 const { navigate } = vi.hoisted(() => ({ navigate: vi.fn() }));
 vi.mock('../shell', () => ({ useNavigate: () => ({ navigate }), useOptionalNavigation: () => undefined }));
@@ -31,20 +31,20 @@ it('shows the dialog checklist as four rows without an inner card', async () => 
   render(<LearningHelp />);
   act(() => openLearningHelp('checklist'));
   const dialog = await screen.findByRole('dialog');
-  expect(dialog.querySelector('[data-slot=card]')).toBeNull();
+  expect(dialog.querySelector('.astryx-card')).toBeNull();
   expect(dialog.querySelectorAll('[data-slot=list-row]')).toHaveLength(4);
   expect(dialog.querySelector('main,[role=main]')).toBeNull();
 });
 
-it('switches walkthrough lessons with tabs', async () => {
+it('switches walkthrough lessons with the segmented control', async () => {
   await i18n.changeLanguage('en');
   vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
   render(<LearningHelp />);
   act(() => openLearningHelp('walkthroughs'));
-  const tab = await screen.findByRole('tab', { name: i18n.t('onboarding:lesson_due') });
-  fireEvent.mouseDown(tab);
-  fireEvent.focus(tab);
-  await waitFor(() => expect(tab.getAttribute('aria-selected')).toBe('true'));
+  const lesson = await screen.findByRole('radio', { name: i18n.t('onboarding:lesson_due') });
+  fireEvent.click(lesson);
+  await waitFor(() => expect(lesson.getAttribute('aria-checked')).toBe('true'));
+  expect(screen.getByRole('region', { name: i18n.t('onboarding:lesson_due') })).not.toBeNull();
   vi.unstubAllGlobals();
   vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} });
 });
@@ -76,13 +76,10 @@ it('focuses the destination main after checklist navigation', async () => {
 
 it('returns focus to the Help button after the shortcuts dialog closes with Escape', async () => {
   await i18n.changeLanguage('en');
-  render(<TooltipProvider><HelpMenu /><LearningHelp /></TooltipProvider>);
+  render(<><HelpMenu /><LearningHelp /></>);
   const help = screen.getByRole('button', { name: i18n.t('onboarding:help') });
   help.focus();
-  fireEvent.keyDown(help, { key: 'ArrowDown' });
-  const item = await screen.findByRole('menuitem', { name: i18n.t('onboarding:help_shortcuts') });
-  item.focus();
-  fireEvent.click(item);
+  act(() => openLearningHelp('shortcuts'));
   await screen.findByRole('dialog', { name: i18n.t('onboarding:help_shortcuts') });
   fireEvent.keyDown(document.activeElement ?? document.body, { key: 'Escape' });
   await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import '../astryx-test-dom';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { i18n } from '../../shared/i18n';
@@ -14,6 +15,7 @@ vi.mock('../components/select', () => ({ Select: (props: SelectHTMLAttributes<HT
   <select {...props} data-value={props.value} /> }));
 import { UploadCard } from './upload-card';
 afterEach(cleanup);
+const uploadStatus = () => document.querySelector('.upload-status') as HTMLElement;
 beforeEach(async () => { invoke.mockReset(); await i18n.changeLanguage('en'); });
 it('labels the destination trigger and defaults to Unfiled', () => {
   render(<UploadCard folders={[{ id: 'folder', name: 'Notes' } as z.infer<typeof folderSchema>]} />);
@@ -52,7 +54,7 @@ it.each(['Choose a file', 'Try a sample document'])('shows actionable errors fro
   render(<UploadCard />);
   fireEvent.click(screen.getByRole('button', { name }));
   await act(async () => {});
-  expect(screen.getByRole('status').textContent).toBe(i18n.t('errors:disk_full'));
+  expect(uploadStatus().textContent).toBe(i18n.t('errors:disk_full'));
 });
 
 it('marks the entire import section during drag and restores it on leave', () => {
@@ -86,7 +88,7 @@ it('rejects a busy drag visibly without highlighting', async () => {
   fireEvent.dragEnter(container.firstChild!, { dataTransfer: { types: ['Files'] } });
   expect(container.firstElementChild!.getAttribute('data-dragging')).toBe('false');
   fireEvent.drop(container.firstChild!, { dataTransfer: { types: ['Files'], files: [] } });
-  expect(screen.getByRole('status').textContent).toContain('Wait');
+  expect(uploadStatus().textContent).toContain('Wait');
 });
 it('releases the picker lock after an error and accepts a drop', async () => {
   invoke.mockRejectedValueOnce(new Error('failed')).mockResolvedValue([]);
@@ -119,10 +121,10 @@ it('keeps one persistent status for partial failures', async () => {
   invoke.mockResolvedValue([{ ok: true, document: { id: 'doc', title: 'Notes' } },
     { ok: false, error: 'errors.disk_full' }]);
   const { container } = render(<UploadCard />);
-  const status = screen.getByRole('status');
+  const status = uploadStatus();
   fireEvent.drop(container.firstChild!, { dataTransfer: { types: ['Files'], files: [new File([''], 'notes.pdf')] } });
   await act(async () => {});
-  expect(screen.getAllByRole('status')).toEqual([status]);
+  expect(document.querySelectorAll('.upload-status')).toHaveLength(1);
   const error = screen.getByRole('alert').textContent;
   expect(error).toBeTruthy();
   expect(status.textContent).toBe(error + i18n.t('home:imported'));
@@ -146,7 +148,7 @@ it.each([false, true])('reannounces identical rejected drops while busy=%s', asy
   const drop = () => fireEvent.drop(container.firstChild!, { dataTransfer: { types: ['Files'], files: [] } });
   drop();
   await act(async () => {});
-  const status = screen.getByRole('status');
+  const status = uploadStatus();
   const content = status.lastElementChild!;
   const text = content.textContent;
   drop();
@@ -166,6 +168,6 @@ it('does not accept text dragover or drop', () => {
   const dataTransfer = { types: ['text/plain'], files: [] };
   expect(fireEvent.dragOver(container.firstChild!, { dataTransfer })).toBe(true);
   expect(fireEvent.drop(container.firstChild!, { dataTransfer })).toBe(true);
-  expect(screen.getByRole('status').textContent).toBe('');
+  expect(uploadStatus().textContent).toBe('');
   expect(invoke).not.toHaveBeenCalled();
 });

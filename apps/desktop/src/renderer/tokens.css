@@ -1,22 +1,32 @@
-/* Shared visual primitives. Inner corners subtract their inset from the outer radius. */
+/* Global tokens. In-flow surfaces are flat: tone plus a 1px hairline, no shadow, no blur.
+   Only floating overlays (menus, popovers, dialogs, toasts) use Astryx --shadow-low/med/high. */
 :root {
- --r-xs:6px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px; --r-pill:999px;
- --r-outer:var(--r-lg); --inset:6px; --r-inner:max(0px,calc(var(--r-outer) - var(--inset)));
- --space-1:calc(4px * var(--density)); --space-2:calc(8px * var(--density)); --space-3:calc(12px * var(--density)); --space-4:calc(16px * var(--density)); --space-5:calc(20px * var(--density)); --space-6:calc(24px * var(--density)); --space-8:calc(32px * var(--density));
+ --r-xs:var(--radius-inner); --r-sm:var(--radius-element); --r-md:var(--radius-container); --r-lg:var(--radius-container); --r-xl:var(--radius-container); --r-pill:var(--radius-full);
+ --r-outer:var(--r-md); --inset:var(--spacing-1); --r-inner:max(0px,calc(var(--r-outer) - var(--inset)));
+ --space-1:calc(var(--spacing-1) * var(--density)); --space-2:calc(var(--spacing-2) * var(--density)); --space-3:calc(var(--spacing-3) * var(--density)); --space-4:calc(var(--spacing-4) * var(--density)); --space-5:calc(var(--spacing-5) * var(--density)); --space-6:calc(var(--spacing-6) * var(--density)); --space-8:calc(var(--spacing-8) * var(--density));
  --type-xs:0.75rem; --type-sm:0.75rem; --type-base:0.8125rem; --type-md:0.9375rem; --type-lg:1.0625rem; --type-xl:1.375rem; --type-display:1.75rem;
- --motion-fast:120ms; --motion-base:200ms; --motion-slow:320ms;
+ --motion-fast:125ms; --motion-base:175ms; --motion-slow:300ms;
  --opacity-hover:.04; --opacity-pressed:.08; --opacity-disabled:.4;
- --elevation-flat:none; --elevation-raised:var(--glass-shadow);
- --elevation-floating:var(--glass-shadow-float);
+ --sidebar-width:232px; --topbar-height:52px; --filter-width:300px; --library-row-height:2.75rem; --library-card-height:148px;
+ --line-strong:var(--muted); --line:color-mix(in oklab,var(--ink) 10%,transparent);
+ --hairline:var(--line);
+ --focus-ring:var(--focus-outline-width,2px) var(--focus-outline-style,solid) var(--focus);
+}
 
- --material-card:color-mix(in oklab,var(--glass-tint) var(--glass-opacity),transparent);
- --material-sheet:color-mix(in oklab,var(--glass-tint) max(90%,var(--glass-opacity)),transparent);
+/* Two border strengths. --line is a quiet ink mix for dividers, card edges and chrome in every theme and mode.
+   --line-strong is the theme's 3:1 boundary token (check-contrast.mjs) and stays on form controls, switch tracks and the high-contrast setting. */
+html[data-contrast=more] { --line:var(--line-strong); }
 
- --shadow-legacy-0:var(--glass-shadow-float);
- --shadow-legacy-1:var(--glass-shadow-float);
- --shadow-legacy-2:var(--glass-shadow-float);
- --shadow-legacy-3:6px 0 20px var(--shadow-faint);
- --shadow-legacy-4:var(--glass-shadow-float);
+/* Legacy aliases. Flat values for in-flow surfaces; delete once no page references them. */
+:root {
+ --elevation-flat:none; --elevation-raised:none; --elevation-floating:var(--shadow-med);
+ --glass-shadow:none; --glass-shadow-hover:none; --glass-shadow-float:var(--shadow-med); --glass-depth:none; --glass-depth-float:var(--shadow-med); --glass-edge:none; --primary-shadow:none;
+ --glass-blur:none; --material-filter:none;
+ --glass-fill:var(--surface); --glass-fill-hover:color-mix(in oklab,var(--ink) 4%,var(--surface));
+ --glass-tone:color-mix(in oklab,var(--ink) 5%,transparent); --glass-tone-strong:color-mix(in oklab,var(--ink) 8%,transparent);
+ --material-card:var(--surface); --material-sheet:var(--surface);
+ --surface-card:var(--surface); --surface-card-strong:var(--surface);
+ --composer-focus-ring:color-mix(in oklab,var(--accent-color) 52%,transparent);
 }
 
 html { font-family:var(--font-ui); font-synthesis:none; }
@@ -28,36 +38,30 @@ body { font-family:inherit; }
 }
 .markdown:lang(zh-Hant),.markdown:lang(ja) { line-break:strict; word-break:normal; overflow-wrap:anywhere; line-height:var(--reader-leading); }
 .aui-md:lang(zh-Hant),.aui-md:lang(ja) { line-break:strict; word-break:normal; overflow-wrap:anywhere; line-height:var(--chat-leading); }
-.settings-dialog,.model-popover,.conversation-list-popover,[data-slot=popover-content] { background:var(--material-card); backdrop-filter:blur(20px) saturate(1.15); box-shadow:var(--elevation-floating); border-radius:var(--r-lg); }
-.settings-dialog { background:var(--material-sheet); }
 .language-settings { display:grid; gap:var(--space-3); margin-block:var(--space-4); }
 .language-settings label { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--space-2); }
 button,input,select { min-height:24px; }
-:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+
+/* Focus. Keyboard focus on controls draws the Astryx ring. Programmatic focus on a heading or dialog
+   container (Astryx focuses the dialog title on open and the menu surface on open, the app focuses page
+   headings on navigation) must not: those targets are not controls, so there is nothing for the ring to point at. */
+:focus-visible { outline:var(--focus-ring); outline-offset:var(--focus-outline-offset,3px); }
+:is(h1,h2,h3,h4,h5,h6,[role=heading],dialog,[role=dialog],[role=alertdialog],[popover],[role=menu],[role=listbox],[data-focus-target]):focus-visible { outline:none; }
+
 .model-traits { min-width:0; }
 .model-traits h4,.fast-mode,.picker-settings { overflow-wrap:anywhere; }
 .model-popover { max-width:calc(100vw - 24px); }
-@media(prefers-reduced-transparency:reduce) { :root { --material-card:var(--surface); --material-sheet:var(--surface); } * { backdrop-filter:none!important; } }
-html[data-reduced-transparency=true] { --material-card:var(--surface); --material-sheet:var(--surface); }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0ms!important; transition-duration:0ms!important; scroll-behavior:auto!important; } }
 .skip-link { position:fixed; top:0; left:12px; z-index:100; padding:var(--space-2); background:var(--surface); color:var(--ink); transform:translateY(-120%); }
 .skip-link:focus { transform:translateY(0); }
-
-:root { --sidebar-width:232px; --sidebar-compact-width:180px; --topbar-height:52px; }
-
-:root { --filter-width:300px; --library-row-height:2.75rem; }
-
-:root { --hairline:color-mix(in oklab,var(--ink) 10%,transparent); }
-
-:root { --library-card-height:148px; }
 
 button.secondary,.filter-popover summary { border:0; box-shadow:none; background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
 button.ghost { border:0; background:transparent; }
 button.primary { min-height:36px; background:var(--accent-color); color:var(--accent-foreground); }
 button.ghost:hover { background:var(--active); }
-.app-select { display:inline-flex; align-items:center; justify-content:space-between; gap:var(--space-2); min-height:32px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); padding:var(--space-1) var(--space-2); font:inherit; }
+.app-select { display:inline-flex; align-items:center; justify-content:space-between; gap:var(--space-2); min-height:32px; border:1px solid var(--line-strong); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); padding:var(--space-1) var(--space-2); font:inherit; }
 .select-positioner { z-index:150; }
-.select-popup { background:var(--surface); color:var(--ink); border:1px solid var(--hairline); border-radius:var(--r-md); padding:var(--space-1); box-shadow:var(--elevation-floating); max-height:50vh; overflow:auto; min-width:var(--anchor-width); }
+.select-popup { background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--r-md); padding:var(--space-1); box-shadow:var(--shadow-med); max-height:50vh; overflow:auto; min-width:var(--anchor-width); }
 .select-item { display:flex; justify-content:space-between; gap:var(--space-4); padding:var(--space-2); border-radius:var(--r-sm); font-size:var(--type-base); cursor:default; }
 .select-item[data-highlighted] { background:var(--active); }
 progress { appearance:none; height:6px; border:0; border-radius:var(--r-pill); overflow:hidden; }
@@ -71,42 +75,29 @@ h1:lang(ja),h2:lang(ja),h3:lang(ja),h1:lang(zh-Hant),h2:lang(zh-Hant),h3:lang(zh
 button:lang(ja),button:lang(zh-Hant) { line-height:1.2; }
 html:lang(ja),html:lang(zh-Hant) { --type-xs:0.8125rem; --type-sm:0.8125rem; }
 
+/* Motion. Easing comes from Astryx (--ease-entrance, --ease-exit); the legacy names alias to it. */
 :root {
- --motion-story:600ms; --motion-hero:800ms;
- --ease-out-soft:cubic-bezier(.22,1,.36,1); --ease-in-out-soft:cubic-bezier(.65,0,.35,1);
- --ease-standard:cubic-bezier(.2,0,0,1); --ease-exit:cubic-bezier(.4,0,1,1);
- --type-hero:clamp(1.75rem,2.2rem + 1.2cqi,2.5rem);
+ --motion-story:var(--motion-slow); --motion-hero:var(--motion-slow);
+ --ease-out-soft:var(--ease-entrance); --ease-in-out-soft:var(--ease-move);
+ --type-hero:clamp(1.75rem,2.2rem + 1.2cqi,2.5rem); --type-hero-compact:clamp(1.75rem,6cqi,2.5rem);
  --spotlight-size:260px; --spotlight-tint:color-mix(in oklab,var(--ink) 5%,transparent);
  --edge-lit:color-mix(in oklab,var(--ink) 32%,transparent);
- --welcome-marquee:24s; --welcome-float:6000ms;
 }
-.shell-sidebar { view-transition-name:vt-sidebar; }
-.shell-topbar { view-transition-name:vt-topbar; }
-::view-transition-old(root) { animation:vt-out var(--motion-fast) var(--ease-exit) both; }
-::view-transition-new(root) { animation:vt-in var(--motion-base) var(--ease-out-soft) 40ms both; }
-::view-transition-group(vt-document) { animation-duration:var(--motion-slow); animation-timing-function:var(--ease-in-out-soft); }
-@keyframes vt-out { to { opacity:0; } }
-@keyframes vt-in { from { opacity:0; transform:translateY(8px); } }
-:root { --type-hero-compact:clamp(1.75rem,6cqi,2.5rem); }
-:root { --citation-pulse-start:0 0 0 0 var(--edge-lit); --citation-pulse-end:0 0 0 var(--inset) transparent; }
-
-:root { --welcome-header-height:40px; --welcome-body-delay:240ms; --welcome-cta-delay:320ms; --welcome-type-duration:1200ms; --welcome-citation-duration:1600ms; --welcome-chip-delay:900ms; --welcome-float-delay:1120ms; --welcome-answer-stagger:45ms; }
+/* Routes and tabs swap without motion; only a document opening morphs from its row. */
+::view-transition-old(root),::view-transition-new(root) { animation:none; }
+::view-transition-group(vt-document) { animation-duration:var(--motion-slow); animation-timing-function:var(--ease-move); }
 
 button,summary { min-inline-size:var(--space-6); min-block-size:var(--space-6); }
-.library-view .library-search { border-color:var(--line); }
-html[data-reduced-transparency=true] *,html[data-reduced-transparency=true] ::backdrop { backdrop-filter:none!important; }
-@media(prefers-reduced-transparency:reduce) { ::backdrop { backdrop-filter:none!important; } }
-@media(prefers-contrast:more) { :root { --hairline:var(--ink); --material-card:var(--surface); --material-sheet:var(--surface); } }
-.shell-sidebar button[aria-current=page] { border-inline-start:0; font-weight:600; }
+.library-view .library-search { border-color:var(--line-strong); }
+@media(prefers-contrast:more) { :root { --hairline:var(--ink); } }
 @media(forced-colors:active) {
- :root { --hairline:CanvasText; --material-card:Canvas; --material-sheet:Canvas; }
+ :root { --hairline:CanvasText; }
  [aria-current=page] { border-color:Highlight; }
  .aui-user-message-content { border:1px solid CanvasText; }
  :focus-visible { outline-color:Highlight; }
 }
 .markdown > * { content-visibility:auto; contain-intrinsic-size:auto 100px; }
 @media(max-width:719px) {
- .shell-sidebar:not([hidden]) { position:absolute; inset:var(--topbar-height) auto 0 0; z-index:50; }
  .shell-main,.shell-content,.home-page,.library-view { min-width:0; max-width:100%; }
  .library-toolbar { flex-wrap:wrap; }
  .home-grid { grid-template-columns:minmax(0,1fr); }
@@ -124,8 +115,6 @@ html[data-reduced-transparency=true] *,html[data-reduced-transparency=true] ::ba
 .markdown[data-citation-layout] > * { content-visibility:visible; }
 input[type="checkbox"] { accent-color:var(--accent-color); }
 
-:root { --composer-focus-ring:color-mix(in oklab,var(--accent-color) 52%,transparent); }
-
 /* Typography, scale, and density are independent of the selected theme. */
 :root {
  --ui-scale:1; --density:1;
@@ -136,7 +125,6 @@ input[type="checkbox"] { accent-color:var(--accent-color); }
  --reader-size:.875rem; --chat-size:.8125rem;
  --reader-leading:1.8; --reader-para-gap:.875rem; --reader-tracking:normal; --reader-measure:50rem;
  --chat-leading:1.625; --chat-para-gap:.75rem; --chat-tracking:normal;
- --material-filter:blur(20px) saturate(1.15);
  --control-height:calc(2.25rem * var(--density));
 }
 
@@ -157,91 +145,39 @@ html:lang(ja) { --font-ui:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",syst
  :root [data-slot=select-content],:root [data-slot=select-trigger] { border:1px solid var(--ink); }
 }
 
-/* Transparency changes surface opacity without adding borders or changing layout. */
-:root { --surface-opacity:100%; --surface-card:color-mix(in srgb,var(--surface) var(--surface-opacity),transparent); --surface-card-strong:var(--surface-card); }
-html[data-card-transparency=solid],html[data-theme=contrast],html[data-reduced-transparency=true] { --surface-opacity:100%!important; }
-@media(prefers-reduced-transparency:reduce), (prefers-contrast:more), (forced-colors:active) { :root { --surface-opacity:100%!important; } }
+/* Surfaces. Resting containers are flat: surface tone, 1px hairline, container radius, no shadow, no blur. */
+:root { --surface-opacity:100%; --page-field:var(--background); }
+.glass,.glass-pill,.glass-lift,[data-slot=card] { border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); box-shadow:none; }
+.glass-pill { border-radius:var(--r-pill); }
+.glass-lift { transition:background-color var(--motion-fast) var(--ease-standard); }
+.glass-lift:hover { background:var(--glass-fill-hover); }
 
-/* Card transparency sets --surface-opacity (Solid 100, Soft 68, Glass 50). */
-:root {
- --glass-alpha:var(--surface-opacity,68%);
- --glass-base:var(--surface);
- --glass-fill:color-mix(in oklab,var(--glass-base) var(--glass-alpha),transparent);
- --glass-fill-hover:color-mix(in oklab,var(--ink) 3%,var(--glass-fill));
- --glass-fill-float:color-mix(in oklab,var(--glass-base) min(100%,calc(var(--glass-alpha) + 24%)),transparent);
- --glass-blur:blur(18px) saturate(1.3);
- --glass-edge:inset 0 0 0 1px color-mix(in srgb,var(--ink) 5.5%,transparent);
- --glass-depth:0 0 2px color-mix(in srgb,var(--shadow-color) 10%,transparent);
- --glass-depth-hover:var(--glass-depth);
- --glass-depth-float:0 0 12px color-mix(in srgb,var(--shadow-color) 14%,transparent);
- --glass-shadow:var(--glass-edge),var(--glass-depth);
- --glass-shadow-hover:var(--glass-edge),var(--glass-depth-hover);
- --glass-shadow-float:var(--glass-edge),var(--glass-depth-float);
- --glass-tone:color-mix(in oklab,var(--ink) 5%,transparent);
- --glass-tone-strong:color-mix(in oklab,var(--ink) 8%,transparent);
- --primary-shadow:var(--glass-shadow);
- --page-field:radial-gradient(ellipse 70% 55% at 100% 0%,color-mix(in oklab,var(--accent-color) 9%,transparent),transparent 70%),radial-gradient(ellipse 60% 50% at 0% 100%,color-mix(in oklab,var(--muted) 8%,transparent),transparent 70%),var(--background);
-
- --elevation-raised:var(--glass-shadow);
- --elevation-floating:var(--glass-shadow-float);
- --material-card:var(--glass-fill-float);
- --material-sheet:color-mix(in oklab,var(--glass-base) min(100%,calc(var(--glass-alpha) + 28%)),transparent);
- --material-filter:var(--glass-blur);
- --art-reader-ring:transparent;
- --art-reader-shadow:var(--glass-shadow);
- --art-reader-glass:var(--glass-fill);
- --course-shadow:var(--glass-shadow);
- --course-glass:var(--glass-fill);
- --surface-card:var(--glass-fill);
-}
-:root.dark {
- --glass-base:color-mix(in oklab,var(--surface) 93%,var(--ink));
- --glass-edge:inset 0 0 0 1px color-mix(in srgb,var(--ink) 7%,transparent);
- --glass-depth:0 0 2px color-mix(in srgb,var(--shadow-color) 45%,transparent);
- --glass-depth-hover:var(--glass-depth);
- --glass-depth-float:0 0 12px color-mix(in srgb,var(--shadow-color) 55%,transparent);
- --glass-tone:color-mix(in oklab,var(--ink) 7%,transparent);
- --glass-tone-strong:color-mix(in oklab,var(--ink) 9%,transparent);
- --primary-shadow:var(--glass-shadow);
-}
-html[data-card-transparency=glass] { --glass-blur:blur(28px) saturate(1.5); }
-html[data-card-transparency=solid] { --glass-blur:none; }
-html[data-reduced-transparency=true],html[data-theme=contrast] { --glass-blur:none; --glass-fill:var(--glass-base); --glass-fill-hover:color-mix(in oklab,var(--ink) 6%,var(--glass-base)); --glass-fill-float:var(--glass-base); --page-field:var(--background); }
-@media(prefers-reduced-transparency:reduce) { :root { --glass-blur:none; --glass-fill:var(--glass-base); --glass-fill-hover:color-mix(in oklab,var(--ink) 6%,var(--glass-base)); --glass-fill-float:var(--glass-base); --page-field:var(--background); } }
-@media(prefers-contrast:more) { :root { --glass-blur:none; --glass-fill:var(--surface); --glass-fill-hover:color-mix(in oklab,var(--ink) 6%,var(--surface)); --glass-fill-float:var(--surface); --page-field:var(--background); } }
-
-.glass,[data-slot=card] { border:0; border-radius:var(--glass-radius); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
-.glass-pill { border:0; border-radius:var(--r-pill); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
-.glass-lift { transition:box-shadow var(--motion-base) var(--ease-out-soft),transform var(--motion-base) var(--ease-out-soft),background-color var(--motion-base) var(--ease-out-soft); }
-.glass-lift:hover { background:var(--glass-fill-hover); box-shadow:var(--glass-shadow-hover); }
-
-/* Secondary buttons are glass pills of the same recipe; primary buttons stay solid with a soft shadow. */
+/* Buttons: secondary is a flat tone, primary a solid fill. Press feedback is a 150ms scale, never on disabled. */
 :is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary) {
- border:0; background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); color:var(--ink);
- transition:box-shadow var(--motion-fast) var(--ease-standard),background-color var(--motion-fast) var(--ease-standard),transform var(--motion-fast) var(--ease-standard);
+ border:0; background:var(--glass-tone); box-shadow:none; color:var(--ink);
+ transition:background-color var(--motion-fast) var(--ease-standard),transform 150ms ease-out;
 }
-:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):is(:hover,[aria-expanded=true],[aria-pressed=true]) { background:var(--glass-fill-hover); box-shadow:var(--glass-shadow-hover); color:var(--ink); }
-:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):active { box-shadow:var(--glass-shadow); transform:translateY(.5px); }
-:is([data-slot=button][data-variant=default],button.primary) { box-shadow:var(--primary-shadow); transition:box-shadow var(--motion-fast) var(--ease-standard),transform var(--motion-fast) var(--ease-standard),filter var(--motion-fast) var(--ease-standard); }
-:is([data-slot=button][data-variant=default],button.primary):active { transform:translateY(1px); box-shadow:none; filter:brightness(.92); }
-:root.dark :is([data-slot=button][data-variant=default],button.primary):active { filter:brightness(.86); }
+:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):is(:hover,[aria-expanded=true],[aria-pressed=true]) { background:var(--glass-tone-strong); color:var(--ink); }
+:is([data-slot=button][data-variant=default],button.primary) { box-shadow:none; transition:background-color var(--motion-fast) var(--ease-standard),transform 150ms ease-out; }
+:is([data-slot=button],button.secondary,button.primary):not(:disabled,[aria-disabled=true]):active { transform:scale(.97); }
+@media(prefers-reduced-motion:reduce) { :is([data-slot=button],button.secondary,button.primary):not(:disabled):active { transform:none; } }
 
-/* Floating surfaces: popovers, menus, selects and dialogs share the stronger glass fill. */
-:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=tooltip-content]:not(.bg-foreground),.select-popup) { border:0; }
-:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup):not(.settings-dialog) { background:var(--glass-fill-float); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow-float); }
+/* Floating overlays are the only shadowed surfaces: menus and popovers use --shadow-med, dialogs --shadow-high. */
+:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=tooltip-content]:not(.bg-foreground),.select-popup) { border:1px solid var(--line); }
+:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],.select-popup,.model-popover,.conversation-list-popover) { background:var(--surface); box-shadow:var(--shadow-med); border-radius:var(--r-md); }
+:is([data-slot=dialog-content],.settings-dialog) { background:var(--surface); box-shadow:var(--shadow-high); border-radius:var(--r-md); }
+.model-popover,.conversation-list-popover { border:1px solid var(--line); }
 
-/* Chrome: no band or line under the top bar; scrolled content fades out under it instead. */
-.app-shell .shell-main { background:var(--page-field); }
-.app-shell .shell-topbar { background:transparent; backdrop-filter:none; box-shadow:none; border:0; }
-.app-shell:not([data-view=workspace]) .shell-content [data-scrolled=true] { mask-image:linear-gradient(to bottom,transparent 0,var(--ink) var(--space-6)); }
+/* Chrome: a flat header row with a hairline below it. No blur, no scroll mask. */
+.app-shell .shell-main { background:var(--background); }
+.app-shell .shell-topbar { background:var(--surface); box-shadow:none; }
 
 @media(prefers-contrast:more) {
- .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup) { border:1px solid var(--ink); box-shadow:none; }
+ .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup) { border:1px solid var(--ink); }
 }
 @media(forced-colors:active) {
  .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup) { border:1px solid CanvasText; }
 }
-@media(prefers-reduced-motion:reduce) { .glass-lift,.glass-lift:hover { transition:none; transform:none; } }
 
 html[data-theme=contrast] :is([data-slot=card],[data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=input],[data-slot=textarea],[data-slot=select-trigger],[data-slot=button],[data-slot=aui_composer-shell]) { border:1px solid var(--ink); box-shadow:none; }
 @media(prefers-contrast:more) {
@@ -251,7 +187,8 @@ html[data-theme=contrast] :is([data-slot=card],[data-slot=popover-content],[data
  :root :is([data-slot=card],[data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=input],[data-slot=textarea],[data-slot=select-trigger],[data-slot=button],[data-slot=aui_composer-shell]) { border:1px solid CanvasText; box-shadow:none; }
 }
 
-/* Unlayered aliases beat the shipped theme on both the provider and portal root. */
+/* Unlayered aliases beat the shipped theme on both the provider and portal root.
+   Shadows are not aliased: Astryx --shadow-low/med/high stay as shipped, for overlays only. */
 [data-astryx-theme="neutral"] {
  --color-background-body:var(--background);
  --color-background-surface:var(--surface);
@@ -270,7 +207,7 @@ html[data-theme=contrast] :is([data-slot=card],[data-slot=popover-content],[data
  --color-on-accent:var(--accent-foreground);
  --color-accent-muted:var(--active);
  --color-border:var(--line);
- --color-border-emphasized:var(--line);
+ --color-border-emphasized:var(--line-strong);
  --color-neutral:var(--subtle);
  --color-overlay:var(--overlay);
  --color-overlay-hover:var(--active);
@@ -287,8 +224,5 @@ html[data-theme=contrast] :is([data-slot=card],[data-slot=popover-content],[data
  --color-text-info:var(--info);
  --font-family-body:var(--font-ui);
  --font-family-heading:var(--font-ui);
- --shadow-low:none;
- --shadow-med:none;
- --shadow-high:none;
 }
 html > body > #root > [data-astryx-theme] { height:100%; }

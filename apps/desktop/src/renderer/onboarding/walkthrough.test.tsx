@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import '../astryx-test-dom';
 /** Captions remain usable with reduced motion, paused playback, and replay after completion. */
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';

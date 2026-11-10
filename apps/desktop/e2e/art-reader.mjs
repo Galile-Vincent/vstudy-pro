@@ -111,8 +111,8 @@ try {
   await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(1440,900));
   await go('workspace',docs[0].id);await page.locator('.aui-composer-input').waitFor();
   const toggle=page.getByRole('button',{name:'Toggle document library',exact:true});
-  await toggle.focus();await page.keyboard.press('Enter');assert.equal(await page.locator('.shell-sidebar').isVisible(),false);
-  await page.keyboard.press('Enter');assert.equal(await page.locator('.shell-sidebar').isVisible(),true);
+  await toggle.focus();await page.keyboard.press('Enter');assert.equal(await page.locator('.app-shell').getAttribute('data-sidebar'),'collapsed');
+  await page.keyboard.press('Enter');assert.equal(await page.locator('.app-shell').getAttribute('data-sidebar'),'expanded');
   await page.getByRole('button',{name:'Reading tip',exact:true}).focus();await page.keyboard.press('Enter');
   await page.locator('.art-reader-coach').waitFor();await shot('coach-popover-keyboard');
   await page.getByRole('button',{name:'Dismiss this tip permanently',exact:true}).focus();await page.keyboard.press('Enter');

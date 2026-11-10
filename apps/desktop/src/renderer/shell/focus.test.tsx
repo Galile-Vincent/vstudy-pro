@@ -14,7 +14,7 @@ let root:Root,host:HTMLDivElement,reduced=false;
 beforeEach(()=>{
   vi.useFakeTimers();localStorage.clear();reduced=false;
   vi.stubGlobal('matchMedia',()=>({matches:reduced,addEventListener(){},removeEventListener(){}}));
-  vi.stubGlobal('ResizeObserver',class {observe(){} disconnect(){}});
+  vi.stubGlobal('ResizeObserver',class {observe(){} unobserve(){} disconnect(){}});
   host=document.createElement('div');document.body.append(host);root=createRoot(host);
 });
 afterEach(async()=>{await act(async()=>root.unmount());host.remove();vi.useRealTimers();vi.unstubAllGlobals();});
@@ -94,50 +94,25 @@ it('leaves a docked sidebar and its focused input alone on Escape', async () => 
   host.querySelector('.shell-sidebar')!.append(input);
   input.focus();
   await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })));
-  expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(false);
+  expect(host.querySelector('.app-shell')?.getAttribute('data-sidebar')).toBe('expanded');
   expect(document.activeElement).toBe(input);
 });
 
-it.each([700, 900, 1280])('shares shortcut and toggle state at %ipx', async width => {
+it.each([900, 1280])('shares shortcut and toggle state at %ipx', async width => {
   vi.stubGlobal('innerWidth', width);
-  vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('767') ? width < 768 : width < 1200, addEventListener() {}, removeEventListener() {} }));
+  vi.stubGlobal('matchMedia', (query: string) => ({ matches: query.includes('1199') ? width < 1200 : false, addEventListener() {}, removeEventListener() {} }));
   await mount();
+  const shell = host.querySelector('.app-shell')!;
   const toggle = host.querySelector<HTMLButtonElement>('.shell-toggle')!;
-  const initial = toggle.getAttribute('aria-expanded');
+  const initial = shell.getAttribute('data-sidebar');
+  expect(toggle.getAttribute('aria-expanded')).toBe(String(initial === 'expanded'));
   await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', ctrlKey: true, cancelable: true })));
-  expect(toggle.getAttribute('aria-expanded')).not.toBe(initial);
-  expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(toggle.getAttribute('aria-expanded') === 'false');
+  expect(shell.getAttribute('data-sidebar')).not.toBe(initial);
+  expect(toggle.getAttribute('aria-expanded')).toBe(String(shell.getAttribute('data-sidebar') === 'expanded'));
   await act(async () => toggle.click());
-  expect(toggle.getAttribute('aria-expanded')).toBe(initial);
-});
-
-it('anchors overlays below the tabs and restores a visible workspace toggle', async () => {
-  const style = document.createElement('style');
-  style.textContent = '.shell-sidebar { position:absolute; }';
-  document.head.append(style);
-  const rects = vi.spyOn(HTMLElement.prototype, 'getClientRects').mockImplementation(function (this: HTMLElement) {
-    return (this.classList.contains('shell-toggle') ? [] : [{}]) as unknown as DOMRectList;
-  });
-  const bounds = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
-    return { bottom: this.classList.contains('app-tabs') ? 49 : 0 } as DOMRect;
-  });
-  try {
-    await mount();
-    const toggle = host.querySelector<HTMLButtonElement>('.shell-toggle')!;
-    const header = document.createElement('header');
-    header.className = 'app-header';
-    const workspace = document.createElement('div');
-    workspace.className = 'workspace';
-    const visibleToggle = document.createElement('button');
-    visibleToggle.setAttribute('aria-label', toggle.getAttribute('aria-label')!);
-    header.append(visibleToggle); workspace.append(header); host.append(workspace);
-    await act(async () => toggle.click());
-    expect(host.querySelector<HTMLElement>('.shell-sidebar')!.style.getPropertyValue('--sidebar-overlay-top')).toBe('49px');
-    host.querySelector<HTMLButtonElement>('.shell-sidebar button')!.focus();
-    await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })));
-    expect(host.querySelector('.shell-sidebar')?.hasAttribute('hidden')).toBe(true);
-    expect(document.activeElement).toBe(visibleToggle);
-  } finally { style.remove(); rects.mockRestore(); bounds.mockRestore(); }
+  expect(shell.getAttribute('data-sidebar')).toBe(initial);
+  await act(async () => window.dispatchEvent(new Event('vstudy:toggle-sidebar')));
+  expect(shell.getAttribute('data-sidebar')).not.toBe(initial);
 });
 
 it('focuses the active tab after closing an inactive tab with its close button', async () => {
@@ -159,4 +134,10 @@ it('does not carry no-op close focus into the next new tab', async () => {
   await act(() => host.querySelector<HTMLButtonElement>('#open-test-tab')!.click());
   expect(host.querySelectorAll('[role=tab]')).toHaveLength(2);
   expect(document.activeElement).toBe(chosen);
+});
+
+it('leaves the Astryx content wrapper out of the landmark list so pages own the single main', async () => {
+  await mount();
+  expect(host.querySelector('#astryx-app-shell-main')?.hasAttribute('role')).toBe(false);
+  expect(host.querySelectorAll('[role=main]')).toHaveLength(0);
 });

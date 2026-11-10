@@ -52,7 +52,7 @@ try {
   const settings=await call('settings:get',{});await call('settings:set',{...settings,language,uiScale:scale*100});
   await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'library'})));await page.reload();await page.locator('.library-document').first().waitFor();
   if(width===960&&scale===2) {
-   await page.waitForFunction(()=>window.document.querySelector('.app-shell').dataset.sidebarOverlay==='true'&&window.document.querySelector('.shell-sidebar').hidden);
+   await page.waitForFunction(()=>window.matchMedia('(width < 768px)').matches);
    const toolbar=await page.locator('.library-toolbar').evaluate(e=>{const controls=[...e.querySelectorAll('button,input')].filter(c=>c.getClientRects().length);return controls.map(c=>parseFloat(window.getComputedStyle(c).fontSize));});
    assert.ok(Math.min(...toolbar)>=Math.max(...toolbar)*.75,JSON.stringify({context,toolbar}));
    const toolbarRows=await page.locator('.library-toolbar button').evaluateAll(buttons=>buttons.filter(e=>e.getClientRects().length).map(e=>e.getBoundingClientRect().top));assert.ok(Math.max(...toolbarRows)-Math.min(...toolbarRows)<=1,JSON.stringify({context,toolbarRows}));

@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import '../astryx-test-dom';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { i18n } from '../../shared/i18n';

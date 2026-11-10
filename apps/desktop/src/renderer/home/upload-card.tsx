@@ -1,7 +1,7 @@
-import { Card, Section, Toolbar } from '../components/ui';
+import { Button, Card } from '@astryxdesign/core';
+import { Section, Toolbar } from '../components/ui';
 import type { ReactNode } from 'react';
 import { FormField } from '../components/ui/form-field';
-import { Button } from '../components/ui/button';
 import { Select } from '../components/select';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,12 +18,14 @@ export function UploadCard({
   onImported,
   showSample = true,
   showOpen = true,
+  primary = true,
   title,
   footer,
 }: {
   title?: string;
   footer?: ReactNode;
   showOpen?: boolean;
+  primary?: boolean;
   showSample?: boolean;
   folders?: z.infer<typeof folderSchema>[];
   onImported?: (document: Document) => void;
@@ -116,8 +118,8 @@ export function UploadCard({
   };
   return (
     <Card
-      variant="flat"
-      className="home-upload min-w-0 p-[var(--space-6)]"
+      padding={6}
+      className="home-tone home-upload"
       data-dragging={dragging}
       onDragEnter={(e) => {
         clearDropError();
@@ -186,18 +188,14 @@ export function UploadCard({
             className="gap-[var(--space-2)]"
             left={
               <>
-                <Button disabled={busy} onClick={() => void upload()}>
-                  {tr('home:choose_file')}
-                </Button>
+                <Button variant={primary ? 'primary' : 'secondary'} label={tr('home:choose_file')} isDisabled={busy} onClick={() => void upload()} />
                 {showSample && (
-                  <Button variant="ghost" disabled={busy} onClick={() => void upload(undefined, true)}>
-                    {tr('onboarding:sample')}
-                  </Button>
+                  <Button variant="ghost" label={tr('onboarding:sample')} isDisabled={busy} onClick={() => void upload(undefined, true)} />
                 )}
               </>
             }
           />
-          <div role="status" className="flex flex-col gap-[var(--space-2)]">
+          <div role="status" className="upload-status flex flex-col gap-[var(--space-2)]">
             {busy && <progress aria-label={tr('home:importing')} />}
             <div key={announcement}>
               {error && <div role="alert">{error}</div>}
@@ -206,9 +204,7 @@ export function UploadCard({
           </div>
         </div>
         {showOpen && imported && navigation && (
-          <Button variant="outline" onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })}>
-            {tr('home:open_imported', { title: imported.title })}
-          </Button>
+          <Button variant="secondary" label={tr('home:open_imported', { title: imported.title })} onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })} />
         )}
         {footer}
       </Section>

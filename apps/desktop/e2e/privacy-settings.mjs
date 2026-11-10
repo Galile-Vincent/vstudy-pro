@@ -17,7 +17,7 @@ try {
   await app.evaluate(({BrowserWindow},width)=>BrowserWindow.getAllWindows()[0].setSize(width,800),width);
   await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});
   await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language,onboardingCompleted:false});window.localStorage.removeItem('vstudy-onboarding-v1');window.localStorage.setItem('vstudy-route',JSON.stringify({view:'home'}));},language);await seedRoute(page,{view:'home'});await page.reload();
-  await page.locator('.onboarding[data-state=open]').waitFor();await page.locator('.onboarding footer button').last().click();
+  await page.locator('.onboarding').waitFor();await page.locator('.onboarding footer button').last().click();
   assert.equal(await page.locator('.onboarding input[type=password]').count(),0);
   const cliProviders=await page.evaluate(()=>window.desktop.invoke('providers:list',{}).then(providers=>providers.filter(provider=>provider.config.kind==='cli')));
   assert.equal(cliProviders.length,3);assert.ok(cliProviders.every(provider=>!provider.config.enabled));

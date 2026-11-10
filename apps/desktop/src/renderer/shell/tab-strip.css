@@ -1,20 +1,18 @@
-.app-tabs { position:relative; display:flex; align-items:center; gap:4px; padding:6px 12px; min-width:0; flex-shrink:0; border-bottom:1px solid var(--border); background:var(--surface); }
-.app-tabs-scroll { display:flex; flex:1; min-width:0; overflow-x:auto; gap:4px; padding-inline:8px; }
-.app-tab { flex:1 0 120px; max-width:220px; display:flex; align-items:center; min-width:120px; border-radius:var(--r-xs); color:var(--muted); }
-.app-tab[data-active=true] { flex-basis:200px; min-width:200px; background:color-mix(in oklab,var(--ink) 6%,var(--surface)); color:var(--foreground); box-shadow:none; font-weight:500; }
-.app-tab [role=tab] { display:flex; align-items:center; gap:6px; min-width:0; flex:1; text-align:start; }
+.app-tabs { position:relative; display:flex; align-items:center; gap:var(--space-1); padding:var(--space-1) var(--space-3); min-width:0; flex-shrink:0; background:var(--surface); }
+.app-tabs-scroll { display:flex; flex:1; min-width:0; overflow-x:auto; gap:var(--space-1); padding-inline:var(--space-2); }
+.app-tab { flex:1 0 120px; max-width:220px; display:flex; align-items:center; min-width:120px; border-radius:var(--r-sm); color:var(--muted); transition:background-color var(--motion-fast) var(--ease-standard); }
+.app-tab[data-active=true] { flex-basis:200px; min-width:200px; background:var(--glass-tone-strong); color:var(--ink); font-weight:500; }
+.app-tab [role=tab] { display:flex; align-items:center; gap:var(--space-2); min-width:0; flex:1; height:32px; padding-inline:var(--space-2); border:0; background:transparent; color:inherit; font:inherit; text-align:start; cursor:pointer; }
 .app-tab [role=tab] span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .app-tab svg { flex-shrink:0; }
-.app-tabs-menu { display:flex; flex-direction:column; gap:4px; max-height:400px; overflow:auto; }
+.app-tab:not([data-active=true]):hover { background:var(--glass-tone); }
+.app-tabs-menu { display:flex; flex-direction:column; gap:var(--space-1); max-height:400px; overflow:auto; }
 .app-tabs-menu button { justify-content:flex-start; }
-.app-tabs-single { position:absolute; top:16px; right:12px; z-index:7; border:0; padding:0; }
-.app-shell[data-view=workspace] .app-tabs-single { position:relative; top:auto; right:auto; justify-content:flex-end; }
-.app-shell .shell-main .shell-topbar { padding-inline-end:56px; }
-@media(prefers-reduced-motion:reduce) { .app-tabs * { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }
+.app-tabs-single { position:absolute; inset-block-start:var(--space-3); inset-inline-end:var(--space-3); z-index:7; border:0; padding:0; background:transparent; }
+.app-shell[data-view=workspace] .app-tabs-single { position:relative; inset:auto; justify-content:flex-end; }
+@media(prefers-reduced-motion:reduce) { .app-tabs * { transition:none!important; scroll-behavior:auto!important; } }
 #active-tab-panel { display:contents; }
 #active-tab-panel > .workspace { height:100%; }
 .app-tabs .sr-only { left:0; top:0; }
-
-.app-tab:not([data-active=true]):hover { background:color-mix(in oklab,var(--ink) 3%,var(--surface)); }
 html[data-theme=contrast] .app-tab[data-active=true] { outline:1px solid var(--ink); outline-offset:-1px; }
 @media(prefers-contrast:more), (forced-colors:active) { .app-tab[data-active=true] { outline:1px solid currentColor; outline-offset:-1px; } }

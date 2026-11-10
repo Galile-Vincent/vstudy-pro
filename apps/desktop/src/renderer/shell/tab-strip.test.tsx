@@ -50,7 +50,7 @@ it('keeps one tab stop and supports navigation, reordering and Delete', async ()
  expect(activateTab).toHaveBeenLastCalledWith('first');
  fireEvent.keyDown(tabs[0]!, { key: 'ArrowRight', shiftKey: true });
  expect(reorderTabs).toHaveBeenCalledWith(['second', 'first']);
- expect(view.getByRole('status').textContent).not.toBe('');
+ expect(view.container.querySelector('.tab-announcement')?.textContent).not.toBe('');
  fireEvent.keyDown(tabs[0]!, { key: 'Delete' });
  expect(closeTab).toHaveBeenCalledWith('first');
  await act(async () => {});

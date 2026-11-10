@@ -33,7 +33,7 @@ try {
   });
   await page.reload();
   await page
-    .locator(".shell-sidebar [data-slot=sidebar-menu]")
+    .locator(".shell-sidebar")
     .first()
     .getByRole("button", { name: "Library", exact: true })
     .click();
