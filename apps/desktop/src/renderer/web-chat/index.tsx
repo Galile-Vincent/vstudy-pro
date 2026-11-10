@@ -7,7 +7,7 @@ import { tr } from '../../shared/i18n';
 import { type WebChatProvider, type WebChatState } from '../../shared/web-chat';
 import { hasNavigationOverlay } from '../shell/history-swipe-navigation';
 import { Button } from '../components/ui/button';
-import { PageContainer, PageHeader } from '../components/ui';
+import { PageContainer, PageHeader, SegmentedControl, SegmentedControlItem } from '../components/ui';
 import { DesktopChat } from './desktop-chat';
 import './web-chat.css';
 type Tab='desktop'|WebChatProvider;
@@ -19,7 +19,7 @@ export function WebChatHub() {
   const [toolbar,setToolbar]=useState<HTMLDivElement|null>(null);
   const choose=(next:Tab)=>{if(next!=='desktop')openTab({view:'hosted-chat',provider:next,title:tr(`web-chat:${next}`)});};
   const label=(value:Tab)=>tr(`web-chat:${value}`);
-  const launcher=<div className="web-chat-tabs" role="group" aria-label={tr('web-chat:choose')}>{tabs.map(value=><button key={value} id={`web-chat-tab-${value}`} aria-pressed={value===tab} onClick={()=>choose(value)}>{label(value)}</button>)}</div>;
+  const launcher=<SegmentedControl type="single" value={tab} onValueChange={value => { if (value) choose(value as Tab); }} aria-label={tr('web-chat:choose')}>{tabs.map(value=><SegmentedControlItem key={value} value={value} id={`web-chat-tab-${value}`}>{label(value)}</SegmentedControlItem>)}</SegmentedControl>;
   return <PageContainer as="main" className="web-chat-hub" aria-label={tr('web-chat:title')}>
     <PageHeader title={tr('web-chat:title')} description={tr('web-chat:subtitle')} actions={<div ref={setToolbar} className="min-w-0 max-w-full"/>}/>
     <DesktopChat active launcher={launcher} toolbarSlot={toolbar}/>

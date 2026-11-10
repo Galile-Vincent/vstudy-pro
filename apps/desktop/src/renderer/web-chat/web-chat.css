@@ -1,15 +1,10 @@
-.web-chat-hub{height:100%;min-height:0;gap:var(--space-4);background:var(--reader-background);color:var(--ink)}
-.web-chat-tabs{display:flex;gap:var(--space-2);padding:var(--space-1);background:color-mix(in oklab,var(--ink) 4%,transparent);border-radius:var(--r-pill);max-width:100%;overflow:auto}
-.web-chat-tabs button{white-space:nowrap;border:0;border-radius:var(--r-pill);background:transparent;color:var(--muted);padding:var(--space-2) var(--space-3);font:inherit;cursor:pointer}
-.web-chat-tabs button[aria-pressed=true]{background:color-mix(in oklab,var(--ink) 6%,transparent);color:var(--ink);font-weight:500}
-@media(prefers-contrast:more),(forced-colors:active){.web-chat-tabs button[aria-pressed=true]{outline:thin solid var(--ink)}}
+.web-chat-hub{height:100%;min-height:0;background:var(--reader-background);color:var(--ink)}
 .web-chat-hosted,.web-chat-desktop,.web-chat-local{flex:1;min-height:0;display:flex;flex-direction:column}.web-chat-desktop[hidden]{display:none}
 .web-chat-toolbar{display:flex;align-items:center;gap:6px;min-height:48px;padding:6px 16px;border-bottom:1px solid var(--hairline)}.web-chat-toolbar>span{flex:1;font-size:var(--type-sm)}.web-chat-toolbar small{margin-left:12px;color:var(--muted)}
 .web-chat-slot{flex:1;min-height:0;background:var(--surface)}.web-chat-hosted footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:4px 16px;color:var(--muted);font-size:var(--type-xs);border-top:1px solid var(--hairline)}
 .web-chat-empty{margin:auto;max-width:420px}.web-chat-notice{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px}.web-chat-hosted progress{width:100%;height:3px;flex:none}.web-chat-local .chat-motion{flex:1;min-height:0}
-@media(max-width:760px){.web-chat-tabs{width:100%}.web-chat-tabs button{flex:1}.web-chat-toolbar small{display:none}}
 
 .web-chat-compact{padding:0 var(--space-3) var(--space-2);gap:var(--space-2)}
-.web-chat-compact .web-chat-slot{border-radius:16px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--hairline)}
+.web-chat-compact .web-chat-slot{border-radius:var(--r-lg);overflow:hidden;box-shadow:inset 0 0 0 1px var(--hairline)}
 .web-chat-compact .web-chat-notice{padding:var(--space-2) var(--space-3)}
 #active-tab-panel[data-native=true] > .web-chat-hosted{height:100%}

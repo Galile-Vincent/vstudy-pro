@@ -19,6 +19,8 @@ import {
   FormField,
   Tabs,
   TabsContent,
+  SegmentedControl,
+  SegmentedControlItem,
   SegmentedTabsList,
   SegmentedTabsTrigger,
   Button,
@@ -226,6 +228,11 @@ export default function DesignGallery() {
           <FormField label={copy.disabled}>{(props) => <Input {...props} disabled />}</FormField>
         </Section>
         <Section title={copy.tabs}>
+          <SegmentedControl type="single" defaultValue="one" aria-label={copy.tabs}>
+            <SegmentedControlItem value="one">{copy.rest}</SegmentedControlItem>
+            <SegmentedControlItem value="two">{copy.selected}</SegmentedControlItem>
+            <SegmentedControlItem value="three" disabled>{copy.disabled}</SegmentedControlItem>
+          </SegmentedControl>
           <Tabs defaultValue="one">
             <SegmentedTabsList aria-label={copy.tabs}>
               <SegmentedTabsTrigger value="one">{copy.rest}</SegmentedTabsTrigger>

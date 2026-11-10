@@ -111,9 +111,6 @@
   margin-block: var(--space-3);
 }
 
-.review-page {
-  gap: var(--space-6);
-}
 .review-section-heading {
   display: flex;
   flex-wrap: wrap;
@@ -122,12 +119,6 @@
 }
 .review-list [data-slot="list-row"] {
   flex-wrap: wrap;
-}
-.review-list .ui-row-target {
-  padding: 0;
-}
-.review-list [data-slot="list-row"] > :last-child {
-  padding-inline-end: 0;
 }
 
 .review-page [data-slot="section"] > div:first-child {
@@ -139,9 +130,6 @@
 .review-list .review-actions {
   margin: 0;
   gap: var(--space-2);
-}
-.review-list [data-slot="list-row"] {
-  min-height: calc(var(--space-8) + var(--space-6));
 }
 .review-evidence {
   position: relative;

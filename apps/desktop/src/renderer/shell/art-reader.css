@@ -1,7 +1,7 @@
 /* Reader art direction. All color roles derive from the selected theme pack. */
 :root {
-  --art-reader-radius:20px;
-  --art-reader-control:10px;
+  --art-reader-radius:var(--r-lg);
+  --art-reader-control:var(--r-sm);
   --art-reader-ring:color-mix(in oklab,var(--ink) 8%,transparent);
   --art-reader-shadow:var(--glass-shadow);
   --art-reader-glass:color-mix(in oklab,var(--glass-tint) var(--glass-opacity),transparent);
@@ -12,7 +12,7 @@
 .app-shell .shell-sidebar { background:var(--sidebar-surface); padding:var(--space-6) var(--space-4); }
 .app-shell .shell-brand { display:flex; flex-direction:row; align-items:center; gap:var(--space-3); padding:var(--space-3) var(--space-2) var(--space-8); font-size:var(--type-md); letter-spacing:-.02em; }
 .art-reader-brand-mark { width:32px; height:32px; display:grid; place-items:center; border-radius:var(--art-reader-control); color:var(--accent-foreground); background:var(--accent-color); }
-.shell-sidebar [data-slot=sidebar-content] { gap:var(--space-4); }
+.shell-sidebar [data-slot=sidebar-content] { gap:var(--space-6); min-height:0; }
 .shell-sidebar [data-slot=sidebar-group] { padding:0; margin-bottom:0; }
 .app-shell .shell-sidebar .library-smart button { min-height:36px; font-size:var(--type-sm); }
 .app-shell .shell-sidebar .sidebar-empty { margin-inline:var(--space-3); color:var(--muted); }
@@ -70,7 +70,7 @@
 .art-reader-start-content { flex:1 1 0; min-height:0; overflow:auto; padding:var(--space-1) var(--space-1) var(--space-4); }
 .app-shell .workspace .new-chat-composer { margin:0; padding:var(--space-4); flex:none; }
 .art-reader-welcome { padding:var(--space-5) var(--space-2) var(--space-6); text-align:start; }
-.art-reader-assistant-mark { display:grid; place-items:center; width:52px; height:52px; border-radius:16px; margin-bottom:var(--space-6); color:var(--accent-color); background:linear-gradient(140deg,var(--surface),var(--active)); box-shadow:inset 0 0 0 1px var(--art-reader-ring); }
+.art-reader-assistant-mark { display:grid; place-items:center; width:52px; height:52px; border-radius:var(--r-lg); margin-bottom:var(--space-6); color:var(--accent-color); background:linear-gradient(140deg,var(--surface),var(--active)); box-shadow:inset 0 0 0 1px var(--art-reader-ring); }
 .art-reader-welcome .art-reader-kicker { color:var(--accent-color); margin-bottom:var(--space-2); }
 .art-reader-kicker { font-size:var(--type-xs); font-weight:500; }
 .art-reader-welcome h2 { font-size:1.5rem; line-height:1.35; letter-spacing:-.02em; font-weight:600; max-width:22ch; margin:0 0 var(--space-3); text-wrap:balance; }
@@ -154,7 +154,7 @@ html[data-theme=contrast] .art-reader-cover::after { display:none; }
 
 
 .chat-source { display:flex; align-items:center; gap:var(--space-1); flex-wrap:wrap; }
-.art-reader-chat-header .chat-source button { display:inline-flex; align-items:center; gap:var(--space-2); padding:0 var(--space-3); border-radius:999px; font-size:var(--type-xs); color:var(--muted); }
+.art-reader-chat-header .chat-source button { display:inline-flex; align-items:center; gap:var(--space-2); padding:0 var(--space-3); border-radius:var(--r-pill); font-size:var(--type-xs); color:var(--muted); }
 .art-reader-chat-header .chat-source button[aria-pressed=true] { color:var(--ink); background:color-mix(in oklab,var(--ink) 8%,transparent); }
 .chat-source-body { display:contents; }
 .chat-source-body[hidden] { display:none; }
