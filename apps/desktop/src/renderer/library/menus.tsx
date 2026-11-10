@@ -2,7 +2,7 @@ import { Button } from "@astryxdesign/core";
 import { useNavigate } from '../shell';
 import { useState } from 'react';
 import { useFormat } from '../i18n';
-import { Checkbox } from '../components/checkbox';
+import { CheckboxInput } from "@astryxdesign/core";
 import { FileText,Pencil,FolderInput,Tag,ExternalLink,Download,RefreshCw,Trash2,Pin,PinOff,Sparkles,Info } from 'lucide-react';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
@@ -137,25 +137,22 @@ export function LibraryMenus({busy,moveNotice,menu,move,tagging,anchor,items,fol
         >
           <div className="folder-picker">
             <p>{tr('library:tag_hint')}</p>{tags.map((tag) => (
-              <label key={tag.id}>
-                <Checkbox
-                  checked={
+              <CheckboxInput key={tag.id} label={tag.name}
+                  value={
                     items
                       .find((i) => i.document.id === menu.document.id)
                       ?.tags.some((t) => t.id === tag.id) ?? false
                   }
-                  onChange={(e) =>
+                  onChange={(checked) =>
                     void run(() =>
                       desktop.invoke("library:documents:tag", {
                         documentId: menu.document.id,
                         tagId: tag.id,
-                        assigned: e.target.checked,
+                        assigned: checked,
                       }),
                     )
                   }
                 />
-                {tag.name}
-              </label>
             ))}
             <Button label={(tr("library:newTag"))} variant="ghost"
               onClick={async () => {

@@ -32,7 +32,7 @@ html[data-input-modality=pointer] .library-results .document-title:focus { outli
 .library-results.library-results[data-view=list] { box-shadow:none; }
 .document-gutter svg { width:var(--space-4); height:var(--space-4); }
 .document-type [data-slot=badge] { border-radius:var(--radius-element); }
-.library-view .bulk-bar { max-width:calc(100% - var(--space-8)); flex-wrap:wrap; overflow:visible; }
+.library-view .bulk-bar { width:100%; flex-wrap:wrap; overflow:visible; }
 .library-view .bulk-bar > * { flex-shrink:0; white-space:nowrap; }
 .library-view .bulk-bar button { height:var(--space-8); }
 .document-details { display:grid; gap:var(--space-4); min-width:0; }

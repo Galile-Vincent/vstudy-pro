@@ -145,19 +145,31 @@ it('rejects a five digit year without breaking rendering',async()=>{
  expect(screen.getByText('notes')).toBeTruthy();
 });
 
-it('labels every filter above its control and offers one clear action', async () => {
+it('labels each filter and offers one clear action', async () => {
   state.route.query = {status:'ready'};
   const toolbar = await mount(false);
   fireEvent.click(within(toolbar).getByTestId('library-filters'));
   const panel = await screen.findByRole('region', {name:tr('library:filters')});
   const fields = panel.querySelectorAll('[data-slot=form-field]');
-  expect(fields).toHaveLength(10);
+  expect(fields).toHaveLength(7);
   for (const field of fields) {
     const label = field.querySelector('label')!;
     expect(label).toBe(field.firstElementChild);
     const control = field.querySelector('select, input, [role=checkbox]');
     expect(control).toBeTruthy();
     expect(control?.id).toBe(label.htmlFor);
+  }
+  for (const key of ['subfolders', 'hasChats', 'pinned']) {
+    const checkbox = within(panel).getByRole('checkbox', {name:tr(`library:${key}`)}) as HTMLInputElement;
+    expect(checkbox.checked).toBe(false);
+    fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(true);
+    await waitFor(() => {
+      const calls = state.invoke.mock.calls.filter(([channel]) => channel === 'library:documents:list');
+      expect(calls.at(-1)?.[1][key]).toBe(true);
+    });
+    fireEvent.click(checkbox);
+    expect(checkbox.checked).toBe(false);
   }
   expect(screen.getAllByRole('button', {name:tr('library:clearFilters')})).toHaveLength(1);
 });

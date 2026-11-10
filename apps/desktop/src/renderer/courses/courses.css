@@ -567,7 +567,7 @@
 }
 .moodle-assistant-panel .moodle-course-chat {
   flex: 1;
-  min-height: 180px;
+  min-height: 24rem;
   height: auto;
   margin-top: 0;
 }
@@ -671,17 +671,17 @@
 .moodle-course-chat .aui-thread-viewport { min-height:0; }
 .moodle-study-tools { flex:none; font-size:var(--type-sm); color:var(--muted); }
 
-:is(.moodle-page,[data-course]) :is(button,input,select),.moodle-assistant button { min-height:40px; }
+:is(.moodle-page,[data-course]) :is(button,input,select):not([role=switch]):not([type=checkbox]),.moodle-assistant button:not([role=switch]) { min-height:40px; }
 .course-view-switch { height:auto; gap:var(--space-1); padding:var(--space-1); }
 .course-view-switch button { width:40px; height:40px; }
 
-:is(.moodle-page,[data-course]) :is(button,input,select,summary) { min-height:40px; }
-:is(.moodle-page,[data-course]) :is(button,input,select,summary):focus-visible { outline:2px solid var(--focus-outline-color, var(--focus)); outline-offset:3px; }
+:is(.moodle-page,[data-course]) :is(button,input,select,summary):not([role=switch]):not([type=checkbox]) { min-height:40px; }
+:is(.moodle-page,[data-course]) :is(button,input,select,summary):not([role=switch]):not([type=checkbox]):focus-visible { outline:2px solid var(--focus-outline-color, var(--focus)); outline-offset:3px; }
 @media (prefers-reduced-motion:no-preference) {
   :is(.moodle-page,[data-course]) button { transition:transform 150ms ease-out; }
   :is(.moodle-page,[data-course]) button:not(:disabled):not([aria-disabled=true]):active { transform:scale(.97); }
 }
-@media (pointer:coarse) { :is(.moodle-page,[data-course]) :is(button,input,select,summary) { min-height:44px; } }
+@media (pointer:coarse) { :is(.moodle-page,[data-course]) :is(button,input,select,summary):not([role=switch]):not([type=checkbox]) { min-height:44px; } }
 
 .course-detail-content { min-width:0; container:course-detail / inline-size; }
 .moodle-assistant[data-open=true] { width:24rem; max-width:100%; }
@@ -692,7 +692,13 @@
   .moodle-assistant[data-open=true] { width:100%; max-width:none; }
 }
 
-:is(.moodle-page,[data-course],.moodle-assistant) button { min-width:40px; }
-@media (pointer:coarse) { :is(.moodle-page,[data-course],.moodle-assistant) button { min-width:44px; } }
+:is(.moodle-page,[data-course],.moodle-assistant) button:not([role=switch]) { min-width:40px; }
+@media (pointer:coarse) { :is(.moodle-page,[data-course],.moodle-assistant) button:not([role=switch]) { min-width:44px; } }
 
 @container course-detail (min-width:56rem) { .course-overview { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+.moodle-course-chat .chat-motion { display:flex; flex-direction:column; flex:1; min-height:0; }
+
+.moodle-course-chat .tutor-mode-toggle { min-height:40px; }
+.moodle-course-chat .tutor-mode-toggle input[type=checkbox] { box-sizing:border-box; min-height:0; width:16px; height:16px; padding:0; border:1px solid var(--muted); background:var(--surface); }
+.moodle-course-chat .tutor-mode-toggle input[type=checkbox]:checked { background:var(--ink); border-color:var(--ink); }

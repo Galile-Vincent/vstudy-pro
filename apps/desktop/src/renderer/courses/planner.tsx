@@ -103,10 +103,10 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
           <ul className="planner-task-list">{tasks.map(task => <li key={task.id}><ListRow title={task.title} actions={
             <IconButton label={tr("planner:complete", { title: task.title })}  size="md" variant="ghost"  isDisabled={busy} aria-label={tr("planner:complete", { title: task.title })} onClick={() => {
               setBusy(true); void api.approve(crypto.randomUUID(), { type: "update-task", taskId: task.id, changes: { status: "done" } }).then(saved).catch(fail).finally(() => setBusy(false));
-            }} icon={<Check />} />} subtitle={<><span>{courseTitle(task.courseId)} · {tr("planner:minutes", { minutes: task.estimateMinutes })}</span>
+            }} icon={<Check />} />} subtitle={<span className="planner-task-meta"><span>{courseTitle(task.courseId)} · {tr("planner:minutes", { minutes: task.estimateMinutes })}</span>
               <span>{tr(`planner:source_${task.source}`)} · {tr(`planner:status_${task.status}`)}</span>
               {task.dueAt && <time dateTime={task.dueAt} data-overdue={Date.parse(task.dueAt) < now}>{plannerDate(task.dueAt)}</time>}
-            </>} />
+            </span>} />
           </li>)}</ul>
         </Section>
         {snapshot.tasks.some(t => plannerTaskDone(t, deadlines)) && <Section data-completed-tasks title={tr("planner:status_done")}><ul>{snapshot.tasks.filter(t => plannerTaskDone(t, deadlines)).map(t => <li key={t.id}><ListRow title={t.title} /></li>)}</ul></Section>}

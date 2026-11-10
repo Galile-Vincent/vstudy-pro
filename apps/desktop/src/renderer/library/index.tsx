@@ -1,5 +1,5 @@
 import { IconButton } from "@astryxdesign/core";
-import { TextInput, Tooltip, Card, Layout, LayoutContent, LayoutHeader, LayoutFooter, Button } from "@astryxdesign/core";
+import { CheckboxInput, TextInput, Tooltip, Card, Layout, LayoutContent, LayoutHeader, LayoutFooter, Button } from "@astryxdesign/core";
 import { provesExistence } from './selection';
 import { virtualWindow } from './window';
 import { localDate, dayBound, validDay } from './dates';
@@ -8,7 +8,6 @@ import { openDocument } from '../document-open';
 import { PageContainer, PageHeader, Toolbar, FormField, EmptyState } from "../components/ui";
 import { Badge } from '../components/ui/badge';
 import './ui3.css';
-import { Checkbox } from '../components/checkbox';
 import { contentLanguage } from "../../shared/content-language";
 import { Select } from "../components/select";
 import {
@@ -628,7 +627,7 @@ export function LibraryView() {
   }, [loading, grid, items.length > 0, showFolders]);
 
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const baseHeight = grid ? 10 * (textScale || 16) : (rowRem || 2.75) * (textScale || 16);
+  const baseHeight = grid ? 7.5 * (textScale || 16) : (rowRem || 2.75) * (textScale || 16);
   const rowHeight = baseHeight;
   const columns = grid ? Math.max(1, Math.floor(viewportWidth / 280)) : 1;
   const [statusHeights, setStatusHeights] = useState<Record<string, number>>({});
@@ -837,17 +836,13 @@ export function LibraryView() {
               </FormField>
             ))}
             {(["subfolders", "hasChats", "pinned"] as const).map((key) => (
-              <FormField key={key} label={tr(`library:${key}`)}>
-                {control => <Checkbox {...control} style={{width:40, height:40}}
-                  checked={query[key] ?? false}
-                  onChange={(e) =>
-                    setQuery((q) => ({
-                      ...q,
-                      [key]: e.target.checked || undefined,
-                    }))
-                  }
-                />}
-              </FormField>
+              <CheckboxInput key={key} label={tr(`library:${key}`)}
+                className="library-filter-checkbox"
+                value={query[key] ?? false}
+                onChange={(checked) =>
+                  setQuery((q) => ({ ...q, [key]: checked || undefined }))
+                }
+              />
             ))}
             <FormField label={tr("library:addedAfter")}>{control => <Select {...control} aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:localDate(query.addedAfter),addedBefore:localDate(query.addedBefore)});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
@@ -1316,7 +1311,7 @@ export function LibraryView() {
       <LibraryMenus busy={busy} moveNotice={notice} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
       {promptDialog}
 </LayoutContent>} footer={selected.length > 0 && (
-        <LayoutFooter hasDivider className="bulk-bar">
+        <LayoutFooter hasDivider padding={4} height="auto" className="bulk-bar">
           <span role="status">
             {tr("library:selected", {
               count: selected.length,
@@ -1344,7 +1339,7 @@ export function LibraryView() {
           >
             {tr("library:pin")}
           </Button>
-          <Button label={(tr("library:delete"))} variant="secondary"  isDisabled={busy} onClick={() => void remove(selected)}>
+          <Button label={(tr("library:delete"))} variant="destructive"  isDisabled={busy} onClick={() => void remove(selected)}>
             {tr("library:delete")}
           </Button>
           <Button label={(tr("library:clearSelection"))} variant="secondary" onClick={() => setSelected([])}>

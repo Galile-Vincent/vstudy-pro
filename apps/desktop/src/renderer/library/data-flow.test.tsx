@@ -195,7 +195,7 @@ it.each([false, true])('keeps recovery outside optional metadata (grid %s)', asy
  expect(entry.style.position).toBe('absolute');
  if (grid) {
   expect(entry.style.height).toBe('');
-  expect(parseFloat(entry.style.minHeight)).toBe(160);
+  expect(parseFloat(entry.style.minHeight)).toBe(120);
  } else {
   expect(parseFloat(entry.style.height)).toBeGreaterThan(64);
   expect(entry.style.minHeight).toBe(entry.style.height);

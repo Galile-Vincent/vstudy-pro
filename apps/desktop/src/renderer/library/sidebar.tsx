@@ -219,7 +219,7 @@ export function LibrarySidebar() {
       </Button>
     </div>
   ))}
-  <div className="relative mt-[var(--space-6)]">
+  <div className="library-folder-heading">
 
       <h2>{tr('library:folders')}</h2>
 
@@ -367,7 +367,7 @@ export function LibrarySidebar() {
                 <Star />
               ) : (
                 <FolderIcon />
-              )} label={(f.name) + (typeof f.count === 'number' ? format.number(f.count) : '')}
+              )} label={f.name} endContent={<small>{typeof f.count === 'number' ? format.number(f.count) : ''}</small>}
               variant="ghost"
               className="folder-link"
               tabIndex={-1}
@@ -375,7 +375,6 @@ export function LibrarySidebar() {
             >
 
               <span className="folder-name">{f.name}</span>
-              <small>{typeof f.count === 'number' ? format.number(f.count) : ''}</small>
             </Button>
             <IconButton label={tr('library:folderActions', { name: f.name })}
               variant="ghost"
