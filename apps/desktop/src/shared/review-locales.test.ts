@@ -4,10 +4,11 @@ import ja from './locales/ja/review.json';
 import zhHant from './locales/zh-Hant/review.json';
 
 const catalogs = { en, ja, 'zh-Hant': zhHant };
-const allKeys = [...new Set(Object.values(catalogs).flatMap(Object.keys))].sort();
+const keys = (catalog: Record<string, string>) => [...new Set(Object.keys(catalog).map(key => key.replace(/_(one|other)$/, '')))].sort();
+const allKeys = keys(en);
 
 it.each(Object.entries(catalogs))('provides every review key in %s', (_language, catalog) => {
-  expect(Object.keys(catalog).sort()).toEqual(allKeys);
+  expect(keys(catalog)).toEqual(allKeys);
 });
 
 it.each([

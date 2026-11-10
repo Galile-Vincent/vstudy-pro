@@ -8,6 +8,7 @@ import { mkdtemp, mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import assert from 'node:assert/strict';
+import { onboardingForward } from './helpers/onboarding.mjs';
 const round=process.env.DESIGN_ROUND??'1',root=temporaryPath('vstudy-design1');await mkdir(root,{recursive:true});const screenshots=[],audits=[];
 for(const language of ['en','ja','zh-Hant']) {
  const dir=await mkdtemp(join(tmpdir(),'design1-'));let app,db;
@@ -47,7 +48,7 @@ for(const language of ['en','ja','zh-Hant']) {
  await page.getByRole('button',{name:common.open_settings,exact:true}).click();await page.getByRole('dialog').waitFor();await capture('settings',width,theme);if(width===1200)await audit('settings-'+theme);await page.keyboard.press('Escape');
  }
  await call('settings:set',{...await call('settings:get'),onboardingCompleted:false});await go('home');await page.locator('.onboarding[data-state=open]').waitFor();
- for(let step=0;step<4;step++){for(const width of [720,900,1200])for(const theme of ['light','dark']){await page.setViewportSize({width,height:872});await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});await capture('onboarding-'+step,width,theme);if(width===1200)await audit('onboarding-'+step+'-'+theme);}await page.locator('.onboarding footer .primary').click();}
+ for(let step=0;step<4;step++){for(const width of [720,900,1200])for(const theme of ['light','dark']){await page.setViewportSize({width,height:872});await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});await capture('onboarding-'+step,width,theme);if(width===1200)await audit('onboarding-'+step+'-'+theme);}await onboardingForward(page).click();}
  db.exec('DELETE FROM document_tags; DELETE FROM messages; DELETE FROM conversations; DELETE FROM activity_events; DELETE FROM activity_days; DELETE FROM usage_daily; DELETE FROM documents;');
  for(const width of [720,900,1200])for(const theme of ['light','dark']){await page.setViewportSize({width,height:872});await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});await go('home');await capture('home-empty',width,theme);await go('library');await page.locator('.library-empty').waitFor();await capture('library-empty',width,theme);}
  assert.deepEqual(errors,[]);console.log(language,'capture complete');

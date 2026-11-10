@@ -10,10 +10,14 @@ let busy=false,locked=false;
 let maintenance: Promise<void> | undefined;
 export const holdStorageUntilRestart=():void=>{locked=true;};
 const active=new Set<Promise<void>>();
+let revision = 0;
+export const storageWorkRevision = () => revision;
+export async function waitForStorageRequests() { await Promise.all(active); }
 export const storageBusy=():boolean=>busy;
 /** Acquire request ownership and return the release required by the caller. */
 export function enterStorageRequest():()=>void {
   if(busy)throw new Error('storage.busy');
+  revision++;
   let release!:()=>void;const finished=new Promise<void>(resolve=>{release=resolve;});active.add(finished);
   return ()=>{active.delete(finished);release();};
 }

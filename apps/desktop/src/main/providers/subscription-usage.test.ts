@@ -59,3 +59,36 @@ it('does not run Codex when its integration is disabled', async () => {
   expect(load).toHaveBeenCalledTimes(1);
   expect(load).toHaveBeenCalledWith('claude', false);
 });
+
+it('starts a new load when consent changes during a pending request and its result wins', async () => {
+  const settle: Record<string, (r: { status: 'ready' | 'unavailable'; windows: never[] }) => void> = {};
+  const load = vi.fn((provider: string, consent: boolean) =>
+    new Promise<{ status: 'ready' | 'unavailable'; windows: never[] }>((resolve) => {
+      settle[`${provider}:${consent}`] = resolve;
+    }),
+  );
+  const read = createSubscriptionReader(load as never, () => 1793715000000, () => false);
+  const early = read();
+  const consented = read({ allowClaudeKeychain: true, refresh: true });
+  expect(load).toHaveBeenCalledWith('claude', false);
+  expect(load).toHaveBeenCalledWith('claude', true);
+  settle['claude:true']!({ status: 'ready', windows: [] });
+  expect((await consented)[0]).toMatchObject({ status: 'ready' });
+  settle['claude:false']!({ status: 'unavailable', windows: [] });
+  expect((await early)[0]).toMatchObject({ status: 'unavailable' });
+  const calls = load.mock.calls.length;
+  expect((await read())[0]).toMatchObject({ status: 'ready' });
+  expect(load).toHaveBeenCalledTimes(calls);
+});
+
+it('does not reuse a failure cached without consent once consent is granted', async () => {
+  const load = vi.fn(async (_provider: string, consent: boolean) =>
+    consent
+      ? { status: 'ready' as const, windows: [] }
+      : { status: 'unavailable' as const, windows: [] },
+  );
+  const read = createSubscriptionReader(load as never, () => 1793715000000, () => false);
+  expect((await read())[0]).toMatchObject({ status: 'unavailable' });
+  expect((await read({ allowClaudeKeychain: true }))[0]).toMatchObject({ status: 'ready' });
+  expect((await read())[0]).toMatchObject({ status: 'ready' });
+});

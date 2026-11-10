@@ -4,6 +4,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { McpRuntime } from './mcp/runtime';
 
 const mocks = vi.hoisted(() => ({
+  installing:false, shutdownWork:undefined as undefined | (() => Promise<void>),
   handlers:new Map<string,(...args:unknown[]) => Promise<unknown>>(), initialize:vi.fn(), confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
   showMessage: vi.fn(), fatal: vi.fn(), copyDiagnostics: vi.fn(), logDeletionFailure:vi.fn(), log: vi.fn(), registerIpc: vi.fn(), restore: undefined as undefined | (() => void),
 }));
@@ -26,7 +27,7 @@ const electron = await vi.hoisted(async () => {
     releaseSingleInstanceLock:vi.fn(), enableSandbox: vi.fn(), exit: vi.fn(), quit: vi.fn(), relaunch: vi.fn(), setAppUserModelId: vi.fn(),
   });
   return {
-    app, dialog: { showMessageBox: vi.fn(async () => ({ response: 1 })) }, BrowserWindow: Window, nativeTheme: new EventEmitter(), safeStorage: {}, ipcMain: { removeHandler: vi.fn() },
+    app, dialog: { showMessageBox: vi.fn(async () => ({ response: 1 })) }, BrowserWindow: Window, nativeTheme: new EventEmitter(), safeStorage: {}, ipcMain: Object.assign(new EventEmitter(), { removeHandler: vi.fn() }),
     protocol: { registerSchemesAsPrivileged: vi.fn(), handle: vi.fn() },
     session: { fromPath:vi.fn(() => {throw Error("duplicate context");}), defaultSession: {
       clearStorageData:vi.fn(), clearCache:vi.fn(), clearAuthCache:vi.fn(),
@@ -39,6 +40,7 @@ const electron = await vi.hoisted(async () => {
 vi.mock('electron', () => electron);
 vi.mock('node:fs', async importOriginal => ({...await importOriginal<typeof import('node:fs')>(), mkdirSync:vi.fn()}));
 vi.mock('./db', () => ({ openStore: () => ({ settings: { get: () => ({}) }, close: mocks.closeStore }) }));
+vi.mock('./updates/runtime', () => ({createUpdates: vi.fn(() => ({snapshot:()=>({installing:mocks.installing})}))}));
 vi.mock('./ipc', () => ({ registerIpc: (...args:unknown[]) => mocks.registerIpc(...args) }));
 vi.mock('./ipc/register', () => ({ createIpcRegistrar: () => ({ handle: vi.fn((name:string,handler:(...args:unknown[]) => Promise<unknown>) => mocks.handlers.set(name,handler)) }) }));
 vi.mock('./services/secrets', () => ({ createSecretStore: vi.fn() }));
@@ -52,7 +54,7 @@ vi.mock('./storage/backup', () => ({ recoverRestore: vi.fn() }));
 vi.mock('./logging', () => ({ log: mocks.log, stopFileLogging: vi.fn(), logDeletionFailure:mocks.logDeletionFailure, copyDiagnostics: mocks.copyDiagnostics }));
 vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage, showStartupError: mocks.fatal }));
 vi.mock('./window-state', () => ({readWindowState: () => ({width:1200,height:800,maximized:false}), trackWindowState:vi.fn()}));
-vi.mock('./shutdown', () => ({ coordinateShutdown: () => vi.fn() }));
+vi.mock('./shutdown', () => ({ coordinateShutdown: (phases:{stopWork:()=>Promise<void>}) => {mocks.shutdownWork=phases.stopWork;return vi.fn();} }));
 vi.mock('./ownership', async importOriginal => ({...await importOriginal<typeof import('./ownership')>(), acquireOwnership: (_app: unknown, _window: unknown, restore: () => void) => { mocks.restore = restore; return true; } }));
 vi.mock('./i18n', () => ({ tr: (key: string) => key }));
 vi.mock('./packaged-smoke', () => ({ runPackagedSmoke: vi.fn() }));
@@ -63,6 +65,7 @@ beforeEach(() => {
   processListeners = new Map(['exit', 'uncaughtExceptionMonitor', 'unhandledRejection'].map(event => [event, eventProcess.rawListeners(event)]));
   vi.resetModules();
   vi.clearAllMocks();
+  mocks.installing=false;
   mocks.handlers.clear();
   mocks.registerIpc.mockReturnValue(mocks.dispose);
   electron.app.removeAllListeners();
@@ -437,4 +440,55 @@ it('rejects a second deletion request while the first waits for app readiness', 
     window.webContents.emit('did-finish-load');
     await Promise.allSettled([pending,second]);
   }
+});
+
+it('blocks update installation while deletion confirmation is pending and releases on cancel', async () => {
+  const window=await start();
+  const options=mocks.registerIpc.mock.calls[0]![4] as {canInstallUpdate:()=>boolean};
+  window.webContents.emit('did-finish-load');
+  await vi.waitFor(()=>expect(mocks.confirm).toHaveBeenCalledOnce());
+  expect(options.canInstallUpdate()).toBe(true);
+  let answer!:(value:{response:number})=>void;
+  mocks.showMessage.mockImplementationOnce(()=>new Promise(resolve=>{answer=resolve;}));
+  const pending=mocks.handlers.get('settings:deleteAllData')!({}, {sender:window.webContents});
+  await vi.waitFor(()=>expect(answer).toBeDefined());
+  expect(options.canInstallUpdate()).toBe(false);
+  answer({response:0});await pending;
+  expect(options.canInstallUpdate()).toBe(true);
+});
+it('rejects deletion once an update install is quitting the app', async () => {
+  const window=await start();mocks.installing=true;
+  await expect(mocks.handlers.get('settings:deleteAllData')!({}, {sender:window.webContents})).rejects.toThrow('settings.delete_in_progress');
+  expect(mocks.showMessage).not.toHaveBeenCalled();
+  window.webContents.emit('did-finish-load');
+});
+it('normal quit flushes renderer drafts before disposing IPC', async () => {
+  const window=await start();window.webContents.emit('did-finish-load');
+  const send=vi.fn();
+  Object.assign(window.webContents,{isLoading:()=>false,send});
+  const work=mocks.shutdownWork!();
+  expect(send).toHaveBeenCalled();
+  expect(mocks.dispose).not.toHaveBeenCalled();
+  // An unavailable renderer is bounded by the same production draft-flush timeout.
+  await work;
+  expect(mocks.dispose).toHaveBeenCalledOnce();
+  expect(mocks.log).toHaveBeenCalledWith({phase:'draft-flush',outcome:'timeout'});
+});
+it('blocks updates when startup deletion could not finish', async () => {
+  const {finishPendingDeletion}=await import('./services/delete-data');
+  vi.mocked(finishPendingDeletion).mockResolvedValueOnce(false);
+  const window=await start();
+  const options=mocks.registerIpc.mock.calls[0]![4] as {canInstallUpdate:()=>boolean};
+  expect(options.canInstallUpdate()).toBe(false);
+  window.webContents.emit('did-finish-load');
+});
+it('keeps updates blocked once deletion shutdown starts', async () => {
+  const window=await start();window.webContents.emit('did-finish-load');
+  await vi.waitFor(()=>expect(mocks.confirm).toHaveBeenCalledOnce());
+  const {createDataDeletion}=await import('./services/delete-data');
+  const stop=vi.mocked(createDataDeletion).mock.calls[0]![1];
+  await stop();
+  const options=mocks.registerIpc.mock.calls[0]![4] as {canInstallUpdate:()=>boolean};
+  expect(options.canInstallUpdate()).toBe(false);
+  expect(mocks.dispose).toHaveBeenCalledWith(true);
 });

@@ -1,3 +1,4 @@
+import { UpdateSettings } from './settings/updates';
 import { AppVersion } from './components/app-version';
 import { aiCliSetupEvent } from './ai-cli/entry';
 import { AiCliInventory } from './ai-cli/inventory';
@@ -115,7 +116,7 @@ export function ProviderSettings({
             <X size={16} />
           </Button>
         </div>
-        {guide && <Onboarding onComplete={() => setGuide(false)} />}
+        {guide && <Onboarding onComplete={() => setGuide(false)} onOpenPrivacy={() => setTab('privacy')} />}
         <Tabs orientation={orientation} value={tab} onValueChange={setTab} className="settings-body">
           <TabsList ref={setTabsList} variant="line" className="settings-tabs" aria-label={tr('common:settings')}>
             {(
@@ -148,6 +149,7 @@ export function ProviderSettings({
                       <SettingsGroup title={tr('settings:languages')}>
                         <LanguageSettings />
                       </SettingsGroup>
+                      <UpdateSettings />
                       <SettingsGroup title={tr('settings:welcome')}>
                         <SettingsRow label={tr('settings:welcomeGuide')} description={tr('settings:welcome_guide_hint')}>
                           <Button size="sm" variant="secondary" onClick={() => setGuide(true)}>

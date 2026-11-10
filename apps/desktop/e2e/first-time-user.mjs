@@ -6,6 +6,7 @@ import { performance } from 'node:perf_hooks';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { onboardingForward, onboardingConsent } from './helpers/onboarding.mjs';
 const evidence = resolve('../../docs/evidence/onboarding');
 await mkdir(evidence, { recursive: true });
 const results = [];
@@ -33,7 +34,7 @@ for (const [language, goal] of matrix) {
   const catalog = async ns => JSON.parse(await readFile(`src/shared/locales/${language}/${ns}.json`, 'utf8'));
   const readerCopy = await catalog('art-reader');
   const schools = await catalog('schools'), history = await catalog('history'), storage = await catalog('storage');
-  const copy = { ...await catalog('onboarding'), ...JSON.parse(await readFile(`src/renderer/onboarding/locales/${language}.json`, 'utf8')) }, common = await catalog('common'), moodle = await catalog('moodle'), home = await catalog('home');
+  const copy = { ...await catalog('onboarding'), ...JSON.parse(await readFile(`src/renderer/onboarding/locales/${language}.json`, 'utf8')) }, common = await catalog('common'), moodle = await catalog('moodle'), home = await catalog('home'), analytics = await catalog('analytics');
   let app;
   const started = performance.now(), screenshots = [], violations = [], errors = [];
   try {
@@ -54,7 +55,7 @@ for (const [language, goal] of matrix) {
       violations.push({ name, violations: result.violations.filter(v => ['serious', 'critical'].includes(v.impact)).map(v => ({ id: v.id, targets: v.nodes.map(n => n.target) })) });
       assert.deepEqual(violations.at(-1).violations, [], name);
     };
-    const next = () => page.locator('.onboarding footer .primary').click();
+    const next = () => onboardingForward(page).click();
     await page.locator('.onboarding').waitFor(); await capture('welcome');
     if (language === 'en' && goal === 'sample') await audit('welcome');
     await next(); await page.locator(`input[name=onboarding-language][value="${language}"]`).check();
@@ -65,7 +66,7 @@ for (const [language, goal] of matrix) {
     assert.equal(await page.locator('.onboarding .themes-grid, .onboarding .appearance-layout').count(), 0);
     if (goal === 'sample') await capture('appearance');
     await next(); await page.locator('#onboarding-title').filter({ hasText: copy.step_acquisition }).waitFor();
-    await next(); await page.locator('.analytics-choices button').last().click();
+    await next(); await onboardingConsent(page, true, analytics).click();
     await page.locator(`input[value=${goal}]`).check();
     if (language === 'en' && goal === 'sample') {
       await page.getByRole('button', { name: copy.later, exact: true }).click(); await page.locator('.onboarding').waitFor({ state: 'detached' });
@@ -82,7 +83,7 @@ for (const [language, goal] of matrix) {
     if (goal === 'documents') {
       await app.evaluate(({ dialog }, path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, resolve('e2e/fixtures/reading.md'));
       await page.locator('.onboarding').getByRole('button', { name: home.choose_file, exact: true }).click();
-      await page.locator('.onboarding footer .primary').filter({ hasText: copy.open_document }).waitFor();
+      await page.locator('.onboarding footer').getByRole('button', { name: copy.open_document, exact: true }).waitFor();
     }
     if (goal === 'sample') {
       await page.locator('.onboarding').getByRole('button', { name: copy.sample, exact: true }).click();
@@ -94,13 +95,13 @@ for (const [language, goal] of matrix) {
       await app.close(); app = undefined; page = await launch();
       await page.getByRole('button', { name: copy.resume, exact: true }).click();
       await page.locator('.onboarding').getByRole('button', { name: copy.sample_added, exact: true }).waitFor();
-      assert.equal(await page.locator('.onboarding footer .primary').isEnabled(), true, 'imported sample survives restart');
+      assert.equal(await onboardingForward(page).isEnabled(), true, 'imported sample survives restart');
     }
     await capture('start');
     if (goal === 'sample') {
-      for (let step = 0; step < 5; step++) await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
+      for (let step = 0; step < 4; step++) await page.locator('.onboarding').getByRole('button', { name: copy.back, exact: true }).click();
       await page.locator('input[name=onboarding-scheme][value=dark]').check();
-      for (let step = 0; step < 5; step++) await next(); await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(720, 900));
+      for (let step = 0; step < 4; step++) await next(); await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(720, 900));
       await capture('start-dark-720'); await audit('start-dark-720');
       await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1200, 900)); await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
     }
@@ -143,7 +144,7 @@ for (const [language, goal] of matrix) {
     await page.getByRole('button', { name: copy.help, exact: true }).click(); await page.getByRole('menuitem', { name: copy.help_walkthroughs, exact: true }).click();
     const help = page.locator('.learning-dialog');
     for (const lesson of ['school', 'due', 'agent', 'selection', 'history']) {
-      await help.getByRole('button', { name: copy[`lesson_${lesson}`], exact: true }).click();
+      await help.getByRole('tab', { name: copy[`lesson_${lesson}`], exact: true }).click();
       await help.getByRole('button', { name: copy.next_caption, exact: true }).click(); await help.getByRole('button', { name: copy.next_caption, exact: true }).click();
       assert.ok((await help.locator('.walkthrough-node[data-active=true]').innerText()).includes(copy[`${lesson}_visual_2`]));
       if (language === 'en' && goal === 'sample') { await help.evaluate(node => { node.scrollTop = 0; }); await capture(`walkthrough-${lesson}`); }
@@ -151,7 +152,7 @@ for (const [language, goal] of matrix) {
     if (goal === 'sample') await audit('walkthroughs');
     if (language === 'en' && goal === 'sample') {
       for (const lesson of ['school', 'history']) {
-        await help.getByRole('button', { name: copy[`lesson_${lesson}`], exact: true }).click();
+        await help.getByRole('tab', { name: copy[`lesson_${lesson}`], exact: true }).click();
         await help.locator('.recorded-example > summary').click();
         await help.locator('video').scrollIntoViewIfNeeded();
         const playback = await help.locator('video').evaluate(async video => {

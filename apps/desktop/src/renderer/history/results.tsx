@@ -5,6 +5,7 @@ import { Pin, MoreHorizontal } from 'lucide-react';
 import type { ChatHit, ChatPatch } from '../../shared/chat-history';
 import { tr } from '../../shared/i18n';
 import { useTranslation } from 'react-i18next';
+import { useFormat } from '../i18n';
 import { ThreadListRoot } from '../components/assistant-ui/elements/thread-list.aui';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 export function HistorySnippet({ text }: {
@@ -29,6 +30,7 @@ type ContextValue = {
 const Context = createContext<ContextValue | null>(null);
 function Result() {
   useTranslation();
+  const format = useFormat();
   const id = useAuiState(s => s.threadListItem.id), context = useContext(Context)!;
   const hit = context.byId.get(id);
   // assistant-ui updates thread IDs in an effect, after the new search data renders.
@@ -36,10 +38,10 @@ function Result() {
   const group = hit.courseTitle || hit.documentTitle || tr('history:' + hit.scope);
   const first = context.firstInGroup.has(id);
   return <>{context.groupByCourse && first && <h2 className="history-group">{group}</h2>}<ThreadListItemPrimitive.Root className="history-result" data-testid="history-result">
-  <ThreadListItemPrimitive.Trigger asChild><button className="history-result-title" data-history-result>
+  <ThreadListItemPrimitive.Trigger asChild><button className="history-result-title" data-history-result data-history-id={hit.id}>
    <strong><HistorySnippet text={hit.titleSnippet || tr('common:new_chat')}/></strong>
    {hit.pinned && <Pin size={13} aria-label={tr('history:pinned')}/>}
-   <time dateTime={hit.updatedAt}>{new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(hit.updatedAt))}</time>
+   <time dateTime={hit.updatedAt}>{format.date(hit.updatedAt, { month: 'short', day: 'numeric' })}</time>
   </button></ThreadListItemPrimitive.Trigger>
   <p className="history-meta"><span className="history-course-dot" style={{ background: courseColor(hit.courseId) }}/>{group}{hit.term ? ' · ' + hit.term : ''} · {hit.modelId}</p>
   {hit.matches.map(m => <button key={m.messageId} className="history-match" onClick={() => context.open(hit, m.messageId)}><span className="history-role">{tr(m.role === 'user' ? 'history:question' : 'history:answer')}</span><HistorySnippet text={m.snippet}/></button>)}

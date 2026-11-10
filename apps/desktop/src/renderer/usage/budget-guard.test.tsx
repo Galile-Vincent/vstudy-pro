@@ -52,3 +52,25 @@ it('does not send when the budget cannot be checked', async () => {
   await waitFor(() => expect(result.current.warning).toBe(true));
   expect(send).not.toHaveBeenCalled();
 });
+it('focuses the composer when an approved budgeted form sends', async () => {
+  const {render, screen, fireEvent} = await import('@testing-library/react');
+  mockUsage(5, 0.9);
+  const sent = vi.fn();
+  function Harness() {
+    const budget = useBudgetGuard(data, 'chat' as never, 'Question');
+    return <form onSubmitCapture={budget.guard} onSubmit={event => { event.preventDefault(); sent(); }}>
+      <textarea aria-label="Question"/>
+      <button type="submit">Send</button>
+      {budget.warning && <button type="button" onClick={budget.approve}>Approve</button>}
+    </form>;
+  }
+  render(<Harness/>);
+  const send = screen.getByRole('button', {name: 'Send'});
+  send.focus();
+  fireEvent.click(send);
+  const approve = await screen.findByRole('button', {name: 'Approve'});
+  approve.focus();
+  fireEvent.click(approve);
+  expect(sent).toHaveBeenCalledOnce();
+  expect(document.activeElement).toBe(screen.getByRole('textbox'));
+});

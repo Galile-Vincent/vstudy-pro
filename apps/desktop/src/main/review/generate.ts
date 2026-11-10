@@ -30,6 +30,9 @@ export class GenerationService implements ReviewWorker {
     private disposed = false;
     private unregister: () => void;
     constructor(readonly repo: ArtifactRepository, private readonly deps: GenerationDependencies) { this.unregister = reviewWorkers.register(this); }
+    preview(courseId: string, scope: GenerationRequest['scope']) {
+        return resolveScope(scope, this.repo.scopeInputs(courseId, scope)).snapshot;
+    }
     generate(request: GenerationRequest, progress: (event: ReviewProgress) => void = () => { }) {
         if(request.exam && (request.courseId!==EXAM_COURSE_ID||request.kind!=='test'||request.scope.kind!=='documents'||request.scope.documentIds.length>8))throw new Error('review.scope_mismatch');
         const existing = this.repo.byKey(request.idempotencyKey);

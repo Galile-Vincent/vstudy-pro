@@ -4,17 +4,27 @@ import { tr } from "../../shared/i18n";
 import {
   ArrowLeft,
   ArrowRight,
-  Check,
   CheckCircle2,
-  Clock3,
+  ChevronDown,
   Sparkles,
   XCircle,
 } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { Input } from "../components/ui/input";
+import {
+  Badge,
+  Button,
+  FormField,
+  Input,
+  SegmentedTabsList,
+  SegmentedTabsTrigger,
+  Stat,
+  Tabs,
+  TabsContent,
+  Toolbar,
+} from "../components/ui";
 import { Progress } from "../components/ui/progress";
-import { useEffect, useRef } from "react";
+import { useExamFormat } from "./format";
+import { useFooterInset } from "./footer-inset";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 type Artifact = NonNullable<IpcResponse<"review:artifact:get">>;
 type Attempt = IpcResponse<"review:attempt:start">;
 type Answer = Attempt["answers"][string];
@@ -82,7 +92,9 @@ export function ExamPlayer({
   results,
   busy,
   failed,
+  draftError,
   explanations,
+  gradedEarlier,
   onDraft,
   onMove,
   onSubmit,
@@ -90,6 +102,7 @@ export function ExamPlayer({
   onExplain,
   onRetry,
   onReport,
+  actions,
 }: {
   artifact: Artifact;
   attempt: Attempt | null;
@@ -98,7 +111,9 @@ export function ExamPlayer({
   results: boolean;
   busy: boolean;
   failed: boolean;
+  draftError: boolean;
   explanations: Record<string, string>;
+  gradedEarlier: boolean;
   onDraft: (value: Answer) => void;
   onMove: (index: number) => void;
   onSubmit: () => void;
@@ -106,17 +121,20 @@ export function ExamPlayer({
   onExplain: (id: string) => void;
   onRetry: () => void;
   onReport: (id: string) => void;
+  actions?: ReactNode;
 }) {
+  const format = useExamFormat();
+  const footerInset = useFooterInset();
   const items = artifact.test?.items ?? [],
     item = items[index];
   const heading = useRef<HTMLHeadingElement>(null);
+  const [filter, setFilter] = useState<"all" | "incorrect">("all");
   useEffect(() => {
     heading.current?.focus();
-  }, [index, results]);
+  }, [index, results, attempt?.id]);
   const committed =
     attempt?.results.filter((r) => r.correct !== null).length ?? 0;
   const correct = attempt?.results.filter((r) => r.correct).length ?? 0;
-  const percent = items.length ? Math.round((correct / items.length) * 100) : 0;
   const feedback = attempt?.results.find((r) => r.itemId === item?.id);
   const locked = feedback?.correct !== null && feedback?.correct !== undefined;
   const feedbackRegion=useRef<HTMLElement>(null);
@@ -141,6 +159,42 @@ export function ExamPlayer({
   );
   return (
     <section className="exam-player" aria-busy={busy}>
+      <Toolbar
+        left={
+          <h2 className="text-[length:var(--type-lg)] font-medium">
+            {artifact.title}
+          </h2>
+        }
+        center={
+          attempt &&
+          !results &&
+          item && (
+            <>
+              <span className="font-medium">
+                {tr("review:item_progress", {
+                  current: index + 1,
+                  total: items.length,
+                })}
+              </span>
+              <Badge variant="secondary">{tr(`exams:${item.type}`)}</Badge>
+              <Progress
+                className="h-1.5 w-24"
+                value={(committed / items.length) * 100}
+                aria-label={tr("exams:progress")}
+                aria-valuenow={Math.round((committed / items.length) * 100)}
+                aria-valuetext={`${committed}/${items.length}`}
+              />
+              <span className="text-[var(--muted)]">
+                {tr("exams:answered", {
+                  answered: committed,
+                  total: items.length,
+                })}
+              </span>
+            </>
+          )
+        }
+        right={actions}
+      />
       {failed && (
         <p role="alert">
           {tr("review:error")}{" "}
@@ -149,118 +203,162 @@ export function ExamPlayer({
           </Button>
         </p>
       )}
-      {!attempt && <p role="status">{tr("review:loading")}</p>}
+      {!attempt && !failed && <p role="status">{tr("review:loading")}</p>}
       {attempt && results ? (
         <>
-          <header className="exam-score-header">
-            <div>
-              <h3 ref={heading} tabIndex={-1}>
-                {tr("exams:results")}
-              </h3>
-              <p className="exam-score-copy">
-                {tr("exams:score_summary", { correct, total: items.length })}
-              </p>
-              <p className="exam-muted exam-duration">
-                <Clock3 size={15} aria-hidden="true" />
-                {tr("exams:duration", {
-                  minutes: Math.max(
-                    0,
-                    Math.round(
-                      (Date.parse(attempt.committedAt ?? attempt.startedAt) -
-                        Date.parse(attempt.startedAt)) /
-                        60000,
-                    ),
+          <h3
+            ref={heading}
+            tabIndex={-1}
+            className="text-[length:var(--type-xl)] font-medium"
+          >
+            {tr("exams:results")}
+          </h3>
+          <div className="flex flex-wrap gap-x-[var(--space-8)] gap-y-[var(--space-4)]">
+            <Stat
+              label={tr("exams:accuracy")}
+              value={format
+                .percentParts(items.length ? correct / items.length : 0)
+                .map((part, i) =>
+                  part.type === "percentSign" ? (
+                    <span key={i}>{part.value}</span>
+                  ) : (
+                    part.value
                   ),
-                })}
-              </p>
-            </div>
-            <div className="exam-score-value">
-              <strong>
-                {percent}
-                <span>%</span>
-              </strong>
-              <span>{tr("exams:accuracy")}</span>
-            </div>
-          </header>
+                )}
+            />
+            <Stat
+              label={tr("exams:correct_count")}
+              value={correct}
+              unit={`/ ${items.length}`}
+            />
+            <Stat
+              label={tr("exams:duration_label")}
+              value={tr("exams:duration", {
+                minutes: format.minutes(
+                  attempt.startedAt,
+                  attempt.committedAt ?? attempt.startedAt,
+                ),
+              })}
+            />
+          </div>
           <section
-            className="exam-type-accuracy"
+            className="flex flex-col gap-[var(--space-3)]"
             aria-label={tr("exams:accuracy_by_type")}
           >
-            <h4>{tr("exams:accuracy_by_type")}</h4>
+            <h4 className="text-[length:var(--type-lg)] font-medium">
+              {tr("exams:accuracy_by_type")}
+            </h4>
             {[...new Set(items.map((i) => i.type))].map((type) => {
               const rows = attempt.results.filter(
                   (r) => items.find((i) => i.id === r.itemId)?.type === type,
                 ),
                 matched = rows.filter((r) => r.correct).length,
-                value = rows.length
-                  ? Math.round((matched / rows.length) * 100)
-                  : 0;
+                ratio = rows.length ? matched / rows.length : 0,
+                value = Math.round(ratio * 100);
               return (
-                <div className="exam-accuracy-row" key={type}>
-                  <div>
-                    <span>{tr(`exams:${type}`)}</span>
-                    <span>
-                      {matched}/{rows.length}{" "}
-                      <span className="exam-muted">· {value}%</span>
-                    </span>
-                  </div>
+                <div
+                  className="flex flex-wrap items-center gap-x-[var(--space-3)] gap-y-[var(--space-1)]"
+                  key={type}
+                >
+                  <span className="flex-[1_1_8rem]">{tr(`exams:${type}`)}</span>
                   <Progress
+                    className="flex-[2_1_12rem] [&>[data-slot=progress-indicator]]:bg-[var(--success)]"
                     value={value}
                     aria-label={tr(`exams:${type}`)}
                     aria-valuenow={value}
                     aria-valuetext={`${matched}/${rows.length}`}
                   />
+                  <span className="min-w-[8ch] text-end tabular-nums">
+                    {matched}/{rows.length}{" "}
+                    <span className="text-[var(--muted)]">
+                      · {format.percent(ratio)}
+                    </span>
+                  </span>
                 </div>
               );
             })}
           </section>
           <section
-            className="exam-question-results"
+            className="flex flex-col gap-[var(--space-3)]"
             aria-label={tr("exams:question_breakdown")}
           >
-            <h4>{tr("exams:question_breakdown")}</h4>
-            <ol>
-              {items.map((question, i) => {
-                const result = attempt.results.find(
-                    (r) => r.itemId === question.id,
-                  ),
-                  full = result?.feedback;
-                return (
-                  <li key={question.id}>
-                    <article>
-                      <header>
-                        <span className="exam-muted">
-                          {tr("exams:question_number", { number: i + 1 })} ·{" "}
-                          {tr(`exams:${question.type}`)}
-                        </span>
-                        <State correct={result?.correct ?? null} />
-                      </header>
-                      <h5>
-                        {question.stem.replaceAll("{{blank}}", "_____").trim()}
-                      </h5>
-                      {full && (
-                        <>
-                          <AnswerReview
-                            item={full}
-                            answer={attempt.answers[question.id]}
-                            correct={result?.correct ?? null}
-                          />
-                          <div className="exam-built-in">
-                            <h6>{tr("exams:explanation")}</h6>
-                            <p>{full.explanation}</p>
-                          </div>
-                          {explain(question.id)}
-                        </>
-                      )}
-                    </article>
-                  </li>
-                );
-              })}
-            </ol>
+            <h4 className="text-[length:var(--type-lg)] font-medium">
+              {tr("exams:question_breakdown")}
+            </h4>
+            <Tabs
+              value={filter}
+              onValueChange={(value) => setFilter(value as typeof filter)}
+              className="gap-[var(--space-3)]"
+            >
+              <SegmentedTabsList>
+                <SegmentedTabsTrigger value="all">
+                  {tr("exams:filter_all")}
+                </SegmentedTabsTrigger>
+                <SegmentedTabsTrigger value="incorrect">
+                  {tr("exams:filter_incorrect")}
+                </SegmentedTabsTrigger>
+              </SegmentedTabsList>
+              <TabsContent value={filter}>
+                <ol className="exam-breakdown">
+                  {items.map((question, i) => {
+                    const result = attempt.results.find(
+                        (r) => r.itemId === question.id,
+                      ),
+                      full = result?.feedback;
+                    if (filter === "incorrect" && result?.correct !== false)
+                      return null;
+                    return (
+                      <li key={question.id}>
+                        <details className="group">
+                          <summary>
+                            <span className="min-w-0 flex-1">
+                              <span className="block text-[var(--muted)]">
+                                {tr("exams:question_number", { number: i + 1 })}{" "}
+                                · {tr(`exams:${question.type}`)}
+                              </span>
+                              <span className="block font-medium">
+                                {question.stem
+                                  .replaceAll("{{blank}}", "_____")
+                                  .trim()}
+                              </span>
+                            </span>
+                            <State correct={result?.correct ?? null} />
+                            <ChevronDown
+                              className="size-4 shrink-0 group-open:rotate-180"
+                              aria-hidden="true"
+                            />
+                          </summary>
+                          {full && (
+                            <div>
+                              <AnswerReview
+                                item={full}
+                                answer={attempt.answers[question.id]}
+                                correct={result?.correct ?? null}
+                              />
+                              <div className="exam-built-in">
+                                <h5>{tr("exams:explanation")}</h5>
+                                <p>{full.explanation}</p>
+                              </div>
+                              {explain(question.id)}
+                            </div>
+                          )}
+                        </details>
+                      </li>
+                    );
+                  })}
+                </ol>
+                {filter === "incorrect" &&
+                  !attempt.results.some((r) => r.correct === false) && (
+                    <p className="text-[var(--muted)]">
+                      {tr("exams:no_incorrect")}
+                    </p>
+                  )}
+              </TabsContent>
+            </Tabs>
           </section>
           <Button
             variant="secondary"
-            className="exam-review-navigation"
+            className="justify-self-start"
             onClick={() => onResults(false)}
           >
             <ArrowLeft aria-hidden="true" />
@@ -271,177 +369,110 @@ export function ExamPlayer({
         attempt &&
         item && (
           <>
-            <header className="exam-progress-header">
-              <div>
-                <span>
-                  {tr("review:item_progress", {
-                    current: index + 1,
-                    total: items.length,
-                  })}
-                </span>
-                <Badge variant="secondary">{tr(`exams:${item.type}`)}</Badge>
-              </div>
-              <Progress
-                value={(committed / items.length) * 100}
-                aria-label={tr("exams:progress")}
-                aria-valuenow={Math.round((committed / items.length) * 100)}
-                aria-valuetext={`${committed}/${items.length}`}
-              />
-              <p className="exam-muted">
-                {tr("exams:answered", {
-                  answered: committed,
-                  total: items.length,
-                })}
-              </p>
-            </header>
             <h3 ref={heading} tabIndex={-1} className="exam-question-stem">
               {item.stem.replaceAll("{{blank}}", "_____").trim()}
             </h3>
             {!locked ? (
               <form
-                className="exam-answer-form"
+                id="exam-answer"
+                className="max-w-[65ch]"
                 onSubmit={(event) => {
                   event.preventDefault();
                   onSubmit();
                 }}
               >
-                <fieldset disabled={busy}>
-                  <legend>{tr("review:your_answer")}</legend>
-                  {(item.type === "mcq" || item.type === "multi_select") && (
-                    <div className="exam-answer-options">
-                      {item.options.map((option, i) => {
-                        const selected =
-                          item.type === "mcq"
-                            ? draft === i
-                            : Array.isArray(draft) && draft.includes(i);
-                        return (
-                          <label
-                            className="exam-option"
-                            data-selected={selected}
-                            key={i}
-                          >
-                            <input
-                              type={item.type === "mcq" ? "radio" : "checkbox"}
-                              name={`answer-${artifact.id}`}
-                              checked={selected}
-                              onChange={(event) =>
-                                onDraft(
-                                  item.type === "mcq"
-                                    ? i
-                                    : event.target.checked
-                                      ? [
-                                          ...(Array.isArray(draft)
-                                            ? draft
-                                            : []),
-                                          i,
-                                        ]
-                                      : (Array.isArray(draft)
-                                          ? draft
-                                          : []
-                                        ).filter((n) => n !== i),
-                                )
-                              }
-                            />
-                            <span className="exam-option-letter">
-                              {String.fromCharCode(65 + i)}
-                            </span>
-                            <span>{option}</span>
-                            {selected && (
-                              <Check
-                                className="exam-option-check"
-                                size={18}
-                                aria-hidden="true"
-                              />
-                            )}
-                          </label>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {item.type === "true_false" && (
-                    <div className="exam-answer-options">
-                      {[true, false].map((value) => (
-                        <label
-                          className="exam-option"
-                          data-selected={draft === value}
-                          key={String(value)}
-                        >
-                          <input
-                            type="radio"
-                            name={`answer-${artifact.id}`}
-                            checked={draft === value}
-                            onChange={() => onDraft(value)}
-                          />
-                          <span>
-                            {tr(
-                              value
-                                ? "review:answer_true"
-                                : "review:answer_false",
-                            )}
-                          </span>
-                          {draft === value && (
-                            <Check
-                              className="exam-option-check"
-                              size={18}
-                              aria-hidden="true"
-                            />
+                <fieldset
+                  disabled={busy}
+                  className="flex min-w-0 flex-col gap-[var(--space-2)]"
+                >
+                  <legend className="mb-[var(--space-3)] font-medium">
+                    {tr("review:your_answer")}
+                  </legend>
+                  {(item.type === "mcq" || item.type === "multi_select") &&
+                    item.options.map((option, i) => (
+                      <label className="exam-choice" key={i}>
+                        <input
+                          type={item.type === "mcq" ? "radio" : "checkbox"}
+                          name={`answer-${artifact.id}`}
+                          checked={
+                            item.type === "mcq"
+                              ? draft === i
+                              : Array.isArray(draft) && draft.includes(i)
+                          }
+                          onChange={(event) =>
+                            onDraft(
+                              item.type === "mcq"
+                                ? i
+                                : event.target.checked
+                                  ? [...(Array.isArray(draft) ? draft : []), i]
+                                  : (Array.isArray(draft) ? draft : []).filter(
+                                      (n) => n !== i,
+                                    ),
+                            )
+                          }
+                        />
+                        <span className="text-[var(--muted)]">
+                          {String.fromCharCode(65 + i)}
+                        </span>
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  {item.type === "true_false" &&
+                    [true, false].map((value) => (
+                      <label className="exam-choice" key={String(value)}>
+                        <input
+                          type="radio"
+                          name={`answer-${artifact.id}`}
+                          checked={draft === value}
+                          onChange={() => onDraft(value)}
+                        />
+                        <span>
+                          {tr(
+                            value ? "review:answer_true" : "review:answer_false",
                           )}
-                        </label>
-                      ))}
-                    </div>
-                  )}
+                        </span>
+                      </label>
+                    ))}
                   {(item.type === "cloze" || item.type === "calculation") && (
-                    <label className="exam-text-answer">
-                      {tr(
+                    <FormField
+                      label={tr(
                         item.type === "calculation"
                           ? "exams:numeric_answer"
                           : "exams:blank_answer",
                       )}
-                      <div className="exam-input-unit">
-                        <Input
-                          autoComplete="off"
-                          inputMode={
-                            item.type === "calculation" ? "decimal" : "text"
-                          }
-                          maxLength={2000}
-                          value={typeof draft === "string" ? draft : ""}
-                          placeholder={tr(
-                            item.type === "calculation"
-                              ? "exams:numeric_hint"
-                              : "exams:blank_hint",
+                    >
+                      {(field) => (
+                        <div className="flex items-center gap-[var(--space-3)]">
+                          <Input
+                            {...field}
+                            autoComplete="off"
+                            inputMode={
+                              item.type === "calculation" ? "decimal" : "text"
+                            }
+                            maxLength={2000}
+                            value={typeof draft === "string" ? draft : ""}
+                            placeholder={tr(
+                              item.type === "calculation"
+                                ? "exams:numeric_hint"
+                                : "exams:blank_hint",
+                            )}
+                            onChange={(e) => onDraft(e.target.value)}
+                          />
+                          {item.type === "calculation" && item.unit && (
+                            <span className="text-[var(--muted)]">
+                              {item.unit}
+                            </span>
                           )}
-                          onChange={(e) => onDraft(e.target.value)}
-                        />
-                        {item.type === "calculation" && item.unit && (
-                          <span>{item.unit}</span>
-                        )}
-                      </div>
-                    </label>
+                        </div>
+                      )}
+                    </FormField>
                   )}
                   {item.type === "multi_select" && (
-                    <p className="exam-muted">{tr("exams:select_all")}</p>
+                    <p className="text-[var(--muted)]">
+                      {tr("exams:select_all")}
+                    </p>
                   )}
                 </fieldset>
-                <p className="exam-muted exam-commit-notice">
-                  {tr("review:commit_notice")}
-                </p>
-                <Button
-                  variant="secondary"
-                  type="submit"
-                  disabled={
-                    busy ||
-                    draft === null ||
-                    draft === "" ||
-                    (Array.isArray(draft) && !draft.length)
-                  }
-                >
-                  {tr(
-                    index === items.length - 1
-                      ? "review:finish_test"
-                      : "review:answer_next",
-                  )}
-                  <ArrowRight aria-hidden="true" />
-                </Button>
               </form>
             ) : (
               <section
@@ -451,6 +482,9 @@ export function ExamPlayer({
                 aria-label={tr("review:item_feedback")}
               >
                 <State correct={feedback?.correct ?? null} />
+                {gradedEarlier && (
+                  <p className="text-[var(--muted)]">{tr("review:graded_earlier")}</p>
+                )}
                 {feedback?.feedback && (
                   <>
                     <AnswerReview
@@ -491,11 +525,15 @@ export function ExamPlayer({
                 )}
               </section>
             )}
-            <nav
-              className="exam-player-navigation"
-              aria-label={tr("exams:question_navigation")}
-            >
+            <footer className="exam-footer" ref={footerInset}>
+              <div className="flex-[1_1_16rem] text-[var(--muted)]">
+                <div role="status">
+                  {draftError && <p>{tr("review:draft_save_failed")}</p>}
+                </div>
+                {!locked && <p>{tr("review:commit_notice")}</p>}
+              </div>
               <Button
+                type="button"
                 variant="ghost"
                 disabled={busy || index === 0}
                 onClick={() => onMove(index - 1)}
@@ -503,19 +541,42 @@ export function ExamPlayer({
                 <ArrowLeft aria-hidden="true" />
                 {tr("review:previous_item")}
               </Button>
-              {locked && index < items.length - 1 && (
-                <Button variant="secondary" onClick={() => onMove(index + 1)}>
-                  {tr("review:next_item")}
-                  <ArrowRight aria-hidden="true" />
-                </Button>
-              )}
               {attempt.phase !== "answering" && (
-                <Button variant="secondary" onClick={() => onResults(true)}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => onResults(true)}
+                >
                   {tr("review:view_results")}
                   <ArrowRight aria-hidden="true" />
                 </Button>
               )}
-            </nav>
+              {locked && index < items.length - 1 && (
+                <Button type="button" onClick={() => onMove(index + 1)}>
+                  {tr("review:next_item")}
+                  <ArrowRight aria-hidden="true" />
+                </Button>
+              )}
+              {!locked && (
+                <Button
+                  type="submit"
+                  form="exam-answer"
+                  disabled={
+                    busy ||
+                    draft === null ||
+                    draft === "" ||
+                    (Array.isArray(draft) && !draft.length)
+                  }
+                >
+                  {tr(
+                    index === items.length - 1
+                      ? "review:finish_test"
+                      : "review:answer_next",
+                  )}
+                  <ArrowRight aria-hidden="true" />
+                </Button>
+              )}
+            </footer>
           </>
         )
       )}

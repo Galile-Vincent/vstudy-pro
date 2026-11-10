@@ -65,7 +65,7 @@ export const guides: Guide[] = [
         id: 'updates',
         title: 'Update or uninstall',
         paragraphs: [
-          'Updates are manual. Export a backup in Settings > Storage, quit the app, and verify the new installer. Mac users replace the app in Applications. Windows users run the new installer for the same user. Preserve the data folder to retain coursework. Database downgrades are unsupported. Auto-update requires a later change after signing and Mac notarization are verified.',
+          'Signed macOS arm64 installations offer in-app updates. Windows updates remain disabled until signing. Export a backup in Settings > Storage, quit the app, and verify the new installer. Mac users replace the app in Applications. Windows users run the new installer for the same user. Preserve the data folder to retain coursework. Database downgrades are unsupported. Mac installation verifies the Developer ID signature; release write access can still replay older signed builds.',
           'To erase data, use Settings > Privacy > Delete all data and confirm DELETE before uninstalling. Then move the Mac app to Trash, or uninstall in Windows Settings > Apps > Installed apps. Removing only the application leaves local data.',
         ],
       },

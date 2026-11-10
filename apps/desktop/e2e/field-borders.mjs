@@ -97,7 +97,7 @@ try {
     await inspect('settings-input', key, key, theme, false);
     await settings.locator('[role=tab][aria-controls$="-usage"]').click();
     await settings.getByText('Advanced: custom prices', { exact: true }).click();
-    const prices = settings.getByRole('textbox', { name: 'Price overrides', exact: true });
+    const prices = settings.getByRole('textbox', { name: /^Price overrides\b/ });
     await inspect('settings-textarea', prices, prices, theme, false);
   }
   assert.deepEqual(errors, []);

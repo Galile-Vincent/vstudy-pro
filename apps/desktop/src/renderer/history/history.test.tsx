@@ -87,11 +87,14 @@ it('keeps result nodes, focus and scroll during pagination and refresh without r
   invoke.mockImplementation(channel=>channel==='chats:facets'?Promise.resolve({courses:[],documents:[],models:[]}):++searches===1?Promise.resolve({items:[hit],nextCursor:cursor}):new Promise(resolve=>{settle=resolve;}));
   const host=await render(<HistorySearch onOpen={()=>{}}/>);await act(()=>vi.advanceTimersByTimeAsync(150));
   const result=host.querySelector<HTMLButtonElement>('[data-history-result]')!,list=host.querySelector<HTMLElement>('.history-results')!;
+  await act(()=>vi.advanceTimersByTimeAsync(1000));
+  const announced=list.querySelector('[role=status]')?.textContent;
+  expect(announced).toBe('1+ conversations');
   result.focus();list.scrollTop=150;
   const more=[...host.querySelectorAll('button')].find(b=>b.textContent==='Load more')!;
   await act(()=>more.click());
   expect(host.querySelector('[data-history-result]')).toBe(result);expect(document.activeElement).toBe(result);expect(list.scrollTop).toBe(150);
-  expect(list.querySelector('[role=status]')?.textContent??'').toBe('');
+  expect(list.querySelector('[role=status]')?.textContent).toBe(announced);
   const added = { ...hit, id: '00000000-0000-4000-8000-000000000003' as typeof hit.id, titleSnippet: 'Second conversation' };
   await act(()=>settle({items:[added],nextCursor:null}));
   expect(host.querySelectorAll('[data-history-result]')).toHaveLength(2);
@@ -101,7 +104,8 @@ it('keeps result nodes, focus and scroll during pagination and refresh without r
   await act(()=>window.dispatchEvent(new Event('vstudy:history-changed')));
   await act(()=>vi.advanceTimersByTimeAsync(150));
   expect(host.querySelector('[data-history-result]')).toBe(result);expect(document.activeElement).toBe(result);
-  expect(list.querySelector('[role=status]')?.textContent??'').toBe('');
+  await act(()=>vi.advanceTimersByTimeAsync(1000));
+  expect(list.querySelector('[role=status]')?.textContent).toBe(announced);
   await act(()=>settle({items:[hit,added],nextCursor:null}));
   expect(host.querySelector('[data-history-result]')).toBe(result);
 });

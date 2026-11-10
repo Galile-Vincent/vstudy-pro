@@ -126,6 +126,15 @@ it.skipIf(process.platform !== 'darwin')('cancels a live login when the existing
   await expect.poll(() => service.sessions.read(owner, session.id).phase).toBe('cancelled');
   expect((await service.list())[0]?.consented).toBe(false);
 });
+it.skipIf(process.platform !== 'darwin')('keeps the cancelled action kind on the retained error after the owner stops a live login', async () => {
+  const fixture = setupFixture(await temporary()), { service } = fixture; active.push(service); const owner = new Owner();
+  await service.consent('claude', true); await run(service, owner, 'install-claude');
+  const preview = await service.preview(owner, 'login-claude'), session = service.run(owner, 'login-claude', preview.token);
+  await expect.poll(() => service.sessions.read(owner, session.id).output).toContain('https://auth.example.test/manual');
+  await service.sessions.close(owner, session.id);
+  expect((await service.list())[0]).toMatchObject({ consented: true, status: 'error', error: { code: 'cancelled', hint: 'cancelled', action: 'login' } });
+  await service.resetOwner(owner);
+});
 
 it('keeps an existing account through manual update and rollback without requesting sign-in again', async () => {
   const root = await temporary(), fixture = setupFixture(root), { service, source, pins } = fixture;
