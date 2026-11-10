@@ -120,8 +120,8 @@ export function GettingStarted({ detailed = false, dialogTitle = false, onNaviga
   const items = ['setup', 'document', 'walkthrough', 'help'] as const;
   if (!detailed && items.every((item) => progress.done.includes(item))) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-[var(--space-3)] p-[var(--space-3)]">
-        <span className="flex items-center gap-[var(--space-2)]">
+      <div className="flex flex-wrap items-center gap-[var(--space-3)]">
+        <span className="flex items-center gap-[var(--space-2)] text-[var(--muted)]">
           <Check size={16} aria-hidden="true" />
           {tr('onboarding:setup_complete')}
         </span>

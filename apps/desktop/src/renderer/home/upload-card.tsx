@@ -119,7 +119,7 @@ export function UploadCard({
   return (
     <Card
       padding={6}
-      className="home-upload"
+      className="home-tone home-upload"
       data-dragging={dragging}
       onDragEnter={(e) => {
         clearDropError();

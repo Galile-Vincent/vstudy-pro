@@ -8,6 +8,9 @@
 .home-secondary { display:grid; gap:var(--space-6); }
 .home-secondary:empty { display:none; }
 .home-continue { display:flex; flex-direction:row; align-items:center; gap:var(--space-3); }
+.home-continue button { flex:none; white-space:nowrap; }
+/* In-flow sections sit on a tone of the page instead of a hairline box; contrast modes restore the outline below. */
+.home-tone { background:var(--subtle); border-color:transparent; --color-neutral:var(--active); }
 .home-upload { display:grid; gap:var(--space-4); }
 .home-upload p { color:var(--muted); overflow-wrap:anywhere; }
 .home-list { list-style:none; padding:0; margin:0; display:grid; gap:var(--space-2); }
@@ -16,7 +19,8 @@
 .streak-days { display:flex; gap:var(--space-3); list-style:none; padding:0; margin:0; color:var(--muted); }
 .streak-days li { display:grid; justify-items:center; font-size:var(--type-sm); }
 .streak-days [data-studied=true] { color:var(--ink); }
-.streak-days [data-today=true] > span:first-child { outline:2px solid var(--ink); outline-offset:2px; border-radius:var(--r-pill); }
+.streak-days li > span:first-child { display:grid; place-items:center; width:var(--space-4); height:var(--space-4); line-height:1; }
+.streak-days [data-today=true] > span:first-child { outline:1px solid var(--ink); outline-offset:1px; border-radius:var(--r-pill); }
 .home-pins .home-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-2) var(--space-4); }
 .home-activity summary { cursor:pointer; font-size:var(--type-base); font-weight:600; color:var(--muted); border-radius:var(--r-sm); }
 .home-activity .home-list { margin-top:var(--space-4); }

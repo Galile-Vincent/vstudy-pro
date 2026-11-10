@@ -22,7 +22,7 @@ export type HomeNavigate = (view: 'home' | 'library' | 'workspace' | 'welcome', 
 export type Dashboard = z.infer<typeof dashboardSchema>;
 export function Card({ title, children, className = '' }: { title: string; children: ReactNode; className?: string }) {
   return (
-    <AstryxCard padding={6} className={`min-w-0 ${className}`}>
+    <AstryxCard padding={6} className={`home-tone min-w-0 ${className}`}>
       <Section title={title}>{children}</Section>
     </AstryxCard>
   );
@@ -278,7 +278,7 @@ export function Home({
                       <span className="line-clamp-2">{plainText(recent.lastChat)}</span>
                     );
                     return index === 0 ? (
-                      <AstryxCard key={recent.document.id} padding={3} className="home-continue">
+                      <AstryxCard key={recent.document.id} padding={3} className="home-tone home-continue">
                         {thumbnail}
                         <div className="min-w-0 flex-1">
                           <h3 className="font-medium break-words" lang={contentLanguage(title) ?? 'en'}>
@@ -289,10 +289,10 @@ export function Home({
                         <Button
                           variant="primary"
                           label={tr('home:resume_title', { title })}
+                          endContent={<ArrowUpRight size={16} aria-hidden="true" />}
                           onClick={() => navigate('workspace', recent.document.id)}
                         >
                           {tr('home:resume')}
-                          <ArrowUpRight size={16} aria-hidden="true" />
                         </Button>
                       </AstryxCard>
                     ) : (
@@ -322,9 +322,9 @@ export function Home({
                   <Button variant="ghost" icon={<BookOpen size={16} />} endContent={<ArrowUpRight size={16} aria-hidden="true" />} label={tr('common:library')} onClick={() => navigate('library')} />
                 }
               />
-              {guidance}
             </div>
             <div className="home-secondary">
+              {guidance}
               {!!data.month.calls && (
                 <Card title={tr('home:usage')}>
                   <Stat
