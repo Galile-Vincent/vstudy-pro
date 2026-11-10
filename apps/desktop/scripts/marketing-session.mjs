@@ -82,7 +82,8 @@ export async function launchMarketing({desktop,directory,scale=2}) {
 export async function captureRaw({app,page},name,scale=2) {
   await page.getByText('Loading conversation',{exact:true}).waitFor({state:'hidden'});
   await page.locator('img:visible').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
-  assert.equal(await page.getByRole('alert').count(),0,`${name} has an error alert`);
+  // Astryx fields keep an empty assertive live region mounted for later validation text; only a populated one is an error.
+  assert.equal(await page.getByRole('alert').filter({hasText:/\S/}).count(),0,`${name} has an error alert`);
   await page.addStyleTag({content:'* { scrollbar-width: none !important; caret-color: transparent !important; } ::-webkit-scrollbar { display: none !important; }'});
   await page.mouse.move(viewport.width-2,viewport.height-2);
   await page.evaluate(()=>{if(window.document.activeElement instanceof window.HTMLElement) window.document.activeElement.blur();});
