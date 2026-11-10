@@ -81,16 +81,11 @@ it('shows a specific deletion failure inside confirmation and returns focus afte
   await waitFor(()=>expect(document.activeElement?.textContent).toBe(tr('themes:system')));
 });
 
-it.each(['solid', 'glass'] as const)('keeps native %s material independent of legacy card transparency', async material => {
-  let settings = settingsSchema.parse({chatSide:'right',lastProviderId:'openai-api',lastModelId:'gpt',material,cardTransparency:'soft'});
+it.each(['solid', 'glass'] as const)('keeps stored %s material and card transparency untouched when other settings change', async material => {
+  let settings = settingsSchema.parse({chatSide:'right',lastProviderId:'openai-api',lastModelId:'gpt',material,cardTransparency:'glass',glassOpacity:90});
   invoke.mockImplementation(async (channel,value) => channel === 'settings:set' ? (settings=value) : settings);
   render(<AppearanceSection/>);
-  const soft = await screen.findByRole('radio',{name:tr('themes:card_soft')});
-  expect(soft.getAttribute('aria-checked')).toBe('true');
-  fireEvent.click(screen.getByRole('radio',{name:tr('themes:card_solid')}));
-  await waitFor(()=>expect(settings.cardTransparency).toBe('solid'));
-  expect(settings.material).toBe(material);
-  fireEvent.click(soft);
-  await waitFor(()=>expect(settings.cardTransparency).toBe('soft'));
-  expect(settings.material).toBe(material);
+  fireEvent.click(await screen.findByRole('button',{name:tr('themes:dark')}));
+  await waitFor(()=>expect(settings.colorScheme).toBe('dark'));
+  expect(settings).toMatchObject({material,cardTransparency:'glass',glassOpacity:90});
 });

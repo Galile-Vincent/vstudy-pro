@@ -25,7 +25,6 @@ const copy = {
   description: 'UI_FOUNDATION_GALLERY_DEV_ONLY_2026',
   scheme: 'Scheme',
   theme: 'Theme pack',
-  material: 'Material',
   contrast: 'Contrast',
   structure: 'Rows and sections',
   empty: 'No documents yet',
@@ -124,14 +123,6 @@ export default function DesignGallery() {
           }
           right={
             <>
-              <Choice
-                label={copy.material}
-                value={preferences.cardTransparency}
-                values={choices(['solid', 'soft', 'glass'])}
-                onChange={(value) =>
-                  change('cardTransparency', value as ThemePreferences['cardTransparency'])
-                }
-              />
               <Choice
                 label={copy.contrast}
                 value={String(preferences.contrast)}

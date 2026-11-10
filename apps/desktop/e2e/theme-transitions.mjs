@@ -150,10 +150,6 @@ try {
     await page.keyboard.press('ArrowRight');
     await page.waitForFunction(()=>window.document.documentElement.dataset.themeTransition==='view');
     await waitEnd();
-    await page.getByRole('slider',{name:'Glass opacity',exact:true}).focus();
-    await page.keyboard.press('ArrowRight');
-    await page.waitForFunction(()=>window.document.documentElement.dataset.themeTransition==='view');
-    await waitEnd();
     await page.keyboard.press('Escape');
   }
   await route('courses');

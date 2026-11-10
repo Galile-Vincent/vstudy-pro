@@ -32,7 +32,7 @@
 @property --course-end { syntax:"<color>"; inherits:true; initial-value:transparent; }
 @property --glass-opacity { syntax:"<percentage>"; inherits:true; initial-value:80%; }
 html[data-theme-transition=tokens] {
-  transition-property:--background,--surface,--sidebar-surface,--subtle,--active,--ink,--muted,--line,--accent-color,--accent-foreground,--selection-color,--focus,--danger,--success,--warning,--info,--chart-1,--chart-2,--chart-3,--chart-4,--chart-5,--glass-tint,--shadow-color,--reader-background,--reader-ink,--code-background,--syntax-keyword,--syntax-string,--syntax-number,--course-start,--course-end,--glass-opacity,background-color,color,border-color,fill,stroke,box-shadow;
+  transition-property:--background,--surface,--sidebar-surface,--subtle,--active,--ink,--muted,--line,--accent-color,--accent-foreground,--selection-color,--focus,--danger,--success,--warning,--info,--chart-1,--chart-2,--chart-3,--chart-4,--chart-5,--glass-tint,--shadow-color,--reader-background,--reader-ink,--code-background,--syntax-keyword,--syntax-string,--syntax-number,--course-start,--course-end,background-color,color,border-color,fill,stroke,box-shadow;
   transition-duration:200ms; transition-timing-function:cubic-bezier(.2,.8,.2,1);
 }
 html[data-theme-transition=view] :is(.shell-sidebar,.shell-topbar,.reading-pane) { view-transition-name:none!important; }
