@@ -23,7 +23,7 @@
 .update-open time { flex:none; padding-top:2px; font-size:var(--type-xs); white-space:nowrap; }
 .update-toggle { align-self:center; margin-right:var(--space-2); flex:none; color:var(--muted); }
 .update-open:hover { background:var(--subtle); }
-.update-open:focus-visible { outline:2px solid var(--ink); outline-offset:-3px; border-radius:var(--r-sm); }
+.update-open:focus-visible { outline:2px solid var(--ink); outline-offset:-3px; border-radius:var(--radius-element); }
 .update-reader { min-width:0; padding:var(--space-6); border-left:1px solid var(--hairline); background:var(--surface); overflow-y:auto; max-height:calc(100dvh - 300px); }
 .update-reader > button:first-child { margin:0 0 var(--space-6); padding-inline:0; }
 .update-reader-sender { font-size:var(--type-sm); color:var(--muted); margin-bottom:var(--space-3); }

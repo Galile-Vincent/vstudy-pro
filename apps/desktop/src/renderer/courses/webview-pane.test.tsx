@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import './test-platform';
 /** Copy feedback reflects successful native clipboard writes and expires. */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';

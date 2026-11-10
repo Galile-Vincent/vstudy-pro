@@ -1,14 +1,12 @@
-/** Direct student input stays separate from model proposals. Exam input creates a reviewable proposal. */
+import { Card, Button } from "@astryxdesign/core";
 import { ZodError } from "zod";
 import { useState, type FormEvent } from "react";
 import type { MoodleCourse } from "../../shared/moodle";
 import { examInputSchema, taskInputSchema, type PlannerAction } from "../../shared/planner";
 import { tr, i18n } from "../../shared/i18n";
 import { displayTitle } from "../../shared/moodle-course-display";
-import { Button } from "../components/ui/button";
-import { Input, FormField, Card } from "../components/ui";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../components/ui/select";
-import { Textarea } from "../components/ui/textarea";
+import { FormField } from "../components/ui";
+import { Selector } from "@astryxdesign/core";
 import type { PlannerApi } from "./planner-api";
 export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
   courses: MoodleCourse[]; api: PlannerApi; onSaved: () => Promise<void>; onExam: (action: PlannerAction) => void; onError: () => void;
@@ -44,19 +42,9 @@ export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
       onExam({ type: "create-exam", exam });
     } catch { onError(); }
   };
-  const courseField = (value: string, onValueChange: (value: string) => void) => <FormField label={tr("planner:course")} children={field =>
-    <Select name="courseId" value={value} onValueChange={onValueChange}>
-      <SelectTrigger {...field} className="w-full"><SelectValue /></SelectTrigger>
-      <SelectContent>
-        <SelectItem value="none">{tr("planner:no_course")}</SelectItem>
-        {courses.map(c => <SelectItem key={c.id} value={c.id}>
-          {displayTitle(c.identity, i18n.resolvedLanguage || "en", c.fullName)}
-        </SelectItem>)}
-      </SelectContent>
-    </Select>
-  } />;
+  const courseField = (value: string, onChange: (value: string) => void) => <Selector label={tr("planner:course")} htmlName="courseId" value={value} onChange={onChange} options={[{value:"none",label:tr("planner:no_course")},...courses.map(c=>({value:c.id,label:displayTitle(c.identity,i18n.resolvedLanguage||"en",c.fullName)}))]} />;
   return <div className="planner-forms">
-    <Card variant="flat" className="p-6"><details open>
+    <Card elevation="none" className="p-6"><details open>
       <summary>{tr("planner:quick_add")}</summary>
       <form className="planner-form" onSubmit={e => void submitTask(e)}
         onInvalid={event => {
@@ -66,21 +54,21 @@ export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
           const input = event.target as HTMLInputElement;
           setErrors(current => ({ ...current, [input.name === "estimate" ? "estimateMinutes" : input.name]: "" }));
         }}>
-        <FormField className="planner-wide" error={errors.title || undefined} label={tr("planner:task_title")}  children={field => <Input {...field} name="title" required maxLength={200} autoComplete="off" />} />
+        <FormField className="planner-wide" error={errors.title || undefined} label={tr("planner:task_title")}  children={field => <input {...field} name="title" required {...{maxLength: 200}} autoComplete="off" />} />
         {courseField(taskCourse, setTaskCourse)}
-        <FormField error={errors.dueAt || undefined} label={tr("planner:due")}  children={field => <Input {...field} type="datetime-local" name="dueAt" />} />
-        <FormField error={errors.estimateMinutes || undefined} label={tr("planner:estimate")}  children={field => <Input {...field} type="number" name="estimate" min={5} max={2880} step={5} defaultValue={30} required />} />
-        <Button type="submit" disabled={busy}>{tr("planner:quick_add")}</Button>
+        <FormField error={errors.dueAt || undefined} label={tr("planner:due")}  children={field => <input {...field} type="datetime-local" name="dueAt" />} />
+        <FormField error={errors.estimateMinutes || undefined} label={tr("planner:estimate")}  children={field => <input {...field} type="number" name="estimate" min={5} max={2880} step={5} defaultValue={30} required />} />
+        <Button label={(tr("planner:quick_add"))} type="submit"  isDisabled={busy}>{tr("planner:quick_add")}</Button>
       </form>
     </details></Card>
-    <Card variant="flat" className="p-6"><details>
+    <Card elevation="none" className="p-6"><details>
       <summary>{tr("planner:add_exam")}</summary>
       <form className="planner-form" onSubmit={submitExam}>
-        <FormField className="planner-wide" label={tr("planner:exam_title")} children={field => <Input {...field} name="title" required maxLength={200} />} />
+        <FormField className="planner-wide" label={tr("planner:exam_title")} children={field => <input {...field} name="title" required {...{maxLength: 200}} />} />
         {courseField(examCourse, setExamCourse)}
-        <FormField label={tr("planner:exam_date")} children={field => <Input {...field} type="datetime-local" name="date" required />} />
-        <FormField className="planner-wide" label={tr("planner:topics")} children={field => <Textarea {...field} name="topics" rows={3} maxLength={8000} />} />
-        <Button type="submit">{tr("planner:confirm")}</Button>
+        <FormField label={tr("planner:exam_date")} children={field => <input {...field} type="datetime-local" name="date" required />} />
+        <FormField className="planner-wide" label={tr("planner:topics")} children={field => <textarea {...field} name="topics" rows={3} {...{maxLength: 8000}} />} />
+        <Button label={(tr("planner:confirm"))} type="submit">{tr("planner:confirm")}</Button>
       </form>
     </details></Card>
   </div>;

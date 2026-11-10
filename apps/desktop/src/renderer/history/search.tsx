@@ -1,4 +1,5 @@
-/** Search controller with debounced queries, stale-response protection and reversible metadata actions. */
+import { useId } from "react";
+import { Dialog, DialogHeader } from "@astryxdesign/core";
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
@@ -9,8 +10,7 @@ import { desktop } from '../bridge';
 import { useFormat } from '../i18n';
 import { SurfaceErrorBoundary } from '../components/surface-error-boundary';
 import { HistoryResults } from './results';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
-import { EmptyState, FormField, Toolbar } from '../components/ui';
+import { EmptyState, FormField, Toolbar } from "../components/ui";
 import './history.css';
 type HistorySearchProps = {
   onOpen: (hit: ChatHit, messageId?: string) => void;
@@ -25,6 +25,7 @@ export function HistorySearch(props: HistorySearchProps) {
 }
 function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusFallback, onSummary }: HistorySearchProps) {
   useTranslation();
+  const dialogDescriptionId=useId();
   const format = useFormat();
   const [filters, setFilters] = useState<ChatSearch>({ scope: 'all', limit: 30, query: '', ...(documentId ? { documentId } : {}), ...(courseId ? { courseIds: [courseId] } : {}) });
   const [page, setPage] = useState<IpcResponse<'chats:search'>>({ items: [], nextCursor: null });
@@ -216,10 +217,10 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
    {<HistoryResults items={page.items} onOpen={onOpen} onUpdate={(h, p) => { void update(h, p); }} onRename={h => { setTitle(h.title); setRenaming(h); }} groupByCourse={grouped}/>}
    {page.nextCursor && <button disabled={loading} onClick={() => void more()}>{tr('history:more')}</button>}
   </div>
-  <Dialog open={!!renaming} onOpenChange={open => { if (!open)
-    setRenaming(null); }}><DialogContent><DialogTitle>{tr('common:rename')}</DialogTitle><DialogDescription>{tr('history:rename_hint')}</DialogDescription><form onSubmit={e => { e.preventDefault(); if (renaming && title.trim()) {
+  <>{!!renaming && <Dialog aria-describedby={dialogDescriptionId} role="dialog" isOpen={!!renaming} onOpenChange={open => { if (!open)
+    setRenaming(null); }} ><DialogHeader title={<>{tr('common:rename')}</>} /><div id={dialogDescriptionId} className="dialog-description">{tr('history:rename_hint')}</div><form onSubmit={e => { e.preventDefault(); if (renaming && title.trim()) {
     void update(renaming, { title: title.trim() });
     setRenaming(null);
-  } }}><input autoFocus aria-label={tr('common:rename_thread')} maxLength={300} value={title} onChange={e => setTitle(e.target.value)}/><button type="submit" disabled={!title.trim()}>{tr('history:save')}</button></form></DialogContent></Dialog>
+  } }}><input autoFocus aria-label={tr('common:rename_thread')} {...{maxLength: 300}} value={title} onChange={e => setTitle(e.target.value)}/><button type="submit" disabled={!title.trim()}>{tr('history:save')}</button></form></Dialog>}</>
  </div>;
 }

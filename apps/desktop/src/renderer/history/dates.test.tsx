@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import '../courses/test-platform';
 /** Result dates follow the app language, not the browser locale. */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';

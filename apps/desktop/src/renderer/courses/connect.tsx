@@ -1,13 +1,12 @@
-/** Three-step school connection. Credentials are submitted once and never retained in recent sites. */
+import { useId } from "react";
+import { Dialog, DialogHeader, Button } from "@astryxdesign/core";
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, GraduationCap, LoaderCircle, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { MoodleAccount, MoodleSchool, MoodleSiteCheck } from '../../shared/moodle';
 import { moodleSiteCheckSchema } from '../../shared/moodle';
 import { tr } from '../../shared/i18n';
-import { Button } from '../components/ui/button';
-import { Input, FormField, ListRow } from '../components/ui';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../components/ui/dialog';
+import { FormField, ListRow } from "../components/ui";
 import type { MoodleApi } from './api';
 
 import { SchoolPicker, SchoolLogo } from './school-picker';
@@ -27,6 +26,7 @@ export function ConnectDialog({open,onOpenChange,api,onConnected,accounts = []}:
   accounts?:MoodleAccount[]|undefined;open:boolean;onOpenChange:(open:boolean) => void;api:MoodleApi;onConnected:() => Promise<void>;
 }) {
   useTranslation('moodle');
+  const dialogDescriptionId = useId();
   const [flow,setFlow] = useState<Flow>({step:'find'});
   const [input,setInput] = useState('');
   const [schools,setSchools] = useState<MoodleSchool[]>([]);
@@ -105,50 +105,37 @@ export function ConnectDialog({open,onOpenChange,api,onConnected,accounts = []}:
   const siteError = error === "moodle:site_check_error" || error.startsWith("schools:") ? tr(error) : undefined;
   const step = flow.step === 'find' ? 0 : flow.step === 'result' ? 1 : 2;
   const plan = flow.step === 'find' ? undefined : flow.site.authPlan;
-  return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="moodle-connect" aria-busy={busy !== null}>
-      <GraduationCap aria-hidden="true" />
-      <DialogTitle>{tr('moodle:connect_title')}</DialogTitle>
-      <DialogDescription>{tr('moodle:connect_description')}</DialogDescription>
-      <ol className="moodle-connect-steps" aria-label={tr('moodle:connect_steps')}>
+  return <>{open && <Dialog aria-describedby={dialogDescriptionId} role="dialog" isOpen={open} onOpenChange={onOpenChange} className="moodle-connect"><GraduationCap aria-hidden="true" /><DialogHeader title={<>{tr('moodle:connect_title')}</>} /><div id={dialogDescriptionId} className="dialog-description">{tr('moodle:connect_description')}</div><ol className="moodle-connect-steps" aria-label={tr('moodle:connect_steps')}>
         {['find_school','check_school','sign_in_step'].map((label,index) => <li key={label} aria-current={step === index ? 'step' : undefined} data-complete={step > index}><span>{step > index ? '✓' : index+1}</span>{tr(`moodle:${label}`)}</li>)}
-      </ol>
-      {unsaved ? <div role="status"><p>{tr('moodle:keychain_unsaved')}</p>
-        <Button disabled={!!busy} onClick={() => {
+      </ol>{unsaved ? <div role="status"><p>{tr('moodle:keychain_unsaved')}</p>
+        <Button label={(tr('moodle:keychain_retry'))}  isDisabled={!!busy} onClick={() => {
           setBusy('permission');setError('');
           void api.retrySave(unsaved).then(async () => {await onConnected();onOpenChange(false);}).catch(() => setError('moodle:keychain_error')).finally(() => setBusy(null));
         }}>{tr('moodle:keychain_retry')}</Button>
-        <Button disabled={!!busy} onClick={() => onOpenChange(false)}>{tr('moodle:keychain_session')}</Button>
+        <Button label={(tr('moodle:keychain_session'))}  isDisabled={!!busy} onClick={() => onOpenChange(false)}>{tr('moodle:keychain_session')}</Button>
       </div> : flow.step === 'find' ? <>
         <SchoolPicker error={siteError} schools={schools} recent={recent} accounts={accounts} input={input} onInput={value => {setInput(value);setError('');}} busy={!!busy} onFind={url => void find(url)} />
       </> : <>
         <ListRow className="moodle-site-result" role="status" leading={<SchoolLogo name={flow.site.siteName} icon={flow.site.iconUrl} />}
           title={flow.site.siteName} subtitle={new URL(flow.site.siteUrl).host + new URL(flow.site.siteUrl).pathname.replace(/\/$/,'')}
           meta={<><ShieldCheck aria-hidden="true" />{tr(`moodle:method_${plan!.kind}`)}</>} />
-        {plan?.kind === 'unavailable' ? <div role="alert" className="moodle-connect-unavailable"><strong>{tr(plan.reason === 'unsupported-login' ? 'schools:unsupported_login' : `moodle:unavailable_${plan.reason}`)}</strong><p>{tr(plan.reason === 'unsupported-login' ? 'schools:unsupported_login_next' : `moodle:next_${plan.reason}`)}</p></div> : flow.step === 'result' ? <Button disabled={!!busy} onClick={() => void prepare()}><ArrowRight />{tr(error === 'moodle:keychain_error' ? 'moodle:keychain_retry' : 'moodle:continue_sign_in')}</Button> : plan?.kind === 'password' ? <form className="moodle-connect-form" onSubmit={event => {
+        {plan?.kind === 'unavailable' ? <div role="alert" className="moodle-connect-unavailable"><strong>{tr(plan.reason === 'unsupported-login' ? 'schools:unsupported_login' : `moodle:unavailable_${plan.reason}`)}</strong><p>{tr(plan.reason === 'unsupported-login' ? 'schools:unsupported_login_next' : `moodle:next_${plan.reason}`)}</p></div> : flow.step === 'result' ? <Button icon={<ArrowRight />} label={(tr(error === 'moodle:keychain_error' ? 'moodle:keychain_retry' : 'moodle:continue_sign_in'))}  isDisabled={!!busy} onClick={() => void prepare()}>{tr(error === 'moodle:keychain_error' ? 'moodle:keychain_retry' : 'moodle:continue_sign_in')}</Button> : plan?.kind === 'password' ? <form className="moodle-connect-form" onSubmit={event => {
           event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);
           const username = String(data.get('username') ?? ''); const password = String(data.get('password') ?? '');
           form.reset(); void connect(undefined,{username,password});
         }}>
-          <FormField error={credentialError} controlId="moodle-username" label={tr('moodle:username')} children={field => <Input {...field} name="username" autoComplete="username" required maxLength={256} disabled={!!busy} />} />
-          <FormField error={credentialError} controlId="moodle-password" label={tr('moodle:password')} children={field => <Input {...field} name="password" type="password" autoComplete="current-password" required maxLength={4096} disabled={!!busy} />} />
-          <Button type="submit" disabled={!!busy}>{busy && <LoaderCircle className="moodle-spin" />}{tr(busy ? 'moodle:connecting' : 'moodle:password_sign_in')}</Button>
+          <FormField error={credentialError} controlId="moodle-username" label={tr('moodle:username')} children={field => <input {...field} name="username" autoComplete="username" required {...{maxLength: 256}} disabled={!!busy} />} />
+          <FormField error={credentialError} controlId="moodle-password" label={tr('moodle:password')} children={field => <input {...field} name="password" type="password" autoComplete="current-password" required {...{maxLength: 4096}} disabled={!!busy} />} />
+          <Button label={(tr(busy ? 'moodle:connecting' : 'moodle:password_sign_in'))} type="submit"  isDisabled={!!busy}>{busy && <LoaderCircle className="moodle-spin" />}{tr(busy ? 'moodle:connecting' : 'moodle:password_sign_in')}</Button>
           <small>{tr('moodle:password_hint')}</small>
         </form> : <div className="moodle-connect-form">
-          {plan && 'providers' in plan && plan.providers.length ? plan.providers.map((provider,index) => <Button key={`${provider.url}:${index}`} disabled={!!busy} onClick={() => void connect(index)}>{busy ? <LoaderCircle className="moodle-spin" /> : <ShieldCheck />}{tr('moodle:continue_provider',{name:provider.name})}</Button>) : <Button disabled={!!busy} onClick={() => void connect()}>{busy && <LoaderCircle className="moodle-spin" />}{tr('moodle:sign_in')}</Button>}
+          {plan && 'providers' in plan && plan.providers.length ? plan.providers.map((provider,index) => <Button icon={busy ? <LoaderCircle className="moodle-spin" /> : <ShieldCheck />} label={(tr('moodle:continue_provider',{name:provider.name}))} key={`${provider.url}:${index}`}  isDisabled={!!busy} onClick={() => void connect(index)}>{tr('moodle:continue_provider',{name:provider.name})}</Button>) : <Button label={(tr('moodle:sign_in'))}  isDisabled={!!busy} onClick={() => void connect()}>{busy && <LoaderCircle className="moodle-spin" />}{tr('moodle:sign_in')}</Button>}
           <small>{tr('moodle:sign_in_hint')}</small>
         </div>}
-        {flow.step === 'sign-in' && plan?.kind === 'password' && plan.providers?.map((provider,index) => <Button key={`${provider.url}:${index}`} disabled={!!busy} onClick={() => void connect(index)}><ShieldCheck />{tr('moodle:continue_provider',{name:provider.name})}</Button>)}
+        {flow.step === 'sign-in' && plan?.kind === 'password' && plan.providers?.map((provider,index) => <Button icon={<ShieldCheck />} label={(tr('moodle:continue_provider',{name:provider.name}))} key={`${provider.url}:${index}`}  isDisabled={!!busy} onClick={() => void connect(index)}>{tr('moodle:continue_provider',{name:provider.name})}</Button>)}
         {flow.site.maintenanceMessage && plan?.kind === 'unavailable' && <p>{flow.site.maintenanceMessage}</p>}
         {plan?.kind !== 'unavailable' && <small>{tr(flow.site.registration === 'browser' ? 'schools:signup_browser' : 'schools:signup_disabled')}</small>}
         {flow.site.qrLogin && <small>{tr('schools:qr_unsupported')}</small>}
-        <Button variant="ghost" disabled={!!busy} onClick={() => {setError('');setFlow(flow.step === 'sign-in' ? {step:'result',site:flow.site} : {step:'find'});}}><ArrowLeft />{tr('moodle:back')}</Button>
-      </>}
-      {busy === 'permission' && <div role="status"><p>{tr('moodle:keychain_waiting')}</p><p>{tr('moodle:keychain_hint')}</p></div>}
-      {!unsaved && error === 'moodle:keychain_error' && flow.step === 'result' && <Button disabled={!!busy} onClick={() => {setStorage('session');setError('');setFlow({step:'sign-in',site:flow.site});}}>{tr('moodle:keychain_session')}</Button>}
-      {ssoMode && <div role="status"><p>{tr(ssoMode === 'external' ? 'moodle:waiting_browser' : 'moodle:waiting_embedded')}</p><Button variant="ghost" onClick={() => {if (activeSite) void api.ssoCancel(activeSite).catch(() => setError('moodle:connect_error'));}}>{tr('moodle:sso_cancel')}</Button></div>}
-      {error && !credentialError && !siteError && <p className="moodle-connect-error" role="alert">{tr(error)}</p>}
-      {busy && <span className="sr-only" role="status">{tr(busy === 'checking' ? 'moodle:checking_site' : busy === 'permission' ? 'moodle:keychain_waiting' : 'moodle:connecting')}</span>}
-    </DialogContent>
-  </Dialog>;
+        <Button icon={<ArrowLeft />} label={(tr('moodle:back'))} variant="ghost"  isDisabled={!!busy} onClick={() => {setError('');setFlow(flow.step === 'sign-in' ? {step:'result',site:flow.site} : {step:'find'});}}>{tr('moodle:back')}</Button>
+      </>}{busy === 'permission' && <div role="status"><p>{tr('moodle:keychain_waiting')}</p><p>{tr('moodle:keychain_hint')}</p></div>}{!unsaved && error === 'moodle:keychain_error' && flow.step === 'result' && <Button label={(tr('moodle:keychain_session'))}  isDisabled={!!busy} onClick={() => {setStorage('session');setError('');setFlow({step:'sign-in',site:flow.site});}}>{tr('moodle:keychain_session')}</Button>}{ssoMode && <div role="status"><p>{tr(ssoMode === 'external' ? 'moodle:waiting_browser' : 'moodle:waiting_embedded')}</p><Button label={(tr('moodle:sso_cancel'))} variant="ghost" onClick={() => {if (activeSite) void api.ssoCancel(activeSite).catch(() => setError('moodle:connect_error'));}}>{tr('moodle:sso_cancel')}</Button></div>}{error && !credentialError && !siteError && <p className="moodle-connect-error" role="alert">{tr(error)}</p>}{busy && <span className="sr-only" role="status">{tr(busy === 'checking' ? 'moodle:checking_site' : busy === 'permission' ? 'moodle:keychain_waiting' : 'moodle:connecting')}</span>}</Dialog>}</>;
 }

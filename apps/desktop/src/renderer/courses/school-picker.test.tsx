@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import './test-platform';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -54,6 +55,6 @@ it('puts Taiwan directory entries first in Traditional Chinese and sorts English
   expect(Array.from(options).slice(0,taiwan.length-1).every(option => option.textContent?.includes('.edu.tw'))).toBe(true);
   await i18n.changeLanguage('en');
   await mount();
-  const names=Array.from(document.querySelector('[role=group][aria-label="School directory"]')!.querySelectorAll('[role=option]')).map(option => option.querySelector('span:not(.moodle-school-monogram)')!.firstChild!.textContent ?? '');
+  const names=Array.from(document.querySelector('[role=group][aria-label="School directory"]')!.querySelectorAll('[role=option]')).map(option => option.getAttribute('aria-label') ?? '');
   expect(names).toEqual([...names].sort(new Intl.Collator('en').compare));
 });

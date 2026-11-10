@@ -4,7 +4,7 @@
   width: 36px;
   height: 36px;
   flex: 0 0 36px;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-element);
   object-fit: contain;
   background: var(--subtle);
 }

@@ -7,7 +7,7 @@ import { mkdtemp, rm, mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 const directory=await mkdtemp(join(tmpdir(),'vstudy-history-'));
-const evidence=resolve('../../docs/evidence/chat-history');
+const evidence=resolve(process.env.VSTUDY_EVIDENCE_DIR ?? '../../docs/evidence/chat-history');
 await mkdir(evidence,{recursive:true});
 let app;
 try {

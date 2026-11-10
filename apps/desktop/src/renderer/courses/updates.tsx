@@ -1,10 +1,11 @@
+import { IconButton } from "@astryxdesign/core";
+import { Button } from "@astryxdesign/core";
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowUpRight, CheckCheck, Mail, MailOpen } from 'lucide-react';
 import type { MoodleCourse, MoodleNotification } from '../../shared/moodle';
 import { i18n, tr } from '../../shared/i18n';
 import { displayTitle } from '../../shared/moodle-course-display';
 import { plainText } from '../../shared/plain-text';
-import { Button } from '../components/ui/button';
 import './updates.css';
 
 function dayGroup(value: string) {
@@ -60,13 +61,13 @@ export function UpdatesInbox({ items, courses, onRead, onClose, onOpen }: {
     if (!item.read) void changeRead([item], true, false);
   };
   return <section className="updates-inbox" aria-labelledby="updates-title" aria-busy={busy}>
-    <Button variant="ghost" className="moodle-back" onClick={onClose}><ArrowLeft />{tr('moodle:courses')}</Button>
+    <Button icon={<ArrowLeft />} label={(tr('moodle:courses'))} variant="ghost" className="moodle-back" onClick={onClose}>{tr('moodle:courses')}</Button>
     <header className="updates-heading">
       <h1 id="updates-title" tabIndex={-1} ref={heading}>{tr('moodle:updates')}</h1>
-      <Button variant="ghost" disabled={busy || !unread.length} onClick={() => void changeRead(unread, true)}><CheckCheck />{tr('moodle:mark_all_read')}</Button>
+      <Button icon={<CheckCheck />} label={(tr('moodle:mark_all_read'))} variant="ghost"  isDisabled={busy || !unread.length} onClick={() => void changeRead(unread, true)}>{tr('moodle:mark_all_read')}</Button>
     </header>
     <div className="updates-toolbar" role="group" aria-label={tr('moodle:updates_filter')}>
-      {(['all','unread'] as const).map(value => <Button key={value} variant="ghost" aria-pressed={filter === value} onClick={() => {setFilter(value);setSelectedId(undefined);}}>{tr(`moodle:updates_${value}`)}{value === 'unread' && unread.length > 0 && <span>{unread.length}</span>}</Button>)}
+      {(['all','unread'] as const).map(value => <Button label={(tr(`moodle:updates_${value}`))} key={value} variant="ghost" aria-pressed={filter === value} onClick={() => {setFilter(value);setSelectedId(undefined);}}>{tr(`moodle:updates_${value}`)}{value === 'unread' && unread.length > 0 && <span>{unread.length}</span>}</Button>)}
     </div>
     <div className="updates-layout" data-reading={!!selected}>
       <div className="updates-list" ref={list} onKeyDown={event => {
@@ -92,19 +93,19 @@ export function UpdatesInbox({ items, courses, onRead, onClose, onOpen }: {
                 <span className="update-copy"><span className="update-sender">{sender(item)}</span><span className="update-subject">{item.subject || tr('moodle:updates')}</span><span className="update-preview">{plainText(item.body).replace(/\s+/g,' ')}</span></span>
                 <time dateTime={item.createdAt} title={new Date(item.createdAt).toLocaleString(i18n.resolvedLanguage)}>{relativeTime(item.createdAt)}</time>
               </button>
-              <Button className="update-toggle" variant="ghost" size="icon" disabled={busy} title={tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')} aria-label={tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')} onClick={() => void changeRead([item], !item.read)}>{item.read ? <Mail /> : <MailOpen />}</Button>
+              <IconButton label={tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')} className="update-toggle" variant="ghost"  size="md"  isDisabled={busy} {...{title:tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')}} aria-label={tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')} onClick={() => void changeRead([item], !item.read)} icon={item.read ? <Mail /> : <MailOpen />} />
             </li>)}</ul>
           </section>;
         })}
         {!visible.length && <div className="updates-empty" role="status"><CheckCheck /><h2>{tr('moodle:updates_empty')}</h2></div>}
       </div>
       {selected && <article className="update-reader" aria-labelledby="update-subject">
-        <Button variant="ghost" onClick={() => {setSelectedId(undefined);list.current?.querySelector<HTMLButtonElement>(`[data-update-id="${selected.id}"] .update-open`)?.focus();}}><ArrowLeft />{tr('moodle:updates')}</Button>
+        <Button icon={<ArrowLeft />} label={(tr('moodle:updates'))} variant="ghost" onClick={() => {setSelectedId(undefined);list.current?.querySelector<HTMLButtonElement>(`[data-update-id="${selected.id}"] .update-open`)?.focus();}}>{tr('moodle:updates')}</Button>
         <p className="update-reader-sender">{sender(selected)}</p>
         <h2 id="update-subject" ref={readerHeading} tabIndex={-1}>{selected.subject || tr('moodle:updates')}</h2>
         <time dateTime={selected.createdAt}>{new Date(selected.createdAt).toLocaleString(i18n.resolvedLanguage)}</time>
         <p className="update-body">{plainText(selected.body)}</p>
-        {selected.url && <Button variant="outline" onClick={() => onOpen(selected)}>{tr('moodle:open_moodle')}<ArrowUpRight /></Button>}
+        {selected.url && <Button endContent={<ArrowUpRight />} label={(tr('moodle:open_moodle'))} variant="secondary" onClick={() => onOpen(selected)}>{tr('moodle:open_moodle')}</Button>}
       </article>}
     </div>
     <p className="updates-shortcuts">{tr('moodle:updates_shortcuts')}</p>

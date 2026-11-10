@@ -1,8 +1,12 @@
+import { useId } from "react";
+import { IconButton } from "@astryxdesign/core";
+import { Layout, LayoutContent, TabList, Tab } from "@astryxdesign/core";
+import { Dialog, DialogHeader, LayoutFooter, Card, Button } from "@astryxdesign/core";
 import { flushSync } from 'react-dom';
 import { catalogDeadlines } from './deadline-groups';
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
-import { Card, PageContainer, PageHeader, Section, ListRow, Toolbar, EmptyState, SegmentedTabsList, SegmentedTabsTrigger } from "../components/ui";
+import { PageContainer, PageHeader, Section, ListRow, Toolbar, EmptyState } from "../components/ui";
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
   useCallback,
@@ -39,11 +43,6 @@ import type { Document } from "../../shared";
 import { tr, i18n } from "../../shared/i18n";
 import { plainText } from "../../shared/plain-text";
 import { useNavigate, useOptionalNavigation } from "../shell";
-import { Button } from "../components/ui/button";
-import {
-  Tabs,
-  TabsContent,
-} from "../components/ui/tabs";
 import { useMoodleApi, type MoodleApi } from "./api";
 import { Reminder } from "./reminder";
 import { CourseAssistant } from "./assistant";
@@ -57,12 +56,11 @@ import {
 import type { MoodleTermFilter } from "../../shared/moodle-course";
 import "./courses.css";
 import { ConnectDialog } from "./connect";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Planner } from "./planner";
 import { courseAttention } from "./attention";
 import { orderCourses, type CourseSort, type CourseSortPreferences } from "../../shared/moodle-course-order";
 import { useCourseMovement } from "./row-movement";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Selector } from "@astryxdesign/core";
 import { UpdatesInbox } from "./updates";
 import { useScrollFades } from "./scroll-fades";
 import "./home.css";
@@ -158,6 +156,7 @@ function CoursesBody({
   const navigation = useOptionalNavigation();
   const pageRef = useRef<HTMLDivElement>(null);
   useScrollFades(pageRef);
+  const dialogDescriptionId = useId();
   const [showUpdates, setShowUpdates] = useState(false);
   const [allDue, setAllDue] = useState(false);
   const updatesTrigger = useRef<HTMLButtonElement>(null);
@@ -291,7 +290,7 @@ function CoursesBody({
       />}
       {states.includes('error') && <EmptyState role="alert" headingLevel={2}
         title={tr(`moodle:panel_error_${names.map(name => detail?.panelErrors?.[name]).find(Boolean) ?? "service"}`)}
-        action={<Button onClick={() => void sync()}>{tr("moodle:retry")}</Button>}
+        action={<Button label={(tr("moodle:retry"))} onClick={() => void sync()}>{tr("moodle:retry")}</Button>}
       />}
     </>;
   };
@@ -410,19 +409,16 @@ function CoursesBody({
               {d.submitted ? tr("moodle:done") : relative(d.dueAt)}
             </span>}
             actions={<div className="flex flex-wrap items-center gap-2">
-            {d.url && <Button variant="ghost" aria-label={tr('moodle:open_deadline', {title: d.title})} onClick={() => {
+            {d.url && <IconButton label={tr('moodle:open_deadline', {title: d.title})} variant="ghost" aria-label={tr('moodle:open_deadline', {title: d.title})} onClick={() => {
               const course = overview?.courses.find(c => c.id === d.courseId);
               if (course && d.url) openMoodle(course.accountId,{kind:'page',url:d.url});
-            }}><ArrowUpRight /></Button>}
+            }} icon={<ArrowUpRight />} />}
             {remind(d)}
-            <Button
+            <IconButton label={tr("moodle:calendar_for", { title: d.title })}
               variant="ghost"
-              size="icon"
+               size="md"
               aria-label={tr("moodle:calendar_for", { title: d.title })}
-              onClick={() => void exportCalendar([d.id])}
-            >
-              <CalendarDays />
-            </Button>
+              onClick={() => void exportCalendar([d.id])} icon={<CalendarDays />} />
             </div>}
           />
         ))}
@@ -449,9 +445,9 @@ function CoursesBody({
             subtitle={<span className="line-clamp-2">{plainText(n.body)}</span>}
             meta={<time dateTime={n.createdAt}>{relative(n.createdAt)}</time>}
             actions={<div className="flex flex-wrap gap-2">
-              {n.url && <Button variant="ghost" aria-label={tr("moodle:open_notification", {title: n.subject})} onClick={() => openMoodle(n.accountId,{kind:'page',url:n.url!})}>{tr('webview:open')}<ArrowUpRight /></Button>}
+              {n.url && <Button endContent={<ArrowUpRight />} label={tr("moodle:open_notification", {title: n.subject})} variant="ghost" aria-label={tr("moodle:open_notification", {title: n.subject})} onClick={() => openMoodle(n.accountId,{kind:'page',url:n.url!})}>{tr('webview:open')}</Button>}
               {!n.read && (
-                <Button
+                <Button icon={<Check />} label={(tr("moodle:mark_read"))}
                   variant="ghost"
                   onClick={async () => {
                     try {
@@ -463,16 +459,16 @@ function CoursesBody({
                     await refresh().catch(() => setError(true));
                   }}
                 >
-                  <Check />
+
                   {tr("moodle:mark_read")}
                 </Button>
               )}
-              <Button
+              <Button endContent={<ArrowUpRight />} label={(tr("moodle:explain_prepare"))}
                 variant="ghost"
                 onClick={() => setAgentRequest((n) => n + 1)}
               >
                 {tr("moodle:explain_prepare")}
-                <ArrowUpRight />
+
               </Button>
             </div>}
           />
@@ -513,7 +509,7 @@ function CoursesBody({
                 onClick={() => void openFile(f.id)}
                 meta={<span>{" "}{tr(opening === f.id ? "moodle:converting" : f.documentId ? "moodle:ready" : "moodle:not_opened")}</span>}
                 actions={
-              <Button variant="ghost" size="icon" aria-label={tr("moodle:open_original_file", {title: f.name})} title={tr('webview:open')} onClick={() => openMoodle(detail!.course.accountId,{kind:'file',fileId:f.id})}><ArrowUpRight /></Button>
+              <IconButton label={tr("moodle:open_original_file", {title: f.name})} variant="ghost"  size="md" aria-label={tr("moodle:open_original_file", {title: f.name})} {...{title:tr('webview:open')}} onClick={() => openMoodle(detail!.course.accountId,{kind:'file',fileId:f.id})} icon={<ArrowUpRight />} />
                 }
               />
             ))}
@@ -524,20 +520,20 @@ function CoursesBody({
     );
   };
   if (showPlanner) return <PageContainer as="main" className="h-full overflow-auto">
-    <Button variant="ghost" ref={plannerBack} className="moodle-back" onClick={() => setShowPlanner(false)}><ArrowLeft />{tr("planner:back")}</Button>
+    <Button icon={<ArrowLeft />} label={(tr("planner:back"))} variant="ghost" ref={plannerBack} className="moodle-back" onClick={() => setShowPlanner(false)}>{tr("planner:back")}</Button>
     <Planner courses={overview?.courses ?? []} deadlines={overview?.upcoming ?? []} />
   </PageContainer>;
   const header = (
     <PageHeader title={!courseId ? tr("moodle:courses") : loading ? <span role="status">{tr("moodle:loading")}</span> : undefined}
       actions={<div className="flex flex-wrap gap-2 [&_button]:min-h-9 [&_button]:h-auto">
-        {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry"
+        {!courseId && <Button icon={<Inbox />} label={(tr("moodle:updates"))} ref={updatesTrigger} variant="secondary" className="updates-entry"
           onClick={() => setShowUpdates(true)}>
-          <Inbox />{tr("moodle:updates")}{unreadUpdates > 0 && <span>{unreadUpdates}</span>}
+          {tr("moodle:updates")}{unreadUpdates > 0 && <span>{unreadUpdates}</span>}
         </Button>}
-        <Button ref={plannerTrigger} variant="outline" className="planner-entry"
-          onClick={() => setShowPlanner(true)}><CalendarDays />{tr("planner:title")}</Button>
-        {overview && !overview.accounts.length && <Button ref={connectTrigger} variant="outline" onClick={() => setConnect(true)}>
-          <GraduationCap />{tr("moodle:connect_school")}
+        <Button icon={<CalendarDays />} label={(tr("planner:title"))} ref={plannerTrigger} variant="secondary" className="planner-entry"
+          onClick={() => setShowPlanner(true)}>{tr("planner:title")}</Button>
+        {overview && !overview.accounts.length && <Button icon={<GraduationCap />} label={(tr("moodle:connect_school"))} ref={connectTrigger} variant="secondary" onClick={() => setConnect(true)}>
+          {tr("moodle:connect_school")}
         </Button>}
       </div>} />
   );
@@ -549,7 +545,7 @@ function CoursesBody({
           {notice && (
             <div className="moodle-banner">
               {notice}
-              <Button variant="ghost" onClick={() => setNotice("")}>
+              <Button label={(tr("moodle:dismiss"))} variant="ghost" onClick={() => setNotice("")}>
                 {tr("moodle:dismiss")}
               </Button>
             </div>
@@ -561,24 +557,24 @@ function CoursesBody({
             <span>
               {tr(overview ? "moodle:offline_stale" : "moodle:load_error")}
             </span>
-            <Button
-              variant="outline"
-              disabled={syncing}
+            <Button label={(tr("moodle:retry"))}
+              variant="secondary"
+               isDisabled={syncing}
               onClick={() => void sync()}
             >
               {tr("moodle:retry")}
             </Button>
-            <Button variant="ghost" onClick={() => setError(false)}>{tr("moodle:dismiss")}</Button>
+            <Button label={(tr("moodle:dismiss"))} variant="ghost" onClick={() => setError(false)}>{tr("moodle:dismiss")}</Button>
           </div>
         )}
         {!!overview?.accounts.length && !showUpdates && (!courseId || overview.accounts.some(account => account.status === "expired" || account.signInStorage)) && (
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap gap-2">
-              <Button variant="ghost" onClick={() => setConnect(true)}>
-                <GraduationCap />{tr("moodle:connect_another_school")}
+              <Button icon={<GraduationCap />} label={(tr("moodle:connect_another_school"))} variant="ghost" onClick={() => setConnect(true)}>
+                {tr("moodle:connect_another_school")}
               </Button>
-              <Button variant="ghost" disabled={syncing} onClick={() => void sync()}>
-                <RefreshCw className={syncing ? "moodle-spin" : ""} />
+              <Button icon={<RefreshCw className={syncing ? "moodle-spin" : ""} />} label={(tr(courseId ? "moodle:refresh_this_course" : "moodle:refresh_all_schools"))} variant="ghost"  isDisabled={syncing} onClick={() => void sync()}>
+
                 {tr(courseId ? "moodle:refresh_this_course" : "moodle:refresh_all_schools")}
               </Button>
             </div>
@@ -591,28 +587,25 @@ function CoursesBody({
                     ? tr("moodle:synced", { time: relative(account.syncedAt) })
                     : tr("moodle:not_synced")}
                 </small>
-                <Button
+                <IconButton label={tr("moodle:disconnect_school_named", { school: account.siteName })}
                   variant="ghost"
-                  size="icon"
+                   size="md"
                   aria-label={tr("moodle:disconnect_school_named", { school: account.siteName })}
                   onClick={event => {
                     disconnectTrigger.current = event.currentTarget;
                     disconnectSchool.current = account.siteName;
                     setConfirmDisconnect(account.id);
-                  }}
-                >
-                  <Unplug />
-                </Button>
+                  }} icon={<Unplug />} />
                 {account.signInStorage && <div role="status">
                   <p>{tr(account.signInStorage === 'unsaved' ? 'moodle:keychain_unsaved' : 'moodle:keychain_session')}</p>
-                  <Button onClick={async () => {
+                  <Button label={(tr('moodle:keychain_retry'))} onClick={async () => {
                     try {await api.retrySave(account.id);await refresh();} catch {failure();}
                   }}>{tr('moodle:keychain_retry')}</Button>
                 </div>}
                 {account.status === "expired" && (
                   <div className="moodle-expired" role="alert">
                     {tr("moodle:expired")}
-                    <Button ref={connectTrigger} variant="outline" onClick={() => setConnect(true)}>
+                    <Button label={(tr("moodle:reconnect"))} ref={connectTrigger} variant="secondary" onClick={() => setConnect(true)}>
                       {tr("moodle:reconnect")}
                     </Button>
                   </div>
@@ -652,30 +645,17 @@ function CoursesBody({
                 onRefresh={() => void sync()}
                 onDisconnect={() => { disconnectSchool.current = overview?.accounts.find(account => account.id === detail.course.accountId)?.siteName; setConfirmDisconnect(detail.course.accountId); }}
               />
-              <div className="moodle-course-layout">
-                <Tabs
-                  value={tab}
-                  onValueChange={(v) => setTab(v as Tab)}
-                  className="moodle-tabs"
-                >
-                  <SegmentedTabsList
-                    aria-label={tr("moodle:course_sections")}
-                  >
-                    {tabs.map((key) => (
-                      <SegmentedTabsTrigger key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"})}>
-                        {tr(`moodle:${key}`)}
-                      </SegmentedTabsTrigger>
-                    ))}
-                  </SegmentedTabsList>
-                  <TabsContent value="content">
-                    <div className="grid items-start gap-6 mb-6 min-[1280px]:grid-cols-2">
+              <Layout className="moodle-course-layout" content={<LayoutContent className="course-detail-content">
+                <div className="moodle-tabs"><TabList role="tablist" value={tab} onChange={(v) => setTab(v as Tab)} aria-label={tr("moodle:course_sections")}>{tabs.map((key) => (
+                      <Tab key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => { setTab(key); event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"}); }} label={tr(`moodle:${key}`)} id={`tab-tab-${key}`} panelId={`panel-tab-${key}`} />
+                    ))}</TabList><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <><div className="course-overview grid items-start gap-6 mb-6">
                       <Section title={tr("moodle:up_next")} actions={
-                          <Button
+                          <Button endContent={<ChevronRight />} label={(tr("moodle:view_all"))}
                             variant="ghost"
                             onClick={() => setTab("deadlines")}
                           >
                             {tr("moodle:view_all")}
-                            <ChevronRight />
+
                           </Button>
                         }>
                         {deadlines(
@@ -692,32 +672,25 @@ function CoursesBody({
                       <Section title={tr("moodle:latest_updates")}>
                         {notifications(3)}
                       </Section>
-                    </div>
-                    {panelStatus('contents','completion','teachers')}
-                    {detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}
-                    <CourseContent
+                    </div>{panelStatus('contents','completion','teachers')}{detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}<CourseContent
                       detail={detail}
                       openWeeks={weekState.open}
                       setWeekOpen={setWeekOpen}
                       openFile={openFile}
                       onError={failure}
-                    />
-                  </TabsContent>
-                  <TabsContent value="deadlines" aria-busy={detail.fetchState === "loading"}>
-                    {panelStatus('assignments','quizzes')}
-                    <section className="flex min-w-0 flex-col gap-4">
+                    /></>}</section><section role="tabpanel" id={`panel-tab-${"deadlines"}`} aria-labelledby={`tab-tab-${"deadlines"}`} data-state={tab === "deadlines" ? "active" : "inactive"} hidden={tab !== "deadlines"}>{tab === "deadlines" && <>{panelStatus('assignments','quizzes')}<section className="flex min-w-0 flex-col gap-4">
                       <div className="moodle-section-heading">
                         <h2>{tr("moodle:deadlines")}</h2>
-                        <Button
-                          variant="outline"
-                          disabled={!detail.deadlines.length}
+                        <Button icon={<CalendarDays />} label={(tr("moodle:export_calendar"))}
+                          variant="secondary"
+                           isDisabled={!detail.deadlines.length}
                           onClick={() =>
                             void exportCalendar(
                               detail.deadlines.map((d) => d.id),
                             )
                           }
                         >
-                          <CalendarDays />
+
                           {tr("moodle:export_calendar")}
                         </Button>
                       </div>
@@ -746,21 +719,10 @@ function CoursesBody({
                           </section>
                         ),
                       )}
-                    </section>
-                  </TabsContent>
-                  <TabsContent value="announcements" aria-busy={detail.fetchState === "loading"}>
-                    {panelStatus('announcements')}
-                    <Announcements accountId={detail.course.accountId} items={detail.announcements} />
-                  </TabsContent>
-                  <TabsContent value="notifications">
-                    <section className="flex min-w-0 flex-col gap-4">
+                    </section></>}</section><section role="tabpanel" id={`panel-tab-${"announcements"}`} aria-labelledby={`tab-tab-${"announcements"}`} data-state={tab === "announcements" ? "active" : "inactive"} hidden={tab !== "announcements"}>{tab === "announcements" && <>{panelStatus('announcements')}<Announcements accountId={detail.course.accountId} items={detail.announcements} /></>}</section><section role="tabpanel" id={`panel-tab-${"notifications"}`} aria-labelledby={`tab-tab-${"notifications"}`} data-state={tab === "notifications" ? "active" : "inactive"} hidden={tab !== "notifications"}>{tab === "notifications" && <><section className="flex min-w-0 flex-col gap-4">
                       <h2>{tr("moodle:notifications")}</h2>
                       {notifications()}
-                    </section>
-                  </TabsContent>
-                  <TabsContent value="grades" aria-busy={detail.fetchState === "loading"}>
-                    {panelStatus('grades')}
-                    <section className="flex min-w-0 flex-col gap-4">
+                    </section></>}</section><section role="tabpanel" id={`panel-tab-${"grades"}`} aria-labelledby={`tab-tab-${"grades"}`} data-state={tab === "grades" ? "active" : "inactive"} hidden={tab !== "grades"}>{tab === "grades" && <>{panelStatus('grades')}<section className="flex min-w-0 flex-col gap-4">
                       <h2>{tr("moodle:grades")}</h2>
                       {detail.grades.length ? (
                         <div className="moodle-table-scroll">
@@ -813,19 +775,14 @@ function CoursesBody({
                       ) : (
                         <EmptyState title={tr("moodle:no_grades")} />
                       )}
-                    </section>
-                  </TabsContent>
-                  <TabsContent value="files">
-                    <section className="flex min-w-0 flex-col gap-4">
+                    </section></>}</section><section role="tabpanel" id={`panel-tab-${"files"}`} aria-labelledby={`tab-tab-${"files"}`} data-state={tab === "files" ? "active" : "inactive"} hidden={tab !== "files"}>{tab === "files" && <><section className="flex min-w-0 flex-col gap-4">
                       <h2>{tr("moodle:files")}</h2>
                       <p className="moodle-panel-description">
                         {tr("moodle:files_hint")}
                       </p>
                       {files()}
-                    </section>
-                  </TabsContent>
-                </Tabs>
-                <CourseAssistant
+                    </section></>}</section></div>
+</LayoutContent>} end={                <CourseAssistant
                   key={detail.course.id}
                   detail={detail}
                   api={api}
@@ -833,13 +790,13 @@ function CoursesBody({
                   onChange={async () => { await refresh(); }}
                   onError={failure}
                 />
-              </div>
+} />
             </>
           ) : (
             <div>
               <PageHeader title={tr("moodle:course_unavailable")} />
               <EmptyState headingLevel={2} title={tr("moodle:course_unavailable")} action={
-              <Button variant="outline" onClick={() => onCourse()}>
+              <Button label={(tr("moodle:all_courses"))} variant="secondary" onClick={() => onCourse()}>
                 {tr("moodle:all_courses")}
               </Button>} />
             </div>
@@ -847,59 +804,31 @@ function CoursesBody({
         ) : overview && (overview.courses.length > 0 || overview.accounts.some(account => account.syncedAt)) ? (
           <div className="flex min-w-0 flex-col gap-6">
     <Section title={tr("moodle:your_courses")} count={overview.courses.length}>
-      <Tabs
-        value={selectedTerm}
-        onValueChange={(value) => {
+      <div className="moodle-term-tabs"><Toolbar
+          left={
+            <TabList role="tablist" value={selectedTerm} onChange={(value) => {
           prepareMovement.current();
           termInitialized.current = true;
           setTerm(value as MoodleTermFilter);
-        }}
-        className="moodle-term-tabs"
-      >
-        <Toolbar
-          left={
-            <SegmentedTabsList aria-label={tr("moodle:term_filter")}>
-              {availableTerms.map((filter) => (
-                <SegmentedTabsTrigger key={filter} value={filter}>
-                  {tr(`moodle:term_${filter}`)}
-                  <span className="moodle-chip">
-                    {overview.courses.filter((course) => matchesTerm(course, filter)).length}
-                  </span>
-                </SegmentedTabsTrigger>
-              ))}
-            </SegmentedTabsList>
+        }} aria-label={tr("moodle:term_filter")}>{availableTerms.map((filter) => (
+                <Tab endContent={<span className="moodle-chip">{overview.courses.filter(course => matchesTerm(course, filter)).length}</span>} onFocus={() => { prepareMovement.current(); termInitialized.current = true; setTerm(filter); }} key={filter} value={filter} label={tr(`moodle:term_${filter}`)} id={`tab-selectedTerm-${filter}`} panelId={`panel-selectedTerm-${filter}`} />
+              ))}</TabList>
           }
           right={
             <>
-              <Select value={sort} onValueChange={(value) => void changeSort(value)}>
-                <SelectTrigger
-                  className="course-sort"
-                  size="sm"
-                  aria-label={tr("moodle:sort_courses")}
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="smart">{tr("moodle:sort_smart")}</SelectItem>
-                  <SelectItem value="name">{tr("moodle:sort_name")}</SelectItem>
-                </SelectContent>
-              </Select>
+              <Selector controlClassName="course-sort" label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} />
               <CourseViewSwitch value={view} onChange={changeView} />
             </>
           }
-        />
-        {termFilters.map((filter) => (
-          <TabsContent key={filter} value={filter}>
-            {!overview.courses.some((course) => matchesTerm(course, filter)) && (
+        />{termFilters.map((filter) => (
+          <section role="tabpanel" id={`panel-selectedTerm-${filter}`} aria-labelledby={`tab-selectedTerm-${filter}`} data-state={selectedTerm === filter ? "active" : "inactive"} hidden={selectedTerm !== filter}>{selectedTerm === filter && <>{!overview.courses.some((course) => matchesTerm(course, filter)) && (
               <EmptyState title={tr("moodle:no_term_courses")} />
-            )}
-            {pinsVisible &&
+            )}{pinsVisible &&
               orderedCourses.some((item) => item.pinned && matchesTerm(item.course, filter)) && (
                 <div className="course-group-label py-2 text-sm text-[var(--muted)]">
                   <h3>{tr("moodle:pinned_courses")}</h3>
                 </div>
-              )}
-            <ul
+              )}<ul
               className={
                 view === "cards"
                   ? "moodle-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,22rem),1fr))] gap-3 p-0 list-none"
@@ -948,7 +877,7 @@ function CoursesBody({
                       }
                     >
                       <Surface
-                        {...(view === "cards" ? { variant: "flat" as const } : {})}
+                        {...(view === "cards" ? { elevation:"none" as const } : {})}
                         className="py-0"
                       >
                         <ListRow
@@ -1010,22 +939,19 @@ function CoursesBody({
                           }
                           actions={
                             <div className="flex items-center gap-1">
-                              {navigation?.openTab && <Button
+                              {navigation?.openTab && <IconButton label={tr("moodle:open_course_tab", { course: name })}
                                 variant="ghost"
-                                size="icon"
+                                 size="md"
                                 className="relative z-1"
                                 aria-label={tr("moodle:open_course_tab", { course: name })}
-                                title={tr("moodle:open_course_tab", { course: name })}
+                                {...{title:tr("moodle:open_course_tab", { course: name })}}
                                 onClick={() =>
                                   navigation?.openTab({
                                     view: "courses",
                                     courseId: course.id,
                                     title: name,
                                   })
-                                }
-                              >
-                                <ArrowUpRight aria-hidden="true" />
-                              </Button>}
+                                } icon={<ArrowUpRight aria-hidden="true" />} />}
                               <div
                                 className="course-counts flex items-center gap-2"
                                 aria-hidden="true"
@@ -1069,7 +995,7 @@ function CoursesBody({
                               </div>
                               <button
                                 type="button"
-                                className="course-pin grid size-[calc(var(--space-3)*3)] shrink-0 place-items-center rounded-[var(--r-sm)] aria-pressed:bg-[var(--active)]"
+                                className="course-pin grid size-[calc(var(--space-3)*3)] shrink-0 place-items-center rounded-[var(--radius-element)] aria-pressed:bg-[var(--active)]"
                                 aria-pressed={pinned}
                                 aria-label={tr(
                                   pinned ? "moodle:unpin_course_named" : "moodle:pin_course_named",
@@ -1105,10 +1031,8 @@ function CoursesBody({
                     </li>
                   );
                 })}
-            </ul>
-          </TabsContent>
-        ))}
-      </Tabs>
+            </ul></>}</section>
+        ))}</div>
     </Section>
     <Section title={tr("moodle:due_soon")} count={overdue.length + dueSoon.length + undated.length}>
       {([overdue, dueSoon, undated] as const).map(
@@ -1154,7 +1078,7 @@ function CoursesBody({
       )}
       {!error && overdue.length + dueSoon.length + undated.length === 0 && <p className="text-[var(--muted)]">{tr("moodle:all_caught_up")}</p>}
       {Math.max(overdue.length, dueSoon.length, undated.length) > 5 && (
-        <Button variant="ghost" aria-expanded={allDue} onClick={() => setAllDue(!allDue)}>
+        <Button label={(tr(allDue ? "moodle:show_less" : "moodle:show_all"))} variant="ghost" aria-expanded={allDue} onClick={() => setAllDue(!allDue)}>
           {tr(allDue ? "moodle:show_less" : "moodle:show_all")}
         </Button>
       )}
@@ -1170,18 +1094,7 @@ function CoursesBody({
             )} description={!overview?.accounts.length ? tr("moodle:empty_description") : undefined} />
           )
         )}
-        <Dialog open={!!confirmDisconnect} onOpenChange={open => { if (!open) setConfirmDisconnect(undefined); }}>
-          <DialogContent onCloseAutoFocus={event => { event.preventDefault(); disconnectTrigger.current?.focus(); }}>
-            <DialogHeader>
-              <DialogTitle>{tr("moodle:disconnect_title", { school: disconnectSchool.current ?? tr("moodle:this_school") })}</DialogTitle>
-              <DialogDescription asChild><div className="grid gap-2"><p>{tr("moodle:disconnect_removes")}</p><p>{tr("moodle:disconnect_keeps")}</p></div></DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setConfirmDisconnect(undefined)}>{tr("common:cancel")}</Button>
-              <Button variant="destructive" onClick={() => confirmDisconnect && void disconnect(confirmDisconnect)}>{tr("moodle:disconnect")}</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <>{!!confirmDisconnect && <Dialog aria-describedby={dialogDescriptionId} role="dialog" isOpen={!!confirmDisconnect} onOpenChange={open => { if (!open) setConfirmDisconnect(undefined); }} ><div><DialogHeader title={<>{tr("moodle:disconnect_title", { school: disconnectSchool.current ?? tr("moodle:this_school") })}</>} /><div id={dialogDescriptionId} className="dialog-description"><div className="grid gap-2"><p>{tr("moodle:disconnect_removes")}</p><p>{tr("moodle:disconnect_keeps")}</p></div></div></div><LayoutFooter hasDivider><Button label={(tr("common:cancel"))} variant="secondary" onClick={() => setConfirmDisconnect(undefined)}>{tr("common:cancel")}</Button><Button label={(tr("moodle:disconnect"))} variant="destructive" onClick={() => confirmDisconnect && void disconnect(confirmDisconnect)}>{tr("moodle:disconnect")}</Button></LayoutFooter></Dialog>}</>
         <ConnectDialog
           accounts={overview?.accounts}
           open={connect}

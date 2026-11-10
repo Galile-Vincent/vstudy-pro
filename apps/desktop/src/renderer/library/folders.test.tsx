@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
+import '../courses/test-platform';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { LibraryView } from './index';
-import { TooltipProvider } from '../components/ui/tooltip';
 import { tr } from '../../shared/i18n';
 import { groupByCourse, courseName, readMode, type Item } from './model';
 const state = vi.hoisted(() => ({ invoke: vi.fn(), route: { view: 'library', query: {} as Record<string, unknown> } }));
@@ -20,7 +20,7 @@ function mount(lang = 'en') {
   document.documentElement.style.setProperty('--library-row-height', '4');
   document.documentElement.style.setProperty('--art-reader-card-height', '240px');
   state.invoke.mockImplementation(async (channel: string) => channel === 'library:documents:list' ? { items: library, nextCursor: null } : []);
-  return render(<TooltipProvider><LibraryView /></TooltipProvider>);
+  return render(<><LibraryView /></>);
 }
 afterEach(() => { cleanup(); vi.resetAllMocks(); localStorage.clear(); sessionStorage.clear(); state.route.query = {}; });
 
@@ -89,7 +89,7 @@ describe('library folders view', () => {
     const results = await screen.findByRole('list', { name: tr('library:documents') });
     const courses = Array.from(results.querySelectorAll('.document-course')).map((e) => e.textContent);
     expect(courses).toEqual(['電子電路', '電子電路', '邏輯設計', tr('library:unfiled')]);
-    const first = results.querySelector<HTMLElement>('[data-slot=card]')!;
+    const first = results.querySelector<HTMLElement>('.library-document')!;
     expect(first.textContent).toContain(tr('library:pages', { count: 3, formatted: '3' }));
     first.focus();
     fireEvent.keyDown(first, { key: 'ArrowRight' });

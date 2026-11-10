@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import '../courses/test-platform';
 /** Model changes use current persisted messages and preserve a working conversation on failure. */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';

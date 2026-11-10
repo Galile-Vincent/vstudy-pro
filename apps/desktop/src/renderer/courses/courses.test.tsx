@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import './test-platform';
 import { act, useState } from "react";
 import { getByRole, getAllByRole, queryByRole, waitFor } from "@testing-library/dom";
 import { createRoot, type Root } from "react-dom/client";
@@ -78,10 +79,7 @@ async function chooseDisconnect() {
   await act(async () => getByRole(document.body, "menuitem", { name: "Disconnect school" }).click());
 }
 async function tab(name: string) {
-  const trigger = [...host.querySelectorAll<HTMLElement>("[role=tab]")].find(
-    (b) => b.textContent === name,
-  );
-  if (!trigger) throw new Error(`Tab not found: ${name}`);
+  const trigger = getByRole(host, "tab", {name});
   await act(async () => trigger.focus());
 }
 
@@ -223,7 +221,7 @@ describe("Courses", () => {
       "Explain what I need to prepare",
     );
     const assistant = document.querySelector(".moodle-assistant")!;
-    expect(assistant.parentElement).toBe(document.body);
+    expect(host.contains(assistant)).toBe(true);
     expect(document.querySelector(".moodle-assistant-panel")?.hasAttribute("hidden")).toBe(false);
     expect(document.activeElement).toBe(assistant.querySelector(".moodle-assistant-close"));
     await tab("Deadlines");
@@ -250,7 +248,7 @@ describe("Courses", () => {
     await act(async () => bell.click());
     await click(
       "1 hour",
-      document.querySelector("[data-slot=popover-content]")!,
+      getByRole(document.body,"dialog"),
     );
     const reminder = (await api.course(courseId)).reminders[0]!;
     expect(reminder.deadlineId).toBe(
@@ -262,7 +260,7 @@ describe("Courses", () => {
     await act(async () => bell.click());
     await click(
       "Remove",
-      document.querySelector("[data-slot=popover-content]")!,
+      getByRole(document.body,"dialog"),
     );
     expect((await api.course(courseId)).reminders).toEqual([]);
   });
@@ -285,7 +283,7 @@ describe("Courses", () => {
     await mount(api);
     expect(host.textContent).toContain("Your next chapter starts here");
     await click("Connect school");
-    expect(document.querySelector("[role=dialog]")?.textContent).toContain(
+    expect(queryByRole(document.body, "dialog")?.textContent).toContain(
       "Chung Yuan Christian University",
     );
     expect(document.querySelector("input[type=password]")).toBeNull();
@@ -293,7 +291,7 @@ describe("Courses", () => {
     await click("Continue to sign in");
     await click("Continue with University ID");
     expect(host.querySelectorAll(".moodle-course-card")).toHaveLength(1);
-    expect(document.querySelector("[role=dialog]")).toBeNull();
+    expect(queryByRole(document.body, "dialog")).toBeNull();
   });
   it("shows loading and expired sessions explicitly", async () => {
     const api = createMockMoodleApi(),
@@ -304,7 +302,7 @@ describe("Courses", () => {
         resolve = done;
       });
     await mount(api);
-    expect(getByRole(host, "status", {name: ""}).textContent).toContain("Loading courses");
+    expect(getAllByRole(host, "status").map(status => status.textContent).join(" ")).toContain("Loading courses");
     await act(async () =>
       resolve({
         ...overview,
@@ -331,7 +329,7 @@ describe("Courses", () => {
       ),
     );
     await chooseDisconnect();
-    const dialog = document.querySelector("[role=dialog]")!;
+    const dialog = queryByRole(document.body, "dialog")!;
     expect((await api.overview()).accounts).toHaveLength(1);
     expect(dialog.textContent).toContain("Disconnect 中原大學 CYCU?");
     expect(dialog.textContent).toContain("planner tasks, goals and exams");
@@ -339,7 +337,7 @@ describe("Courses", () => {
     expect((await api.overview()).accounts).toHaveLength(1);
     expect(onCourse).not.toHaveBeenCalled();
     await chooseDisconnect();
-    await click("Disconnect school", document.querySelector("[role=dialog]")!);
+    await click("Disconnect school", queryByRole(document.body, "dialog")!);
     expect(onCourse.mock.calls).toEqual([[]]);
     expect(host.querySelector("[role=status]")?.textContent).toBe("");
     expect((await api.overview()).accounts).toEqual([]);
@@ -350,7 +348,7 @@ describe("Courses", () => {
     await mount(api, courseId);
     const trigger = await openCourseMenu();
     await act(async () => getByRole(document.body, "menuitem", { name: "Disconnect school" }).click());
-    const dialog = document.querySelector("[role=dialog]")!;
+    const dialog = queryByRole(document.body, "dialog")!;
     await act(async () => {
       dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     });
@@ -974,7 +972,7 @@ it("keeps all four filters with zero counts and associated empty panels", async 
   await mount(api);
   const tabs = [...host.querySelectorAll<HTMLButtonElement>('.moodle-term-tabs [role=tab]')];
   expect(tabs).toHaveLength(4);
-  expect(tabs[1]!.textContent).toBe("Upcoming0");
+  expect(tabs[1]!.textContent).toContain("Upcoming"); expect(tabs[1]!.textContent).toMatch(/0$/);
   await act(async () => tabs[1]!.focus());
   expect(host.querySelector('[role=tabpanel] [data-slot=empty-state]')).not.toBeNull();
   expect(tabs[1]!.getAttribute('aria-controls')).toBe(host.querySelector('[role=tabpanel][data-state=active]')?.id);
@@ -991,8 +989,8 @@ it("retains a one-column grid fallback and separate course actions", async () =>
   const grid = host.querySelector<HTMLElement>(".moodle-grid[data-view]")!;
   await act(async () => getByRole(host, "button", { name: "Cards" }).click());
   expect(grid.className).toContain("min(100%,22rem)");
-  const card = grid.querySelector('[data-slot=card]')!;
-  expect(card.getAttribute("data-variant")).toBe("flat");
+  const card = grid.querySelector('.astryx-card')!;
+  expect(card.getAttribute("data-elevation")).toBe("none");
   expect(card.tagName).toBe("DIV");
   expect(card.querySelector("button button")).toBeNull();
   expect(host.querySelector('[data-slot=page-header] h1')?.className).not.toContain("break-all");
@@ -1285,7 +1283,7 @@ it("preserves opened weeks across tabs and opens a new current week", async () =
 });
 
 it.each([true, false])("expands a collapsed current week before jumping (reduced=%s)", async reduced => {
-  vi.mocked(window.matchMedia).mockReturnValue({matches: reduced} as MediaQueryList);
+  vi.mocked(window.matchMedia).mockReturnValue({matches: reduced, addEventListener: vi.fn(), removeEventListener: vi.fn()} as unknown as MediaQueryList);
   const scroll = vi.fn();
   HTMLElement.prototype.scrollIntoView = scroll;
   const api = createMockMoodleApi();

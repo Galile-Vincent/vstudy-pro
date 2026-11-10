@@ -1,6 +1,6 @@
 /** The native content view sits only inside the slot. Keep all app controls outside its bounds. */
 .moodle-webview-backdrop { position:fixed; inset:0; z-index:100; background:var(--overlay); }
-.moodle-webview-pane { position:absolute; top:var(--space-4); right:var(--space-4); bottom:var(--space-4); display:flex; flex-direction:column; max-width:calc(100vw - var(--space-8)); background:var(--surface); color:var(--ink); border-radius:var(--r-lg); box-shadow:var(--elevation-floating); overflow:hidden; }
+.moodle-webview-pane { position:relative; display:flex; flex-direction:column; min-width:0; min-height:0; width:100%; height:100%; background:var(--surface); color:var(--ink); border:1px solid var(--border); border-radius:var(--radius-container); box-shadow:none; overflow:hidden; }
 .moodle-webview-pane[data-full=true] { inset:var(--space-4); max-width:none; }
 .moodle-webview-header { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-3) var(--space-4); }
 .moodle-webview-header > div { flex:1; min-width:0; display:flex; flex-direction:column; gap:var(--space-1); }
@@ -22,11 +22,11 @@
 .moodle-file-actions { display:flex; align-items:center; gap:var(--space-1); }
 .moodle-file-actions > .moodle-file-row { flex:1; min-width:0; }
 @media (max-width:760px) { .moodle-webview-pane,.moodle-webview-pane[data-full=true] { inset:0; width:100%!important; max-width:none; border-radius:0; } .moodle-webview-footer > div > span { display:none; } .moodle-webview-header p { font-size:11px; } }
-.moodle-webview-pane { border-radius:var(--r-lg); box-shadow:var(--elevation-raised); }
-.moodle-webview-header { min-height:72px; padding:16px 24px; background:radial-gradient(ellipse at 100% 0%,var(--active),transparent 75%),var(--surface); }
+.moodle-webview-pane { border-radius:var(--radius-container); box-shadow:none; }
+.moodle-webview-header { min-height:56px; padding:16px 24px; background:var(--surface); border-bottom:1px solid var(--border); }
 .moodle-webview-header h1 { font-size:17px; line-height:22px; letter-spacing:-.015em; }
-.moodle-webview-toolbar { padding:8px 16px; gap:4px; background:var(--material-sheet); backdrop-filter:var(--glass-blur); }
-.moodle-webview-location { min-height:36px; border-radius:var(--r-pill); background:var(--subtle); margin-inline:8px; }
+.moodle-webview-toolbar { padding:8px 16px; gap:4px; background:var(--surface);  }
+.moodle-webview-location { min-height:36px; border-radius:var(--radius-full); background:var(--subtle); margin-inline:8px; }
 .moodle-webview-pane button { min-width:44px; min-height:44px; }
 .moodle-webview-footer { padding:8px 16px; background:var(--subtle); }
 .moodle-webview-chrome { position:relative; flex:none; }

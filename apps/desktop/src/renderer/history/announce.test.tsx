@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import '../courses/test-platform';
 /** One polite live region announces each completed search, including zero and errors. */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';

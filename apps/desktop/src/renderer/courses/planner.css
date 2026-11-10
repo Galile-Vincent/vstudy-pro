@@ -41,3 +41,5 @@
 .planner-view-tabs [data-slot=tabs-trigger] { color: var(--ink); }
 .planner-view-tabs [data-slot=tabs-list] { margin-bottom: var(--space-4); }
 .planner-task-list [data-slot="list-row"] { width:100%; }
+
+.planner-task-meta { display:flex; flex-wrap:wrap; column-gap:var(--space-3); row-gap:var(--space-1); }
