@@ -4,7 +4,7 @@ import { EXAM_COURSE_ID } from '../../shared/review-artifacts';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { ExamPlayer } from '../exams/player';
-import { Button } from '../components/ui/button';
+import { Button } from '@astryxdesign/core';
 import { draftQueue, flushDraftQueues, type DraftQueue, type Answer } from './draft-queue';
 
 desktop.onDraftFlushRequest?.(flushDraftQueues);
@@ -135,9 +135,9 @@ export function TestPlayer({ artifact, onRetake, onConfirmed, actions }: { artif
   onReport={itemId=>{if(attempt)void run(async()=>setAttempt(await desktop.invoke('review:attempt:report-bad',{attemptId:attempt.id,itemId})));}}
   onRetry={()=>{if(retryAction.current)void run(retryAction.current);}} actions={actions}
  />;
- return <section className="review-test-player" aria-busy={busy}>
+ return <section className="review-test-player max-w-3xl mx-auto w-full" aria-busy={busy}>
   {attempt && <div role="status">{draftError && <p>{tr('review:draft_save_failed')}</p>}</div>}
-  {failed && <p role="alert">{tr('review:error')} <Button disabled={busy} onClick={() => { if (retryAction.current) void run(retryAction.current); }}>{tr('review:retry')}</Button></p>}
+  {failed && <p role="alert">{tr('review:error')} <Button isDisabled={busy} label={tr('review:retry')} onClick={() => { if (retryAction.current) void run(retryAction.current); }} /></p>}
   {!attempt && busy && <p role="status">{tr('review:loading')}</p>}
   {attempt && item && !results && <>
    <p role="status">{tr('review:item_progress', { current: index + 1, total: items.length })}</p>
@@ -151,23 +151,23 @@ export function TestPlayer({ artifact, onRetake, onConfirmed, actions }: { artif
      {item.type === 'cloze' && <label>{tr('review:your_answer')}<input autoComplete="off" maxLength={2000} value={typeof draft === 'string' ? draft : ''} onChange={event => setDraft(event.target.value)} /></label>}
     </fieldset>
     <p>{tr('review:commit_notice')}</p>
-    <Button type="submit" disabled={busy || draft === null || draft === ''}>{tr(index === items.length - 1 ? 'review:finish_test' : 'review:answer_next')}</Button>
+    <Button variant="primary" type="submit" isDisabled={busy || draft === null || draft === ''} label={tr(index === items.length - 1 ? 'review:finish_test' : 'review:answer_next')} />
    </form> : <div ref={feedbackRegion} tabIndex={-1} role="status" aria-live="polite" aria-label={tr('review:item_feedback')}>
     {gradedEarlier === item.id && <p>{tr('review:graded_earlier')}</p>}
     <p>{tr(result?.reportedBad ? 'review:question_reported' : result?.correct ? 'review:answer_matches' : 'review:worth_another_look')}</p>
     <p>{tr('review:correct_answer')}: {feedback?.type === 'mcq' ? feedback.options[feedback.answer] : feedback?.type === 'true_false' ? tr(feedback.answer ? 'review:answer_true' : 'review:answer_false') : feedback?.type==='multi_select'?feedback.answer.map(i=>feedback.options[i]).join(', '):feedback?.answer}</p>
     <p>{feedback?.explanation}</p>
-    {feedback&&<Button disabled={busy} onClick={()=>void run(async()=>{const reply=await desktop.invoke('review:attempt:explain',{attemptId:attempt.id,itemId:item.id,locale:document.documentElement.lang.startsWith('zh')?'zh-Hant':document.documentElement.lang.startsWith('ja')?'ja':'en'});setExplanations(old=>({...old,[item.id]:reply.text}));})}>{tr('exams:ask_ai')}</Button>}
+    {feedback&&<Button variant="secondary" isDisabled={busy} label={tr('exams:ask_ai')} onClick={()=>void run(async()=>{const reply=await desktop.invoke('review:attempt:explain',{attemptId:attempt.id,itemId:item.id,locale:document.documentElement.lang.startsWith('zh')?'zh-Hant':document.documentElement.lang.startsWith('ja')?'ja':'en'});setExplanations(old=>({...old,[item.id]:reply.text}));})} />}
     {explanations[item.id]&&<div className="exam-explanation">{explanations[item.id]}</div>}
     {feedback?.type === 'mcq' && feedback.optionRationales?.map((rationale, optionIndex) => <p key={optionIndex}>{feedback.options[optionIndex]}: {rationale}</p>)}
     {feedback?.nextStep && <p>{feedback?.nextStep}</p>}
     {feedback && <details><summary><span className="review-chip">{tr('review:source_reference', { document: feedback.source.documentId, version: feedback.source.version })}</span></summary><blockquote>{feedback.source.quote}</blockquote></details>}
-    <Button disabled={busy || result?.reportedBad} onClick={() => void run(async () => setAttempt(await desktop.invoke('review:attempt:report-bad', { attemptId: attempt.id, itemId: item.id })))}>{tr('review:report_bad_question')}</Button>
+    <Button variant="secondary" isDisabled={busy || result?.reportedBad} label={tr('review:report_bad_question')} onClick={() => void run(async () => setAttempt(await desktop.invoke('review:attempt:report-bad', { attemptId: attempt.id, itemId: item.id })))} />
    </div>}
    <div className="review-actions">
-    <Button disabled={busy || index === 0} onClick={() => move(index - 1)}>{tr('review:previous_item')}</Button>
-    {locked && index < items.length - 1 && <Button onClick={() => move(index + 1)}>{tr('review:next_item')}</Button>}
-    {attempt.phase !== 'answering' && <Button onClick={() => setResults(true)}>{tr('review:view_results')}</Button>}
+    <Button variant="secondary" isDisabled={busy || index === 0} label={tr('review:previous_item')} onClick={() => move(index - 1)} />
+    {locked && index < items.length - 1 && <Button variant="secondary" label={tr('review:next_item')} onClick={() => move(index + 1)} />}
+    {attempt.phase !== 'answering' && <Button variant="secondary" label={tr('review:view_results')} onClick={() => setResults(true)} />}
    </div>
   </>}
   {attempt && results && <>
@@ -177,12 +177,12 @@ export function TestPlayer({ artifact, onRetake, onConfirmed, actions }: { artif
    <h4>{tr('review:worth_another_look')}</h4>
    <ul>{[...new Set(missed.map(result => result.conceptKey))].map(key => <li key={key}>{tr('review:concept_missed', { label: labels[key] ?? key, count: missed.filter(result => result.conceptKey === key).length })}</li>)}</ul>
    {!exam&&<><p>{tr('review:confirm_notice')}</p>
-   {attempt.phase === 'confirmed' ? <p role="status">{tr('review:review_list_updated')}</p> : <Button disabled={busy} onClick={() => void run(async () => {
+   {attempt.phase === 'confirmed' ? <p role="status">{tr('review:review_list_updated')}</p> : <Button variant="primary" isDisabled={busy} label={tr('review:update_review_list')} onClick={() => void run(async () => {
     setAttempt(await desktop.invoke('review:attempt:confirm', { attemptId: attempt.id }));
     onConfirmed?.();
-   })}>{tr('review:update_review_list')}</Button>}
+   })} />}
    </>}
-   <div className="review-actions">{!exam&&<Button disabled={busy || attempt.phase !== 'confirmed' || !missed.length} onClick={() => onRetake(attempt.id)}>{tr('review:retake_missed')}</Button>}<Button onClick={() => setResults(false)}>{tr('review:review_answers')}</Button></div>
+   <div className="review-actions">{!exam&&<Button variant="secondary" isDisabled={busy || attempt.phase !== 'confirmed' || !missed.length} label={tr('review:retake_missed')} onClick={() => onRetake(attempt.id)} />}<Button variant="secondary" label={tr('review:review_answers')} onClick={() => setResults(false)} /></div>
   </>}
  </section>;
 }

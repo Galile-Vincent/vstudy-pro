@@ -1,8 +1,5 @@
-import { Card, Section, SettingRow } from '../components/ui';
-
-import { Textarea } from '../components/ui/textarea';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
+import { Section, SettingRow } from '../components/ui';
+import { Button, Card, NumberInput, TextArea } from '@astryxdesign/core';
 import { useFormat } from '../i18n';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
@@ -93,95 +90,96 @@ export function UsageSettings() {
         <p>{balanceNote()}</p>
       </div>
       <UsageDashboard documents={documents} />
-      <Section level={3} title={tr('common:provider_rate_limits')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-        <div>
-          {!limits.length && (
-            <p className="muted">
-              {tr(
-                'common:no_rate_limit_information_reported_yet_codex_cli_does_not_report_rate_limits_through_exec_its_account_probe_may_be_unavailable_claude_limits_appear_when_reported',
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--space-6)] items-start">
+        <Section level={3} title={tr('common:provider_rate_limits')}>
+          <Card className="flex flex-col gap-[var(--space-4)] p-[var(--space-4)]">
+            <div>
+              {!limits.length && (
+                <p className="muted">
+                  {tr(
+                    'common:no_rate_limit_information_reported_yet_codex_cli_does_not_report_rate_limits_through_exec_its_account_probe_may_be_unavailable_claude_limits_appear_when_reported',
+                  )}
+                </p>
               )}
-            </p>
-          )}
-          {limits.map((l) => (
-            <p key={l.providerId}>
-              {l.providerId}:{' '}
-              {l.rateLimit.usedPercent === undefined
-                ? ''
-                : tr('usage:percent_used', { percent: format.number(l.rateLimit.usedPercent) })}
-              {rateWindow(l.rateLimit.label, format.number)}
-              {l.rateLimit.remainingTokens !== undefined
-                ? tr('common:tokens_left', { count: format.number(l.rateLimit.remainingTokens) })
-                : ''}
-              {l.rateLimit.remainingRequests !== undefined
-                ? tr('common:requests_left', { count: format.number(l.rateLimit.remainingRequests) })
-                : ''}
-              {l.rateLimit.resetsAt
-                ? tr('common:resets', {
-                    date: format.date(l.rateLimit.resetsAt, { dateStyle: 'medium', timeStyle: 'short' }),
-                  })
-                : ''}
-              <small>
-                {' '}
-                {tr('common:reported')}
-                {format.date(l.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}
-              </small>
-            </p>
-          ))}
-        </div>
-      </Card></Section>
-      {settings && (
-        <>
-          <Section level={3} title={tr('settings:budgets')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-            <p>{tr('usage:budget_help')}</p>
-            <SettingRow htmlFor="usage-monthly_budget_usd" label={tr('common:monthly_budget_usd')}>
-              <Input
+              {limits.map((l) => (
+                <p key={l.providerId}>
+                  {l.providerId}:{' '}
+                  {l.rateLimit.usedPercent === undefined
+                    ? ''
+                    : tr('usage:percent_used', { percent: format.number(l.rateLimit.usedPercent) })}
+                  {rateWindow(l.rateLimit.label, format.number)}
+                  {l.rateLimit.remainingTokens !== undefined
+                    ? tr('common:tokens_left', { count: format.number(l.rateLimit.remainingTokens) })
+                    : ''}
+                  {l.rateLimit.remainingRequests !== undefined
+                    ? tr('common:requests_left', { count: format.number(l.rateLimit.remainingRequests) })
+                    : ''}
+                  {l.rateLimit.resetsAt
+                    ? tr('common:resets', {
+                        date: format.date(l.rateLimit.resetsAt, { dateStyle: 'medium', timeStyle: 'short' }),
+                      })
+                    : ''}
+                  <small>
+                    {' '}
+                    {tr('common:reported')}
+                    {format.date(l.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}
+                  </small>
+                </p>
+              ))}
+            </div>
+          </Card>
+        </Section>
+        {settings && (
+          <Section level={3} title={tr('settings:budgets')}>
+            <Card className="flex flex-col gap-[var(--space-4)] p-[var(--space-4)]">
+              <p>{tr('usage:budget_help')}</p>
+              <NumberInput
                 id="usage-monthly_budget_usd"
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={settings.monthlyBudgetUsd ?? ''}
-                onChange={(e) =>
+                label={tr('common:monthly_budget_usd')}
+                min={0.01}
+                step={0.01}
+                hasClear
+                value={settings.monthlyBudgetUsd}
+                onChange={(value) =>
                   setSettings({
                     ...settings,
-                    monthlyBudgetUsd: e.target.value ? Number(e.target.value) : undefined,
+                    monthlyBudgetUsd: value ?? undefined,
                   })
                 }
               />
-            </SettingRow>
-            <SettingRow htmlFor="usage-monthly_token_cap" label={tr('common:monthly_token_cap')}>
-              <Input
+              <NumberInput
                 id="usage-monthly_token_cap"
-                type="number"
-                min="1"
-                step="1"
-                value={settings.monthlyTokenBudget ?? ''}
-                onChange={(e) =>
+                label={tr('common:monthly_token_cap')}
+                min={1}
+                step={1}
+                hasClear
+                value={settings.monthlyTokenBudget}
+                onChange={(value) =>
                   setSettings({
                     ...settings,
-                    monthlyTokenBudget: e.target.value ? Number(e.target.value) : undefined,
+                    monthlyTokenBudget: value ?? undefined,
                   })
                 }
               />
-            </SettingRow>
-            <SettingRow htmlFor="usage-warn_at" label={tr('common:warn_at')}>
-              <Input
+              <NumberInput
                 id="usage-warn_at"
-                type="number"
-                min="1"
-                max="100"
+                label={tr('common:warn_at')}
+                min={1}
+                max={100}
                 value={settings.warnAtPercent}
-                onChange={(e) => setSettings({ ...settings, warnAtPercent: Number(e.target.value) })}
+                onChange={(value) => setSettings({ ...settings, warnAtPercent: value })}
               />
-            </SettingRow>
             <details><summary>{tr('usage:advanced_prices')}</summary>
             <SettingRow stack htmlFor="usage-price_overrides_usd_per_1m_tokens" label={tr('common:price_overrides_usd_per_1m_tokens')}>
-              <Textarea
+              <TextArea
                 id="usage-price_overrides_usd_per_1m_tokens"
-                className="font-mono text-[length:var(--type-sm)]"
+                label={tr('common:price_overrides_usd_per_1m_tokens')}
+                isLabelHidden
+                controlClassName="font-mono text-[length:var(--type-sm)]"
                 rows={5}
                 value={overrides}
-                onChange={(e) => setOverrides(e.target.value)}
-                spellCheck={false}
+                onChange={(val) => setOverrides(val)}
+                hasSpellCheck={false}
               />
             </SettingRow>
             <p className="muted">
@@ -193,12 +191,16 @@ export function UsageSettings() {
             </p>
             </details>
             <div className="flex flex-wrap justify-end gap-[var(--space-2)]">
-              <Button variant="default" size="sm" onClick={() => void save()}>
-                {tr('common:save_usage_settings')}
-              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                label={tr('common:save_usage_settings')}
+                onClick={() => void save()}
+              />
               <Button
                 variant="secondary"
                 size="sm"
+                label={tr('common:export_csv')}
                 onClick={() => {
                   void desktop
                     .invoke('usage:export', {})
@@ -207,13 +209,12 @@ export function UsageSettings() {
                     )
                     .catch(() => setStatus(tr('common:export_failed')));
                 }}
-              >
-                {tr('common:export_csv')}
-              </Button>
+              />
             </div>
-          </Card></Section>
-        </>
+          </Card>
+        </Section>
       )}
+    </div>
       {status && <p role="status">{status}</p>}
     </section>
   );

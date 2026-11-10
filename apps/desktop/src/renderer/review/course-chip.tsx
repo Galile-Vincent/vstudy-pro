@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { IpcResponse } from '../../shared';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
-import { Button } from '../components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+import { Button, Popover } from '@astryxdesign/core';
 
 type Course = IpcResponse<'review:courses:list'>['items'][number];
 type Cursor = NonNullable<IpcResponse<'review:courses:list'>['nextCursor']>;
@@ -51,16 +50,52 @@ export function CourseChip({ conversationId }: { conversationId: string }) {
     finally { setBusy(false); }
   }
   const label = courseId === null ? tr('review:unsorted') : courses.find(course => course.id === courseId)?.title ?? tr('review:course_picker');
-  return <Popover open={open} onOpenChange={setOpen}>
-    <PopoverTrigger asChild><Button type="button" size="sm" variant="ghost" data-testid="chat-course-chip">{label}</Button></PopoverTrigger>
-    <PopoverContent align="start">
-      <label>{tr('review:course_picker')}<select aria-label={tr('review:course_picker')} value={courseId ?? ''} disabled={busy} onChange={event => void assign(event.target.value)}>
-        <option value="">{tr('review:unsorted')}</option>
-        {courses.filter(course => !course.archivedAt || course.id === courseId).map(course => <option key={course.id} value={course.id}>{course.title}</option>)}
-      </select></label>
-      <Button type="button" variant="ghost" disabled={busy || excluded} onClick={() => void exclude()}>{tr('review:exclude_chat')}</Button>
-      {excluded && <p role="status">{tr('review:chat_excluded')}</p>}
-      {error && <div role="alert"><p>{tr('review:error')}</p><Button onClick={() => setRevision(value => value + 1)}>{tr('review:retry')}</Button></div>}
-    </PopoverContent>
-  </Popover>;
+  return (
+    <Popover
+      label={tr('review:course_picker')}
+      isOpen={open}
+      onOpenChange={setOpen}
+      alignment="start"
+      content={
+        <div className="flex flex-col gap-[var(--space-2)] p-[var(--space-3)]">
+          <label>
+            {tr('review:course_picker')}
+            <select
+              aria-label={tr('review:course_picker')}
+              value={courseId ?? ''}
+              disabled={busy}
+              onChange={event => void assign(event.target.value)}
+            >
+              <option value="">{tr('review:unsorted')}</option>
+              {courses.filter(course => !course.archivedAt || course.id === courseId).map(course => (
+                <option key={course.id} value={course.id}>{course.title}</option>
+              ))}
+            </select>
+          </label>
+          <Button
+            type="button"
+            variant="ghost"
+            isDisabled={busy || excluded}
+            label={tr('review:exclude_chat')}
+            onClick={() => void exclude()}
+          />
+          {excluded && <p role="status">{tr('review:chat_excluded')}</p>}
+          {error && (
+            <div role="alert">
+              <p>{tr('review:error')}</p>
+              <Button label={tr('review:retry')} onClick={() => setRevision(value => value + 1)} />
+            </div>
+          )}
+        </div>
+      }
+    >
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        data-testid="chat-course-chip"
+        label={label}
+      />
+    </Popover>
+  );
 }

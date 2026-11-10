@@ -1,6 +1,5 @@
 import { SubscriptionMeters } from './subscriptions';
-import { Select } from '../components/select';
-import { Button } from '../components/ui/button';
+import { Button, Selector } from '@astryxdesign/core';
 import { Stat, Toolbar } from '../components/ui';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
@@ -38,6 +37,7 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
         </span>
       </figcaption>
       <svg
+        className="w-full aspect-[16/5]"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
         aria-label={tr(
@@ -236,19 +236,24 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
         <Toolbar
           left={
             <>
-              <Select
-                aria-label={tr('common:usage_period')}
-                value={period}
-                onChange={(e) => setPeriod(e.target.value as UsagePeriod)}
-              >
-                <option value="all">{tr('common:all_time')}</option>
-                <option value="month">{tr('common:this_month')}</option>
-                <option value="last30days">{tr('common:last_30_days')}</option>
-                <option value="day">{tr('common:today')}</option>
-              </Select>
-              <Button variant="secondary" size="sm" onClick={() => setRevision((r) => r + 1)}>
-                {tr('common:refresh_usage')}
-              </Button>
+              <Selector
+                  label={tr('common:usage_period')}
+                  isLabelHidden
+                  value={period}
+                  onChange={(value) => setPeriod(value as typeof period)}
+                  options={[
+                    { value: 'all', label: tr('common:all_time') },
+                    { value: 'month', label: tr('common:this_month') },
+                    { value: 'last30days', label: tr('common:last_30_days') },
+                    { value: 'day', label: tr('common:today') },
+                  ]}
+                />
+              <Button
+                variant="secondary"
+                size="sm"
+                label={tr('common:refresh_usage')}
+                onClick={() => setRevision((r) => r + 1)}
+              />
             </>
           }
         />
@@ -284,15 +289,17 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
             <Toolbar
               left={<strong>{tr('common:breakdown')}</strong>}
               right={
-                <Select
-                  aria-label={tr('common:group_usage_by')}
+                <Selector
+                  label={tr('common:group_usage_by')}
+                  isLabelHidden
                   value={by}
-                  onChange={(e) => setBy(e.target.value as typeof by)}
-                >
-                  <option value="provider">{tr('common:provider')}</option>
-                  <option value="model">{tr('common:model')}</option>
-                  <option value="document">{tr('common:document')}</option>
-                </Select>
+                  onChange={(value) => setBy(value as typeof by)}
+                  options={[
+                    { value: 'provider', label: tr('common:provider') },
+                    { value: 'model', label: tr('common:model') },
+                    { value: 'document', label: tr('common:document') },
+                  ]}
+                />
               }
             />
             <div className="usage-breakdown">

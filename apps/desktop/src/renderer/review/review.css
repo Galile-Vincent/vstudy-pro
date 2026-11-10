@@ -1,5 +1,6 @@
 .review-page {
   height: 100%;
+  gap: var(--space-4);
   overflow: auto;
   background: transparent;
   color: var(--ink);
@@ -98,15 +99,6 @@
   }
 }
 
-.review-consent {
-  margin-block: var(--space-5);
-  padding: var(--space-5);
-  border-radius: var(--r-md);
-  background: color-mix(in oklab, var(--ink) 4%, var(--surface));
-}
-.review-consent h2 {
-  margin-top: 0;
-}
 .review-consent-done {
   margin-block: var(--space-3);
 }
@@ -140,4 +132,13 @@
 }
 .review-evidence[open] {
   flex-basis: 100%;
+}
+
+.review-page, .review-consent {
+  --color-overlay-hover: color-mix(in srgb, var(--ink) 6%, transparent);
+  --color-overlay-pressed: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+:is(.review-page, .review-consent) .astryx-button[data-variant="primary"] {
+  --color-overlay-hover: color-mix(in srgb, var(--accent-foreground) 8%, transparent);
+  --color-overlay-pressed: color-mix(in srgb, var(--accent-foreground) 12%, transparent);
 }

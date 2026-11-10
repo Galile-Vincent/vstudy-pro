@@ -2,7 +2,7 @@
   block-size:100%; overflow:auto;
   scroll-padding-block-end:calc(var(--exam-footer-size,0px) + var(--space-8) + var(--space-4));
 }
-.exam-documents { display:grid; gap:var(--space-2); max-block-size:calc(var(--space-8) * 5); overflow:auto; }
+.exam-documents { display:grid; gap:var(--space-2); }
 .exam-fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(9rem,1fr)); gap:var(--space-4); }
 .exam-choice,.exam-breakdown details { border-radius:var(--r-sm); background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
 .exam-choice { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3); cursor:pointer; overflow-wrap:anywhere; }
@@ -39,10 +39,10 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
 .exam-source { color:var(--muted); }
 .exam-source summary { cursor:pointer; }
 .exam-source blockquote { margin-block:var(--space-3); line-height:1.6; color:var(--ink); }
-.exams-view :is(input,select,textarea):focus-visible { outline:2px solid var(--focus); outline-offset:3px; }
+.exams-view :is(input,select,textarea):not(:where([class*="astryx-"] *)):focus-visible { outline:2px solid var(--focus); outline-offset:3px; }
 .exams-view button[data-slot="button"][data-variant="secondary"] { background:var(--subtle); backdrop-filter:none; box-shadow:none; color:var(--ink); }
 .exams-view button[data-slot="button"][data-variant="secondary"]:hover:not(:disabled) { background:var(--active); }
-.exams-view button[data-slot="button"]:focus-visible { outline:none; box-shadow:0 0 0 3px color-mix(in oklab,var(--focus) 40%,transparent); }
+.exams-view button[data-slot="button"]:focus-visible { outline:var(--focus-outline-width, 2px) solid var(--focus); outline-offset:var(--focus-outline-offset, 2px); box-shadow:none; }
 @media (forced-colors:active) { .exams-view button[data-slot="button"]:focus-visible { outline:2px solid Highlight; outline-offset:3px; } }
 @media print {
   :is(.shell-content,.shell-main,.app-shell,.min-h-svh,#root):has(.exams-view) { display:block; block-size:auto; overflow:visible; }
@@ -51,4 +51,19 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
   .exam-footer { position:static; }
   .exam-breakdown > li { break-inside:avoid; }
   .exam-breakdown details::details-content { content-visibility:visible; display:block; }
+}
+
+.exams-view {
+  --color-overlay-hover: color-mix(in srgb, var(--ink) 6%, transparent);
+  --color-overlay-pressed: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+.exams-view .astryx-button[data-variant="primary"] {
+  --color-overlay-hover: color-mix(in srgb, var(--accent-foreground) 8%, transparent);
+  --color-overlay-pressed: color-mix(in srgb, var(--accent-foreground) 12%, transparent);
+}
+
+.exams-view :is(.astryx-number-input, .astryx-text-input) input:focus-visible { outline: none; }
+.exams-view :is(.astryx-number-input, .astryx-text-input):has(input:focus-visible) {
+  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
+  outline-offset: var(--focus-outline-offset);
 }

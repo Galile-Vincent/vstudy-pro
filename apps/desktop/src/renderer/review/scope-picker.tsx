@@ -7,7 +7,7 @@ import {
 import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
 import { desktop } from "../bridge";
-import { Button } from "../components/ui/button";
+import { Button } from "@astryxdesign/core";
 import { useReviewPage, type Cursor } from "./paging";
 
 export type ReviewScope = z.infer<typeof studyScopeSchema>;
@@ -244,14 +244,14 @@ export function ScopePicker({
           {error && (
             <p role="alert">
               {tr("review:error")}{" "}
-              <Button variant="secondary"
+              <Button
+                variant="secondary"
                 type="button"
+                label={tr("review:retry")}
                 onClick={() =>
                   page ? page.retry() : setReload((value) => value + 1)
                 }
-              >
-                {tr("review:retry")}
-              </Button>
+              />
             </p>
           )}
           <div className="review-scope-choices">
@@ -274,9 +274,13 @@ export function ScopePicker({
             <p>{tr("review:scope_empty")}</p>
           )}
           {page?.cursor && (
-            <Button variant="secondary" type="button" disabled={page.loading} onClick={page.more}>
-              {tr("review:load_more")}
-            </Button>
+            <Button
+              variant="secondary"
+              type="button"
+              isDisabled={page.loading}
+              label={tr("review:load_more")}
+              onClick={page.more}
+            />
           )}
         </>
       )}

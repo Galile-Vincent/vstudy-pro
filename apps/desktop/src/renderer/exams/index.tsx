@@ -6,24 +6,19 @@ import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
 import { desktop } from "../bridge";
 import {
-  Button,
   EmptyState,
-  FormField,
-  Input,
   PageContainer,
   PageHeader,
   Section,
   Toolbar,
 } from "../components/ui";
+import { Button, NumberInput, Selector, TextArea } from "@astryxdesign/core";
 import { ExamHistory } from "./history";
 import { useFooterInset } from "./footer-inset";
-import { Textarea } from "../components/ui/textarea";
 import { TestPlayer } from "../review/test-player";
 import { useReviewPage, type Cursor } from "../review/paging";
 import "./exams.css";
 type Artifact = NonNullable<IpcResponse<"review:artifact:get">>;
-const selectClass =
-  "h-9 w-full rounded-md border border-input bg-transparent px-3 text-base md:text-sm";
 const initialCounts = {
   mcq: 3,
   multi_select: 2,
@@ -149,15 +144,14 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
   const leave = (
     <Button
       variant="ghost"
-      disabled={busy}
+      isDisabled={busy}
+      label={tr("exams:back")}
       onClick={() => {
         setArtifact(null);
         setMode("setup");
         history.retry();
       }}
-    >
-      {tr("exams:back")}
-    </Button>
+    />
   );
   const ready = documents?.filter((d) => d.status === "ready") ?? [];
   return (
@@ -171,27 +165,25 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
             aria-label={tr("exams:navigation")}
           >
             <Button
-              variant={mode === "setup" && !artifact ? "secondary" : "ghost"}
+              variant={!artifact ? mode === "setup" ? "secondary" : "primary" : "ghost"}
               aria-pressed={mode === "setup" && !artifact}
+              label={tr("exams:new_exam")}
               onClick={() => {
                 setArtifact(null);
                 setMode("setup");
                 history.retry();
               }}
-            >
-              {tr("exams:new_exam")}
-            </Button>
+            />
             <Button
               variant={mode === "history" && !artifact ? "secondary" : "ghost"}
               aria-pressed={mode === "history" && !artifact}
+              label={tr("exams:history")}
               onClick={() => {
                 setArtifact(null);
                 setMode("history");
                 history.retry();
               }}
-            >
-              {tr("exams:history")}
-            </Button>
+            />
           </nav>
         }
       />
@@ -202,7 +194,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
           icon={<FileText size={32} />}
           title={tr("exams:empty_title")}
           description={tr("exams:no_documents")}
-          action={<Button onClick={onOpenLibrary}>{tr("common:library")}</Button>}
+          action={onOpenLibrary ? <Button variant="primary" label={tr("common:library")} onClick={onOpenLibrary} /> : undefined}
         />
       )}
       {!artifact && mode === "setup" && ready.length > 0 && (
@@ -240,47 +232,29 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
               </div>
             </Section>
             <Section title={tr("exams:configuration")}>
-              <FormField label={tr("exams:prompt")}>
-                {(field) => (
-                  <Textarea
-                    {...field}
-                    maxLength={4000}
-                    rows={2}
-                    value={prompt}
-                    placeholder={tr("exams:prompt_hint")}
-                    onChange={(e) => setPrompt(e.target.value)}
-                  />
-                )}
-              </FormField>
+              <TextArea
+                label={tr("exams:prompt")}
+                maxLength={4000}
+                rows={2}
+                value={prompt}
+                placeholder={tr("exams:prompt_hint")}
+                onChange={(val) => setPrompt(val)}
+              />
               <fieldset className="flex flex-col gap-[var(--space-3)]">
                 <legend className="mb-[var(--space-3)] font-medium">
                   {tr("exams:question_types")}
                 </legend>
                 <div className="exam-fields">
                   {Object.entries(counts).map(([type, count]) => (
-                    <FormField key={type} label={tr(`exams:${type}`)}>
-                      {(field) => (
-                        <Input
-                          {...field}
-                          type="number"
-                          min={0}
-                          max={40}
-                          value={count}
-                          onChange={(e) =>
-                            setCounts({
-                              ...counts,
-                              [type]: Math.max(
-                                0,
-                                Math.min(
-                                  40,
-                                  Math.trunc(Number(e.target.value)),
-                                ),
-                              ),
-                            })
-                          }
-                        />
-                      )}
-                    </FormField>
+                    <NumberInput
+                      key={type}
+                      label={tr(`exams:${type}`)}
+                      min={0}
+                      max={40}
+                      isIntegerOnly
+                      value={count}
+                      onChange={(value) => setCounts({ ...counts, [type]: value })}
+                    />
                   ))}
                 </div>
                 <p className="text-[var(--muted)]">
@@ -288,72 +262,44 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
                 </p>
               </fieldset>
               <div className="exam-fields">
-                <FormField label={tr("exams:difficulty")}>
-                  {(field) => (
-                    <select
-                      {...field}
-                      className={selectClass}
-                      value={difficulty}
-                      onChange={(e) =>
-                        setDifficulty(e.target.value as typeof difficulty)
-                      }
-                    >
-                      {["easy", "medium", "hard"].map((v) => (
-                        <option key={v} value={v}>
-                          {tr(`exams:${v}`)}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </FormField>
-                <FormField label={tr("exams:language")}>
-                  {(field) => (
-                    <select
-                      {...field}
-                      className={selectClass}
-                      value={language}
-                      onChange={(e) =>
-                        setLanguage(e.target.value as typeof language)
-                      }
-                    >
-                      <option value="en">English</option>
-                      <option value="zh-Hant">繁體中文</option>
-                      <option value="ja">日本語</option>
-                    </select>
-                  )}
-                </FormField>
-                <FormField label={tr("review:generation_model")}>
-                  {(field) => (
-                    <select
-                      {...field}
-                      className={selectClass}
-                      value={model}
-                      onChange={(e) => setModel(e.target.value)}
-                    >
-                      {choices.map((c, i) => (
-                        <option key={c.providerId + c.modelId} value={i}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </FormField>
+                <Selector
+                  label={tr("exams:difficulty")}
+                  value={difficulty}
+                  onChange={(value) => setDifficulty(value as typeof difficulty)}
+                  options={(["easy", "medium", "hard"] as const).map(id => ({ value: id, label: tr(`exams:${id}`) }))}
+                />
+                <Selector
+                  label={tr("exams:language")}
+                  value={language}
+                  onChange={(value) => setLanguage(value as typeof language)}
+                  options={[
+                    { value: "en", label: "English" },
+                    { value: "zh-Hant", label: "繁體中文" },
+                    { value: "ja", label: "日本語" },
+                  ]}
+                />
+                <Selector
+                  label={tr("review:generation_model")}
+                  value={model}
+                  onChange={setModel}
+                  options={choices.map((c, i) => ({ value: String(i), label: c.label }))}
+                />
               </div>
               {!choices.length && <p>{tr("review:choose_provider")}</p>}
             </Section>
             <div className="exam-footer" ref={footerInset}>
               <Button
                 type="submit"
-                disabled={
+                variant="primary"
+                isDisabled={
                   busy ||
                   !selected.length ||
                   total < 1 ||
                   total > 40 ||
                   !choices.length
                 }
-              >
-                {tr("exams:generate")}
-              </Button>
+                label={tr("exams:generate")}
+              />
             </div>
           </fieldset>
         </form>
@@ -380,6 +326,8 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
             <div role="status">
               <p>{tr("review:stage_generating")}</p>
               <Button
+                variant="secondary"
+                label={tr("review:cancel")}
                 onClick={() =>
                   void run(async () => {
                     await desktop.invoke("review:artifact:cancel", {
@@ -393,9 +341,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
                     history.retry();
                   })
                 }
-              >
-                {tr("review:cancel")}
-              </Button>
+              />
             </div>
           ) : (
             <p role="alert">
@@ -410,7 +356,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
           {history.error && (
             <p role="alert">
               {tr("exams:history_error")}{" "}
-              <Button onClick={history.retry}>{tr("review:retry")}</Button>
+              <Button variant="secondary" label={tr("review:retry")} onClick={history.retry} />
             </p>
           )}
           {!history.items.length && !history.loading && !history.error && (
@@ -448,7 +394,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
             }}
           />
           {history.cursor && (
-            <Button onClick={history.more}>{tr("review:load_more")}</Button>
+            <Button variant="secondary" label={tr("review:load_more")} onClick={history.more} />
           )}
         </Section>
       )}

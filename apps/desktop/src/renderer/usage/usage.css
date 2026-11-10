@@ -36,8 +36,8 @@
 }
 
 .composer-usage:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+  outline: var(--focus-outline-width, 2px) solid var(--focus-color, var(--focus));
+  outline-offset: var(--focus-outline-offset, 2px);
 }
 
 /* Simple meter without outlines */
@@ -318,7 +318,11 @@
   border-bottom: 0;
 }
 
-.usage-trend svg { width:100%; height:124px; }
+.usage-trend svg {
+  width: 100%;
+  aspect-ratio: 16 / 5;
+  height: auto;
+}
 
 .usage-dashboard .subscription-meters { padding:0; }
 .subscription-meters { padding:8px; font-size:12px; min-width:0; }
@@ -383,4 +387,13 @@
 @media (forced-colors:active) {
   .subscription-progress { outline:1px solid CanvasText; background:Canvas; }
   .subscription-progress [data-slot=progress-indicator] { background:Highlight; forced-color-adjust:none; }
+}
+
+.usage-settings, .subscription-meters {
+  --color-overlay-hover: color-mix(in srgb, var(--ink) 6%, transparent);
+  --color-overlay-pressed: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+:is(.usage-settings, .subscription-meters) .astryx-button[data-variant="primary"] {
+  --color-overlay-hover: color-mix(in srgb, var(--accent-foreground) 8%, transparent);
+  --color-overlay-pressed: color-mix(in srgb, var(--accent-foreground) 12%, transparent);
 }

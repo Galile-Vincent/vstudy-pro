@@ -2,16 +2,9 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
-import { Badge, Button, ListRow } from "../components/ui";
+import { Badge, ListRow } from "../components/ui";
+import { Button, Dialog } from "@astryxdesign/core";
 import { useExamFormat } from "./format";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "../components/ui/dialog";
 type Row = IpcResponse<"review:exam:history">["items"][number];
 export function ExamHistory({
   items,
@@ -85,18 +78,18 @@ export function ExamHistory({
                 actions={
                   <Button
                     variant="ghost"
-                    size="icon-sm"
-                    disabled={busy}
+                    size="sm"
+                    isIconOnly
+                    isDisabled={busy}
                     onClick={() => {
                       setDeleteFailed(false);
                       setDeleting(row);
                     }}
-                    aria-label={tr("exams:delete_named", {
+                    label={tr("exams:delete_named", {
                       title: artifact.title,
                     })}
-                  >
-                    <Trash2 aria-hidden="true" />
-                  </Button>
+                    icon={<Trash2 aria-hidden="true" size={16} />}
+                  />
                 }
               />
             </li>
@@ -104,7 +97,8 @@ export function ExamHistory({
         })}
       </ul>
       <Dialog
-        open={deleting !== null}
+        isOpen={deleting !== null}
+        aria-label={tr("exams:delete_title")}
         onOpenChange={(open) => {
           if (!open && !busy) {
             setDeleting(null);
@@ -112,38 +106,34 @@ export function ExamHistory({
           }
         }}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{tr("exams:delete_title")}</DialogTitle>
-            <DialogDescription>
-              {tr("exams:delete_description", {
-                title: deleting?.artifact.title ?? "",
-              })}
-            </DialogDescription>
-          </DialogHeader>
+        <div className="flex flex-col gap-[var(--space-3)] p-[var(--space-4)]">
+          <h2>{tr("exams:delete_title")}</h2>
+          <p>
+            {tr("exams:delete_description", {
+              title: deleting?.artifact.title ?? "",
+            })}
+          </p>
           {deleteFailed && <p role="alert">{tr("review:error")}</p>}
-          <DialogFooter>
+          <div className="flex gap-[var(--space-2)] justify-end">
             <Button
               variant="ghost"
-              disabled={busy}
+              isDisabled={busy}
+              label={tr("review:cancel")}
               onClick={() => setDeleting(null)}
-            >
-              {tr("review:cancel")}
-            </Button>
+            />
             <Button
               variant="destructive"
-              disabled={busy}
+              isDisabled={busy}
+              label={tr("review:delete_confirm")}
               onClick={() => {
                 if (deleting)
                   void onDelete(deleting.artifact.id)
                     .then(() => setDeleting(null))
                     .catch(() => setDeleteFailed(true));
               }}
-            >
-              {tr("review:delete_confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+            />
+          </div>
+        </div>
       </Dialog>
     </>
   );

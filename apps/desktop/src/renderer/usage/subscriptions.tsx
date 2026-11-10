@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { tr } from '../../shared/i18n';
 import type { SubscriptionUsage } from '../../shared/subscription-usage';
 import { desktop } from '../bridge';
-import { Button } from '../components/ui/button';
+import { Button } from '@astryxdesign/core';
 import { Progress } from '../components/ui/progress';
 import { SubscriptionWindowMeter } from './meter';
 import './usage.css';
@@ -90,14 +90,14 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
       </small>}
       <Button
         variant="ghost"
-        size="icon"
+        size="sm"
+        isIconOnly
         aria-expanded={expanded}
         aria-controls={regionId}
-        aria-label={tr(expanded ? 'usage:quota_collapse' : 'usage:quota_expand')}
+        label={tr(expanded ? 'usage:quota_collapse' : 'usage:quota_expand')}
+        icon={expanded ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
         onClick={toggle}
-      >
-        {expanded ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
-      </Button>
+      />
     </div>}
     <div
       id={regionId}
@@ -106,7 +106,7 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
       className={compact ? 'subscription-details' : undefined}
       tabIndex={compact && expanded && overflowing ? 0 : undefined}
     >
-    <header><strong>{tr('usage:subscription_limits')}</strong><Button variant="ghost" size="icon" disabled={loading} aria-label={tr('common:refresh_usage')} onClick={() => window.dispatchEvent(new Event('subscription-refresh'))}><RefreshCw size={14} aria-hidden="true"/></Button></header>
+    <header><strong>{tr('usage:subscription_limits')}</strong><Button variant="ghost" size="sm" isIconOnly isDisabled={loading} label={tr('common:refresh_usage')} icon={<RefreshCw size={14} aria-hidden="true"/>} onClick={() => window.dispatchEvent(new Event('subscription-refresh'))} /></header>
     {error ? <small role="status">{tr('usage:quota_unavailable')}</small> : !rows ? <small role="status">{tr('usage:usage_loading')}</small> : rows.map(row => <div key={row.provider} className="subscription-provider">
       <div className="subscription-provider-name">{providerName(row.provider)}{row.status !== 'ready' && <small>{tr(`usage:quota_${row.status}`)}</small>}</div>
       <div className="subscription-windows">{(['5h', 'weekly'] as const).map(label => {
