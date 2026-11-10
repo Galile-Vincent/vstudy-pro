@@ -8,7 +8,6 @@
   --art-reader-ease:cubic-bezier(.2,.8,.2,1);
 }
 .art-reader-brand-mark { width:32px; height:32px; display:grid; place-items:center; border-radius:var(--art-reader-control); color:var(--accent-foreground); background:var(--accent-color); }
-.app-shell .shell-sidebar .library-smart button { min-height:36px; font-size:var(--type-sm); }
 .app-shell .shell-sidebar .sidebar-empty { margin-inline:var(--space-3); color:var(--muted); }
 .shell-sidebar .folder-tree { margin-top:var(--space-2); }
 .shell-sidebar .folder-node { border-radius:var(--art-reader-control); }

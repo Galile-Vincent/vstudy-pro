@@ -8,7 +8,16 @@
 .shell-sidebar { --color-neutral:var(--active); --color-overlay-hover:color-mix(in oklab,var(--ink) 5%,transparent); }
 .shell-sidebar .astryx-side-nav-item { min-height:32px; font-size:var(--type-sm); }
 .shell-sidebar .astryx-side-nav-item svg { width:16px; height:16px; }
-.shell-sidebar .library-smart button { min-height:32px; font-size:var(--type-sm); }
+/* Library sections reuse SideNavSection headings and SideNavItem rows. The folder tree is a custom ARIA tree, so its rows copy the item metrics: 32px high, 16px icons, one left edge. */
+.shell-sidebar .library-folders { flex:0 0 auto; padding:0; }
+.shell-sidebar [role=group] > :first-child:has(button) { min-height:28px; }
+.shell-sidebar [role=group] > :first-child button { min-width:0; min-height:0; width:24px; height:24px; }
+.shell-sidebar .folder-tree { max-height:40vh; overflow:auto; position:relative; }
+.shell-sidebar .folder-node { display:flex; align-items:center; gap:var(--space-1); box-sizing:border-box; height:32px; padding-inline-end:var(--space-1); font-size:var(--type-sm); }
+.shell-sidebar .folder-node > button { flex:none; width:24px; min-width:0; height:24px; min-height:0; padding:0; }
+.shell-sidebar .folder-node > .folder-link { flex:1; width:auto; justify-content:flex-start; gap:var(--space-2); padding-inline:var(--space-1); font-size:var(--type-sm); font-weight:400; }
+.shell-sidebar .folder-node[aria-selected=true] > .folder-link { font-weight:500; }
+.shell-sidebar .folder-node svg { width:16px; height:16px; }
 .shell-footer { display:flex; flex-direction:column; gap:var(--space-2); min-width:0; }
 .shell-footer[data-collapsed] { align-items:center; }
 .shell-footer[data-collapsed] .update-row > button > span:not(.sr-only) { display:none; }

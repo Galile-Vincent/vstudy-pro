@@ -1,5 +1,4 @@
-import { IconButton } from "@astryxdesign/core";
-import { TextInput, Button } from "@astryxdesign/core";
+import { IconButton, SideNavItem, SideNavSection, TextInput, Button } from "@astryxdesign/core";
 import { Select } from "../components/select";
 import { useEffect, useState, useRef, type DragEvent } from "react";
 import {
@@ -9,7 +8,7 @@ import {
   Plus,
   MoreHorizontal,
   BookOpen,
-  Star, Files, Clock, Inbox, AlertTriangle, ListFilter,
+  Star, Files, Clock, Inbox, AlertTriangle, ListFilter, ArrowUp, ArrowDown,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
@@ -131,19 +130,17 @@ export function LibrarySidebar() {
   const visible = visibleFolders(folders, expanded);
   const [treeTop,setTreeTop] = useState(0);
   const treeRef = useRef<HTMLDivElement>(null);
-  const folderRowHeight = 44;
+  const folderRowHeight = 32;
   const treeStart = Math.max(0,Math.floor(treeTop / folderRowHeight)-2);
   const treeEnd = treeStart + Math.ceil((treeRef.current?.clientHeight || 400)/folderRowHeight)+4;
   return (
     <section className="library-folders">
-  <h2>{tr('art-reader:collection')}</h2>
-  <nav
-    className="library-smart"
-    aria-label={tr('library:smartViews')}
-  >
+  <SideNavSection title={tr('art-reader:collection')}>
     {(['all', 'recent', 'pinned', 'unfiled', 'converting-failed'] as const).map(
       (view) => (
-        <Button icon={view === 'all' ? (
+        <SideNavItem
+          key={view}
+          icon={view === 'all' ? (
             <Files />
           ) : view === 'recent' ? (
             <Clock />
@@ -153,89 +150,77 @@ export function LibrarySidebar() {
             <Inbox />
           ) : (
             <AlertTriangle />
-          )} label={tr(`library:${view}`)} variant="ghost"
-          data-active={route.view === 'library' && route.query?.view === view}
-          key={view}
-          aria-current={
-            route.view === 'library' && route.query?.view === view ? 'page' : undefined
-          }
-          onClick={() => go({ view }, tr(`library:${view}`))}
-        >
-
-          {tr(`library:${view}`)}
-          {view === 'converting-failed' && !!counts[view] && (
-            <small>{format.number(counts[view] ?? 0)}</small>
           )}
-        </Button>
+          label={tr(`library:${view}`)}
+          isSelected={route.view === 'library' && route.query?.view === view}
+          {...(view === 'converting-failed' && !!counts[view]
+            ? { endContent: <small>{format.number(counts[view] ?? 0)}</small> }
+            : {})}
+          onClick={() => go({ view }, tr(`library:${view}`))}
+        />
       ),
     )}
-  </nav>
+  </SideNavSection>
   {!!pins.length && (
-
-      <h2>{tr('library:pinnedFolders')}</h2>
-
+    <SideNavSection title={tr('library:pinnedFolders')}>
+      {pins.map((f, index) => (
+        <div
+          className="folder-pin"
+          onKeyDown={(e) => {
+            if (e.altKey && ['ArrowUp', 'ArrowDown'].includes(e.key)) {
+              e.preventDefault();
+              reorderPin(index, index + (e.key === 'ArrowUp' ? -1 : 1));
+            }
+          }}
+          key={f.id}
+          draggable
+          onDragStart={(e) => e.dataTransfer.setData('application/vstudy-pin', String(index))}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const source = e.dataTransfer.getData('application/vstudy-pin');
+            if (source) reorderPin(Number(source), index);
+          }}
+        >
+          <SideNavItem
+            icon={<Pin />}
+            label={f.name}
+            actions={
+              <>
+                <IconButton label={tr('library:moveUp', { name: f.name })}
+                  variant="ghost"
+                  isDisabled={index === 0}
+                  onClick={() => reorderPin(index, index - 1)}
+                  icon={<ArrowUp />} />
+                <IconButton label={tr('library:moveDown', { name: f.name })}
+                  variant="ghost"
+                  isDisabled={index === pins.length - 1}
+                  onClick={() => reorderPin(index, index + 1)}
+                  icon={<ArrowDown />} />
+              </>
+            }
+            onClick={() => go({ folderId: f.id }, f.name)}
+          />
+        </div>
+      ))}
+    </SideNavSection>
   )}
-  {pins.map((f, index) => (
-    <div
-      className="folder-pin"
-      onKeyDown={(e) => {
-        if (e.altKey && ['ArrowUp', 'ArrowDown'].includes(e.key)) {
-          e.preventDefault();
-          reorderPin(index, index + (e.key === 'ArrowUp' ? -1 : 1));
-        }
-      }}
-      key={f.id}
-      draggable
-      onDragStart={(e) => e.dataTransfer.setData('application/vstudy-pin', String(index))}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-        const source = e.dataTransfer.getData('application/vstudy-pin');
-        if (source) reorderPin(Number(source), index);
-      }}
-    >
-      <Button icon={<Pin />} label={(f.name)}
-        variant="ghost"
-        onClick={() => go({ folderId: f.id }, f.name)}
-      >
-
-        {f.name}
-      </Button>
-      <Button label={tr('library:moveUp', { name: f.name })}
-        variant="ghost"
-        aria-label={tr('library:moveUp', { name: f.name })}
-         isDisabled={index === 0}
-        onClick={() => reorderPin(index, index - 1)}
-      >
-        ↑
-      </Button>
-      <Button label={tr('library:moveDown', { name: f.name })}
-        variant="ghost"
-        aria-label={tr('library:moveDown', { name: f.name })}
-         isDisabled={index === pins.length - 1}
-        onClick={() => reorderPin(index, index + 1)}
-      >
-        ↓
-      </Button>
-    </div>
-  ))}
-  <div className="library-folder-heading">
-
-      <h2>{tr('library:folders')}</h2>
-
-    <IconButton label={tr("library:newFolder")} variant="ghost"
-      aria-label={tr('library:newFolder')}
-      onClick={async () => {
-        const name = await prompt(tr('library:newFolder'));
-        if (name)
-          void run(() =>
-            desktop.invoke('library:folders:create', {
-              name,
-              parentId: null,
-            }),
-          );
-      }} icon={<Plus />} />
-  </div>
+  <SideNavSection
+    title={tr('library:folders')}
+    endContent={
+      <IconButton label={tr("library:newFolder")} variant="ghost" size="sm"
+        onClick={async () => {
+          const name = await prompt(tr('library:newFolder'));
+          if (name)
+            void run(() =>
+              desktop.invoke('library:folders:create', {
+                name,
+                parentId: null,
+              }),
+            );
+        }} icon={<Plus />} />
+    }
+  >
   {!folders.length && <p className="sidebar-empty">{tr('library:noFolders')}</p>}
   <div
     ref={treeRef}
@@ -275,7 +260,7 @@ export function LibrarySidebar() {
               top: index * folderRowHeight,
               height: folderRowHeight,
               width: '100%',
-              paddingInlineStart: `calc(var(--space-3) * ${level - 1})`,
+              paddingInlineStart: `calc(var(--space-1) + var(--space-3) * ${level - 1})`,
             }}
             draggable
             onFocus={() => setFocus(f.id)}
@@ -389,22 +374,19 @@ export function LibrarySidebar() {
       })}
     </div>
   </div>
+  </SideNavSection>
   {!!saved.length && (
-
-      <h2>{tr('library:savedFilters')}</h2>
-
+    <SideNavSection title={tr('library:savedFilters')}>
+      {saved.map((s) => (
+        <SideNavItem
+          key={s.id}
+          icon={<ListFilter />}
+          label={s.name}
+          onClick={() => go(JSON.parse(s.queryJson), s.name)}
+        />
+      ))}
+    </SideNavSection>
   )}
-  {saved.map((s) => (
-    <Button icon={<ListFilter />} label={(s.name)}
-      variant="ghost"
-      className="library-saved-filter"
-      key={s.id}
-      onClick={() => go(JSON.parse(s.queryJson), s.name)}
-    >
-
-      {s.name}
-    </Button>
-  ))}
   {error && (
     <p role="alert">
       {error}

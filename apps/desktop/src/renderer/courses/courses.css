@@ -99,6 +99,10 @@
 .moodle-tabs {
   min-width: 0;
 }
+/* Every tab panel starts one section gap below the tab row, so no panel sits flush under it. */
+.moodle-tabs > [role="tabpanel"] {
+  margin-block-start: var(--space-6);
+}
 .moodle-panel-description {
   color: var(--muted);
   line-height: 1.6;
