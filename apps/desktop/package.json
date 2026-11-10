@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "node scripts/generate-locales.mjs && node ../../scripts/brand-dev-electron.mjs && electron-vite dev",
     "build": "pnpm --filter @vstudy/mcp build && node scripts/build-mcp-platform.mjs && node scripts/generate-locales.mjs && electron-vite build",
-    "test": "node --test scripts/ui-lint.test.mjs && node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run",
+    "test": "node --test scripts/ui-lint.test.mjs scripts/shadow-metric.test.mjs && node scripts/generate-locales.mjs && node scripts/check-contrast.mjs && vitest run",
     "test:delete:win32": "vitest run --config vitest.delete-win32.config.ts",
     "contrast:check": "node scripts/check-contrast.mjs",
     "typecheck": "node scripts/generate-locales.mjs && tsc --noEmit",
@@ -25,7 +25,7 @@
     "package:signed": "node scripts/package-signed.mjs",
     "test:release": "node --test scripts/release.test.mjs",
     "ui:check": "node scripts/ui-lint.mjs",
-    "ui:test": "node --test scripts/ui-lint.test.mjs"
+    "ui:test": "node --test scripts/ui-lint.test.mjs scripts/shadow-metric.test.mjs"
   },
   "dependencies": {
     "@assistant-ui/react": "0.15.32",

@@ -1,6 +1,7 @@
 /**
  * Before/after screenshot harness for UI redesign work. Reuses the marketing launch and seed in a disposable profile,
- * writes only to UI_SHOTS_OUT, and records shadow and backdrop-filter counts per view.
+ * writes only to UI_SHOTS_OUT, and records visible elevation, focus ring and backdrop-filter counts per view
+ * (see shadow-metric.mjs for what counts).
  *
  *   UI_SHOTS_OUT=<dir>   required, receives PNGs, metrics.json and index.html
  *   UI_SHOTS_BASE=<dir>  optional earlier run, adds before/after columns and metric deltas to index.html
@@ -15,6 +16,7 @@ import { mkdtemp, mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, relative } from 'node:path';
 import { launchMarketing, captureRaw, aliases, captureTime, viewport } from './marketing-session.mjs';
+import { countEffects } from './shadow-metric.mjs';
 
 const desktop = resolve(import.meta.dirname,'..');
 const out = process.env.UI_SHOTS_OUT && resolve(process.env.UI_SHOTS_OUT);
@@ -25,17 +27,6 @@ const modes = (process.env.UI_SHOTS_MODES ?? 'light,dark').split(',');
 const theme = process.env.UI_SHOTS_THEME ?? 'vstudy';
 const scale = Number(process.env.UI_SHOTS_SCALE ?? 1);
 const wanted = name => !only || only.includes(name);
-
-const countEffects = () => {
-  let boxShadow = 0, backdropFilter = 0;
-  const elements = window.document.querySelectorAll('*');
-  for (const element of elements) {
-    const style = window.getComputedStyle(element);
-    if (style.boxShadow !== 'none') boxShadow++;
-    if ((style.backdropFilter || style.webkitBackdropFilter || 'none') !== 'none') backdropFilter++;
-  }
-  return { boxShadow, backdropFilter, elements: elements.length };
-};
 
 const settingsPanes = ['general','appearance','providers','agents','usage','storage','privacy'];
 
@@ -69,25 +60,26 @@ function extraViews({ page, go, settings, documents }) {
 
 const contactSheet = ({ shots, failures, metrics, baseMetrics, baseDir }) => {
   const esc = text => String(text).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[char]);
+  const elevationOf = m => m?.elevation ?? m?.boxShadow;
   const delta = (now,before) => before===undefined ? '' : now===before ? ` <small>(=)</small>` : ` <small class="${now<before?'down':'up'}">(${now>before?'+':''}${now-before})</small>`;
   const cell = (file,key,source) => {
     const m = (source??metrics)[key];
-    return `<figure><a href="${esc(file)}"><img loading="lazy" src="${esc(file)}" alt="${esc(key)}"></a>${m?`<figcaption>shadow ${m.boxShadow} · backdrop ${m.backdropFilter}</figcaption>`:''}</figure>`;
+    return `<figure><a href="${esc(file)}"><img loading="lazy" src="${esc(file)}" alt="${esc(key)}"></a>${m?`<figcaption>elevation ${elevationOf(m)}${m.focusRing===undefined?'':` · ring ${m.focusRing}`} · backdrop ${m.backdropFilter}</figcaption>`:''}</figure>`;
   };
   const rows = shots.map(({name,mode,file}) => {
     const key = `${name}-${mode}`, before = baseMetrics?.[key];
     const beforeCell = base ? (before ? cell(`${relative(out,baseDir)}/${file}`,key,baseMetrics) : '<figure class="missing">not in base</figure>') : '';
     const now = metrics[key];
-    return `<section><h2>${esc(name)} <small>${esc(mode)}</small>${now?`<span class="m">shadow ${now.boxShadow}${delta(now.boxShadow,before?.boxShadow)} · backdrop ${now.backdropFilter}${delta(now.backdropFilter,before?.backdropFilter)}</span>`:''}</h2><div class="pair${base?' two':''}">${beforeCell}${cell(file,key)}</div></section>`;
+    return `<section><h2>${esc(name)} <small>${esc(mode)}</small>${now?`<span class="m">elevation ${elevationOf(now)}${delta(elevationOf(now),elevationOf(before))}${now.focusRing===undefined?'':` · ring ${now.focusRing}${delta(now.focusRing,before?.focusRing)}`} · backdrop ${now.backdropFilter}${delta(now.backdropFilter,before?.backdropFilter)}</span>`:''}</h2><div class="pair${base?' two':''}">${beforeCell}${cell(file,key)}</div></section>`;
   }).join('\n');
-  const total = field => Object.values(metrics).reduce((sum,m)=>sum+m[field],0);
-  const baseTotal = field => baseMetrics ? Object.values(baseMetrics).reduce((sum,m)=>sum+m[field],0) : undefined;
+  const total = field => Object.values(metrics).reduce((sum,m)=>sum+(m[field]??0),0);
+  const baseTotal = field => baseMetrics ? Object.values(baseMetrics).reduce((sum,m)=>sum+(m[field]??(field==='elevation'?m.boxShadow:0)),0) : undefined;
   return `<!doctype html><meta charset="utf-8"><title>UI shots</title><style>
 :root{color-scheme:light dark;font:14px/1.4 -apple-system,system-ui,sans-serif}body{margin:24px;background:Canvas;color:CanvasText}h1{font-size:20px}h2{font-size:14px;margin:0 0 6px;display:flex;gap:12px;align-items:baseline}h2 small{opacity:.6;font-weight:400}.m{margin-left:auto;font-weight:400;font-variant-numeric:tabular-nums}.up{color:#b3261e}.down{color:#1b7a3d}
 main{display:grid;grid-template-columns:repeat(auto-fill,minmax(440px,1fr));gap:20px 16px}.pair{display:grid;gap:8px}.pair.two{grid-template-columns:1fr 1fr}main:has(.two){grid-template-columns:repeat(auto-fill,minmax(760px,1fr))}
 figure{margin:0}img{width:100%;display:block;border:1px solid #8884}figcaption{font-size:12px;opacity:.7}.missing{padding:24px;text-align:center;opacity:.6;border:1px dashed #8886}.fail{color:#b3261e}</style>
 <h1>UI shots · ${esc(theme)} · ${viewport.width}×${viewport.height}${base?` · left: ${esc(baseDir)} · right: this run`:''}</h1>
-<p>Total elements with a box-shadow: ${total('boxShadow')}${delta(total('boxShadow'),baseTotal('boxShadow'))} · with backdrop-filter: ${total('backdropFilter')}${delta(total('backdropFilter'),baseTotal('backdropFilter'))}</p>
+<p>Rendered elements with a visible elevation shadow: ${total('elevation')}${delta(total('elevation'),baseTotal('elevation'))} · with a focus-ring shadow: ${total('focusRing')}${delta(total('focusRing'),baseTotal('focusRing'))} · with backdrop-filter: ${total('backdropFilter')}${delta(total('backdropFilter'),baseTotal('backdropFilter'))}</p>
 ${failures.length?`<p class="fail">Not captured: ${failures.map(f=>`${esc(f.name)} ${esc(f.mode)} (${esc(f.reason)})`).join('; ')}</p>`:''}
 <main>
 ${rows}
@@ -133,7 +125,8 @@ const record = async (name,mode,png,page) => {
   await writeFile(join(out,file),png);
   metrics[`${name}-${mode}`] = await page.evaluate(countEffects);
   shots.push({name,mode,file});
-  console.log(`${name}-${mode}: shadow ${metrics[`${name}-${mode}`].boxShadow}, backdrop ${metrics[`${name}-${mode}`].backdropFilter}`);
+  const m = metrics[`${name}-${mode}`];
+  console.log(`${name}-${mode}: elevation ${m.elevation}, ring ${m.focusRing}, backdrop ${m.backdropFilter}`);
 };
 const fail = (name,mode,error) => { failures.push({name,mode,reason:String(error.message??error).split('\n')[0].slice(0,200)}); console.error(`${name}-${mode} FAILED: ${failures.at(-1).reason}`); };
 
@@ -178,7 +171,7 @@ if (wanted('design')) {
 const baseMetrics = base ? await readFile(join(base,'metrics.json'),'utf8').then(text=>JSON.parse(text).views).catch(()=>undefined) : undefined;
 const order = Object.keys(metrics);
 shots.sort((a,b)=>a.mode.localeCompare(b.mode)||order.indexOf(`${a.name}-${a.mode}`)-order.indexOf(`${b.name}-${b.mode}`));
-await writeFile(join(out,'metrics.json'),JSON.stringify({captureTime:new Date(captureTime).toISOString(),theme,viewport:{...viewport,scale},counted:'elements whose computed box-shadow is not none, and whose computed backdrop-filter is not none',views:metrics,failures},null,2)+'\n');
+await writeFile(join(out,'metrics.json'),JSON.stringify({captureTime:new Date(captureTime).toISOString(),theme,viewport:{...viewport,scale},counted:'rendered elements (non-zero box, visibility visible, opacity above zero) with a shadow layer of non-transparent colour and non-zero blur, spread or offset (elevation), spread-only layers (focusRing), or a backdrop-filter; rawBoxShadow is the old not-none count',views:metrics,failures},null,2)+'\n');
 await writeFile(join(out,'index.html'),contactSheet({shots,failures,metrics,baseMetrics,baseDir:base}));
 console.log(`${shots.length} shots, ${failures.length} failures → ${join(out,'index.html')}`);
 if (failures.length) process.exitCode = 1;
