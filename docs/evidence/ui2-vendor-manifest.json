@@ -373,12 +373,12 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/foundation.test.tsx",
-      "sha256": "4fa2bdfcdb2c3eac51f24e3fd427b267e631aab2b208575d92db464dd9bacad6",
+      "sha256": "7176f7a44a94121273b750832d6fe96460fb0b54303992a122f4a842bc43f9ba",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/index.ts",
-      "sha256": "12b8daf070b8f9c434d0caa7f76f7797325484adabfc190db91d63a22703aa42",
+      "sha256": "022be3e62959ded2515578605230b2b285ab5215cbdd2ae0cfceab6fcdffb6dc",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -388,12 +388,12 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
-      "sha256": "9d1a69658d14c588e55b7dc8686635cccf6ba4521460b41613f5586201b499b2",
+      "sha256": "2b6d328814a330e2c279c7b66a61fe1d2ece80bd54ef9eff9af628a12ac30bda",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/segmented-tabs.tsx",
-      "sha256": "21c27992944f96dbb21013ca6ba219f8f8727ef47a94452fdb132172ae8c74ce",
+      "sha256": "580ececcf1dd20c7ed7240103f7e75de9f726bb58cd88e8d27e508aa33392dfe",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -403,7 +403,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/ui.css",
-      "sha256": "93238a44d441f14a64e9e9c31357c257798e1993273e448819ee51a6ac002697",
+      "sha256": "1b58dab350e01410661e797df46ea76a767ac3a963d4412a53a6791825c5b985",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -412,13 +412,8 @@
       "reason": "Shared settings row and radio choice, with keyboard behavior coverage."
     },
     {
-      "path": "apps/desktop/src/renderer/components/ui/segmented-control.tsx",
-      "sha256": "7d46f23820905ff4927cfbd93a6d12082c7628f1d6f6614da4bbbfcd105c07ec",
-      "reason": "Shared settings row and radio choice, with keyboard behavior coverage."
-    },
-    {
       "path": "apps/desktop/src/renderer/components/ui/segmented-control.test.tsx",
-      "sha256": "29ee8f5f9832861a4ebfc3d1ed57091835ebd8f84f4db97c9ec2450ad34f216a",
+      "sha256": "a9d1e1b3e2502dd429346aca2e00cea08ef306ae94b40df15b79c1a7a4c32370",
       "reason": "Shared settings row and radio choice, with keyboard behavior coverage."
     },
     {

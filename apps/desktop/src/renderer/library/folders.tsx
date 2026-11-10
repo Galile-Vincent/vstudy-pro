@@ -1,6 +1,7 @@
 import { type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, Files, FolderClosed } from "lucide-react";
 import { tr } from "../../shared/i18n";
+import { SegmentedControl, SegmentedControlItem } from '../components/ui';
 import { Button } from "../components/ui/button";
 import { uncategorizedKey, type CourseGroup, type LibraryMode } from "./model";
 
@@ -14,16 +15,16 @@ function toneFor(key: string) {
 
 export function LibraryModeToggle({ mode, onChange }: { mode: LibraryMode; onChange: (mode: LibraryMode) => void }) {
   return (
-    <div className="library-mode" role="group" aria-label={tr("library:viewMode")}>
-      <Button variant="ghost" aria-pressed={mode === "files"} onClick={() => onChange("files")}>
+    <SegmentedControl type="single" value={mode} onValueChange={value => { if (value) onChange(value as LibraryMode); }} className="library-mode" aria-label={tr("library:viewMode")}>
+      <SegmentedControlItem value="files">
         <Files aria-hidden="true" />
         {tr("library:viewFiles")}
-      </Button>
-      <Button variant="ghost" aria-pressed={mode === "folders"} onClick={() => onChange("folders")}>
+      </SegmentedControlItem>
+      <SegmentedControlItem value="folders">
         <FolderClosed aria-hidden="true" />
         {tr("library:viewFolders")}
-      </Button>
-    </div>
+      </SegmentedControlItem>
+    </SegmentedControl>
   );
 }
 

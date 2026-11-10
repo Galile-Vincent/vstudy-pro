@@ -5,7 +5,7 @@
   height: 100%;
   min-width: 0;
   padding: var(--space-8);
-  gap: var(--space-4);
+  gap: var(--space-8);
   position: relative;
   background: transparent;
 }

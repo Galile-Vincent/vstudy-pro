@@ -254,7 +254,7 @@ it.each(['back', 'breadcrumb'])('restores the originating folder after %s naviga
  state.invoke.mockImplementation(async c => c === 'library:documents:list'
   ? {items:[row('inside')], nextCursor:null} : []);
  mount(); await screen.findByText('inside');
- fireEvent.click(screen.getByRole('button', {name:tr('library:viewFolders')}));
+ fireEvent.click(screen.getByRole('radio', {name:tr('library:viewFolders')}));
  const folder = screen.getByRole('button', {name:tr('library:openFolder', {name:tr('library:unfiled')})});
  act(() => folder.focus()); fireEvent.click(folder);
  expect(document.activeElement).toBe(screen.getByRole('heading', {level:1, name:tr('library:unfiled')}));
@@ -343,7 +343,7 @@ it.each([false,true])('retries a failed row with Enter without nested tab stops 
 it('does not steal search focus after choosing files repeatedly', async () => {
  state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[row('inside')],nextCursor:null}:[]);
  mount(); await screen.findByText('inside');
- const files=screen.getByRole('button',{name:tr('library:viewFiles')});
+ const files=screen.getByRole('radio',{name:tr('library:viewFiles')});
  fireEvent.click(files); fireEvent.click(files);
  const search=screen.getByRole('textbox',{name:tr('library:search')});
  act(()=>search.focus()); fireEvent.change(search,{target:{value:'inside'}});
@@ -356,7 +356,7 @@ it.each([false,true])('falls back when the originating folder disappears (other 
  const remaining={...row('remaining'),course:{id:'course',fullName:'Other',identity:{title:{en:'Other',zh:'其他'},teachers:[],term:'1142'}}};
  state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:rows,nextCursor:null}:[]);
  mount(); await screen.findByText('inside');
- fireEvent.click(screen.getByRole('button',{name:tr('library:viewFolders')}));
+ fireEvent.click(screen.getByRole('radio',{name:tr('library:viewFolders')}));
  fireEvent.click(screen.getByRole('button',{name:tr('library:openFolder',{name:tr('library:unfiled')})}));
  rows=other?[remaining]:[];
  act(()=>window.dispatchEvent(new Event('library-changed')));
@@ -563,7 +563,7 @@ it.each(['en','zh-Hant','ja'])('announces failed row recovery instructions (%s)'
 it('retries focus restoration until the originating folder mounts', async () => {
  state.invoke.mockImplementation(async c=>c==='library:documents:list'?{items:[row('inside')],nextCursor:null}:[]);
  mount();await screen.findByText('inside');
- fireEvent.click(screen.getByRole('button',{name:tr('library:viewFolders')}));
+ fireEvent.click(screen.getByRole('radio',{name:tr('library:viewFolders')}));
  fireEvent.click(screen.getByRole('button',{name:tr('library:openFolder',{name:tr('library:unfiled')})}));
  const get=document.getElementById.bind(document);
  let pending=true;

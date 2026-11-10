@@ -64,7 +64,7 @@
   },
   "shell/art-reader.css": {
     "shadow": 1,
-    "radius": 2,
+    "radius": 0,
     "color": 0,
     "backdrop": 0,
     "surface-class": 0
@@ -83,23 +83,16 @@
     "backdrop": 0,
     "surface-class": 0
   },
-  "shell/tab-strip.css": {
-    "shadow": 0,
-    "radius": 1,
-    "color": 0,
-    "backdrop": 0,
-    "surface-class": 0
-  },
   "style.css": {
     "shadow": 0,
     "radius": 1,
     "color": 0,
     "backdrop": 0,
-    "surface-class": 2
+    "surface-class": 1
   },
   "web-chat/web-chat.css": {
     "shadow": 1,
-    "radius": 1,
+    "radius": 0,
     "color": 0,
     "backdrop": 0,
     "surface-class": 0

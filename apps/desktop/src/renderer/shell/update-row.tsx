@@ -37,7 +37,7 @@ export function UpdateRow() {
           aria-disabled={snapshot?.waiting || snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading'}>
           <RefreshCw aria-hidden="true" /><span>{label}</span>
         </Button>}
-      {snapshot?.waiting && <Button variant="link" size="sm"
+      {snapshot?.waiting && <Button variant="ghost" size="sm"
         onClick={() => void desktop.invoke('updates:cancel', {})}>{tr('common:cancel')}</Button>}
       {state?.status === 'available' && <Button variant="link" size="icon-sm" aria-label={tr('updates:notes')} title={tr('updates:notes')}
         onClick={() => void desktop.invoke('updates:notes', {})}><FileText aria-hidden="true" /></Button>}
