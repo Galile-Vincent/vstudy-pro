@@ -32,13 +32,13 @@
 @property --course-end { syntax:"<color>"; inherits:true; initial-value:transparent; }
 @property --glass-opacity { syntax:"<percentage>"; inherits:true; initial-value:80%; }
 html[data-theme-transition=tokens] {
-  transition-property:--background,--surface,--sidebar-surface,--subtle,--active,--ink,--muted,--line,--accent-color,--accent-foreground,--selection-color,--focus,--danger,--success,--warning,--info,--chart-1,--chart-2,--chart-3,--chart-4,--chart-5,--glass-tint,--shadow-color,--reader-background,--reader-ink,--code-background,--syntax-keyword,--syntax-string,--syntax-number,--course-start,--course-end,--glass-opacity,background-color,color,border-color,fill,stroke,box-shadow;
-  transition-duration:320ms; transition-timing-function:cubic-bezier(.2,.8,.2,1);
+  transition-property:--background,--surface,--sidebar-surface,--subtle,--active,--ink,--muted,--line,--accent-color,--accent-foreground,--selection-color,--focus,--danger,--success,--warning,--info,--chart-1,--chart-2,--chart-3,--chart-4,--chart-5,--glass-tint,--shadow-color,--reader-background,--reader-ink,--code-background,--syntax-keyword,--syntax-string,--syntax-number,--course-start,--course-end,background-color,color,border-color,fill,stroke,box-shadow;
+  transition-duration:200ms; transition-timing-function:cubic-bezier(.2,.8,.2,1);
 }
 html[data-theme-transition=view] :is(.shell-sidebar,.shell-topbar,.reading-pane) { view-transition-name:none!important; }
 html[data-theme-transition=view]::view-transition-group(root) { animation:none; }
 html[data-theme-transition=view]::view-transition-old(root) { animation:none; mix-blend-mode:normal; }
-html[data-theme-transition=view]::view-transition-new(root) { animation:theme-crossfade 320ms cubic-bezier(.2,.8,.2,1) both; mix-blend-mode:normal; }
+html[data-theme-transition=view]::view-transition-new(root) { animation:theme-crossfade 200ms cubic-bezier(.2,.8,.2,1) both; mix-blend-mode:normal; }
 @keyframes theme-crossfade { from { opacity:0; } to { opacity:1; } }
 @media(prefers-reduced-motion:reduce) {
   html[data-theme-transition] { transition:none; }

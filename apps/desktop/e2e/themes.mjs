@@ -86,7 +86,7 @@ try {
     await shot(`${themeId}-${scheme}-reader-chat`);
     await appearance();
     await shot(`${themeId}-${scheme}-settings`);
-    await page.getByRole('slider',{name:'Glass opacity',exact:true}).scrollIntoViewIfNeeded();
+    await page.getByRole('button',{name:'Create theme',exact:true}).scrollIntoViewIfNeeded();
     await shot(`${themeId}-${scheme}-interface`);
     const axe=await new AxeBuilder({page}).setLegacyMode(true).include('.appearance-layout').withTags(['wcag2a','wcag2aa','wcag21aa']).analyze();
     assert.deepEqual(axe.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))})),[],`${themeId}/${scheme} appearance accessibility`);

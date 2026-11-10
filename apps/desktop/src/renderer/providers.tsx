@@ -1,5 +1,5 @@
-import { Select } from './components/select';
-import { Card, Section, SettingRow } from './components/ui';
+import { Button, Card, Dialog, DialogHeader, IconButton, Switch, Tab, TabList } from '@astryxdesign/core';
+import { Section, SettingRow } from './components/ui';
 import { UpdateSettings } from './settings/updates';
 import { AppVersion } from './components/app-version';
 import { aiCliSetupEvent } from './ai-cli/entry';
@@ -7,15 +7,11 @@ import { AiCliInventory } from './ai-cli/inventory';
 import { DocumentSettings } from './settings/documents';
 import { StorageSettings } from "./settings/storage";
 import { AiSetupGuide } from './ai-setup';
-import { Switch } from './components/ui/switch';
 import { SlidersHorizontal, Palette, KeyRound, BarChart3, Shield, HardDrive, Bot, X } from 'lucide-react';
 import { AgentsSettings } from './settings/agents';
 import { AppearanceSection } from './settings/appearance';
 import './settings/settings.css';
-import { Dialog, DialogContent, DialogTitle } from './components/ui/dialog';
 import { track } from './analytics';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
-import { Button } from './components/ui/button';
 import { useOptionalNavigation } from './shell';
 import { PrivacySettings } from './privacy-settings';
 import { Onboarding } from './onboarding/onboarding';
@@ -23,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageSettings } from './language-settings';
 import { tr } from '../shared/i18n';
 import { UsageSettings } from './usage/settings';
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { desktop } from './bridge';
 import { type Providers } from './provider-metadata';
 import { ProviderRow } from './provider-row';
@@ -47,35 +43,27 @@ export function ProviderSettings({
   const [open, setOpen] = useState(true);
   const completed = useRef(false);
   const requestClose = useCallback(() => setOpen(false), []);
+  const closeOwner = useRef(onClose);
+  closeOwner.current = onClose;
   const finishClose = useCallback(() => {
     if (completed.current) return;
     completed.current = true;
-    onClose();
-  }, [onClose]);
+    closeOwner.current();
+  }, []);
   useEffect(() => {
     if (open) return;
-    const timer = setTimeout(finishClose, 250);
+    const timer = setTimeout(finishClose, 160);
     return () => clearTimeout(timer);
   }, [open, finishClose]);
   const [guide, setGuide] = useState(false);
   const [structuredTables, setStructuredTables] = useState(false);
   const [featureError, setFeatureError] = useState('');
   const [tab, setTab] = useState(initialTab);
-  const [tabsList, setTabsList] = useState<HTMLDivElement | null>(null);
-  const [orientation, setOrientation] = useState<'vertical' | 'horizontal'>('vertical');
+  const panelBase = useId();
+  const tabsHost = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
-    const list = tabsList;
-    if (!list) return;
-    const syncOrientation = () => setOrientation(getComputedStyle(list).flexDirection === 'row' ? 'horizontal' : 'vertical');
-    syncOrientation();
-    if (typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(syncOrientation);
-    observer.observe(list);
-    return () => observer.disconnect();
-  }, [tabsList]);
-  useLayoutEffect(() => {
-    tabsList?.querySelector<HTMLElement>('[role=tab][aria-selected=true]')?.scrollIntoView?.({block:'nearest',inline:'nearest'});
-  }, [tab,tabsList,orientation]);
+    tabsHost.current?.querySelector<HTMLElement>('[role=tab][aria-selected=true]')?.scrollIntoView?.({block:'nearest',inline:'nearest'});
+  }, [tab]);
   useEffect(() => {
     const section = ({providers:'ai',agents:'ai',general:'general',privacy:'privacy',appearance:'appearance',storage:'storage',usage:'usage',moodle:'moodle'} as const)[tab as 'general' | 'providers' | 'agents' | 'privacy' | 'appearance' | 'storage' | 'usage' | 'moodle'];
     if (section) track('settings_opened', {settings_section:section});
@@ -101,159 +89,136 @@ export function ProviderSettings({
     return () => window.removeEventListener(aiCliSetupEvent, handoff);
   }, [requestClose]);
 
+  const sections = [
+    ['general', SlidersHorizontal], ['appearance', Palette], ['providers', KeyRound], ['agents', Bot],
+    ['usage', BarChart3], ['storage', HardDrive], ['privacy', Shield],
+  ] as const;
+  const sectionTitle = (id: string) => tr(id === 'agents' ? 'agents:title' : id === 'storage' ? 'storage:title' : `settings:${id}`);
+
   return (
     <Dialog
-      open={open}
-      onOpenChange={(open) => {
-        if (!open) requestClose();
+      isOpen={open}
+      onOpenChange={(next) => {
+        if (!next) requestClose();
       }}
+      width={960}
+      maxHeight="calc(100dvh - var(--spacing-8))"
+      className="settings-dialog"
     >
-      <DialogContent aria-describedby={undefined} showCloseButton={false} className="settings-dialog"
-        onAnimationEnd={event => {
-          if (!open && event.target === event.currentTarget) finishClose();
-        }}>
-        <div className="settings-header">
-          <DialogTitle>{tr('common:settings')}</DialogTitle>
-          <Select position="popper" className="settings-section-select" aria-label={tr('settings:section_picker')}
-            value={tab} onChange={event => setTab(event.target.value)}>
-            {['general', 'appearance', 'providers', 'agents', 'usage', 'storage', 'privacy'].map(id => (
-              <option key={id} value={id}>
-                {tr(id === 'agents' ? 'agents:title' : id === 'storage' ? 'storage:title' : `settings:${id}`)}
-              </option>
+      <DialogHeader title={tr('common:settings')}
+        endContent={<IconButton label={tr('common:close_settings')} icon={<X size={16} />} variant="ghost" onClick={requestClose} />} />
+      {guide && <Onboarding onComplete={() => setGuide(false)} onOpenPrivacy={() => setTab('privacy')} />}
+      <div className="settings-body">
+        <div ref={tabsHost} className="settings-tabs">
+          <TabList role="tablist" aria-label={tr('common:settings')} value={tab} onChange={setTab} hasDivider>
+            {sections.map(([id, Icon]) => (
+              <Tab key={id} value={id} label={sectionTitle(id)} icon={<Icon size={16} />} panelId={`${panelBase}-${id}`} />
             ))}
-          </Select>
-          <Button variant="ghost" size="icon-sm" onClick={requestClose} aria-label={tr('common:close_settings')}>
-            <X size={16} />
-          </Button>
+          </TabList>
         </div>
-        {guide && <Onboarding onComplete={() => setGuide(false)} onOpenPrivacy={() => setTab('privacy')} />}
-        <Tabs orientation={orientation} value={tab} onValueChange={setTab} className="settings-body">
-          <TabsList ref={setTabsList} variant="line" className="settings-tabs" aria-label={tr('common:settings')}>
-            {(
-              [
-                ['general', SlidersHorizontal],
-                ['appearance', Palette],
-                ['providers', KeyRound],
-                ['agents', Bot],
-                ['usage', BarChart3],
-                ['storage', HardDrive],
-                ['privacy', Shield],
-              ] as const
-            ).map(([id, Icon]) => (
-              <TabsTrigger key={id} value={id}>
-                <Icon size={16} />
-                {tr(id === 'agents' ? 'agents:title' : id === 'storage' ? 'storage:title' : `settings:${id}`)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {['general', 'appearance', 'providers', 'agents', 'usage', 'storage', 'privacy'].map((id) => (
-            <TabsContent forceMount hidden={tab !== id} value={id} key={id} className="settings-pane">
-              <div className="settings-pane-inner">
-                <header className="settings-section-header">
-                  <h2>{tr(id === 'agents' ? 'agents:title' : id === 'storage' ? 'storage:title' : `settings:${id}`)}</h2>
-
-                </header>
-                {tab === id &&
-                  (id === 'general' ? (
-                    <>
-                      <Section level={3} title={tr('settings:languages')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-                        <LanguageSettings />
-                      </Card></Section>
-                      <UpdateSettings />
-                      <Section level={3} title={tr('settings:welcome')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-                        <SettingRow label={tr('settings:welcomeGuide')} description={tr('settings:welcome_guide_hint')}>
-                          <Button size="sm" variant="secondary" onClick={() => setGuide(true)}>
-                            {tr('settings:show')}
-                          </Button>
-                        </SettingRow>
-                        <SettingRow label={tr('settings:aboutApp')} description={tr('settings:about_hint')}>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            id="welcome-settings-entry"
-                            onClick={() => {
-                              navigation?.navigate('welcome');
-                              requestClose();
-                            }}
-                          >
-                            {tr('settings:open')}
-                          </Button>
-                        </SettingRow>
-                      </Card></Section>
-                      <Section level={3} title={tr('library:documents')}><Card variant="flat" className="p-[var(--space-4)]">
-                        <DocumentSettings />
-                      </Card></Section>
-                      <AppVersion/>
-                    </>
-                  ) : id === 'appearance' ? (
-                    <AppearanceSection />
-                  ) : id === 'agents' ? (
-                    <AgentsSettings />
-                  ) : id === 'storage' ? (
-                    <StorageSettings />
-                  ) : id === 'privacy' ? (
-                    <PrivacySettings />
-                  ) : id === 'usage' ? (
-                    <UsageSettings />
-                  ) : (
-                    <>
-                      <AiCliInventory settings />
-                      <div className="settings-intro">
-                        <p>{tr('novice:privacy')}</p>
-                        <ol>
-                          <li>{tr('novice:step_access')}</li>
-                          <li>{tr('novice:step_key')}</li>
-                        </ol>
+        {sections.map(([id]) => (
+          <div hidden={tab !== id} id={`${panelBase}-${id}`} key={id} role="tabpanel" aria-label={sectionTitle(id)} className="settings-pane">
+            <div className="settings-pane-inner">
+              <header className="settings-section-header">
+                <h2>{sectionTitle(id)}</h2>
+              </header>
+              {tab === id &&
+                (id === 'general' ? (
+                  <>
+                    <Section level={3} title={tr('settings:languages')}><Card padding={4} className="settings-stack">
+                      <LanguageSettings />
+                    </Card></Section>
+                    <UpdateSettings />
+                    <Section level={3} title={tr('settings:welcome')}><Card padding={4} className="settings-stack">
+                      <SettingRow label={tr('settings:welcomeGuide')} description={tr('settings:welcome_guide_hint')}>
+                        <Button size="sm" variant="secondary" label={tr('settings:show')} onClick={() => setGuide(true)} />
+                      </SettingRow>
+                      <SettingRow label={tr('settings:aboutApp')} description={tr('settings:about_hint')}>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          label={tr('settings:open')}
+                          id="welcome-settings-entry"
+                          onClick={() => {
+                            navigation?.navigate('welcome');
+                            requestClose();
+                          }}
+                        />
+                      </SettingRow>
+                    </Card></Section>
+                    <Section level={3} title={tr('library:documents')}><Card padding={4} className="settings-stack">
+                      <DocumentSettings />
+                    </Card></Section>
+                    <AppVersion/>
+                  </>
+                ) : id === 'appearance' ? (
+                  <AppearanceSection />
+                ) : id === 'agents' ? (
+                  <AgentsSettings />
+                ) : id === 'storage' ? (
+                  <StorageSettings />
+                ) : id === 'privacy' ? (
+                  <PrivacySettings />
+                ) : id === 'usage' ? (
+                  <UsageSettings />
+                ) : (
+                  <>
+                    <AiCliInventory settings />
+                    <div className="settings-intro">
+                      <p className="settings-intro-lead">{tr('novice:privacy_lead')}</p>
+                      <p>{tr('novice:privacy')}</p>
+                    </div>
+                    <details className="settings-disclosure">
+                      <summary>{tr('novice:setup_title')}</summary>
+                      <div className="settings-disclosure-body">
+                        <AiSetupGuide onClose={requestClose} leadingSteps={[tr('novice:step_access'), tr('novice:step_key')]} />
                       </div>
-                      <details className="settings-disclosure">
-                        <summary>{tr('novice:setup_title')}</summary>
-                        <div className="settings-disclosure-body"><AiSetupGuide onClose={requestClose} /></div>
-                      </details>
-                      <Section level={3} title={tr('settings:api_keys')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-                        {providers.filter(provider => provider.config.kind === 'api').map(provider => (
-                          <ProviderRow settingsView key={provider.config.id} provider={provider} onRefresh={onRefresh} />
-                        ))}
-                      </Card></Section>
+                    </details>
+                    <Section level={3} title={tr('settings:api_keys')}><Card padding={4} className="settings-stack">
+                      {providers.filter(provider => provider.config.kind === 'api').map(provider => (
+                        <ProviderRow settingsView key={provider.config.id} provider={provider} onRefresh={onRefresh} />
+                      ))}
+                    </Card></Section>
 
-                      <Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-                        <SettingRow
+                    <Card padding={4} className="settings-stack">
+                      <SettingRow
+                        label={tr('common:read_only_structured_tables_api_providers_only')}
+                        description={tr('common:optional_table_presentations_off_by_default_cli_tools_remain_disabled')}
+                      >
+                        <Switch
                           label={tr('common:read_only_structured_tables_api_providers_only')}
-                          description={tr('common:optional_table_presentations_off_by_default_cli_tools_remain_disabled')}
-                        >
-                          <Switch
-                            aria-label={tr('common:read_only_structured_tables_api_providers_only')}
-                            checked={structuredTables}
-                            onCheckedChange={(enabled) => {
-                              setStructuredTables(enabled);
-                              void desktop
-                                .invoke('settings:get', {})
-                                .then((s) => desktop.invoke('settings:set', { ...s, enableGenerativeUI: enabled }))
-                                .catch(() => {
-                                  setStructuredTables(!enabled);
-                                  setFeatureError(tr('common:could_not_save_structured_table_setting'));
-                                });
-                            }}
-                          />
-                        </SettingRow>
-                        {featureError && <p role="alert">{featureError}</p>}
-                      </Card>
-                      <Section level={3} title={tr('common:providers')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-                        {providers.filter(provider => provider.config.kind !== 'api').map((provider) => (
-                          <ProviderRow
-                            settingsView
-                            key={provider.config.id}
-                            provider={provider}
-                            onRefresh={onRefresh}
-                          />
-                        ))}
-                      </Card></Section>
-                    </>
-                  ))}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-      </DialogContent>
+                          isLabelHidden
+                          value={structuredTables}
+                          onChange={(enabled) => {
+                            setStructuredTables(enabled);
+                            void desktop
+                              .invoke('settings:get', {})
+                              .then((s) => desktop.invoke('settings:set', { ...s, enableGenerativeUI: enabled }))
+                              .catch(() => {
+                                setStructuredTables(!enabled);
+                                setFeatureError(tr('common:could_not_save_structured_table_setting'));
+                              });
+                          }}
+                        />
+                      </SettingRow>
+                      {featureError && <p role="alert">{featureError}</p>}
+                    </Card>
+                    <Section level={3} title={tr('common:providers')}><Card padding={4} className="settings-stack">
+                      {providers.filter(provider => provider.config.kind !== 'api').map((provider) => (
+                        <ProviderRow
+                          settingsView
+                          key={provider.config.id}
+                          provider={provider}
+                          onRefresh={onRefresh}
+                        />
+                      ))}
+                    </Card></Section>
+                  </>
+                ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </Dialog>
   );
 }

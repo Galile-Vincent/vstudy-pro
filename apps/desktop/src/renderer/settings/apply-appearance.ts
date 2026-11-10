@@ -19,9 +19,6 @@ export function applyTheme(preferences: ThemePreferences, preview?: ThemePack): 
   for (const [name, value] of Object.entries(adjustedTokens(theme[scheme], scheme, preferences.contrast))) {
     root.style.setProperty(`--${{ sidebar: 'sidebar-surface', line: 'line-strong' }[name] ?? name}`, value);
   }
-  root.style.setProperty('--surface-opacity', `${{solid:100,soft:68,glass:50}[preferences.cardTransparency]}%`);
-  root.dataset.cardTransparency = preferences.cardTransparency;
-  root.style.setProperty('--glass-opacity', `${preferences.glassOpacity}%`);
   root.dataset.theme = theme.id;
   root.dataset.contrast = preferences.contrast >= 125 ? 'more' : 'normal';
   root.dataset.scheme = scheme;
@@ -37,13 +34,10 @@ export function previewTheme(preferences: ThemePreferences): () => void {
 
 /** The cache avoids a default-theme paint while the authoritative SQLite settings load. */
 export function applyAppearance(settings: Settings, animate = false): void {
-  const nextKey = JSON.stringify([resolveTheme(settings), settings.colorScheme, settings.contrast, settings.glassOpacity, settings.material, settings.cardTransparency]);
+  const nextKey = JSON.stringify([resolveTheme(settings), settings.colorScheme, settings.contrast]);
   const changed = appearanceKey !== undefined && appearanceKey !== nextKey;
   appearanceKey = nextKey;
-  if (!animate || changed) transition(() => {
-    applyTheme(settings);
-    document.documentElement.dataset.material = settings.material;
-  }, animate && changed);
+  if (!animate || changed) transition(() => applyTheme(settings), animate && changed);
   const root = document.documentElement;
   root.style.setProperty('--ui-scale', String(settings.uiScale / 100));
   root.style.setProperty('--density', settings.density === 'compact' ? '.875' : '1');

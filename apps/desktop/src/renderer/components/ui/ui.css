@@ -6,29 +6,28 @@
 .ui-row-target:is(button,a):hover { background:var(--glass-tone); }
 .ui-row-target:disabled,.ui-row-target[aria-disabled=true] { opacity:var(--opacity-disabled); }
 [data-slot=list-row][data-divider=true] { border-block-end:thin solid var(--hairline); }
-:is([data-slot=segmented-tabs-trigger][data-state=active],[data-slot=segmented-control-item][data-state=on]) { background:color-mix(in oklab,var(--ink) 6%,transparent); color:var(--ink); font-weight:500; box-shadow:none; }
+:is([data-slot=segmented-tabs-trigger][data-state=active]) { background:color-mix(in oklab,var(--ink) 6%,transparent); color:var(--ink); font-weight:500; box-shadow:none; }
 .ui-page-container { max-inline-size:calc(var(--space-8) * 40); }
 @media(prefers-contrast:more),(forced-colors:active) {
- :is([data-slot=segmented-tabs-trigger][data-state=active],[data-slot=segmented-control-item][data-state=on]),[data-slot=list-row][data-selected=true] { outline:thin solid var(--ink); }
+ :is([data-slot=segmented-tabs-trigger][data-state=active]),[data-slot=list-row][data-selected=true] { outline:thin solid var(--ink); }
 }
-html[data-theme=contrast] :is([data-slot=segmented-tabs-trigger][data-state=active],[data-slot=segmented-control-item][data-state=on]) { outline:thin solid var(--ink); }
-html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=segmented-tabs-trigger],[data-slot=segmented-control-item]):is(:focus-visible,[data-demo-state=focus]) { outline:2px solid var(--focus); outline-offset:2px; }
+html[data-theme=contrast] :is([data-slot=segmented-tabs-trigger][data-state=active]) { outline:thin solid var(--ink); }
+html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=segmented-tabs-trigger]):is(:focus-visible,[data-demo-state=focus]) { outline:2px solid var(--focus); outline-offset:2px; }
 
 [data-slot=page-header]:not(.moodle-webview-header) > div h1 { font-size:var(--type-display); font-weight:500; white-space:normal; overflow-wrap:anywhere; line-height:1.35; margin:0; }
 [data-slot=page-header]:not(.moodle-webview-header) > div p { margin:0; line-height:1.5; }
 
-[data-slot=setting-row] { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-3) var(--space-6); min-width:0; }
-[data-slot=setting-row] > div:first-child { flex:1; min-width: min(100%,12rem); }
-[data-slot=setting-row] label { font-weight:500; }
-[data-slot=setting-row] p { color:var(--muted); font-size:var(--type-sm); margin-top:var(--space-1); }
-[data-slot=setting-control] { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2); max-width:100%; min-width:0; }
-[data-slot=setting-control] > :is(input,textarea) { width:8rem; max-width:100%; }
-[data-slot=setting-control] > [data-slot=select-trigger] { width:16rem; max-width:100%; }
+/* Field renders [label group, control wrapper]; the row lays them out side by side. */
+[data-slot=setting-row] { flex-direction:row; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--spacing-3) var(--spacing-6); }
+[data-slot=setting-row] > :first-child { flex:1; min-width:min(100%,12rem); }
+[data-slot=setting-row] > :last-child { flex:0 1 auto; display:flex; flex-wrap:wrap; align-items:center; gap:var(--spacing-2); max-width:100%; min-width:0; }
 [data-slot=setting-row][data-layout=stack] { flex-direction:column; align-items:stretch; }
-[data-slot=setting-row][data-layout=stack] > [data-slot=setting-control] { width:100%; }
+[data-slot=setting-row][data-layout=stack] > :last-child { width:100%; flex:1 1 auto; }
 [data-slot=setting-row][data-layout=stack] textarea { width:100%; font-family:var(--font-mono); }
 
-html:is([data-theme=contrast],[data-contrast=more]) :is([data-slot=card],[data-slot=segmented-control]) { outline:1px solid var(--hairline); outline-offset:0; }
+/* The Astryx track is a borderless tone; a hairline keeps its edge perceivable (WCAG 1.4.11). */
+.astryx-segmented-control { border:1px solid var(--line); }
+html:is([data-theme=contrast],[data-contrast=more]) :is([data-slot=card],.astryx-segmented-control) { outline:1px solid var(--hairline); outline-offset:0; }
 @media (prefers-contrast:more), (forced-colors:active) {
- :is([data-slot=card],[data-slot=segmented-control]) { outline:1px solid var(--hairline); outline-offset:0; }
+ :is([data-slot=card],.astryx-segmented-control) { outline:1px solid var(--hairline); outline-offset:0; }
 }

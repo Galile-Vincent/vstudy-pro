@@ -13,6 +13,6 @@ it('shows the package version beside a separate beta badge', () => {
   const label = screen.getByText(`v${version}`);
   const badge = screen.getByText('beta');
   expect(label).not.toBe(badge);
-  expect(label.parentElement).toBe(badge.parentElement);
+  expect(label.closest('p')).toBe(badge.closest('p'));
   expect(container.textContent).toBe(`v${version} beta`);
 });

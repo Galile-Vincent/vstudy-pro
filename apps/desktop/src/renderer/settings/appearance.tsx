@@ -8,10 +8,9 @@ import { type Settings } from '../../shared';
 import { builtinThemes, resolveTheme, type ThemePack } from '../../shared/themes';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
-import { Card, Section, SettingRow, SegmentedControl, SegmentedControlItem } from '../components/ui';
+import { Section, SettingRow, SegmentedControl, SegmentedControlItem } from '../components/ui';
 import { Select } from '../components/select';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
-import { Button } from '../components/ui/button';
+import { Button, Card, Dialog, DialogHeader } from '@astryxdesign/core';
 import { applyAppearance } from './apply-appearance';
 import { ThemeEditor, ThemeTransfer } from './theme-editor';
 import './appearance.css';
@@ -20,7 +19,7 @@ import { ThemePreview } from './theme-preview';
 export function AppearanceSection() {
   const commits = useTrailingCommit();
   const [settings, setSettings] = useState<Settings>();
-  const sliderSaved = useRef<Partial<Record<'contrast' | 'glassOpacity',number>>>({});
+  const contrastSaved = useRef<number | undefined>(undefined);
   const pending = useRef<Promise<void>>(Promise.resolve());
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState<ThemePack>();
@@ -36,7 +35,7 @@ export function AppearanceSection() {
   const [editor, setEditor] = useState<ThemePack>();
   const [transfer, setTransfer] = useState<ThemePack | 'import'>();
   useEffect(() => {
-    void desktop.invoke('settings:get', {}).then(value => {setSettings(value);sliderSaved.current={contrast:value.contrast,glassOpacity:value.glassOpacity};}).catch(() => setError(tr('errors:generic')));
+    void desktop.invoke('settings:get', {}).then(value => {setSettings(value);contrastSaved.current=value.contrast;}).catch(() => setError(tr('errors:generic')));
   }, []);
 
   const update = (patch: Partial<Settings>) => {
@@ -75,16 +74,16 @@ export function AppearanceSection() {
   if (!settings) return error ? <p role="alert">{error}</p> : <p role="status">{tr('themes:loading')}</p>;
   const theme = resolveTheme(settings);
   const packs = [...builtinThemes,...settings.customThemes];
-  const commitSlider = (field: 'contrast' | 'glassOpacity', value: number) => {
-    if (sliderSaved.current[field] === value) return;
-    const previous = sliderSaved.current[field] ?? settings[field];
-    sliderSaved.current[field] = value;
-    void update({[field]:value}).then(saved => {if (!saved) sliderSaved.current[field] = previous;});
+  const commitContrast = (value: number) => {
+    if (contrastSaved.current === value) return;
+    const previous = contrastSaved.current ?? settings.contrast;
+    contrastSaved.current = value;
+    void update({contrast:value}).then(saved => {if (!saved) contrastSaved.current = previous;});
   };
-  const slider = (field: 'contrast' | 'glassOpacity') => <SettingRow htmlFor={`appearance-${field}`} key={field} label={tr(`themes:${field}`)} description={tr(`themes:${field}_hint`)}>
-    <label className="theme-slider"><output>{settings[field]}%</output><input id={`appearance-${field}`} type="range" min={field === 'contrast' ? 100 : 50} max={field === 'contrast' ? 150 : 100} step="1"
-      aria-label={tr(`themes:${field}`)} aria-valuetext={`${settings[field]}%`} value={settings[field]} onChange={e => { const value=Number(e.target.value); const next={...settings,[field]:value}; setSettings(next); applyAppearance(next, false); commits.schedule(field,()=>commitSlider(field,value)); }}
-      onPointerUp={e => commitSlider(field,Number(e.currentTarget.value))} onKeyDown={e => {if (e.key === 'Enter' || e.key === 'Escape') commits.flush(field);}} onBlur={e => commitSlider(field,Number(e.currentTarget.value))}/></label>
+  const contrastRow = <SettingRow htmlFor="appearance-contrast" label={tr('themes:contrast')} description={tr('themes:contrast_hint')}>
+    <label className="theme-slider"><output>{settings.contrast}%</output><input id="appearance-contrast" type="range" min={100} max={150} step="1"
+      aria-label={tr('themes:contrast')} aria-valuetext={`${settings.contrast}%`} value={settings.contrast} onChange={e => { const value=Number(e.target.value); const next={...settings,contrast:value}; setSettings(next); applyAppearance(next, false); commits.schedule('contrast',()=>commitContrast(value)); }}
+      onPointerUp={e => commitContrast(Number(e.currentTarget.value))} onKeyDown={e => {if (e.key === 'Enter' || e.key === 'Escape') commits.flush('contrast');}} onBlur={e => commitContrast(Number(e.currentTarget.value))}/></label>
   </SettingRow>;
   return <div className="appearance-layout">
     <Section level={3} title={tr('themes:scheme')}>
@@ -96,19 +95,12 @@ export function AppearanceSection() {
         </button>)}
       </div>
     </Section>
-    <Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-      <SettingRow label={tr('themes:cardTransparency')} description={tr('themes:cardTransparency_hint')}>
-        <SegmentedControl type="single" aria-label={tr('themes:cardTransparency')} value={settings.cardTransparency}
-          onValueChange={value => { if (value) void update({cardTransparency:value as Settings['cardTransparency']}); }}
-        >
-          {(['solid','soft','glass'] as const).map(value => <SegmentedControlItem key={value} value={value}>{tr(`themes:card_${value}`)}</SegmentedControlItem>)}
-        </SegmentedControl>
-      </SettingRow>
-      {slider('contrast')}
+    <Card padding={4} className="settings-stack">
+      {contrastRow}
     </Card>
-    <Section level={3} title={tr('settings:text_reading')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-      {(['uiScale','density','readerFont','readerSize'] as const).map(field => <SettingRow {...(field === 'readerFont' ? {htmlFor:'appearance-reader-font'} : {})} key={field} label={tr(`settings:${field}`)}>
-        {field === 'readerFont' ? <Select id="appearance-reader-font" aria-label={tr('settings:readerFont')} value={settings.readerFont} onChange={e => void update({readerFont:e.target.value as Settings['readerFont']})}>
+    <Section level={3} title={tr('settings:text_reading')}><Card padding={4} className="settings-stack">
+      {(['uiScale','density','readerFont','readerSize'] as const).map(field => <SettingRow key={field} label={tr(`settings:${field}`)}>
+        {field === 'readerFont' ? <Select id="appearance-reader-font" aria-label={tr('settings:readerFont')} width={192} value={settings.readerFont} onChange={e => void update({readerFont:e.target.value as Settings['readerFont']})}>
           {['system','serif','mono'].map(v => <option key={v} value={v}>{tr(`settings:${v}`)}</option>)}
         </Select> : field === 'uiScale' ? toggles(field,[100,125,150,200]) : field === 'density' ? toggles(field,['comfortable','compact']) : toggles(field,['s','m','l','xl'])}
       </SettingRow>)}
@@ -133,29 +125,30 @@ export function AppearanceSection() {
     <details className="settings-disclosure">
       <summary>{tr('settings:advanced')}</summary>
       <div className="settings-disclosure-body">
-        <Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-          {slider('glassOpacity')}
+        <Card padding={4} className="settings-stack">
           <SettingRow label={tr('themes:custom')} description={tr('themes:custom_hint')}>
-            <Button size="sm" variant="secondary" disabled={settings.customThemes.length >= 30} onClick={() => setEditor({...theme, id:`custom-${crypto.randomUUID()}`,name:tr('themes:untitled')})}><Pencil/>{tr('themes:create')}</Button>
-            <Button size="sm" variant="secondary" disabled={settings.customThemes.length >= 30} onClick={() => setTransfer('import')}><Plus/>{tr('themes:add')}</Button>
+            <Button size="sm" variant="secondary" label={tr('themes:create')} icon={<Pencil />} isDisabled={settings.customThemes.length >= 30} onClick={() => setEditor({...theme, id:`custom-${crypto.randomUUID()}`,name:tr('themes:untitled')})} />
+            <Button size="sm" variant="secondary" label={tr('themes:add')} icon={<Plus />} isDisabled={settings.customThemes.length >= 30} onClick={() => setTransfer('import')} />
           </SettingRow>
         </Card>
       </div>
     </details>
     {settings.customThemes.length >= 30 && <p role="status">{tr('themes:limit')}</p>}
     {message && <p role="status">{message}</p>}
-    {deleting && <Dialog open onOpenChange={open => {if (!open) setDeleting(undefined);}}>
-      <DialogContent><DialogTitle>{tr('themes:delete_named',{name:deleting.name})}</DialogTitle>
-        <DialogDescription>{tr('themes:delete_copy',{name:deleting.name})}</DialogDescription>
+    {deleting && <Dialog isOpen onOpenChange={open => {if (!open) setDeleting(undefined);}} width={420} purpose="required">
+      <DialogHeader title={tr('themes:delete_named',{name:deleting.name})} subtitle={tr('themes:delete_copy',{name:deleting.name})} />
+      <div className="dialog-body">
         {error && <p role="alert">{error}</p>}
-        <Button variant="secondary" onClick={() => {setError('');setDeleting(undefined);}}>{tr('common:cancel')}</Button>
-        <Button variant="destructive" onClick={() => void (async () => {
-          const active = settings.themeId === deleting.id;
-          const saved = await update({customThemes:settings.customThemes.filter(t => t.id !== deleting.id),
-            ...(active ? {themeId:'vstudy'} : {})});
-          if (saved) {focusAfterDelete.current=true;setDeleting(undefined);if (active) setMessage(tr('themes:deleted_default'));}
-        })()}>{tr('common:delete')}</Button>
-      </DialogContent>
+        <div className="dialog-actions">
+          <Button label={tr('common:cancel')} variant="secondary" onClick={() => {setError('');setDeleting(undefined);}} />
+          <Button label={tr('common:delete')} variant="destructive" onClick={() => void (async () => {
+            const active = settings.themeId === deleting.id;
+            const saved = await update({customThemes:settings.customThemes.filter(t => t.id !== deleting.id),
+              ...(active ? {themeId:'vstudy'} : {})});
+            if (saved) {focusAfterDelete.current=true;setDeleting(undefined);if (active) setMessage(tr('themes:deleted_default'));}
+          })()} />
+        </div>
+      </div>
     </Dialog>}
     {error && !deleting && <p role="alert">{error}</p>}
     {editor && <ThemeEditor theme={editor} settings={settings} onClose={() => setEditor(undefined)} onSave={saveTheme}/>}

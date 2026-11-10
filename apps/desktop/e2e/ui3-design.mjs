@@ -135,7 +135,7 @@ try {
  }
  // Exercise the real Appearance controls and verify persistence, rather than only setting tokens in the test.
  await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-tabs [role=tab]').nth(1).click();
- for(const [value,token,expected]of [['125%','--ui-scale','1.25'],['Compact','--density','.875'],['Solid',null,null]]) {
+ for(const [value,token,expected]of [['125%','--ui-scale','1.25'],['Compact','--density','.875']]) {
   // Use an English catalog for stable control names across the locale matrix.
   const current=await call('settings:get',{});if(current.language!=='en'){await call('settings:set',{...current,language:'en'});await page.reload();await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-tabs [role=tab]').nth(1).click();}
   await page.getByRole('radio',{name:value,exact:true}).click();
@@ -143,7 +143,7 @@ try {
  }
  await page.getByRole('radio',{name:'Large',exact:true}).click();await page.waitForFunction(()=>window.document.documentElement.style.getPropertyValue('--reader-size')==='1rem');
  await page.getByRole('combobox',{name:'Reader font',exact:true}).click();await page.getByRole('option',{name:'Serif',exact:true}).click();await page.waitForFunction(()=>window.document.documentElement.style.getPropertyValue('--font-reader').includes('Georgia'));
- await page.reload();const persisted=await call('settings:get',{});assert.equal(persisted.uiScale,125);assert.equal(persisted.density,'compact');assert.equal(persisted.readerFont,'serif');assert.equal(persisted.cardTransparency,'solid');assert.equal(persisted.material,initial.material);assert.equal(persisted.readerSize,'l');
+ await page.reload();const persisted=await call('settings:get',{});assert.equal(persisted.uiScale,125);assert.equal(persisted.density,'compact');assert.equal(persisted.readerFont,'serif');assert.equal(persisted.cardTransparency,initial.cardTransparency);assert.equal(persisted.material,initial.material);assert.equal(persisted.readerSize,'l');
  checks.push({state:'appearance-live-persistence',violations:[]});
 
 } finally {await writeFile(`${out}/report.json`,JSON.stringify(checks,null,2));await app?.close();await rm(dir,{recursive:true,force:true});}

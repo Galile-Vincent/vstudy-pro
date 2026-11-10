@@ -19,8 +19,8 @@ export function LanguageSettings() {
     } catch { setError(tr('errors:generic')); }
   };
   return <>
-    {(['language','replyLanguage'] as const).map(field => <SettingRow key={field} htmlFor={`settings-${field}`} label={tr(field === 'language' ? 'common:language' : 'common:reply_language')} description={field==='replyLanguage'?tr('common:reply_note'):undefined}>
-      <Select id={`settings-${field}`} data-testid={field} value={field === 'language' && i18n.language === 'en-XA' ? 'en-XA' : settings?.[field] ?? 'auto'} disabled={!settings} onChange={e => void update(field,e.target.value)}>
+    {(['language','replyLanguage'] as const).map(field => <SettingRow key={field} label={tr(field === 'language' ? 'common:language' : 'common:reply_language')} {...(field==='replyLanguage' ? { description: tr('common:reply_note') } : {})}>
+      <Select id={`settings-${field}`} data-testid={field} aria-label={tr(field === 'language' ? 'common:language' : 'common:reply_language')} width={192} value={field === 'language' && i18n.language === 'en-XA' ? 'en-XA' : settings?.[field] ?? 'auto'} disabled={!settings} onChange={e => void update(field,e.target.value)}>
         <option value="auto">{tr(field === 'language' ? 'common:auto' : 'common:reply_auto')}</option>
         <option value="en" lang="en">English</option><option value="zh-Hant" lang="zh-Hant">繁體中文</option><option value="ja" lang="ja">日本語</option>
         {field === 'language' && import.meta.env.DEV && <option value="en-XA">{tr('common:pseudo')}</option>}

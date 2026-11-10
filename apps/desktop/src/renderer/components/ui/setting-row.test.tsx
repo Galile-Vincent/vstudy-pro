@@ -2,7 +2,8 @@
 import { afterEach, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { SettingRow } from './setting-row';
-import { Switch } from './switch';
+import { useState } from 'react';
+import { Switch } from '@astryxdesign/core';
 afterEach(cleanup);
 it('associates a visible label with an input', () => {
   render(<SettingRow label="Idle minutes" htmlFor="idle"><input id="idle" type="number" /></SettingRow>);
@@ -11,9 +12,13 @@ it('associates a visible label with an input', () => {
   expect(screen.queryByRole('group')).toBeNull();
 });
 it('toggles a switch by its visible label', () => {
-  render(<SettingRow label="Analytics" htmlFor="analytics"><Switch id="analytics" /></SettingRow>);
-  fireEvent.click(screen.getByText('Analytics'));
-  expect(screen.getByRole('switch', {name:'Analytics'}).getAttribute('aria-checked')).toBe('true');
+  function Row() {
+    const [on, setOn] = useState(false);
+    return <SettingRow label="Analytics" htmlFor="analytics"><Switch label="Analytics" isLabelHidden value={on} onChange={setOn} /></SettingRow>;
+  }
+  const { container } = render(<Row />);
+  fireEvent.click(container.querySelector('label[for=analytics]')!);
+  expect((screen.getByRole('switch', {name:'Analytics'}) as HTMLInputElement).checked).toBe(true);
 });
 it('names a group when no htmlFor is supplied', () => {
   render(<SettingRow label="Actions"><button>Export</button></SettingRow>);

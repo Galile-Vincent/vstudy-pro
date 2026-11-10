@@ -6,13 +6,13 @@ import { desktopPlatform } from '../../shared/platform';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { Toolbar } from '../components/ui';
-import { Button } from '../components/ui/button';
+import { Button } from '@astryxdesign/core';
 import type { CliDetection } from './model';
 
 export function ManualInstallReason({ provider }: { provider: CliProvider }) {
   const [error, setError] = useState(false);
   return <div className="ai-cli-manual-reason"><p>{tr('ai-cli:manual_install_reason')}</p>
-    <Button variant="link" onClick={() => { setError(false); void desktop.invoke('shell:openExternal', { url: cliInstallSources[provider] }).catch(() => setError(true)); }}>{tr('ai-cli:official_source')}</Button>
+    <Button label={tr('ai-cli:official_source')} variant="ghost" onClick={() => { setError(false); void desktop.invoke('shell:openExternal', { url: cliInstallSources[provider] }).catch(() => setError(true)); }} />
     {error && <p role="alert">{tr('ai-cli:manual_link_error')}</p>}
   </div>;
 }
@@ -56,10 +56,10 @@ export function ManualInstall({ provider, required = false, busy = false, onChec
       </ol>
       <pre className="ai-cli-output"><code>{command}</code></pre>
       <Toolbar left={<>
-        <Button variant="secondary" data-manual-copy disabled={busy || pending} onClick={() => void navigator.clipboard.writeText(command).then(() => { setCopied(true); setError(undefined); }).catch(() => setError('copy'))}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_command')}</Button>
-        <Button variant="secondary" data-manual-terminal disabled={busy || pending} onClick={() => void act(true)}>{tr(windows ? 'ai-cli:open_terminal_windows' : 'ai-cli:open_terminal')}</Button>
+        <Button label={tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_command')} variant="secondary" data-manual-copy isDisabled={busy || pending} onClick={() => void navigator.clipboard.writeText(command).then(() => { setCopied(true); setError(undefined); }).catch(() => setError('copy'))} />
+        <Button label={tr(windows ? 'ai-cli:open_terminal_windows' : 'ai-cli:open_terminal')} variant="secondary" data-manual-terminal isDisabled={busy || pending} onClick={() => void act(true)} />
       </>} />
-      <Button className="ai-cli-manual-check" data-manual-check disabled={busy || pending} onClick={() => void act(false)}>{tr(pending ? 'ai-cli:manual_working' : 'ai-cli:check_again')}</Button>
+      <Button label={tr(pending ? 'ai-cli:manual_working' : 'ai-cli:check_again')} variant="primary" className="ai-cli-manual-check" data-manual-check isDisabled={busy || pending} onClick={() => void act(false)} />
     </> : <p>{tr('ai-cli:failure_unsupported')}</p>}
     {error && <p role="alert">{tr(error === 'copy' ? 'ai-cli:copy_error' : 'ai-cli:manual_terminal_error')}</p>}
     {!required && <ManualInstallReason provider={provider} />}

@@ -1,5 +1,6 @@
-import { type ComponentProps } from 'react';
-import { Tabs as Primitive, ToggleGroup as Control } from 'radix-ui';
+import { Children, isValidElement, useState, type ComponentProps, type ReactElement, type ReactNode } from 'react';
+import { Tabs as Primitive } from 'radix-ui';
+import { SegmentedControl as Control, SegmentedControlItem as Item } from '@astryxdesign/core';
 import { cn } from '@/lib/utils';
 import './ui.css';
 export { Tabs, TabsContent } from './tabs';
@@ -31,29 +32,35 @@ export function SegmentedTabsTrigger({
   );
 }
 
-export function SegmentedControl({ className, onKeyDownCapture, ...props }: ComponentProps<typeof Control.Root>) {
-  return <Control.Root {...props} onKeyDownCapture={event => {
-    onKeyDownCapture?.(event);
-    if (event.defaultPrevented || props.type !== 'single' || event.altKey || event.ctrlKey || event.metaKey) return;
-    const direction = props.dir ?? getComputedStyle(event.currentTarget).direction;
-    const horizontal = props.orientation !== 'vertical';
-    const previous = horizontal ? (direction === 'rtl' ? 'ArrowRight' : 'ArrowLeft') : 'ArrowUp';
-    const next = horizontal ? (direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight') : 'ArrowDown';
-    if (![previous, next, 'Home', 'End'].includes(event.key)) return;
-    const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[data-slot=segmented-control-item]:not(:disabled)'));
-    const index = items.indexOf(event.target as HTMLButtonElement);
-    if (index < 0 || !items.length) return;
-    event.preventDefault();
-    event.stopPropagation();
-    const step = event.key === previous ? -1 : 1;
-    let target = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 : index + step;
-    target = props.loop === false ? Math.max(0, Math.min(items.length - 1, target)) : (target + items.length) % items.length;
-    const item = items[target];
-    if (!item) return;
-    item.focus();
-    if (item.getAttribute('aria-checked') !== 'true') item.click();
-  }} data-slot="segmented-control" className={cn('flex w-fit max-w-full flex-wrap gap-[var(--space-1)] rounded-[var(--r-md)] p-[var(--space-1)]', className)} />;
+type ControlProps = {
+  type?: 'single';
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
+  children?: ReactNode;
+  'aria-label'?: string;
+};
+
+export function SegmentedControl({ value, defaultValue = '', onValueChange, disabled, className, children, 'aria-label': label = '' }: ControlProps) {
+  const [inner, setInner] = useState(defaultValue);
+  const current = value ?? inner;
+  return <Control label={label} value={current} isDisabled={disabled ?? false} className={cn('ui-segmented', className)}
+    onChange={next => { if (value === undefined) setInner(next); onValueChange?.(next); }}>{children}</Control>;
 }
-export function SegmentedControlItem({ className, ...props }: ComponentProps<typeof Control.Item>) {
-  return <Control.Item {...props} data-slot="segmented-control-item" className={cn('inline-flex items-center gap-[var(--space-2)] rounded-[var(--r-sm)] px-[var(--space-3)] py-[var(--space-2)] font-medium text-[var(--muted)] disabled:opacity-[var(--opacity-disabled)]', className)} />;
+
+const textOf = (node: ReactNode): string => Children.toArray(node).map(child =>
+  typeof child === 'string' || typeof child === 'number' ? String(child)
+    : isValidElement<{ children?: ReactNode }>(child) ? textOf(child.props.children) : '').join('');
+
+export function SegmentedControlItem({ value, disabled, id, children }: {
+  value: string;
+  disabled?: boolean;
+  id?: string;
+  children?: ReactNode;
+}) {
+  const nodes = Children.toArray(children);
+  const icon = nodes.find((node): node is ReactElement => isValidElement(node) && !textOf(node));
+  return <Item value={value} label={textOf(nodes)} isDisabled={disabled ?? false} {...(icon ? { icon } : {})} {...(id ? { id } : {})} />;
 }

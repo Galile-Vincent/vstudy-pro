@@ -44,7 +44,7 @@ it('applies every token and works when localStorage is unavailable', () => {
   for (const [name,value] of Object.entries(pack.light)) {
     expect(document.documentElement.style.getPropertyValue(`--${({sidebar:'sidebar-surface',line:'line-strong'} as Record<string,string>)[name]??name}`)).toBe(value);
   }
-  expect(document.documentElement.style.getPropertyValue('--glass-opacity')).toBe('95%');
+  expect(document.documentElement.style.getPropertyValue('--glass-opacity')).toBe('');
   storage.mockRestore();
 });
 
@@ -70,22 +70,16 @@ it('does not cut the slider preview when its identical value is persisted', asyn
   document.startViewTransition = undefined as unknown as typeof document.startViewTransition;
 });
 
-it.each([['solid','100%'],['soft','68%'],['glass','50%']] as const)('applies and caches %s card transparency', (cardTransparency, opacity) => {
-  applyAppearance({...defaultSettings,cardTransparency});
-  expect(document.documentElement.style.getPropertyValue('--surface-opacity')).toBe(opacity);
-  expect(document.documentElement.dataset.cardTransparency).toBe(cardTransparency);
-  expect(JSON.parse(localStorage.getItem('vstudy-appearance-v1')!)).toMatchObject({cardTransparency});
-});
-
-it('restores cached card transparency before settings resolve', async () => {
-  localStorage.setItem('vstudy-appearance-v1',JSON.stringify({...defaultSettings,cardTransparency:'glass'}));
-  let resolve!: (value: typeof defaultSettings) => void;
-  state.invoke.mockReturnValue(new Promise(done => {resolve=done;}));
-  const initialized=initializeAppearance();
-  expect(document.documentElement.style.getPropertyValue('--surface-opacity')).toBe('50%');
-  resolve({...defaultSettings,cardTransparency:'solid'});
-  await initialized;
-  expect(document.documentElement.style.getPropertyValue('--surface-opacity')).toBe('100%');
+it('loads stored glass settings without applying them', async () => {
+  const stored = {...defaultSettings,cardTransparency:'glass',glassOpacity:95,material:'glass'};
+  localStorage.setItem('vstudy-appearance-v1',JSON.stringify(stored));
+  state.invoke.mockResolvedValue(stored);
+  await expect(initializeAppearance()).resolves.toBeUndefined();
+  const root = document.documentElement;
+  expect(root.dataset.cardTransparency).toBeUndefined();
+  expect(root.dataset.material).toBeUndefined();
+  expect(root.style.getPropertyValue('--surface-opacity')).toBe('');
+  expect(root.style.getPropertyValue('--glass-opacity')).toBe('');
 });
 
 it('restores the authoritative theme and system tracking after a gallery preview', async () => {

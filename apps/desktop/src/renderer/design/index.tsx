@@ -1,36 +1,19 @@
+import { Button } from '@astryxdesign/core';
 import { AstryxGallery } from './astryx-gallery';
 import { useEffect, useState } from 'react';
 import { builtinThemes, themePreferencesSchema, type ThemePreferences } from '../../shared/themes';
 import { applyTheme, previewTheme } from '../settings/apply-appearance';
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-  CardAction,
   PageContainer,
   PageHeader,
   Section,
   Toolbar,
   ListRow,
   EmptyState,
-  Stat,
-  FormField,
   SettingRow,
-  Tabs,
-  TabsContent,
   SegmentedControl,
   SegmentedControlItem,
-  SegmentedTabsList,
-  SegmentedTabsTrigger,
-  Button,
   Badge,
-  Input,
-  Separator,
-  ToggleGroup,
-  ToggleGroupItem,
 } from '../components/ui';
 
 const copy = {
@@ -42,26 +25,16 @@ const copy = {
   description: 'UI_FOUNDATION_GALLERY_DEV_ONLY_2026',
   scheme: 'Scheme',
   theme: 'Theme pack',
-  material: 'Material',
   contrast: 'Contrast',
-  cards: 'Cards',
   structure: 'Rows and sections',
-  forms: 'Fields',
-  tabs: 'Segmented tabs',
   empty: 'No documents yet',
   hint: 'Import a document to start studying.',
   action: 'Import document',
-  label: 'Course name',
-  error: 'A course name is required',
-  stats: 'Study time',
-  unit: 'minutes',
   back: 'Back to app',
   meta: 'Development preview',
   disabled: 'Disabled',
   selected: 'Selected',
   rest: 'Rest',
-  hover: 'Hover',
-  focus: 'Focus',
 };
 function Choice({
   label,
@@ -120,7 +93,7 @@ export default function DesignGallery() {
   }, [preferences]);
   const change = <K extends keyof ThemePreferences>(key: K, value: ThemePreferences[K]) =>
     setPreferences((previous) => ({ ...previous, [key]: value }));
-  const action = <Button>{copy.action}</Button>;
+  const action = <Button label={copy.action} variant="primary" />;
   return (
     <main>
       <PageContainer data-gallery={copy.description}>
@@ -151,14 +124,6 @@ export default function DesignGallery() {
           right={
             <>
               <Choice
-                label={copy.material}
-                value={preferences.cardTransparency}
-                values={choices(['solid', 'soft', 'glass'])}
-                onChange={(value) =>
-                  change('cardTransparency', value as ThemePreferences['cardTransparency'])
-                }
-              />
-              <Choice
                 label={copy.contrast}
                 value={String(preferences.contrast)}
                 values={choices(['100', '125', '150'])}
@@ -174,45 +139,6 @@ export default function DesignGallery() {
           <SegmentedControlItem value="offline">{copy.offline}</SegmentedControlItem>
         </SegmentedControl>
       </SettingRow>
-      <Section title={copy.cards} count={3}>
-          <div className="grid gap-[var(--space-4)] md:grid-cols-3">
-            {(['flat', 'raised', 'interactive'] as const).map((variant) => (
-              <Card
-                key={variant}
-                {...(variant === 'interactive' ? { variant, onClick: () => {} } : { variant })}
-              >
-                {variant === 'interactive' ? (
-                  <span className="px-[var(--space-6)]">{variant}: {copy.hint}</span>
-                ) : (
-                  <>
-                    <CardHeader>
-                      <CardTitle>{variant}</CardTitle>
-                      <CardDescription>{copy.hint}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Stat label={copy.stats} value={42} unit={copy.unit} delta="+12%" />
-                    </CardContent>
-                    <CardFooter>{action}</CardFooter>
-                  </>
-                )}
-              </Card>
-            ))}
-            {(['rest', 'hover', 'focus', 'disabled'] as const).map((state) => (
-              <Card
-                key={state}
-                variant="interactive"
-                onClick={() => {}}
-                disabled={state === 'disabled'}
-                data-demo-state={state}
-              >
-                <CardContent>{copy[state]}</CardContent>
-              </Card>
-            ))}
-            <Card variant="interactive" href="#/design">
-              <CardContent>{copy.back}</CardContent>
-            </Card>
-          </div>
-        </Section>
         <Section title={copy.structure} actions={action}>
           <ListRow
             leading={<Badge>1</Badge>}
@@ -220,7 +146,7 @@ export default function DesignGallery() {
             subtitle={copy.hint}
             meta={copy.meta}
             divider
-            actions={<Button variant="ghost">{copy.action}</Button>}
+            actions={<Button label={copy.action} variant="ghost" />}
           />
           <ListRow title={copy.selected} selected onClick={() => {}} />
           <ListRow title={copy.disabled} disabled onClick={() => {}} />
@@ -231,76 +157,6 @@ export default function DesignGallery() {
             description={copy.hint}
             action={action}
           />
-        </Section>
-        <Section title={copy.forms}>
-          <FormField label={copy.label} description={copy.hint}>
-            {(props) => <Input {...props} />}
-          </FormField>
-          <FormField label={copy.label} description={copy.hint} error={copy.error}>
-            {(props) => <Input {...props} />}
-          </FormField>
-          <FormField label={copy.disabled}>{(props) => <Input {...props} disabled />}</FormField>
-        </Section>
-        <Section title={copy.tabs}>
-          <SegmentedControl type="single" defaultValue="one" aria-label={copy.tabs}>
-            <SegmentedControlItem value="one">{copy.rest}</SegmentedControlItem>
-            <SegmentedControlItem value="two">{copy.selected}</SegmentedControlItem>
-            <SegmentedControlItem value="three" disabled>{copy.disabled}</SegmentedControlItem>
-          </SegmentedControl>
-          <Tabs defaultValue="one">
-            <SegmentedTabsList aria-label={copy.tabs}>
-              <SegmentedTabsTrigger value="one">{copy.rest}</SegmentedTabsTrigger>
-              <SegmentedTabsTrigger value="two">{copy.selected}</SegmentedTabsTrigger>
-              <SegmentedTabsTrigger value="three" disabled>
-                {copy.disabled}
-              </SegmentedTabsTrigger>
-            </SegmentedTabsList>
-            <TabsContent value="one">{copy.hint}</TabsContent>
-            <TabsContent value="two">{copy.meta}</TabsContent>
-          </Tabs>
-        </Section>
-        <Section title={copy.action}>
-          <Toolbar
-            left={
-              <>
-                {(['default', 'secondary', 'outline', 'ghost', 'link', 'destructive'] as const).map(
-                  (variant) => (
-                    <Button key={variant} variant={variant}>
-                      {variant}
-                    </Button>
-                  ),
-                )}
-              </>
-            }
-            right={<Button disabled>{copy.disabled}</Button>}
-          />
-          <Separator />
-          <ToggleGroup type="single" defaultValue="one" aria-label={copy.tabs}>
-            <ToggleGroupItem value="one">{copy.selected}</ToggleGroupItem>
-            <ToggleGroupItem value="two">{copy.rest}</ToggleGroupItem>
-            <ToggleGroupItem value="three" disabled>
-              {copy.disabled}
-            </ToggleGroupItem>
-          </ToggleGroup>
-          <Toolbar
-            left={
-              <>
-                {(['default', 'secondary', 'outline', 'ghost', 'link', 'destructive'] as const).map(
-                  (variant) => (
-                    <Badge key={variant} variant={variant}>
-                      {variant}
-                    </Badge>
-                  ),
-                )}
-              </>
-            }
-          />
-          <Card>
-            <CardHeader>
-              <CardTitle>{copy.title}</CardTitle>
-              <CardAction>{action}</CardAction>
-            </CardHeader>
-          </Card>
         </Section>
       </PageContainer>
     </main>

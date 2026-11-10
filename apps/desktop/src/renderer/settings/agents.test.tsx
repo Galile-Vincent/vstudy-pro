@@ -28,11 +28,11 @@ const mount = async () => { view = await mountAgents(<AgentsSettings />); };
 
 it('leaves the master off until the user switches it on and off', async () => {
   await mount();
-  const master = document.querySelector<HTMLButtonElement>('[role=switch]')!;
-  expect(master.getAttribute('aria-checked')).toBe('false');
+  const master = document.querySelector<HTMLInputElement>('[role=switch]')!;
+  expect(master.checked).toBe(false);
   expect(invoke.mock.calls).toEqual([['mcp:state', {}]]);
   await act(() => master.click());
-  expect(master.getAttribute('aria-checked')).toBe('true');
+  expect(master.checked).toBe(true);
   await act(() => master.click());
   expect(invoke.mock.calls.filter(([channel]) => channel === 'mcp:enable')).toEqual([
     ['mcp:enable', { enabled: true }], ['mcp:enable', { enabled: false }],
@@ -67,7 +67,7 @@ it('edits exact scopes, accounts and future expiry only after save', async () =>
     grantId: ids.grant, scopes: ['read:courses', 'read:grades'], accountIds: [ids.account, ids.otherAccount],
     expiresAt: new Date('2099-07-08T14:30').toISOString(),
   });
-  expect(document.querySelector('[role=dialog]')).toBeNull();
+  expect(document.querySelector('dialog[open]')).toBeNull();
 });
 
 it('blocks saving without an account or permission and with an expired date', async () => {
@@ -92,11 +92,11 @@ it('shows safe offline and action errors without leaking raw IPC exceptions', as
   invoke.mockRejectedValueOnce(new Error('token=secret'));
   await mount();
   expect(view.host.textContent).toContain(tr('agents:offline'));
-  expect(document.querySelector<HTMLButtonElement>('[role=switch]')!.disabled).toBe(true);
+  expect(document.querySelector('[role=switch]')!.getAttribute('aria-disabled')).toBe('true');
   expect(view.host.textContent).not.toContain('token=');
   await click('Refresh');
   invoke.mockRejectedValueOnce(new Error('wsfunction=secret'));
-  await act(() => document.querySelector<HTMLButtonElement>('[role=switch]')!.click());
+  await act(() => document.querySelector<HTMLInputElement>('[role=switch]')!.click());
   expect(view.host.textContent).toContain(tr('agents:action_error'));
   expect(view.host.textContent).not.toContain('wsfunction=');
 });
@@ -119,7 +119,7 @@ it('renders every activity entry with fixed statuses and literal redacted argume
 it.each(['en', 'zh-Hant', 'ja'])('renders translated controls in %s', async locale => {
   await i18n.changeLanguage(locale);
   await mount();
-  expect(button(tr('agents:master')).getAttribute('aria-checked')).toBe('false');
+  expect(document.querySelector<HTMLInputElement>('[role=switch]')!.checked).toBe(false);
   expect(view.host.textContent).toContain(tr('agents:no_grants'));
   expect(view.host.textContent).not.toContain('agents:');
 });

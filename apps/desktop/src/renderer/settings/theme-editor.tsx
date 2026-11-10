@@ -4,8 +4,7 @@ import { ZodError } from 'zod';
 import { type Settings } from '../../shared';
 import { builtinThemes, contrastFailures, importTheme, tokenNames, type ThemePack, type ColorScheme } from '../../shared/themes';
 import { tr } from '../../shared/i18n';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
-import { Button } from '../components/ui/button';
+import { Button, Dialog, DialogHeader, TextArea, TextInput } from '@astryxdesign/core';
 import { ThemePreview } from './theme-preview';
 import { applyAppearance, applyTheme } from './apply-appearance';
 
@@ -49,18 +48,21 @@ export function ThemeEditor({theme,settings,onClose,onSave}: ThemeActions & { th
     finally { setSaving(false); }
   };
   const fieldError = error === tr('themes:invalid_name');
-  return <Dialog open onOpenChange={open => {if (!open) onClose();}}><DialogContent className="theme-editor" style={controlStyle}>
-    <DialogTitle>{tr('themes:editor')}</DialogTitle><DialogDescription>{tr('themes:editor_hint')}</DialogDescription>
-    <label className="theme-field">{tr('themes:name')}<input aria-invalid={fieldError} aria-describedby={fieldError ? errorId : undefined} value={draft.name} maxLength={60} onChange={e => setDraft({...draft,name:e.target.value})}/></label>
-    <div className="theme-editor-schemes">{(['light','dark'] as const).map(s => <button type="button" key={s} aria-pressed={scheme===s} onClick={() => setScheme(s)}>{tr(`themes:${s}`)}</button>)}</div>
+  return <Dialog isOpen onOpenChange={open => {if (!open) onClose();}} width={720} purpose="form" className="theme-editor" style={controlStyle}>
+    <DialogHeader title={tr('themes:editor')} subtitle={tr('themes:editor_hint')} />
+    <div className="dialog-body">
+    <TextInput label={tr('themes:name')} value={draft.name} onChange={name => setDraft({...draft,name})}
+      {...(fieldError ? { status: { type: 'error' as const }, 'aria-describedby': errorId } : {})} />
+    <div className="theme-editor-schemes">{(['light','dark'] as const).map(s => <Button key={s} label={tr(`themes:${s}`)} variant={scheme===s ? 'primary' : 'secondary'} size="sm" aria-pressed={scheme===s} onClick={() => setScheme(s)} />)}</div>
     <ThemePreview theme={draft} scheme={scheme}/>
     <div className="theme-color-fields">{tokenNames.map(key => <label key={key}><span>{tr(`themes:token_${key}`)}</span><input type="color" aria-label={tr(`themes:token_${key}`)} value={draft[scheme][key]}
       onChange={e => setDraft({...draft,[scheme]:{...draft[scheme],[key]:e.target.value},orbs:{...draft.orbs,[scheme]:[key==='surface'?e.target.value:draft[scheme].surface,key==='accent-color'?e.target.value:draft[scheme]['accent-color']]}})}/><code>{draft[scheme][key]}</code></label>)}</div>
     <div className="theme-contrast-result" role="status"><p>{tr(warnings.length ? 'themes:contrast_warning' : 'themes:contrast_pass',{count:warnings.length})}</p>
       {warnings.length > 0 && <details><summary>{tr('themes:details')}</summary><ul>{warnings.map(w => <li key={w}>{w}</li>)}</ul></details>}</div>
     {error && <p id={errorId} role="alert">{error}</p>}
-    <footer><button type="button" onClick={onClose}>{tr('common:cancel')}</button><button type="button" className="primary" disabled={saving || !draft.name.trim()} onClick={() => void save()}>{tr('themes:save')}</button></footer>
-  </DialogContent></Dialog>;
+    <div className="dialog-actions"><Button label={tr('common:cancel')} variant="secondary" onClick={onClose} /><Button label={tr('themes:save')} variant="primary" isDisabled={saving || !draft.name.trim()} onClick={() => void save()} /></div>
+    </div>
+  </Dialog>;
 }
 
 export function ThemeTransfer({theme,onClose,onSave,existing=[]}: ThemeActions & { theme: ThemePack | 'import'; existing?: ThemePack[] }) {
@@ -84,33 +86,36 @@ export function ThemeTransfer({theme,onClose,onSave,existing=[]}: ThemeActions &
     finally { setSaving(false); }
   };
   const fieldError = ['invalid_json','unknown_field','invalid_id','invalid_name','invalid','reserved_id','too_large'].some(key => error === tr(`themes:${key}`));
-  return <Dialog open onOpenChange={open => {if (!open) onClose();}}><DialogContent className="theme-transfer">
-    <DialogTitle>{tr(exporting?'themes:export':'themes:add')}</DialogTitle><DialogDescription>{tr('themes:json_hint')}</DialogDescription>
+  return <Dialog isOpen onOpenChange={open => {if (!open) onClose();}} width={640} purpose="form" className="theme-transfer">
+    <DialogHeader title={tr(exporting?'themes:export':'themes:add')} subtitle={tr('themes:json_hint')} />
+    <div className="dialog-body">
     {!exporting && <label className="theme-field">{tr('themes:choose_file')}<input type="file" accept=".json,application/json" onChange={e => {
       const file=e.target.files?.[0]; if (!file) return;
       if (file.size>32768) {setError(tr('themes:too_large')); return;}
       void file.text().then(value => {setJson(value);setError('');}).catch(() => setError(tr('themes:read_failed')));
     }}/></label>}
-    <label className="theme-field">{tr('themes:json')}<textarea aria-invalid={fieldError} aria-describedby={fieldError ? errorId : undefined} aria-label={tr('themes:json')} value={json} readOnly={exporting} maxLength={32768} rows={14} onChange={e => {setJson(e.target.value);setError('');}}/></label>
+    <TextArea label={tr('themes:json')} value={json} isReadOnly={exporting} maxLength={32768} rows={14} onChange={value => {setJson(value);setError('');}}
+      {...(fieldError ? { status: { type: 'error' as const }, 'aria-describedby': errorId } : {})} />
     {limited && <p role="status">{tr('themes:limit')}</p>}
-    {overwrite && <Dialog open onOpenChange={open => {if (!open) setOverwrite(undefined);}}>
-      <DialogContent><DialogTitle>{tr('themes:overwrite',{name:overwrite.name})}</DialogTitle>
-        <DialogDescription>{tr('themes:overwrite_copy')}</DialogDescription>
-        <Button variant="secondary" onClick={() => setOverwrite(undefined)}>{tr('common:cancel')}</Button>
-        <Button onClick={() => void (async () => {
+    {overwrite && <Dialog isOpen onOpenChange={open => {if (!open) setOverwrite(undefined);}} width={420} purpose="required">
+      <DialogHeader title={tr('themes:overwrite',{name:overwrite.name})} subtitle={tr('themes:overwrite_copy')} />
+      <div className="dialog-actions">
+        <Button label={tr('common:cancel')} variant="secondary" onClick={() => setOverwrite(undefined)} />
+        <Button label={tr('themes:save')} variant="primary" onClick={() => void (async () => {
           try {if (await onSave(overwrite)) onClose();else setError(tr('themes:save_failed'));}
           catch {setError(tr('themes:save_failed'));}
           setOverwrite(undefined);
-        })()}>{tr('themes:save')}</Button>
-      </DialogContent>
+        })()} />
+      </div>
     </Dialog>}
     {error && <p id={errorId} role="alert">{error}</p>}{message && <p role="status">{message}</p>}
-    <footer><button type="button" onClick={onClose}>{tr('common:cancel')}</button>{exporting ? <>
-      <button type="button" onClick={() => {void navigator.clipboard.writeText(json).then(() => setMessage(tr('themes:copied'))).catch(() => setError(tr('themes:copy_hint')));}}>{tr('themes:copy')}</button>
-      <button type="button" onClick={() => {
+    <div className="dialog-actions"><Button label={tr('common:cancel')} variant="secondary" onClick={onClose} />{exporting ? <>
+      <Button label={tr('themes:copy')} variant="secondary" onClick={() => {void navigator.clipboard.writeText(json).then(() => setMessage(tr('themes:copied'))).catch(() => setError(tr('themes:copy_hint')));}} />
+      <Button label={tr('themes:download')} variant="primary" onClick={() => {
         const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
         const a=document.createElement('a');a.href=url;a.download=`${theme.id}.json`;a.click();setTimeout(() => URL.revokeObjectURL(url),1000);
-      }}>{tr('themes:download')}</button>
-    </> : <button type="button" className="primary" disabled={saving || limited || !json.trim()} onClick={() => void save()}>{tr('themes:import')}</button>}</footer>
-  </DialogContent></Dialog>;
+      }} />
+    </> : <Button label={tr('themes:import')} variant="primary" isDisabled={saving || limited || !json.trim()} onClick={() => void save()} />}</div>
+    </div>
+  </Dialog>;
 }

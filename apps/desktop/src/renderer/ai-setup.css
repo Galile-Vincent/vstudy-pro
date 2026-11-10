@@ -1,7 +1,7 @@
 /** Keep the optional-AI explanation readable inside chat and settings panes. */
 .ai-setup-notice, .ai-setup-guide {
   padding: var(--space-4);
-  border-radius: var(--r-md);
+  border-radius: var(--radius-container);
   background: var(--subtle);
   text-align: start;
 }
@@ -17,7 +17,7 @@
   margin-block: var(--space-3);
   margin-inline: 0;
   padding: var(--space-3);
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-element);
   background: transparent;
   border: 1px solid var(--hairline);
   user-select: text;

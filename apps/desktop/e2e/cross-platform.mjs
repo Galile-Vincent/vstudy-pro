@@ -49,7 +49,7 @@ try {
     await page.getByTestId('bridge-status').waitFor({state: 'attached'});
     assert.ok((await page.locator('.shell-history-trigger kbd').innerText()).includes(process.platform === 'darwin' ? 'Cmd' : 'Ctrl'));
     await page.evaluate(() => window.dispatchEvent(new window.Event('vstudy:open-settings')));
-    await page.locator('.settings-dialog[data-state=open]').waitFor();
+    await page.locator('.settings-dialog[open]').waitFor();
     await page.getByRole('tab', {name: labels.providers, exact: true}).click();
     const providers = await page.evaluate(() => window.desktop.invoke('providers:list', {}));
     assert.ok(providers.filter(row => row.config.kind === 'cli').every(row => !row.config.enabled));
