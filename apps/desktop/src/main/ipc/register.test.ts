@@ -130,3 +130,12 @@ it('returns a localized size error before accepting an oversize user chat messag
   await expect(invoke!({} as IpcMainInvokeEvent,request)).rejects.toThrow('VSTUDY_STATUS:{"code":"errors.message_too_large","params":{}}');
   expect(calls).toBe(0);registrar.dispose();
 });
+it('does not include the deletion request in the drain it awaits', async () => {
+  const { stopStorageForDeletion } = await import('../storage/maintenance');
+  let invoke!: (event: IpcMainInvokeEvent, payload: unknown) => unknown;
+  const registrar = createIpcRegistrar({handle:(_channel,listener)=>{invoke=listener;},removeHandler:()=>{}},()=>true);
+  registrar.handle('settings:deleteAllData',async () => {
+    await stopStorageForDeletion(); return {ok:true};
+  });
+  await expect(invoke({} as IpcMainInvokeEvent,{confirmation:'DELETE'})).resolves.toEqual({ok:true});
+});

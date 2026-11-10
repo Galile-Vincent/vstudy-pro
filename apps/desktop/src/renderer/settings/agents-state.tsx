@@ -87,7 +87,11 @@ export function AgentsProvider({ children }: { children: ReactNode }) {
       await refresh();
       return true;
     } catch {
-      if (alive.current) { setFailed(true); setConnection('offline'); }
+      if (decisionId && channel === 'mcp:pair-decision') {
+        decisions.current.delete(decisionId);
+        if (alive.current) setAttempted(new Set(decisions.current));
+      }
+      if (alive.current) { setFailed(true); }
       return false;
     } finally {
       locked.current = false;

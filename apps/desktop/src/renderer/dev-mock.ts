@@ -146,6 +146,7 @@ export function createMockBridge(): DesktopApi {
       case "welcome:sampleDocument":
         result = mockMarkdown;
         break;
+      case 'settings:deletionStatus': return {pending:false} as IpcResponse<C>;
       case 'updates:state': result = updateSnapshot; break;
       case 'updates:setAuto': updateSnapshot = {...updateSnapshot,automatic:(request as {enabled:boolean}).enabled}; result = updateSnapshot; break;
       case 'updates:check': updateSnapshot = {...updateSnapshot,state:states.available as UpdateSnapshot['state'],lastCheckedAt:Date.now()}; result = updateSnapshot; break;

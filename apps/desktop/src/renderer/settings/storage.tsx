@@ -29,7 +29,7 @@ export function StorageSettings(){
   return <div data-testid="storage-settings" aria-busy={busy}>
     <p className="settings-intro">{tr('storage:description')}</p>
     <SettingsGroup title={tr('storage:usage')}>
-      {usage?.categories.map(category=><SettingsRow key={category.id} label={tr('storage:'+category.id)}><output className="storage-bytes">{bytes(category.bytes)}</output></SettingsRow>)}
+      {usage?.categories.map(category=><SettingsRow key={category.id} label={tr('storage:'+category.id)}><span className="storage-bytes">{bytes(category.bytes)}</span></SettingsRow>)}
       {usage && <p className="muted">{tr('storage:logical_cache',{size:bytes(usage.cacheBytes)})}</p>}
     </SettingsGroup>
     <SettingsGroup>
@@ -42,7 +42,7 @@ export function StorageSettings(){
       <SettingsRow label={tr('storage:restore')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:restore',{});setScheduled(result.scheduled);return result.scheduled ? tr('storage:scheduled') : '';})}>{tr('storage:restore')}</Button></SettingsRow>
       <SettingsRow label={tr('storage:integrity')}><Button variant="secondary" disabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:integrity',{});return result.ok ? tr('storage:integrity_ok') : tr('storage:integrity_issues',{count:result.issues});})}>{tr('storage:integrity')}</Button></SettingsRow>
     </SettingsGroup>
-    <p role="status" aria-live="polite">{busy ? tr('storage:pending') : scheduled ? tr('storage:scheduled') : message}</p>
+    {(busy || scheduled || message) && <p role="status" aria-live="polite">{busy ? tr('storage:pending') : scheduled ? tr('storage:scheduled') : message}</p>}
     {error && <p role="alert">{error}</p>}
     {scheduled && <Button disabled={busy} onClick={()=>void desktop.invoke('storage:restart',{}).catch(e=>setError(errorText(e)))}>{tr('storage:restart')}</Button>}
   </div>;

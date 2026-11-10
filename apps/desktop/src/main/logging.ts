@@ -12,6 +12,8 @@ import { redact } from '../shared/redact';
 export { redact } from '../shared/redact';
 const maxBytes = 1024 * 1024;
 const recent: string[] = [];
+let fileLogging = true;
+export function stopFileLogging(): void { fileLogging = false; }
 function logPath(): string { return join(app.getPath('userData'), 'logs', 'main.log'); }
 /** Write one bounded, redacted record; diagnostics must never break application work. */
 export function log(value: unknown): void {
@@ -19,6 +21,7 @@ export function log(value: unknown): void {
   recent.push(line);
   if (recent.length > 100) recent.shift();
   console.log(line);
+  if (!fileLogging) return;
   try {
     const path = logPath();
     mkdirSync(join(app.getPath('userData'), 'logs'), {recursive:true, mode:0o700});
@@ -51,4 +54,11 @@ export function copyDiagnostics(): void {
   } catch { /* The file sink may be unavailable before startup. */ }
   if (!lines.length) lines = recent;
   clipboard.writeText(`VStudy Pro ${app.getVersion()}\nOS ${process.platform} ${release()}\nArch ${process.arch}\n${lines.slice(-100).map(redact).join('\n')}`);
+}
+
+export function logDeletionFailure(error: unknown): void {
+  const previous = fileLogging;
+  fileLogging = true;
+  try { log({phase:'delete-failed',error}); }
+  finally { fileLogging = previous; }
 }

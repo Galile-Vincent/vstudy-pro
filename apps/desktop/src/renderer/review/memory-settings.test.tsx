@@ -13,12 +13,12 @@ it('shows memory as off until the student agrees, then saves the switch and requ
   let prefs = { memoryEnabled: true, noticeAcknowledged: false, consentAcknowledged: false, timeZone: 'UTC' };
   invoke.mockImplementation(async (channel, input) => channel === 'review:prefs:erase' ? { ok: true } : (prefs = { ...prefs, ...input }));
   render(<MemorySettings />);
-  const toggle = await screen.findByRole('checkbox', { name: en.memory_enabled }) as HTMLInputElement;
+  const toggle = await screen.findByRole('switch', { name: en.memory_enabled }) as HTMLInputElement;
   expect(screen.getByText(en.memory_disclosure)).toBeTruthy();
-  expect(toggle.checked).toBe(false);
+  expect(toggle.getAttribute('aria-checked')).toBe('false');
   fireEvent.click(toggle);
   await waitFor(() => expect(invoke).toHaveBeenCalledWith('review:prefs:set', { memoryEnabled: true, consentAcknowledged: true }));
-  await waitFor(() => expect(toggle.checked).toBe(true));
+  await waitFor(() => expect(toggle.getAttribute('aria-checked')).toBe('true'));
   fireEvent.click(toggle);
   await waitFor(() => expect(invoke).toHaveBeenCalledWith('review:prefs:set', { memoryEnabled: false }));
   fireEvent.click(screen.getByRole('button', { name: en.erase_memory }));
@@ -31,7 +31,7 @@ it('describes the automatic provider request in the interface language', async (
   invoke.mockResolvedValue({ memoryEnabled: true, noticeAcknowledged: true, consentAcknowledged: true, timeZone: 'UTC' });
   render(<MemorySettings />);
   expect(await screen.findByText(ja.memory_disclosure)).toBeTruthy();
-  expect((screen.getByRole('checkbox') as HTMLInputElement).checked).toBe(true);
+  expect(screen.getByRole('switch').getAttribute('aria-checked')).toBe('true');
 });
 it('offers retry when preferences cannot be read', async () => {
   invoke.mockRejectedValueOnce(new Error('offline'));
@@ -39,5 +39,5 @@ it('offers retry when preferences cannot be read', async () => {
   await screen.findByRole('alert');
   invoke.mockResolvedValue({ memoryEnabled: false, noticeAcknowledged: true, consentAcknowledged: true, timeZone: 'UTC' });
   fireEvent.click(screen.getByRole('button', { name: en.retry }));
-  await screen.findByRole('checkbox');
+  await screen.findByRole('switch');
 });

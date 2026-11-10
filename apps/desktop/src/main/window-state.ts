@@ -18,7 +18,7 @@ export function readWindowState(userData: string): WindowState {
     return {x:saved.x,y:saved.y,width:saved.width,height:saved.height,maximized:saved.maximized === true};
   } catch { return {...defaults}; }
 }
-export function trackWindowState(window: BrowserWindow, userData: string, state: WindowState): void {
+export function trackWindowState(window: BrowserWindow, userData: string, state: WindowState): () => void {
   const path = join(userData, 'window-state.json'), temporary = path + '.tmp';
   let timer: ReturnType<typeof setTimeout> | undefined;
   const save = () => {
@@ -39,6 +39,15 @@ export function trackWindowState(window: BrowserWindow, userData: string, state:
   window.on('unmaximize', changed);
   window.on('close', save);
   window.on('closed', () => clearTimeout(timer));
+  const stop = () => {
+    clearTimeout(timer);
+    window.removeListener('move', changed);
+    window.removeListener('resize', changed);
+    window.removeListener('maximize', changed);
+    window.removeListener('unmaximize', changed);
+    window.removeListener('close', save);
+  };
   // Electron maximize() also shows hidden windows, so wait for an explicit show.
   if (state.maximized) window.once('show', () => window.maximize());
+  return stop;
 }

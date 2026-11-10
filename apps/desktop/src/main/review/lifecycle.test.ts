@@ -1,5 +1,5 @@
 import {randomUUID} from 'node:crypto';
-import {mkdtemp,writeFile,access,rm} from 'node:fs/promises';
+import {mkdtemp,writeFile,access,rm,readdir} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {expect,it,vi} from 'vitest';
@@ -50,13 +50,18 @@ it.each(['storage settle','shutdown','delete-all'] as const)('drains both real w
   operation=exclusiveStorage(settle,async()=>{expect(settled).toBe(true);});
  }else{
   const stop=async()=>{await reviewWorkers.dispose();await settle();};
-  operation=path==='delete-all' ? (await import('../services/delete-data')).deleteAllData(root,stop) : stop();
+  operation=path==='delete-all' ? (await import('../services/delete-data')).createDataDeletion(root,stop,async error=>{throw error;},()=>{})() : stop();
  }
  await Promise.resolve();expect(settled).toBe(false);
  expect(()=>generation.generate({...request,idempotencyKey:randomUUID()})).toThrow('suspended');
  expect(calls).toContain('memory suspend');
  release();await operation;expect(settled).toBe(true);
- if(path==='delete-all')await expect(access(root)).rejects.toThrow();
+ if(path==='delete-all'){
+  await expect(access(join(root,'owned'))).rejects.toThrow();
+  if(process.platform==='win32')expect(await readdir(root)).toEqual([]);
+  else await expect(access(root)).rejects.toThrow();
+  await expect(access(root+'.delete-pending')).rejects.toThrow();
+ }
  if(path!=='storage settle')expect(calls).toContain('memory dispose');
  await generation.dispose();await memory.dispose();store.close();await rm(root,{recursive:true,force:true});
 });

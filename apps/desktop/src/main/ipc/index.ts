@@ -50,6 +50,7 @@ import { registerChatIpc } from "./chat";
 
 /** App-owned transport and packaged paths are injected only by the composition root. */
 export interface AppIpcOptions {
+  canInstallUpdate?: () => boolean;
   updates?: import('../updates/service').Updates;
   newsletterConsent?:NewsletterConsentHook;
   moodleRequest?:typeof fetch;
@@ -65,7 +66,7 @@ export function registerIpc(
   isTrusted: (event: IpcMainInvokeEvent) => boolean,
   restoreMainWindow: () => BrowserWindow | undefined | Promise<BrowserWindow | undefined> = () => undefined,
   options:AppIpcOptions = {},
-): () => Promise<void> {
+): (deleting?: boolean) => Promise<void> {
   const pins = new ExecutablePins(`${app.getPath('userData')}/executable-pins.json`, async (previous, current) => {
     const result = await showAttachedMessage({type:'warning', message:tr('settings:binary_changed'), detail:tr('settings:binary_detail',{previous:previous.path,current:current.path,hash:current.hash,mtime:new Date(current.mtime).toISOString()}), buttons:[tr('common:cancel'),tr('settings:allow')],defaultId:0,cancelId:0});
     return result.response === 1;
@@ -124,9 +125,10 @@ export function registerIpc(
     registrar.handle('updates:download', async (_request,event) =>
       updates.snapshot().state.status === 'available' && await updateConsent(event,'download') ? updates.download() : updates.snapshot());
     registrar.handle('updates:cancel', () => updates.cancelWait());
+    const blockedInstall = () => { log({phase:'updates-install-blocked'}); return updates.snapshot(); };
     let installing = false;
     registrar.handle('updates:install', async (_request,event) => {
-      if (installing || updates.snapshot().installing || updates.snapshot().state.status !== 'ready') return updates.snapshot();
+      if (options.canInstallUpdate?.() === false || installing || updates.snapshot().installing || updates.snapshot().state.status !== 'ready') return blockedInstall();
       installing = true;
       try {
         if (!await updateConsent(event,'install')) return updates.snapshot();
@@ -144,7 +146,7 @@ export function registerIpc(
             buttons:[tr('updates:not_now'), tr('updates:restart_now')], defaultId:0, cancelId:0}, event.sender);
           return result.response === 1 && !event.sender.isDestroyed();
         });
-        if (!proceed) return updates.snapshot();
+        if (!proceed || options.canInstallUpdate?.() === false) return blockedInstall();
         return updates.install();
       } finally { installing = false; }
     });
@@ -237,5 +239,23 @@ export function registerIpc(
         throw new Error("not implemented");
       });
   }
-  return async () => { stopUpdates?.(); updates?.dispose(); await webChats.dispose(); await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments(); };
+  return async (deleting = false) => {
+    stopUpdates?.(); updates?.dispose();
+    if (deleting) {
+      registrar.dispose();
+      app.removeListener('browser-window-created',restoreMcp);
+      disposePlanner();
+      disposeLibrary();
+      const results = await Promise.allSettled([
+        webChats.dispose(),reviewWorkers.dispose(),mcp.dispose(),disposeAiCli(),
+        disposeMoodle(),chat.dispose(),disposeDiscovery(),disposeSearchWorkers(),
+        disposeDocuments(),disposeLibrary.waitForIdle(),
+      ]);
+      navigation.clear();
+      const errors = results.filter(result => result.status === 'rejected').map(result => result.reason);
+      if (errors.length) throw new AggregateError(errors,'Deletion shutdown incomplete');
+      return;
+    }
+    await webChats.dispose(); await reviewWorkers.dispose(); app.removeListener('browser-window-created',restoreMcp); registrar.dispose(); await mcp.dispose(); navigation.clear(); await disposeAiCli(); disposePlanner(); await disposeMoodle(); disposeLibrary(); await disposeLibrary.waitForIdle(); await chat.dispose(); await disposeDiscovery(); await disposeSearchWorkers(); await disposeDocuments();
+  };
 }

@@ -135,5 +135,11 @@
   "queued_other": "{{count}} 個請求等待確認",
   "own_work": "我確認這是自己的作品，並同意將這段完整文字儲存為草稿。",
   "request_expires": "請求到期時間",
-  "unavailable": "此平台或建置版本無法使用代理程式存取功能"
+  "unavailable": "此平台或建置版本無法使用代理程式存取功能",
+  "waiting": "等待您的回應",
+  "review": "檢視",
+  "dismiss": "忽略",
+  "revoke_done": "已撤銷 {{name}} 的存取權。",
+  "client_action": "{{action}} — {{name}}",
+  "deny_help": "「拒絕」會立即拒絕請求。如需先查看內容，請選擇「檢視」。"
 }

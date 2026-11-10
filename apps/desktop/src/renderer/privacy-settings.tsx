@@ -1,25 +1,32 @@
+import { useTrailingCommit } from './settings/use-trailing-commit';
 import { MemorySettings } from './review/memory-settings';
 import { AnalyticsSettings } from './analytics-ui';
 import { CliPrivacyPreferences } from './ai-cli/preferences';
 import { SettingsGroup, SettingsRow } from './settings/layout';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { tr } from '../shared/i18n';
+import { useFormat } from './i18n';
+import { i18n, tr } from '../shared/i18n';
 import type { IpcResponse } from '../shared';
 import { desktop } from './bridge';
 import { errorText } from './status';
 
 export function PrivacySettings() {
   useTranslation();
+  const commits = useTrailingCommit();
+  const fmt = useFormat();
   const [events, setEvents] = useState<IpcResponse<'settings:networkActivity'>>([]);
+  const idleErrorId = useId();
+  const idleWrites = useRef(Promise.resolve());
+  const savedIdle = useRef<number | undefined>(undefined);
   const [idle, setIdle] = useState<number | string>('');
   const [offline, setOffline] = useState<boolean>();
   const [modeStatus, setModeStatus] = useState('');
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
-  const load = () => desktop.invoke('settings:get', {}).then(s => { setIdle(s.converterIdleMinutes); setOffline(s.converterOffline); setLoaded(true); setError(''); }).catch(() => setError(tr('settings:load_failed')));
+  const load = () => desktop.invoke('settings:get', {}).then(s => { setIdle(s.converterIdleMinutes); savedIdle.current=s.converterIdleMinutes; setOffline(s.converterOffline); setLoaded(true); setError(''); }).catch(() => setError(tr('settings:load_failed')));
   const [confirmation, setConfirmation] = useState('');
   const refresh = () =>
     desktop
@@ -38,6 +45,15 @@ export function PrivacySettings() {
       .then(() => { setOffline(offline); setModeStatus(tr('settings:mode_saved')); return refresh(); })
       .catch((e) => setError(errorText(e)));
 
+  const invalidIdle = !Number.isInteger(Number(idle)) || Number(idle) < 1 || Number(idle) > 60;
+  const saveIdle = (value = Number(idle)) => {
+    if (!loaded || !Number.isInteger(value) || value < 1 || value > 60 || savedIdle.current === value) return;
+    savedIdle.current = value;
+    idleWrites.current = idleWrites.current.then(async () => {
+      const latest = await desktop.invoke('settings:get',{});
+      await desktop.invoke('settings:set',{...latest,converterIdleMinutes:value});
+    }).catch(error => {savedIdle.current=undefined;setError(errorText(error));});
+  };
   return (
     <div data-testid="privacy-settings">
       <AnalyticsSettings/>
@@ -48,13 +64,13 @@ export function PrivacySettings() {
           </Button>
         </SettingsRow>
         {events.length ? (
-          events.map((event, index) => (
-            <div className="network-event" key={index}>
+          events.map((event,index) => (
+            <div className="network-event" key={`${index}-${event.at}`}>
               <time dateTime={event.at}>
-                {new Date(event.at).toLocaleString(document.documentElement.lang)}
+                {fmt.date(event.at,{dateStyle:'medium',timeStyle:'short'})}
               </time>
               <span>
-                {tr(`settings:event_${event.what}`)} · {event.to}
+                {tr(i18n.exists(`settings:event_${event.what}`) ? `settings:event_${event.what}` : 'settings:event_unknown')} · {event.to}
               </span>
             </div>
           ))
@@ -68,7 +84,7 @@ export function PrivacySettings() {
         {!loaded && <Button onClick={() => void load()}>{tr('settings:retry')}</Button>}
         {offline !== undefined && <p role="status">{tr(offline ? 'settings:mode_offline' : 'settings:mode_online')}</p>}
         {modeStatus && <p role="status">{modeStatus}</p>}
-        {loaded && (!Number.isInteger(Number(idle)) || Number(idle) < 1 || Number(idle) > 60) && <p role="alert">{tr('settings:idle_range')}</p>}
+        {loaded && invalidIdle && <p id={idleErrorId} role="alert">{tr('settings:idle_range')}</p>}
         <SettingsRow
           label={tr('settings:idle_minutes')}
           description={tr('settings:converter_copy')}
@@ -80,20 +96,11 @@ export function PrivacySettings() {
             max={60}
             disabled={!loaded}
             value={idle}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              setIdle(e.target.value);
-              if (Number.isInteger(value) && value >= 1 && value <= 60)
-                void desktop
-                  .invoke('settings:get', {})
-                  .then((s) =>
-                    desktop.invoke('settings:set', {
-                      ...s,
-                      converterIdleMinutes: value,
-                    }),
-                  )
-                  .catch((e) => setError(errorText(e)));
-            }}
+            aria-invalid={loaded && invalidIdle}
+            aria-describedby={loaded && invalidIdle ? idleErrorId : undefined}
+            onChange={e => {const value=Number(e.target.value);setIdle(e.target.value);commits.schedule('idle',()=>saveIdle(value));}}
+            onBlur={() => saveIdle()}
+            onKeyDown={e => {if (e.key === 'Enter' || e.key === 'Escape') {commits.flush('idle');saveIdle();}}}
           />
         </SettingsRow>
         <SettingsRow label={tr('settings:converterMode')}>

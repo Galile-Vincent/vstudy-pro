@@ -135,5 +135,11 @@
   "queued_other": "{{count}} requests waiting for review",
   "own_work": "I confirm this is my own work and I want to save this exact text as a draft.",
   "request_expires": "Request expires",
-  "unavailable": "Agent access is unavailable on this platform/build"
+  "unavailable": "Agent access is unavailable on this platform/build",
+  "waiting": "Waiting for you",
+  "review": "Review",
+  "dismiss": "Dismiss",
+  "revoke_done": "Access revoked for {{name}}.",
+  "client_action": "{{action}} — {{name}}",
+  "deny_help": "Deny rejects the request immediately. Use Review to inspect it first."
 }

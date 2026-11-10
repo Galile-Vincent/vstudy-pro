@@ -5,7 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { i18n, tr } from '../../shared/i18n';
 import type { AgentsState } from '../../shared/mcp';
 import { AgentsSettings } from './agents';
-import { ids, stateFixture, grantFixture, mountAgents, button, click, toggle } from './agents-test-helpers';
+import { ids, pairingFixture, stateFixture, grantFixture, mountAgents, button, click, toggle } from './agents-test-helpers';
 
 const invoke = vi.hoisted(() => vi.fn());
 vi.mock('../bridge', () => ({ desktop: { invoke } }));
@@ -129,4 +129,27 @@ it('shows platform unavailability without losing Settings controls', async () =>
   await mount();
   expect(view.host.textContent).toContain('Agent access is unavailable on this platform/build');
   expect(document.querySelector('[role=switch]')).not.toBeNull();
+});
+
+it('lists pending requests with a review action', async () => {
+  state.enabled = true;
+  state.pairings = [pairingFixture()];
+  await mount();
+  expect(view.host.textContent).toContain('Waiting for you');
+  expect(button('Review')).toBeTruthy();
+});
+
+it('announces successful revocation inline', async () => {
+  state.grants = [grantFixture()];
+  await mount(); await click('Revoke access');
+  expect(view.host.querySelector('[role=status]')?.textContent).toContain('Access revoked');
+});
+
+it('allows a failed pairing denial to be retried and reports the error', async () => {
+  state.enabled=true;state.pairings=[pairingFixture()];await mount();
+  invoke.mockRejectedValueOnce(new Error('private failure'));
+  await click('Deny');
+  expect(view.host.textContent).toContain(tr('agents:action_error'));
+  await click('Deny');
+  expect(invoke.mock.calls.filter(([c])=>c==='mcp:pair-decision')).toHaveLength(2);
 });

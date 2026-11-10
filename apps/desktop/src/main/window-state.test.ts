@@ -44,3 +44,12 @@ it('waits until a hidden window is shown to restore maximization', () => {
   window.emit('show');
   expect(window.maximize).toHaveBeenCalledOnce();
 });
+
+it('cancels pending and future writes when quiesced', () => {
+  vi.useFakeTimers();
+  const window = Object.assign(new EventEmitter(), {getNormalBounds:()=>({x:0,y:0,width:1000,height:720}),isDestroyed:()=>false,isMaximized:()=>false});
+  const stop = trackWindowState(window as unknown as Electron.BrowserWindow, root, {width:1200,height:800,maximized:false});
+  window.emit('resize'); stop();
+  window.emit('move'); window.emit('close'); vi.advanceTimersByTime(1000);
+  expect(readdirSync(root)).toEqual([]);
+});

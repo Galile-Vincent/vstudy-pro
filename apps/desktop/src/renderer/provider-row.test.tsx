@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import {act} from 'react';
+import {render,screen,fireEvent,cleanup} from '@testing-library/react';
 import {createRoot} from 'react-dom/client';
 import {expect,it,vi} from 'vitest';
 vi.mock('./bridge',()=>({desktop:{invoke:vi.fn(async()=>({ok:true}))}}));
@@ -39,4 +40,48 @@ it('explains unavailable Codex isolation on Windows and disables its launch cont
   expect(host.querySelector('[role=note]')?.textContent).toContain('macOS process sandbox');
   expect(Array.from(host.querySelectorAll('button')).every(button=>button.disabled)).toBe(true);
  } finally {await act(async()=>root.unmount());host.remove();hostPlatform.mockRestore();}
+});
+
+it('asks before deleting a saved key', async () => {
+ const {desktop} = await import('./bridge');
+ vi.mocked(desktop.invoke).mockResolvedValueOnce({hasKey:true} as never);
+ const host=document.createElement('div'); document.body.append(host); const root=createRoot(host);
+ try {
+  await act(() => root.render(<ProviderRow provider={{config:{kind:'api',id:'openai-api',enabled:true},availability:{available:true},models:[]}} onRefresh={async()=>{}}/>));
+  await act(() => [...host.querySelectorAll('button')].find(b=>b.textContent==='Remove')!.click());
+  expect(document.querySelector('[role=dialog]')).toBeTruthy();
+  expect(vi.mocked(desktop.invoke).mock.calls.filter(([channel])=>channel==='secrets:delete')).toHaveLength(0);
+ } finally {await act(() => root.unmount());host.remove();}
+});
+it('names provider actions with the provider', async () => {
+ const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+ try {
+  await act(() => root.render(<ProviderRow provider={{config:{kind:'api',id:'openai-api',enabled:true},availability:{available:true},models:[]}} onRefresh={async()=>{}}/>));
+  expect([...host.querySelectorAll('button')].find(b=>b.textContent==='Get a key')?.getAttribute('aria-label')).toContain('OpenAI');
+ } finally {await act(() => root.unmount());host.remove();}
+});
+
+it('includes visible Retry text in the save key accessible name', async () => {
+ const {desktop}=await import('./bridge');
+ vi.mocked(desktop.invoke).mockImplementation(async channel=>{if(channel==='secrets:has')return {hasKey:false} as never;throw new Error('failed');});
+ try {
+  render(<ProviderRow provider={{config:{kind:'api',id:'anthropic-api',enabled:true},availability:{available:true},models:[]}} onRefresh={async()=>{}}/>);
+  fireEvent.change(screen.getByLabelText('Anthropic API key'),{target:{value:'key'}});
+  fireEvent.submit(screen.getByLabelText('Anthropic API key').closest('form')!);
+  await screen.findByRole('alert');
+  expect(screen.getByRole('button',{name:'Retry — Anthropic'}).textContent).toBe('Retry');
+ } finally {cleanup();}
+});
+
+it('keeps failed key removal actionable with an error inside confirmation', async () => {
+ const {desktop}=await import('./bridge');
+ vi.mocked(desktop.invoke).mockImplementation(async channel=>{if(channel==='secrets:has')return {hasKey:true} as never;throw new Error('failed');});
+ try {
+  render(<ProviderRow provider={{config:{kind:'api',id:'openai-api',enabled:true},availability:{available:true},models:[]}} onRefresh={async()=>{}}/>);
+  fireEvent.click(await screen.findByRole('button',{name:'Remove — OpenAI'}));
+  fireEvent.click(screen.getByRole('button',{name:'Remove'}));
+  const {within}=await import('@testing-library/react');
+  await within(screen.getByRole('dialog')).findByRole('alert');
+  expect((screen.getByRole('button',{name:'Remove'}) as HTMLButtonElement).disabled).toBe(false);
+ } finally {cleanup();}
 });

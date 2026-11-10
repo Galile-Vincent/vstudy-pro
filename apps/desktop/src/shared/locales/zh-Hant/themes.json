@@ -78,5 +78,19 @@
   "token_course-start": "課程漸層起點",
   "token_course-end": "課程漸層終點",
   "custom": "自訂主題",
-  "custom_hint": "建立主題，或匯入主題檔案。"
+  "custom_hint": "建立主題，或匯入主題檔案。",
+  "limit": "已達 30 個自訂佈景主題上限。",
+  "delete_named": "刪除 {{name}}",
+  "delete_copy": "刪除「{{name}}」？若使用中，將改用預設佈景主題。",
+  "deleted_default": "已刪除佈景主題，現已使用 VStudy 預設主題。",
+  "save_failed": "無法儲存佈景主題，請重試。",
+  "overwrite": "取代「{{name}}」？",
+  "overwrite_copy": "此 ID 的自訂佈景主題已存在，要取代嗎？",
+  "invalid_id": "主題 ID 請使用小寫英文字母、數字及連字號。",
+  "unknown_field": "主題 JSON 含有未知欄位。",
+  "reserved_id": "此 ID 屬於內建主題，請改用自訂 ID。",
+  "invalid_json": "請輸入有效的 JSON。",
+  "invalid_name": "請輸入 1 至 60 字的主題名稱。",
+  "too_large": "主題檔案不得超過 32 KB。",
+  "read_failed": "無法讀取此主題檔案。"
 }

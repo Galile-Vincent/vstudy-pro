@@ -11,7 +11,7 @@ import { exportBackup, recoverRestore, stageRestore } from './backup';
 import { ReviewRepository } from '../review/repository';
 import { ArtifactRepository } from '../review/artifact-repository';
 import { Attempts } from '../review/attempts';
-import { deleteAllData } from '../services/delete-data';
+import { createDataDeletion } from '../services/delete-data';
 import { confirmRestoreStartup } from './restore-startup';
 import { randomUUID } from 'node:crypto';
 import { fingerprint, writeZip } from './zip';
@@ -83,7 +83,10 @@ it('restores study evidence and confirmed test answers, then deletes all restore
   expect(recoveredAttempts.get(attempt.id)).toMatchObject({phase:'confirmed',answers:{q1:false},results:[{itemId:'q1',correct:false,feedback:{answer:true}}]});
   validateStudyData(restored.db);
   let stopped=false;
-  await deleteAllData(target,async()=>{restored!.close();restored=undefined;stopped=true;});
-  expect(stopped).toBe(true);await expect(access(target)).rejects.toMatchObject({code:'ENOENT'});
+  await createDataDeletion(target,async()=>{restored!.close();restored=undefined;stopped=true;},async error=>{throw error;},()=>{})();
+  expect(stopped).toBe(true);
+  if(process.platform==='win32')expect(await (await import('node:fs/promises')).readdir(target)).toEqual([]);
+  else await expect(access(target)).rejects.toMatchObject({code:'ENOENT'});
+  await expect(access(target+'.delete-pending')).rejects.toMatchObject({code:'ENOENT'});
  } finally {source?.close();restored?.close();await rm(root,{recursive:true,force:true});await rm(target,{recursive:true,force:true});}
 });

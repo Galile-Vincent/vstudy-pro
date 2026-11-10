@@ -4,8 +4,9 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { McpRuntime } from './mcp/runtime';
 
 const mocks = vi.hoisted(() => ({
-  initialize:vi.fn(), confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
-  showMessage: vi.fn(), fatal: vi.fn(), copyDiagnostics: vi.fn(), log: vi.fn(), registerIpc: vi.fn(), restore: undefined as undefined | (() => void),
+  installing:false, shutdownWork:undefined as undefined | (() => Promise<void>),
+  handlers:new Map<string,(...args:unknown[]) => Promise<unknown>>(), initialize:vi.fn(), confirm: vi.fn(), rollback: vi.fn(async () => false), dispose: vi.fn(), closeStore: vi.fn(),
+  showMessage: vi.fn(), fatal: vi.fn(), copyDiagnostics: vi.fn(), logDeletionFailure:vi.fn(), log: vi.fn(), registerIpc: vi.fn(), restore: undefined as undefined | (() => void),
 }));
 const electron = await vi.hoisted(async () => {
   const { EventEmitter } = await import('node:events');
@@ -23,12 +24,14 @@ const electron = await vi.hoisted(async () => {
   }
   const app = Object.assign(new EventEmitter(), {
     isPackaged: false, whenReady: () => Promise.resolve(), getPath: () => '/tmp/vstudy-startup-unit-test',
-    enableSandbox: vi.fn(), exit: vi.fn(), quit: vi.fn(), relaunch: vi.fn(), setAppUserModelId: vi.fn(),
+    releaseSingleInstanceLock:vi.fn(), enableSandbox: vi.fn(), exit: vi.fn(), quit: vi.fn(), relaunch: vi.fn(), setAppUserModelId: vi.fn(),
   });
   return {
-    app, dialog: { showMessageBox: vi.fn(async () => ({ response: 1 })) }, BrowserWindow: Window, nativeTheme: new EventEmitter(), safeStorage: {}, ipcMain: { removeHandler: vi.fn() },
+    app, dialog: { showMessageBox: vi.fn(async () => ({ response: 1 })) }, BrowserWindow: Window, nativeTheme: new EventEmitter(), safeStorage: {}, ipcMain: Object.assign(new EventEmitter(), { removeHandler: vi.fn() }),
     protocol: { registerSchemesAsPrivileged: vi.fn(), handle: vi.fn() },
-    session: { defaultSession: {
+    session: { fromPath:vi.fn(() => {throw Error("duplicate context");}), defaultSession: {
+      clearStorageData:vi.fn(), clearCache:vi.fn(), clearAuthCache:vi.fn(),
+      closeAllConnections:vi.fn(), flushStorageData:vi.fn(), cookies:{flushStore:vi.fn()},
       setDevicePermissionHandler: vi.fn(), setPermissionRequestHandler: vi.fn(), setPermissionCheckHandler: vi.fn(),
       webRequest: { onBeforeRequest: vi.fn(), onHeadersReceived: vi.fn() },
     } },
@@ -37,22 +40,22 @@ const electron = await vi.hoisted(async () => {
 vi.mock('electron', () => electron);
 vi.mock('node:fs', async importOriginal => ({...await importOriginal<typeof import('node:fs')>(), mkdirSync:vi.fn()}));
 vi.mock('./db', () => ({ openStore: () => ({ settings: { get: () => ({}) }, close: mocks.closeStore }) }));
-vi.mock('./updates/runtime', () => ({createUpdates: vi.fn(async () => undefined)}));
+vi.mock('./updates/runtime', () => ({createUpdates: vi.fn(() => ({snapshot:()=>({installing:mocks.installing})}))}));
 vi.mock('./ipc', () => ({ registerIpc: (...args:unknown[]) => mocks.registerIpc(...args) }));
-vi.mock('./ipc/register', () => ({ createIpcRegistrar: () => ({ handle: vi.fn() }) }));
+vi.mock('./ipc/register', () => ({ createIpcRegistrar: () => ({ handle: vi.fn((name:string,handler:(...args:unknown[]) => Promise<unknown>) => mocks.handlers.set(name,handler)) }) }));
 vi.mock('./services/secrets', () => ({ createSecretStore: vi.fn() }));
-vi.mock('./services/delete-data', () => ({ deleteAllData: vi.fn() }));
+vi.mock('./services/delete-data', () => ({ createDataDeletion: vi.fn(() => vi.fn()), cleanupDeletedData: vi.fn(async () => true), finishPendingDeletion: vi.fn(async () => true) }));
 vi.mock('./assets', () => ({ assetHandler: vi.fn() }));
 vi.mock('./theme', () => ({ applyNativeTheme: vi.fn(), nativeBackground: () => '#ffffff' }));
 vi.mock('./moodle/sso-protocol', () => ({ initializeMoodleProtocol: mocks.initialize }));
 vi.mock('./storage/reconcile', () => ({ reconcileDownloads: vi.fn() }));
 vi.mock('./storage/restore-startup', () => ({ confirmRestoreStartup: mocks.confirm, rollbackRestoreStartup: mocks.rollback }));
 vi.mock('./storage/backup', () => ({ recoverRestore: vi.fn() }));
-vi.mock('./logging', () => ({ log: mocks.log, copyDiagnostics: mocks.copyDiagnostics }));
+vi.mock('./logging', () => ({ log: mocks.log, stopFileLogging: vi.fn(), logDeletionFailure:mocks.logDeletionFailure, copyDiagnostics: mocks.copyDiagnostics }));
 vi.mock('./dialogs', () => ({ showAttachedMessage: mocks.showMessage, showStartupError: mocks.fatal }));
 vi.mock('./window-state', () => ({readWindowState: () => ({width:1200,height:800,maximized:false}), trackWindowState:vi.fn()}));
-vi.mock('./shutdown', () => ({ coordinateShutdown: () => vi.fn() }));
-vi.mock('./ownership', () => ({ acquireOwnership: (_app: unknown, _window: unknown, restore: () => void) => { mocks.restore = restore; return true; } }));
+vi.mock('./shutdown', () => ({ coordinateShutdown: (phases:{stopWork:()=>Promise<void>}) => {mocks.shutdownWork=phases.stopWork;return vi.fn();} }));
+vi.mock('./ownership', async importOriginal => ({...await importOriginal<typeof import('./ownership')>(), acquireOwnership: (_app: unknown, _window: unknown, restore: () => void) => { mocks.restore = restore; return true; } }));
 vi.mock('./i18n', () => ({ tr: (key: string) => key }));
 vi.mock('./packaged-smoke', () => ({ runPackagedSmoke: vi.fn() }));
 
@@ -62,6 +65,8 @@ beforeEach(() => {
   processListeners = new Map(['exit', 'uncaughtExceptionMonitor', 'unhandledRejection'].map(event => [event, eventProcess.rawListeners(event)]));
   vi.resetModules();
   vi.clearAllMocks();
+  mocks.installing=false;
+  mocks.handlers.clear();
   mocks.registerIpc.mockReturnValue(mocks.dispose);
   electron.app.removeAllListeners();
   electron.nativeTheme.removeAllListeners();
@@ -386,4 +391,171 @@ it('returns the main window to privileged callers even without OS focus',async()
   const restore=mocks.registerIpc.mock.calls[0]![3] as ()=>Promise<unknown>;
   expect(await restore()).toBe(window);
   expect(window.focus).toHaveBeenCalledOnce();
+});
+
+it('flushes default cookies without opening partition contexts during deletion', async () => {
+  const window = await start();
+  const {finishPendingDeletion} = await import('./services/delete-data');
+  const clear = vi.mocked(finishPendingDeletion).mock.calls[0]![1];
+  await clear(['web-chat-test']);
+  expect(electron.session.fromPath).not.toHaveBeenCalled();
+  expect(electron.session.defaultSession.cookies.flushStore).toHaveBeenCalled();
+  window.webContents.emit('did-finish-load');
+});
+
+it('bounds startup session deletion even when Chromium never responds', async () => {
+  const window = await start();
+  const {finishPendingDeletion} = await import('./services/delete-data');
+  const clear=vi.mocked(finishPendingDeletion).mock.calls[0]![1];
+  electron.session.defaultSession.clearStorageData.mockImplementationOnce(() => new Promise(() => {}));
+  vi.useFakeTimers();
+  try {
+    let settled=false;
+    void clear([]).catch(() => {}).finally(() => {settled=true;});
+    await vi.advanceTimersByTimeAsync(12_001);
+    expect(settled).toBe(true);
+  } finally {vi.useRealTimers();window.webContents.emit('did-finish-load');}
+});
+
+it('reports deletion errors with a failure title in one unparented notice', async () => {
+  const window=await start();
+  const {createDataDeletion}=await import('./services/delete-data');
+  const report=vi.mocked(createDataDeletion).mock.calls[0]![2];
+  await report(Object.assign(Error('/private/secret/path'),{code:'EACCES'}),true);
+  expect(electron.dialog.showMessageBox).toHaveBeenCalledWith(expect.objectContaining({
+    title:'settings:delete_failure_title',message:'settings:delete_failed',
+  }));
+  window.webContents.emit('did-finish-load');
+});
+
+it('rejects a second deletion request while the first waits for app readiness', async () => {
+  const window=await start();
+  const handler=mocks.handlers.get('settings:deleteAllData')!;
+  const pending=handler({}, {sender:window.webContents});
+  const second=handler({}, {sender:window.webContents}).catch(error => String(error));
+  try {
+    const result=await Promise.race([second,new Promise(resolve => setTimeout(() => resolve('waiting'),100))]);
+    expect(result).toContain('settings.delete_in_progress');
+  } finally {
+    window.webContents.emit('did-finish-load');
+    await Promise.allSettled([pending,second]);
+  }
+});
+
+it('blocks update installation while deletion confirmation is pending and releases on cancel', async () => {
+  const window=await start();
+  const options=mocks.registerIpc.mock.calls[0]![4] as {canInstallUpdate:()=>boolean};
+  window.webContents.emit('did-finish-load');
+  await vi.waitFor(()=>expect(mocks.confirm).toHaveBeenCalledOnce());
+  expect(options.canInstallUpdate()).toBe(true);
+  let answer!:(value:{response:number})=>void;
+  mocks.showMessage.mockImplementationOnce(()=>new Promise(resolve=>{answer=resolve;}));
+  const pending=mocks.handlers.get('settings:deleteAllData')!({}, {sender:window.webContents});
+  await vi.waitFor(()=>expect(answer).toBeDefined());
+  expect(options.canInstallUpdate()).toBe(false);
+  answer({response:0});await pending;
+  expect(options.canInstallUpdate()).toBe(true);
+});
+it('rejects deletion once an update install is quitting the app', async () => {
+  const window=await start();mocks.installing=true;
+  await expect(mocks.handlers.get('settings:deleteAllData')!({}, {sender:window.webContents})).rejects.toThrow('settings.delete_in_progress');
+  expect(mocks.showMessage).not.toHaveBeenCalled();
+  window.webContents.emit('did-finish-load');
+});
+it('normal quit flushes renderer drafts before disposing IPC', async () => {
+  const window=await start();window.webContents.emit('did-finish-load');
+  const send=vi.fn();
+  Object.assign(window.webContents,{isLoading:()=>false,send});
+  const work=mocks.shutdownWork!();
+  expect(send).toHaveBeenCalled();
+  expect(mocks.dispose).not.toHaveBeenCalled();
+  // An unavailable renderer is bounded by the same production draft-flush timeout.
+  await work;
+  expect(mocks.dispose).toHaveBeenCalledOnce();
+  expect(mocks.log).toHaveBeenCalledWith({phase:'draft-flush',outcome:'timeout'});
+});
+it('blocks updates when startup deletion could not finish', async () => {
+  const {finishPendingDeletion}=await import('./services/delete-data');
+  vi.mocked(finishPendingDeletion).mockResolvedValueOnce(false);
+  const window=await start();
+  const options=mocks.registerIpc.mock.calls[0]![4] as {canInstallUpdate:()=>boolean};
+  expect(options.canInstallUpdate()).toBe(false);
+  window.webContents.emit('did-finish-load');
+});
+it('keeps updates blocked once deletion shutdown starts', async () => {
+  const window=await start();window.webContents.emit('did-finish-load');
+  await vi.waitFor(()=>expect(mocks.confirm).toHaveBeenCalledOnce());
+  const {createDataDeletion}=await import('./services/delete-data');
+  const stop=vi.mocked(createDataDeletion).mock.calls[0]![1];
+  await stop();
+  const options=mocks.registerIpc.mock.calls[0]![4] as {canInstallUpdate:()=>boolean};
+  expect(options.canInstallUpdate()).toBe(false);
+  expect(mocks.dispose).toHaveBeenCalledWith(true);
+});
+
+it('releases deletion admission when deleteData rejects before shutdown', async () => {
+  const {createDataDeletion}=await import('./services/delete-data');
+  const deleteData=vi.fn().mockRejectedValueOnce(Error('not started')).mockResolvedValue(undefined);
+  vi.mocked(createDataDeletion).mockReturnValueOnce(deleteData);
+  const window=await start();window.webContents.emit('did-finish-load');
+  await vi.waitFor(()=>expect(mocks.confirm).toHaveBeenCalledOnce());
+  mocks.showMessage.mockResolvedValue({response:1});
+  const handler=mocks.handlers.get('settings:deleteAllData')!;
+  await expect(handler({}, {sender:window.webContents})).rejects.toThrow('not started');
+  await expect(handler({}, {sender:window.webContents})).resolves.toEqual({ok:true});
+  expect(deleteData).toHaveBeenCalledTimes(2);
+});
+
+it('blocks deletion and update installation during normal quit draft flushing and disposal', async () => {
+  vi.useFakeTimers();
+  const window=await start();window.webContents.emit('did-finish-load');
+  await vi.advanceTimersByTimeAsync(0);
+  const options=mocks.registerIpc.mock.calls[0]![4] as {canInstallUpdate:()=>boolean};
+  expect(options.canInstallUpdate()).toBe(true);
+  Object.assign(window.webContents,{isLoading:()=>false,send:vi.fn()});
+  electron.app.emit('before-quit',{preventDefault:vi.fn()});
+  let release!:()=>void;
+  mocks.dispose.mockImplementationOnce(()=>new Promise<void>(resolve=>{release=resolve;}));
+  const work=mocks.shutdownWork!();
+  for (const phase of ['draft flush','IPC disposal']) {
+    expect(options.canInstallUpdate(),phase).toBe(false);
+    await expect(mocks.handlers.get('settings:deleteAllData')!({}, {sender:window.webContents})).rejects.toThrow('settings.delete_in_progress');
+    expect(mocks.showMessage).not.toHaveBeenCalled();
+    if (phase==='draft flush') await vi.advanceTimersByTimeAsync(2_001);
+  }
+  release();await work;
+});
+
+it.each(['resolve','timeout'] as const)('waits for the deletion failure notice before relaunch (%s)', async outcome => {
+  const {createDataDeletion}=await import('./services/delete-data');
+  vi.mocked(createDataDeletion).mockImplementationOnce((_root, _stop, report, relaunch)=>async()=>{
+    await report(Error('failed'),true);
+    relaunch();
+  });
+  const window=await start();window.webContents.emit('did-finish-load');
+  await vi.waitFor(()=>expect(mocks.confirm).toHaveBeenCalledOnce());
+  let close!:()=>void;
+  electron.dialog.showMessageBox.mockImplementationOnce(()=>new Promise(resolve=>{close=()=>resolve({response:0});}));
+  mocks.showMessage.mockResolvedValue({response:1});
+  vi.useFakeTimers();
+  const pending=mocks.handlers.get('settings:deleteAllData')!({}, {sender:window.webContents});
+  await vi.advanceTimersByTimeAsync(0);
+  expect(electron.app.relaunch).not.toHaveBeenCalled();
+  expect(electron.app.exit).not.toHaveBeenCalled();
+  if (outcome==='resolve') close();
+  else await vi.advanceTimersByTimeAsync(30_000);
+  await pending;
+  expect(electron.app.relaunch).toHaveBeenCalledOnce();
+  expect(electron.app.exit).toHaveBeenCalledOnce();
+});
+
+it('rejects deletion after destructive shutdown without flushing drafts', async () => {
+  const window=await start();window.webContents.emit('did-finish-load');
+  await vi.waitFor(()=>expect(mocks.confirm).toHaveBeenCalledOnce());
+  const {createDataDeletion}=await import('./services/delete-data');
+  await vi.mocked(createDataDeletion).mock.calls[0]![1]();
+  const send=vi.fn();Object.assign(window.webContents,{isLoading:()=>false,send});
+  electron.app.emit('before-quit',{preventDefault:vi.fn()});
+  await expect(mocks.handlers.get('settings:deleteAllData')!({}, {sender:window.webContents})).rejects.toThrow('settings.delete_in_progress');
+  expect(send).not.toHaveBeenCalled();
 });

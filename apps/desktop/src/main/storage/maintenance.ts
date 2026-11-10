@@ -7,6 +7,7 @@ import { reviewWorkers } from "../review/workers";
  */
 /** Exclusive storage work rejects new IPC and drains accepted requests before settling background jobs. */
 let busy=false,locked=false;
+let maintenance: Promise<void> | undefined;
 export const holdStorageUntilRestart=():void=>{locked=true;};
 const active=new Set<Promise<void>>();
 let revision = 0;
@@ -23,5 +24,13 @@ export function enterStorageRequest():()=>void {
 /** Run maintenance only when document, conversion, and chat ownership permits it. */
 export async function exclusiveStorage<T>(settle:()=>Promise<void>,work:()=>Promise<T>):Promise<T>{
   if(busy)throw new Error('storage.busy');busy=true;
-  try {reviewWorkers.suspend("storage");await Promise.all(active);await reviewWorkers.waitForIdle();await settle();return await work();}finally{busy=locked;if(!locked)reviewWorkers.resume("storage");}
+  let release!: () => void;
+  maintenance = new Promise<void>(resolve => {release=resolve;});
+  try {reviewWorkers.suspend("storage");await Promise.all(active);await reviewWorkers.waitForIdle();await settle();return await work();}finally{release();maintenance=undefined;busy=locked;if(!locked)reviewWorkers.resume("storage");}
+}
+
+export async function stopStorageForDeletion(): Promise<void> {
+  locked = true;
+  busy = true;
+  await Promise.all([...active, maintenance]);
 }

@@ -78,5 +78,19 @@
   "token_course-start": "Course gradient start",
   "token_course-end": "Course gradient end",
   "custom": "Custom themes",
-  "custom_hint": "Create a theme or import a theme file."
+  "custom_hint": "Create a theme or import a theme file.",
+  "limit": "Limit of 30 custom themes reached.",
+  "delete_named": "Delete {{name}}",
+  "delete_copy": "Delete “{{name}}”? If active, VStudy will use the default theme.",
+  "deleted_default": "Theme deleted. The default VStudy theme is now active.",
+  "save_failed": "Could not save the theme. Try again.",
+  "overwrite": "Replace “{{name}}”?",
+  "overwrite_copy": "A custom theme with this id already exists. Replace it?",
+  "invalid_id": "Use a lowercase theme id with letters, numbers, and hyphens.",
+  "unknown_field": "Theme JSON contains an unknown field.",
+  "reserved_id": "This id belongs to a built-in theme. Choose a custom id.",
+  "invalid_json": "Enter valid JSON.",
+  "invalid_name": "Enter a theme name between 1 and 60 characters.",
+  "too_large": "Theme files must be at most 32 KB.",
+  "read_failed": "Could not read this theme file."
 }

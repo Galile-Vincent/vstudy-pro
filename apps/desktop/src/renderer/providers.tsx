@@ -71,6 +71,9 @@ export function ProviderSettings({
     observer.observe(list);
     return () => observer.disconnect();
   }, [tabsList]);
+  useLayoutEffect(() => {
+    tabsList?.querySelector<HTMLElement>('[role=tab][aria-selected=true]')?.scrollIntoView?.({block:'nearest',inline:'nearest'});
+  }, [tab,tabsList,orientation]);
   useEffect(() => {
     const section = ({providers:'ai',agents:'ai',general:'general',privacy:'privacy',appearance:'appearance',storage:'storage',usage:'usage',moodle:'moodle'} as const)[tab as 'general' | 'providers' | 'agents' | 'privacy' | 'appearance' | 'storage' | 'usage' | 'moodle'];
     if (section) track('settings_opened', {settings_section:section});

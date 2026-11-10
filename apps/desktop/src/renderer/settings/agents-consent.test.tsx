@@ -223,3 +223,13 @@ it('requires the student to confirm ownership before approving an assignment sub
   await click('Approve once');
   expect(decisions()).toEqual([['mcp:proposal-decision',{proposalId:ids.proposal,approve:true}]]);
 });
+
+it('returns focus to the previous settings control after Escape', async () => {
+  const control = document.createElement('button');
+  document.body.append(control); control.focus();
+  await mount();
+  await act(() => document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape',bubbles:true})));
+  await act(() => new Promise(resolve => setTimeout(resolve, 10)));
+  expect(document.activeElement).toBe(control);
+  control.remove();
+});

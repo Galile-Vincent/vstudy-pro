@@ -10,7 +10,7 @@ vi.mock('node:fs', async importOriginal => {
   return {...actual,renameSync:vi.fn(actual.renameSync),rmSync:vi.fn(actual.rmSync)};
 });
 vi.mock('electron', () => ({app:{getPath:()=>mocks.root,getVersion:()=> '0.3.0'},clipboard:{writeText:mocks.copy}}));
-import { log, redact, copyDiagnostics } from './logging';
+import { log, redact, copyDiagnostics, stopFileLogging } from './logging';
 const roots:string[]=[];
 function fixture() { const root=mkdtempSync(join(tmpdir(),'vstudy-log-')); roots.push(root); mocks.root=root; return join(root,'logs'); }
 afterEach(() => { for (const root of roots.splice(0)) rmSync(root,{recursive:true,force:true}); vi.restoreAllMocks(); });
@@ -187,4 +187,18 @@ it.each([
   const elapsed = performance.now() - started;
   process.stdout.write(`${shape}: ${elapsed.toFixed(2)} ms\n`);
   expect(elapsed).toBeLessThan(50);
+});
+
+it('does not recreate data through diagnostics after quiescing file writes', () => {
+  fixture();vi.spyOn(console,'log').mockImplementation(()=>{});
+  stopFileLogging();rmSync(mocks.root,{recursive:true,force:true});
+  log({phase:'main-exit'});
+  expect(fs.existsSync(mocks.root)).toBe(false);
+});
+it('persists deletion diagnostics after the sink was stopped', async () => {
+  const directory = fixture();
+  stopFileLogging();
+  const { logDeletionFailure } = await import('./logging');
+  logDeletionFailure(Error('DELETE_LOCKED'));
+  expect(readFileSync(join(directory,'main.log'),'utf8')).toContain('DELETE_LOCKED');
 });

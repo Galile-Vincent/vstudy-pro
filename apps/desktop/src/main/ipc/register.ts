@@ -49,7 +49,7 @@ export function createIpcRegistrar(
         else if (++budget.count > policy.requests) throw new Error('IPC rate limited');
         let release = () => {};
         try {
-          release = (channel.startsWith('storage:') || ['updates:install', 'updates:cancel', 'updates:download'].includes(channel)) ? () => {} : enterStorageRequest();
+          release = (channel.startsWith('storage:') || ['settings:deleteAllData', 'updates:install', 'updates:cancel', 'updates:download'].includes(channel)) ? () => {} : enterStorageRequest();
           const request = ipcContract[channel].request.parse(payload) as IpcRequest<C>;
           const response = await handler(request, event);
           if (channel.startsWith('review:') && Buffer.byteLength(JSON.stringify(response) ?? '') > 512 * 1024) throw new Error('review.response_limit');
@@ -74,6 +74,7 @@ export function createIpcRegistrar(
           if (error instanceof Error && /Search took too long|Refine your query/.test(error.message)) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message.startsWith('Search took too long') ? 'errors.search_too_long' : 'errors.search_refine',params:{}}));
           if (error instanceof Error && error.message.startsWith('ai_parse.')) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'errors.'+error.message,params:{}}));
           if (error instanceof Error && error.message === 'errors.keychain_unavailable') throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:error.message,params:{}}));
+          if (channel === 'settings:deleteAllData' && error instanceof Error && error.message.startsWith('VSTUDY_STATUS:')) throw error;
           if (channel.startsWith('library:') && error instanceof Error) {
             const reason = Object.entries(libraryErrors).find(([, message]) => message === error.message);
             if (reason) throw new Error('VSTUDY_STATUS:' + JSON.stringify({code:'library.' + reason[0],params:{}}));

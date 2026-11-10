@@ -1,8 +1,9 @@
+import { clearDeletionSession } from './services/delete-session';
 import { attachNavigationInput } from './navigation-input';
 import { initializeAnalytics } from './analytics/runtime';
 import { analytics } from './analytics/service';
 const analyticsStartup = performance.now();
-let telemetry: ReturnType<typeof initializeAnalytics>;
+let telemetry: ReturnType<typeof initializeAnalytics> | undefined;
 /**
  * Own Electron startup, application protocols, main-window creation, and ordered shutdown.
  * Owned by main.
@@ -14,13 +15,13 @@ import { confirmRestoreStartup, rollbackRestoreStartup } from "./storage/restore
 import { recoverRestore } from "./storage/backup";
 import { applyNativeTheme, nativeBackground } from './theme';
 import { initializeMoodleProtocol } from './moodle/sso-protocol';
-import { log, copyDiagnostics } from './logging';
+import { log, copyDiagnostics, stopFileLogging, logDeletionFailure } from './logging';
 import { showAttachedMessage, showStartupError, type StartupStage } from './dialogs';
 import { readWindowState, trackWindowState } from './window-state';
 import { coordinateShutdown } from './shutdown';
+import { acquireOwnership, restartOwnedApp } from './ownership';
 import { coordinateDraftClose, createDraftFlush } from './review/draft-flush';
 import { draftFlushAckChannel, draftFlushAckSchema, draftFlushRequestChannel } from '../shared/review-generate';
-import { acquireOwnership } from './ownership';
 import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -37,7 +38,7 @@ import { createWindowsStatePersistence } from "./mcp/windows-state";
 import { createSecretStore } from "./services/secrets";
 import { developmentCsp, isAppUrl, productionCsp } from "./security";
 
-import { deleteAllData } from "./services/delete-data";
+import { createDataDeletion, cleanupDeletedData, finishPendingDeletion } from "./services/delete-data";
 import { createIpcRegistrar } from "./ipc/register";
 import { assetHandler } from "./assets";
 import { isPathWithin } from './platform/paths';
@@ -101,8 +102,11 @@ app.on('web-contents-created', (_event, contents) => {
   contents.on('will-attach-webview', event => event.preventDefault());
 });
 let store: Store | undefined;
-let disposeIpc: (() => Promise<void>) | undefined;
+let disposeIpc: ((deleting?: boolean) => Promise<void>) | undefined;
 let window: BrowserWindow | null = null;
+let deletingData = false;
+let shuttingDown = false;
+let stopWindowState: (() => void) | undefined;
 const developmentUrl = !app.isPackaged
   ? process.env.ELECTRON_RENDERER_URL
   : undefined;
@@ -113,7 +117,7 @@ const entryUrl =
 let reloads: number[] = [];
 let openingWindow: Promise<void> | undefined;
 async function restoreMainWindow(): Promise<BrowserWindow | undefined> {
-  if (!await appReady) return;
+  if (!await appReady || deletingData) return;
   if (window && !window.isDestroyed()) {window.show();window.focus();return window;}
   await (openingWindow ??= createWindow().finally(() => {openingWindow=undefined;}));
   return window ?? undefined;
@@ -147,7 +151,8 @@ async function createWindow(show = true): Promise<void> {
     },
   });
   window = current;
-  trackWindowState(current, app.getPath('userData'), state);
+  current.on('close', event => { if (deletingData) event.preventDefault(); });
+  stopWindowState = trackWindowState(current, app.getPath('userData'), state);
   attachNavigationInput(current);
   current.on('focus',()=>telemetry?.activity.focus(true));
   current.on('blur',()=>telemetry?.activity.focus(false));
@@ -246,6 +251,10 @@ if (ownsApplication) void app.whenReady().then(async () => {
   if (process.platform === 'win32') app.setAppUserModelId('com.vstudy.pro');
   startupStage = 'recovery';
   const userData = app.getPath("userData");
+  const deletionFinished = await finishPendingDeletion(userData, async () => {
+    await clearDeletionSession(session.defaultSession);
+  }, log);
+  const cleanupFinished = await cleanupDeletedData(userData, log);
   mkdirSync(userData, { recursive: true });
   await rollbackRestoreStartup(userData);
   await recoverRestore(userData);
@@ -294,6 +303,8 @@ if (ownsApplication) void app.whenReady().then(async () => {
   );
   let updaterWindowShown = () => {};
   const updaterReady = new Promise<void>(resolve => { updaterWindowShown = resolve; });
+  let deleteRequested = false;
+  const updates = createUpdates(store, updaterReady);
   disposeIpc = registerIpc(
     store,
     secrets,
@@ -303,25 +314,57 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
     restoreMainWindow,
-    { updates: createUpdates(store, updaterReady), ...(process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {}) },
+    { updates, canInstallUpdate: () => !deleteRequested && !shuttingDown && deletionFinished && cleanupFinished, ...(process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {}) },
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
+  ipcMain.removeHandler('settings:deletionStatus');
+  deletion.handle('settings:deletionStatus', () => ({pending:!deletionFinished || !cleanupFinished}));
   ipcMain.removeHandler('settings:deleteAllData');
+  const deleteData = createDataDeletion(userData, async () => {
+    shuttingDown = true;
+    deletingData = true;
+    quitting = true;
+    stopWindowState?.();
+    stopFileLogging();
+    const results = await Promise.allSettled([
+      disposeIpc?.(true),
+      (async () => {
+        const stoppingTelemetry = telemetry;
+        telemetry = undefined;
+        await stoppingTelemetry?.stop();
+      })(),
+      clearDeletionSession(session.defaultSession),
+    ]);
+    store?.close();
+    store = undefined;
+    const errors = results.filter(result => result.status === 'rejected').map(result => result.reason);
+    if (errors.length) throw new AggregateError(errors,'Deletion shutdown incomplete');
+  }, async (error, scheduled) => {
+    const code = (error as NodeJS.ErrnoException | undefined)?.code;
+    const reason = tr(code === 'EACCES' || code === 'EPERM'
+      ? 'settings:delete_failed_permission' : code === 'EBUSY'
+        ? 'settings:delete_failed_busy' : 'settings:delete_failed_files');
+    logDeletionFailure(error);
+    let noticeTimeout: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([dialog.showMessageBox({type:'warning',title:tr('settings:delete_failure_title'),
+      message:tr(scheduled ? 'settings:delete_failed' : 'settings:delete_not_scheduled',{reason}),
+      buttons:[tr('common:close')],
+      }), new Promise<void>(resolve => { noticeTimeout = setTimeout(resolve, 30_000); })]);
+    } finally { clearTimeout(noticeTimeout); }
+  }, () => { restartOwnedApp(app); });
   deletion.handle('settings:deleteAllData', async (_request, event) => {
-    const result = await showAttachedMessage({ type: 'warning', message: tr('settings:delete_title'), detail: tr('settings:delete_copy'), buttons: [tr('common:cancel'), tr('settings:delete')], defaultId: 0, cancelId: 0 }, event.sender);
-    if (result.response !== 1) return { ok: true };
-    await deleteAllData(userData, async () => {
-      window?.destroy();
-      await session.defaultSession.clearStorageData();
-      await session.defaultSession.clearCache();
-      await session.defaultSession.closeAllConnections();
-      session.defaultSession.flushStorageData();
-      await disposeIpc?.();
-      await telemetry?.stop();
-      store?.close();
-      store = undefined;
-    });
-    app.exit();
+    if (deleteRequested || updates.snapshot().installing || shuttingDown) throw Error('VSTUDY_STATUS:' + JSON.stringify({
+      code:'settings.delete_in_progress', params:{},
+    }));
+    deleteRequested = true;
+    try {
+      if (!await appReady) throw Error('Application is not ready');
+      const result = await showAttachedMessage({ type: 'warning', message: tr('settings:delete_title'), detail: tr('settings:delete_copy'), buttons: [tr('common:cancel'), tr('settings:delete')], defaultId: 0, cancelId: 0 }, event.sender);
+      if (result.response !== 1) { deleteRequested = false; return {ok:true}; }
+    } catch (error) { deleteRequested = false; throw error; }
+    try { await deleteData(); }
+    finally { if (!deletingData) deleteRequested = false; }
     return { ok: true };
   });
   nativeTheme.on("updated", () => { if (store) applyNativeTheme(store.settings.get()); });
@@ -342,7 +385,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
   try {
     await disposeIpc?.();
     store?.close(); store = undefined;
-    if (await rollbackRestoreStartup(app.getPath('userData'))) app.relaunch();
+    if (await rollbackRestoreStartup(app.getPath('userData'))) restartOwnedApp(app, 1);
   } catch (cleanupError) { log({phase:'startup-cleanup-failed', error:cleanupError}); }
   finally { app.exit(1); }
 });
@@ -380,6 +423,7 @@ const shutdown = coordinateShutdown({
 });
 app.on("before-quit", (event) => {
   if (quitting || !ownsApplication) return;
+  shuttingDown = true;
   event.preventDefault();
   void shutdown();
 });

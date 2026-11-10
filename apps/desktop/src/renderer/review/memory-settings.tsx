@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { studyMemoryActive, type StudyPrefs } from '../../shared/review';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
+import { Switch } from '../components/ui/switch';
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
 import { SettingsGroup, SettingsRow } from '../settings/layout';
@@ -37,12 +38,12 @@ export function MemorySettings() {
   }
   return <SettingsGroup title={tr('review:memory_title')}>
     <SettingsRow label={tr('review:memory_enabled')} description={tr('review:memory_disclosure')} stack>
-      {prefs && <label><input type="checkbox" aria-label={tr('review:memory_enabled')} checked={studyMemoryActive(prefs)} disabled={busy} onChange={event => void save(event.target.checked ? { memoryEnabled: true, consentAcknowledged: true } : { memoryEnabled: false })} />{tr('review:memory_enabled')}</label>}
+      {prefs && <Switch aria-label={tr('review:memory_enabled')} checked={studyMemoryActive(prefs)} disabled={busy} onCheckedChange={checked => void save(checked ? {memoryEnabled:true,consentAcknowledged:true} : {memoryEnabled:false})} />}
       <Button variant="secondary" disabled={!prefs || busy} onClick={() => setConfirm(true)}>{tr('review:erase_memory')}</Button>
       {erased && <p role="status">{tr('review:erase_done')}</p>}
       {error && <div role="alert"><p>{tr('review:error')}</p><Button onClick={() => void load()}>{tr('review:retry')}</Button></div>}
       <Dialog open={confirm} onOpenChange={value => { if (!busy) setConfirm(value); }}>
-        <DialogContent><DialogTitle>{tr('review:erase_confirm')}</DialogTitle><DialogDescription>{tr('review:erase_confirm_copy')}</DialogDescription><Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>{tr('review:cancel')}</Button><Button variant="secondary" disabled={busy} onClick={() => void erase()}>{tr('review:erase_confirm')}</Button></DialogContent>
+        <DialogContent><DialogTitle>{tr('review:erase_confirm')}</DialogTitle><DialogDescription>{tr('review:erase_confirm_copy')}</DialogDescription><Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>{tr('review:cancel')}</Button><Button variant="destructive" disabled={busy} onClick={() => void erase()}>{tr('review:erase_confirm')}</Button></DialogContent>
       </Dialog>
     </SettingsRow>
   </SettingsGroup>;

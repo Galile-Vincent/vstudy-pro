@@ -1,0 +1,13 @@
+
+> @vstudy/desktop@0.4.4 test:delete:win32 /Users/vc/.t3/worktrees/vstudy-pro/t3-949b7590/apps/desktop
+> vitest run --config vitest.delete-win32.config.ts
+
+
+ RUN  v4.1.12 /Users/vc/.t3/worktrees/vstudy-pro/t3-949b7590/apps/desktop
+
+
+ Test Files  5 passed (5)
+      Tests  46 passed | 1 skipped (47)
+   Start at  19:03:54
+   Duration  4.71s (transform 357ms, setup 18ms, import 209ms, tests 5.49s, environment 0ms)
+

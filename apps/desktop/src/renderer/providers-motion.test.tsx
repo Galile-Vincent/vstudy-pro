@@ -12,6 +12,7 @@ vi.mock('./shell', () => ({ useOptionalNavigation: () => null }));
 vi.mock('./components/ui/dialog', () => ({
   Dialog: ({ open, onOpenChange, children }: {open: boolean; onOpenChange: (open: boolean) => void; children: React.ReactNode}) => <div data-open={open}><button onClick={() => onOpenChange(false)}>Escape</button>{children}</div>,
   DialogContent: ({children, showCloseButton: _show, ...props}: React.HTMLAttributes<HTMLDivElement> & {showCloseButton: boolean}) => { void _show; return <div {...props}>{children}</div>; },
+  DialogDescription: ({children}: {children: React.ReactNode}) => <p>{children}</p>,
   DialogTitle: ({children}: {children: React.ReactNode}) => <h2>{children}</h2>,
 }));
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -45,4 +46,13 @@ it('also delays dismissal requested by the dialog and cancels completion on unmo
 it('shows the version and beta badge in General settings', async () => {
   await mount();
   expect(host.querySelector('.app-version')?.textContent).toBe(`v${version} beta`);
+});
+it('scrolls the selected tab into view on mount and change', async () => {
+  const scroll = vi.fn();
+  Object.defineProperty(HTMLElement.prototype,'scrollIntoView',{configurable:true,value:scroll});
+  await mount();
+  expect(scroll).toHaveBeenCalled();
+  scroll.mockClear();
+  await act(() => [...host.querySelectorAll<HTMLButtonElement>('[role=tab]')].find(tab=>tab.textContent?.includes('Privacy'))!.dispatchEvent(new MouseEvent('mousedown',{bubbles:true,button:0})));
+  expect(scroll).toHaveBeenCalled();
 });

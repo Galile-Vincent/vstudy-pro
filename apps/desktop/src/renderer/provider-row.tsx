@@ -1,4 +1,5 @@
 import { openAiCliSetup } from './ai-cli/entry';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from './components/ui/dialog';
 import { Check } from 'lucide-react';
 import { Checkbox } from './components/checkbox';
 import { Switch } from './components/ui/switch';
@@ -22,6 +23,8 @@ export function ProviderRow({
   onRefresh: () => Promise<void>;
 }) {
   useTranslation();
+  const [removing,setRemoving] = useState(false);
+  const [removeError,setRemoveError] = useState('');
   const [hasKey, setHasKey] = useState(false);
   const [key, setKey] = useState('');
   const [baseUrl, setBaseUrl] = useState(
@@ -90,13 +93,13 @@ export function ProviderRow({
         <span className="provider-actions">
           {isCli ? (
             <>
-              <Button variant="secondary" size="sm" disabled={busy || unsupportedCli} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
-              <Button variant="secondary" size="sm" disabled={busy || unsupportedCli} onClick={() => void perform(() => desktop.invoke('providers:list', { discover: true }))}>{tr('settings:detect_again')}</Button>
+              <Button aria-label={tr('settings:provider_action',{action:tr('ai-cli:wizard'),name:providerName[provider.config.id]})} variant="secondary" size="sm" disabled={busy || unsupportedCli} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
+              <Button aria-label={tr('settings:provider_action',{action:tr('settings:detect_again'),name:providerName[provider.config.id]})} variant="secondary" size="sm" disabled={busy || unsupportedCli} onClick={() => void perform(() => desktop.invoke('providers:list', { discover: true }))}>{tr('settings:detect_again')}</Button>
             </>
           ) : (
             <>
-              <Button variant="link" onClick={() => void perform(() => desktop.invoke('shell:openExternal', { url: provider.config.id === 'anthropic-api' ? 'https://platform.claude.com/settings/keys' : provider.config.id === 'openai-api' ? 'https://platform.openai.com/api-keys' : new URL(baseUrl).origin }))}>{tr('settings:get_key')}</Button>
-              <Button variant="secondary" size="sm" disabled={busy} onClick={() => void perform(async () => {
+              <Button aria-label={tr('settings:provider_action',{action:tr('settings:get_key'),name:providerName[provider.config.id]})} variant="link" onClick={() => void perform(() => desktop.invoke('shell:openExternal', { url: provider.config.id === 'anthropic-api' ? 'https://platform.claude.com/settings/keys' : provider.config.id === 'openai-api' ? 'https://platform.openai.com/api-keys' : new URL(baseUrl).origin }))}>{tr('settings:get_key')}</Button>
+              <Button aria-label={tr('settings:provider_action',{action:tr('settings:test_connection'),name:providerName[provider.config.id]})} variant="secondary" size="sm" disabled={busy} onClick={() => void perform(async () => {
                 const id = provider.config.id;
                 if (id !== 'anthropic-api' && id !== 'openai-api' && id !== 'openai-compatible') return;
                 setTestResult('');
@@ -140,7 +143,7 @@ export function ProviderRow({
               {provider.resolvedPath ?? tr('settings:not_found')}
             </code>
           </p>
-          <Button
+          <Button aria-label={tr('settings:provider_action',{action:tr('settings:change'),name:providerName[provider.config.id]})}
             variant={settingsView ? 'secondary' : 'outline'}
             size={settingsView ? 'sm' : 'default'}
             disabled={busy || unsupportedCli}
@@ -185,10 +188,10 @@ export function ProviderRow({
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
-            <Button variant="default" size="sm" disabled={busy || !key.trim()}>
+            <Button aria-label={tr('settings:provider_action',{action:tr(error && key.trim() ? 'settings:retry' : 'common:save_key'),name:providerName[provider.config.id]})} variant="default" size="sm" disabled={busy || !key.trim()}>
               {tr(error && key.trim() ? 'settings:retry' : 'common:save_key')}
             </Button>
-            <Button
+            <Button aria-label={tr('settings:provider_action',{action:tr('settings:session_key'),name:providerName[provider.config.id]})}
               variant="ghost"
               size="sm"
               type="button"
@@ -216,19 +219,12 @@ export function ProviderRow({
               </Button>
             )}
             {hasKey && (
-              <Button
+              <Button aria-label={tr('settings:provider_action',{action:tr('common:remove'),name:providerName[provider.config.id]})}
                 variant="ghost"
                 size="sm"
                 type="button"
                 disabled={busy}
-                onClick={() =>
-                  void perform(async () => {
-                    await desktop.invoke('secrets:delete', {
-                      providerId: provider.config.id,
-                    });
-                    setHasKey(false);
-                  })
-                }
+                onClick={() => {setRemoveError('');setRemoving(true);}}
               >
                 {tr('common:remove')}
               </Button>
@@ -266,6 +262,20 @@ export function ProviderRow({
           </div>
         </>
       )}
+      <Dialog open={removing} onOpenChange={value => {if (!busy) setRemoving(value);}}>
+        <DialogContent><DialogTitle>{tr('settings:remove_key_title',{name:providerName[provider.config.id]})}</DialogTitle>
+          <DialogDescription>{tr('settings:remove_key_copy')}</DialogDescription>
+          {removeError && <p role="alert">{removeError}</p>}
+          <Button variant="secondary" disabled={busy} onClick={() => setRemoving(false)}>{tr('common:cancel')}</Button>
+          <Button variant="destructive" disabled={busy} onClick={() => void perform(async () => {
+            setRemoveError('');
+            try {
+              await desktop.invoke('secrets:delete',{providerId:provider.config.id});
+              setHasKey(false);setRemoving(false);
+            } catch (error) { setRemoveError(errorText(error)); }
+          })}>{tr('common:remove')}</Button>
+        </DialogContent>
+      </Dialog>
       {waitingKeychain && <p role="status">{tr('settings:waiting')}</p>}
       {error && <p role="alert">{error}</p>}
     </section>
