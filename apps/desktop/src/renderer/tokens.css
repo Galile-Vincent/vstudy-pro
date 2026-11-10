@@ -8,9 +8,14 @@
  --motion-fast:125ms; --motion-base:175ms; --motion-slow:300ms;
  --opacity-hover:.04; --opacity-pressed:.08; --opacity-disabled:.4;
  --sidebar-width:232px; --topbar-height:52px; --filter-width:300px; --library-row-height:2.75rem; --library-card-height:148px;
+ --line-strong:var(--muted); --line:color-mix(in oklab,var(--ink) 10%,transparent);
  --hairline:var(--line);
  --focus-ring:var(--focus-outline-width,2px) var(--focus-outline-style,solid) var(--focus);
 }
+
+/* Two border strengths. --line is a quiet ink mix for dividers, card edges and chrome in every theme and mode.
+   --line-strong is the theme's 3:1 boundary token (check-contrast.mjs) and stays on form controls, switch tracks and the high-contrast setting. */
+html[data-contrast=more] { --line:var(--line-strong); }
 
 /* Legacy aliases. Flat values for in-flow surfaces; delete once no page references them. */
 :root {
@@ -54,7 +59,7 @@ button.secondary,.filter-popover summary { border:0; box-shadow:none; background
 button.ghost { border:0; background:transparent; }
 button.primary { min-height:36px; background:var(--accent-color); color:var(--accent-foreground); }
 button.ghost:hover { background:var(--active); }
-.app-select { display:inline-flex; align-items:center; justify-content:space-between; gap:var(--space-2); min-height:32px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); padding:var(--space-1) var(--space-2); font:inherit; }
+.app-select { display:inline-flex; align-items:center; justify-content:space-between; gap:var(--space-2); min-height:32px; border:1px solid var(--line-strong); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); padding:var(--space-1) var(--space-2); font:inherit; }
 .select-positioner { z-index:150; }
 .select-popup { background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--r-md); padding:var(--space-1); box-shadow:var(--shadow-med); max-height:50vh; overflow:auto; min-width:var(--anchor-width); }
 .select-item { display:flex; justify-content:space-between; gap:var(--space-4); padding:var(--space-2); border-radius:var(--r-sm); font-size:var(--type-base); cursor:default; }
@@ -83,7 +88,7 @@ html:lang(ja),html:lang(zh-Hant) { --type-xs:0.8125rem; --type-sm:0.8125rem; }
 ::view-transition-group(vt-document) { animation-duration:var(--motion-slow); animation-timing-function:var(--ease-move); }
 
 button,summary { min-inline-size:var(--space-6); min-block-size:var(--space-6); }
-.library-view .library-search { border-color:var(--line); }
+.library-view .library-search { border-color:var(--line-strong); }
 @media(prefers-contrast:more) { :root { --hairline:var(--ink); } }
 @media(forced-colors:active) {
  :root { --hairline:CanvasText; }
@@ -202,7 +207,7 @@ html[data-theme=contrast] :is([data-slot=card],[data-slot=popover-content],[data
  --color-on-accent:var(--accent-foreground);
  --color-accent-muted:var(--active);
  --color-border:var(--line);
- --color-border-emphasized:var(--line);
+ --color-border-emphasized:var(--line-strong);
  --color-neutral:var(--subtle);
  --color-overlay:var(--overlay);
  --color-overlay-hover:var(--active);

@@ -42,7 +42,7 @@ it('applies every token and works when localStorage is unavailable', () => {
   const pack={...builtinThemes[1]!,id:'custom-sea'};
   expect(()=>applyAppearance({...defaultSettings,themeId:pack.id,customThemes:[pack],glassOpacity:95})).not.toThrow();
   for (const [name,value] of Object.entries(pack.light)) {
-    expect(document.documentElement.style.getPropertyValue(`--${name==='sidebar'?'sidebar-surface':name}`)).toBe(value);
+    expect(document.documentElement.style.getPropertyValue(`--${({sidebar:'sidebar-surface',line:'line-strong'} as Record<string,string>)[name]??name}`)).toBe(value);
   }
   expect(document.documentElement.style.getPropertyValue('--glass-opacity')).toBe('95%');
   storage.mockRestore();
