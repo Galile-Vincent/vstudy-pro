@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import {
-  Button, Dialog, DialogHeader, DropdownMenu, Tooltip, TextInput, Switch,
-  SegmentedControl, SegmentedControlItem, SideNav, SideNavSection, SideNavItem,
+  AlertDialog, Badge, Button, Card, CheckboxInput, Dialog, DialogHeader, DropdownMenu, IconButton, Selector, Tooltip,
+  Tab, TabList, TextArea, TextInput, Switch, SegmentedControl, SegmentedControlItem, SideNav, SideNavSection, SideNavItem,
 } from '@astryxdesign/core';
-import { BookOpen, CalendarDays } from 'lucide-react';
+import { BookOpen, CalendarDays, Settings } from 'lucide-react';
 
-const copy = { section: 'Astryx components', title: 'Astryx 0.7.11 · Neutral', navigation: 'Study navigation', study: 'Study', session: 'Study session', review: 'Review your notes for' };
+const copy = {
+  section: 'Astryx components', title: 'Astryx 0.7.11 · Neutral', navigation: 'Study navigation', study: 'Study', session: 'Study session', review: 'Review your notes for',
+  settings: 'Settings controls', language: 'Interface language', english: 'English', japanese: '日本語', notes: 'Study notes', share: 'Share anonymous usage',
+  shareHint: 'Helps the team fix problems faster.', sections: 'Settings sections', general: 'General', privacy: 'Privacy', badge: 'Beta',
+  settingsIcon: 'Open settings', delete: 'Delete course', confirmTitle: 'Delete Cognitive science?', confirmBody: 'This course and its notes will be permanently deleted.',
+  cancel: 'Cancel', confirm: 'Delete course',
+};
 
 export function AstryxGallery() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -14,6 +20,11 @@ export function AstryxGallery() {
   const [period, setPeriod] = useState('today');
   const [destination, setDestination] = useState('library');
   const [menuAction, setMenuAction] = useState('No action selected');
+  const [language, setLanguage] = useState('en');
+  const [notes, setNotes] = useState('');
+  const [share, setShare] = useState(false);
+  const [section, setSection] = useState('general');
+  const [confirming, setConfirming] = useState(false);
   return <section aria-label={copy.section} className="grid gap-[var(--space-4)] my-[var(--space-6)]">
     <h2>{copy.title}</h2>
     <div className="grid gap-[var(--space-6)] md:grid-cols-[260px_1fr]">
@@ -41,9 +52,25 @@ export function AstryxGallery() {
           <SegmentedControlItem value="today" label="Today" />
           <SegmentedControlItem value="week" label="This week" />
         </SegmentedControl>
+        <Card padding={4} className="settings-stack" aria-label={copy.settings}>
+          <TabList role="tablist" aria-label={copy.sections} value={section} onChange={setSection}>
+            <Tab value="general" label={copy.general} panelId="gallery-general" />
+            <Tab value="privacy" label={copy.privacy} panelId="gallery-privacy" />
+          </TabList>
+          <Selector label={copy.language} options={[{ value: 'en', label: copy.english }, { value: 'ja', label: copy.japanese }]} value={language} onChange={setLanguage} />
+          <TextArea label={copy.notes} value={notes} onChange={setNotes} rows={3} />
+          <CheckboxInput label={copy.share} description={copy.shareHint} value={share} onChange={setShare} />
+          <div className="flex flex-wrap items-center gap-[var(--space-3)]">
+            <Badge label={copy.badge} />
+            <IconButton label={copy.settingsIcon} icon={<Settings />} variant="ghost" />
+            <Button label={copy.delete} variant="destructive" onClick={() => setConfirming(true)} />
+          </div>
+        </Card>
         <output aria-live="polite">{menuAction} · {destination} · {period}</output>
       </div>
     </div>
+    <AlertDialog isOpen={confirming} onOpenChange={setConfirming} title={copy.confirmTitle} description={copy.confirmBody}
+      actionLabel={copy.confirm} cancelLabel={copy.cancel} onAction={() => setConfirming(false)} />
     <Dialog isOpen={dialogOpen} onOpenChange={setDialogOpen} width={480}>
       <DialogHeader title={copy.session} onOpenChange={setDialogOpen} />
       <div className="grid gap-[var(--space-4)] p-[var(--space-6)]">

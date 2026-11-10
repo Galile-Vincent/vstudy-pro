@@ -57,8 +57,8 @@ try {
   await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));
   await page.getByRole('tab',{name:'Appearance',exact:true}).click();
   for(const scrolled of [false,true]) {
-    await page.locator('.settings-pane[data-state=active]').evaluate((el,scroll)=>{el.scrollTop=scroll?500:0;el.dataset.scrolled=String(scroll);},scrolled);
-    assert.deepEqual(await page.locator('.settings-header').evaluate(el=>({border:window.getComputedStyle(el).borderBottomWidth,shadow:window.getComputedStyle(el).boxShadow,after:window.getComputedStyle(el,'::after').content})),{border:'0px',shadow:'none',after:'none'});
+    await page.locator('.settings-pane:not([hidden])').evaluate((el,scroll)=>{el.scrollTop=scroll?500:0;el.dataset.scrolled=String(scroll);},scrolled);
+    assert.deepEqual(await page.locator('.settings-dialog h2').evaluate(el=>({border:window.getComputedStyle(el).borderBottomWidth,shadow:window.getComputedStyle(el).boxShadow,after:window.getComputedStyle(el,'::after').content})),{border:'0px',shadow:'none',after:'none'});
   }
   await page.screenshot({path:join(evidence,'settings.png'),animations:'disabled'});
   await page.keyboard.press('Escape');

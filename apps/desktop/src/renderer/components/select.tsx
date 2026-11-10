@@ -1,6 +1,11 @@
-import { Children, isValidElement, type ReactNode } from 'react';
-import { Select as Root, SelectTrigger, SelectValue, SelectContent, SelectItem } from './ui/select';
-import { cn } from '@/lib/utils';
+import { Children, isValidElement, type ComponentProps, type ReactNode } from 'react';
+import { Selector } from '@astryxdesign/core';
+
+type Inherited = Pick<ComponentProps<typeof Selector>, 'id' | 'aria-describedby' | 'aria-invalid' | 'width' | 'size' | 'variant'>;
+
+const textOf = (node: ReactNode): string => Children.toArray(node).map(child =>
+  typeof child === 'string' || typeof child === 'number' ? String(child)
+    : isValidElement<{ children?: ReactNode }>(child) ? textOf(child.props.children) : '').join('');
 
 export function Select({
   children,
@@ -8,51 +13,32 @@ export function Select({
   onChange,
   disabled,
   className,
-  position,
+  'aria-label': label = '',
   ...props
-}: {
+}: Inherited & {
   children: ReactNode;
   value?: string;
   onChange: (event: { target: { value: string } }) => void;
   disabled?: boolean;
-  id?: string;
   'aria-label'?: string;
   className?: string;
-  position?: 'item-aligned' | 'popper';
 }) {
   const options = Children.toArray(children).flatMap(child =>
     isValidElement<{ value: string; children: ReactNode }>(child)
-      ? [{ value: child.props.value, label: child.props.children }]
+      ? [{ value: child.props.value, label: textOf(child.props.children) }]
       : []
   );
-  const encode = (value: string) => value || '__vstudy_empty__';
   return (
-    <Root
-      value={encode(value ?? '')}
-      disabled={disabled ?? false}
-      onValueChange={next => onChange({ target: { value: next === '__vstudy_empty__' ? '' : next } })}
-    >
-      <SelectTrigger
-        className={cn(
-          "app-select border-0 bg-[color-mix(in_oklab,var(--ink)_5%,var(--surface))] rounded-[var(--r-sm)] shadow-none transition-colors hover:bg-[color-mix(in_oklab,var(--ink)_8%,var(--surface))] focus-visible:outline-2 focus-visible:outline-[var(--focus)] focus-visible:outline-offset-2",
-          className
-        )}
-        data-value={value}
-        {...props}
-      >
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent position={position} className="border-0 rounded-[var(--r-md)] bg-[var(--surface)] shadow-[var(--elevation-floating)] p-[var(--space-1)]">
-        {options.map(option => (
-          <SelectItem
-            key={option.value}
-            value={encode(option.value)}
-            className="rounded-[var(--r-xs)] transition-colors focus:bg-[var(--active)] focus:text-[var(--ink)]"
-          >
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Root>
+    <Selector
+      {...props}
+      label={label}
+      isLabelHidden
+      options={options}
+      value={value ?? ''}
+      data-value={value ?? ''}
+      isDisabled={disabled ?? false}
+      {...(className ? { containerClassName: className } : {})}
+      onChange={next => onChange({ target: { value: next ?? '' } })}
+    />
   );
 }

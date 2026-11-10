@@ -1,11 +1,7 @@
 import { openAiCliSetup } from './ai-cli/entry';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from './components/ui/dialog';
 import { Check } from 'lucide-react';
-import { Checkbox } from './components/checkbox';
-import { Switch } from './components/ui/switch';
-import { Button } from './components/ui/button';
-import { FormField, ListRow } from './components/ui';
-import { Input } from './components/ui/input';
+import { Button, Dialog, DialogHeader, Switch, TextInput } from '@astryxdesign/core';
+import { ListRow } from './components/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../shared/i18n';
@@ -91,13 +87,13 @@ export function ProviderRow({
         </>} actions={<span className="provider-actions">
           {isCli ? (
             <>
-              <Button aria-label={tr('settings:provider_action',{action:tr('ai-cli:wizard'),name:providerName[provider.config.id]})} variant="secondary" size="sm" disabled={busy || unsupportedCli} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
-              <Button aria-label={tr('settings:provider_action',{action:tr('settings:detect_again'),name:providerName[provider.config.id]})} variant="secondary" size="sm" disabled={busy || unsupportedCli} onClick={() => void perform(() => desktop.invoke('providers:list', { discover: true }))}>{tr('settings:detect_again')}</Button>
+              <Button label={tr('settings:provider_action',{action:tr('ai-cli:wizard'),name:providerName[provider.config.id]})} variant="secondary" size="sm" isDisabled={busy || unsupportedCli} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
+              <Button label={tr('settings:provider_action',{action:tr('settings:detect_again'),name:providerName[provider.config.id]})} variant="secondary" size="sm" isDisabled={busy || unsupportedCli} onClick={() => void perform(() => desktop.invoke('providers:list', { discover: true }))}>{tr('settings:detect_again')}</Button>
             </>
           ) : (
             <>
-              <Button aria-label={tr('settings:provider_action',{action:tr('settings:get_key'),name:providerName[provider.config.id]})} variant="link" onClick={() => void perform(() => desktop.invoke('shell:openExternal', { url: provider.config.id === 'anthropic-api' ? 'https://platform.claude.com/settings/keys' : provider.config.id === 'openai-api' ? 'https://platform.openai.com/api-keys' : new URL(baseUrl).origin }))}>{tr('settings:get_key')}</Button>
-              <Button aria-label={tr('settings:provider_action',{action:tr('settings:test_connection'),name:providerName[provider.config.id]})} variant="secondary" size="sm" disabled={busy} onClick={() => void perform(async () => {
+              <Button label={tr('settings:provider_action',{action:tr('settings:get_key'),name:providerName[provider.config.id]})} variant="ghost" onClick={() => void perform(() => desktop.invoke('shell:openExternal', { url: provider.config.id === 'anthropic-api' ? 'https://platform.claude.com/settings/keys' : provider.config.id === 'openai-api' ? 'https://platform.openai.com/api-keys' : new URL(baseUrl).origin }))}>{tr('settings:get_key')}</Button>
+              <Button label={tr('settings:provider_action',{action:tr('settings:test_connection'),name:providerName[provider.config.id]})} variant="secondary" size="sm" isDisabled={busy} onClick={() => void perform(async () => {
                 const id = provider.config.id;
                 if (id !== 'anthropic-api' && id !== 'openai-api' && id !== 'openai-compatible') return;
                 setTestResult('');
@@ -111,28 +107,16 @@ export function ProviderRow({
         <>
           {unsupportedCli && <p role="note">{tr('distribution:codex_unavailable')}</p>}
           <p className="muted">{tr('ai-cli:row_help')}</p>
-          <label className="provider-cli-label">
-            {settingsView ? (
-              <Switch
-                aria-label={tr('settings:enable_cli', { provider: providerName[provider.config.id] })}
-                checked={provider.config.enabled}
-                disabled={busy || unsupportedCli}
-                onCheckedChange={(enabled) => {
-                  void perform(() => desktop.invoke('providers:configure', { ...provider.config, enabled }));
-                }}
-              />
-            ) : (
-              <Checkbox
-                checked={provider.config.enabled}
-                disabled={busy || unsupportedCli}
-                onChange={(e) => {
-                  const enabled = e.target.checked;
-                  void perform(() => desktop.invoke('providers:configure', { ...provider.config, enabled }));
-                }}
-              />
-            )}
-            <span>{tr('settings:enable_cli', { provider: providerName[provider.config.id] })}</span>
-          </label>
+          <div className="provider-cli-label">
+            <Switch
+              label={tr('settings:enable_cli', { provider: providerName[provider.config.id] })}
+              value={provider.config.enabled}
+              isDisabled={busy || unsupportedCli}
+              onChange={(enabled) => {
+                void perform(() => desktop.invoke('providers:configure', { ...provider.config, enabled }));
+              }}
+            />
+          </div>
           <p className="muted">{tr(provider.config.enabled ? 'settings:enabled' : 'settings:disabled')}</p>
           <p className="muted">
             {tr('settings:binary_path')}:{' '}
@@ -140,10 +124,10 @@ export function ProviderRow({
               {provider.resolvedPath ?? tr('settings:not_found')}
             </code>
           </p>
-          <Button aria-label={tr('settings:provider_action',{action:tr('settings:change'),name:providerName[provider.config.id]})}
-            variant={settingsView ? 'secondary' : 'outline'}
-            size={settingsView ? 'sm' : 'default'}
-            disabled={busy || unsupportedCli}
+          <Button label={tr('settings:provider_action',{action:tr('settings:change'),name:providerName[provider.config.id]})}
+            variant="secondary"
+            size={settingsView ? 'sm' : 'md'}
+            isDisabled={busy || unsupportedCli}
             onClick={() =>
               void perform(() =>
                 desktop.invoke('providers:chooseExecutable', {
@@ -177,55 +161,30 @@ export function ProviderRow({
               }, true);
             }}
           >
-            <FormField className="min-w-0 flex-[1_1_12rem]" label={tr('settings:api_key', { provider: providerName[provider.config.id] })}>
-              {control => <Input {...control}
-              aria-label={tr('settings:api_key', { provider: providerName[provider.config.id] })}
+<TextInput
+              label={tr('settings:api_key', { provider: providerName[provider.config.id] })}
+              isLabelHidden
+              width="min(100%, 20rem)"
               type="password"
               autoComplete="off"
               placeholder={tr('common:enter_api_key')}
               value={key}
-              onChange={(e) => setKey(e.target.value)}
-            />}</FormField>
-            <Button aria-label={tr('settings:provider_action',{action:tr(error && key.trim() ? 'settings:retry' : 'common:save_key'),name:providerName[provider.config.id]})} variant="default" size="sm" disabled={busy || !key.trim()}>
-              {tr(error && key.trim() ? 'settings:retry' : 'common:save_key')}
-            </Button>
-            <Button aria-label={tr('settings:provider_action',{action:tr('settings:session_key'),name:providerName[provider.config.id]})}
-              variant="ghost"
-              size="sm"
-              type="button"
-              disabled={busy || !key.trim()}
-              onClick={() =>
+              onChange={setKey}
+            />
+            <Button label={tr('settings:provider_action',{action:tr(error && key.trim() ? 'settings:retry' : 'common:save_key'),name:providerName[provider.config.id]})} variant="secondary" size="sm" type="submit" isDisabled={busy || !key.trim()}>{tr(error && key.trim() ? 'settings:retry' : 'common:save_key')}</Button>
+            <Button label={tr('settings:provider_action',{action:tr('settings:session_key'),name:providerName[provider.config.id]})} variant="ghost" size="sm" type="button" isDisabled={busy || !key.trim()} onClick={() =>
                 void perform(async () => {
                   await desktop.invoke('secrets:session', { providerId: provider.config.id, key });
                   setKey('');
                 })
-              }
-            >
-              {tr('settings:session_key')}
-            </Button>
+              }>{tr('settings:session_key')}</Button>
             {hasKey && (
-              <Button
-                variant="ghost"
-                size="sm"
-                type="button"
-                disabled={busy}
-                onClick={() =>
+              <Button label={tr(error && !key.trim() ? 'settings:retry' : 'settings:unlock')} variant="ghost" size="sm" type="button" isDisabled={busy} onClick={() =>
                   void perform(() => desktop.invoke('secrets:unlock', { providerId: provider.config.id }), true)
-                }
-              >
-                {tr(error && !key.trim() ? 'settings:retry' : 'settings:unlock')}
-              </Button>
+                } />
             )}
             {hasKey && (
-              <Button aria-label={tr('settings:provider_action',{action:tr('common:remove'),name:providerName[provider.config.id]})}
-                variant="ghost"
-                size="sm"
-                type="button"
-                disabled={busy}
-                onClick={() => {setRemoveError('');setRemoving(true);}}
-              >
-                {tr('common:remove')}
-              </Button>
+              <Button label={tr('settings:provider_action',{action:tr('common:remove'),name:providerName[provider.config.id]})} variant="ghost" size="sm" type="button" isDisabled={busy} onClick={() => {setRemoveError('');setRemoving(true);}}>{tr('common:remove')}</Button>
             )}
           </form>
           {provider.config.kind === 'compatible' && (
@@ -242,17 +201,16 @@ export function ProviderRow({
                 );
               }}
             >
-              <FormField className="min-w-0 flex-[1_1_12rem]" label={tr('common:openai_compatible_base_url')}>
-                {control => <Input {...control}
+<TextInput
+                label={tr('common:openai_compatible_base_url')}
+                isLabelHidden
+                width="min(100%, 20rem)"
                 type="url"
-                required
-                aria-label={tr('common:openai_compatible_base_url')}
+                isRequired
                 value={baseUrl}
-                onChange={(e) => setBaseUrl(e.target.value)}
-              />}</FormField>
-              <Button variant="secondary" size="sm" disabled={busy}>
-                {tr('common:save_url')}
-              </Button>
+                onChange={setBaseUrl}
+              />
+              <Button label={tr('common:save_url')} variant="secondary" size="sm" type="submit" isDisabled={busy} />
             </form>
           )}
           <div className="provider-help">
@@ -261,19 +219,21 @@ export function ProviderRow({
           </div>
         </>
       )}
-      <Dialog open={removing} onOpenChange={value => {if (!busy) setRemoving(value);}}>
-        <DialogContent><DialogTitle>{tr('settings:remove_key_title',{name:providerName[provider.config.id]})}</DialogTitle>
-          <DialogDescription>{tr('settings:remove_key_copy')}</DialogDescription>
+      <Dialog isOpen={removing} onOpenChange={value => {if (!busy) setRemoving(value);}} width={420} purpose="required">
+        <DialogHeader title={tr('settings:remove_key_title',{name:providerName[provider.config.id]})} subtitle={tr('settings:remove_key_copy')} />
+        <div className="dialog-body">
           {removeError && <p role="alert">{removeError}</p>}
-          <Button variant="secondary" disabled={busy} onClick={() => setRemoving(false)}>{tr('common:cancel')}</Button>
-          <Button variant="destructive" disabled={busy} onClick={() => void perform(async () => {
-            setRemoveError('');
-            try {
-              await desktop.invoke('secrets:delete',{providerId:provider.config.id});
-              setHasKey(false);setRemoving(false);
-            } catch (error) { setRemoveError(errorText(error)); }
-          })}>{tr('common:remove')}</Button>
-        </DialogContent>
+          <div className="dialog-actions">
+            <Button label={tr('common:cancel')} variant="secondary" isDisabled={busy} onClick={() => setRemoving(false)} />
+            <Button label={tr('common:remove')} variant="destructive" isDisabled={busy} onClick={() => void perform(async () => {
+              setRemoveError('');
+              try {
+                await desktop.invoke('secrets:delete',{providerId:provider.config.id});
+                setHasKey(false);setRemoving(false);
+              } catch (error) { setRemoveError(errorText(error)); }
+            })} />
+          </div>
+        </div>
       </Dialog>
       {waitingKeychain && <p role="status">{tr('settings:waiting')}</p>}
       {error && <p role="alert">{error}</p>}

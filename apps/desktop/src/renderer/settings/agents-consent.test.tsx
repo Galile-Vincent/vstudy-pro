@@ -25,12 +25,12 @@ it('defaults to requested read scopes only and requires an account and code comp
   state.pairings = [pairingFixture()]; await mount();
   expect(document.body.textContent).toContain('ABCD-1234');
   expect(document.body.textContent).toContain('self-reported');
-  expect(checkbox('Read courses and accounts').getAttribute('aria-checked')).toBe('true');
-  expect(checkbox('Read course content').getAttribute('aria-checked')).toBe('true');
-  expect(checkbox('Read grades').getAttribute('aria-checked')).toBe('false');
-  expect(checkbox('Propose local planner changes').getAttribute('aria-checked')).toBe('false');
-  expect(document.querySelector('[role=dialog]')!.textContent).not.toContain('Read course files');
-  expect(checkbox('Example University').getAttribute('aria-checked')).toBe('false');
+  expect(checkbox('Read courses and accounts').checked).toBe(true);
+  expect(checkbox('Read course content').checked).toBe(true);
+  expect(checkbox('Read grades').checked).toBe(false);
+  expect(checkbox('Propose local planner changes').checked).toBe(false);
+  expect(document.querySelector('dialog[open]')!.textContent).not.toContain('Read course files');
+  expect(checkbox('Example University').checked).toBe(false);
   expect(button('Pair with selected access').disabled).toBe(true);
   await toggle('I compared both codes');
   expect(button('Pair with selected access').disabled).toBe(true);
@@ -38,7 +38,7 @@ it('defaults to requested read scopes only and requires an account and code comp
   expect(button('Pair with selected access').disabled).toBe(false);
   await click('Pair with selected access');
   expect(decisions()).toEqual([['mcp:pair-decision', { pairingId: ids.pairing, approve: true, scopes: ['read:courses', 'read:content'], accountIds: [ids.account] }]]);
-  expect(document.querySelector('[role=dialog]')).toBeNull();
+  expect(document.querySelector('dialog[open]')).toBeNull();
 });
 
 it('permits only explicit requested grade and write additions', async () => {
@@ -84,7 +84,7 @@ it.each([true, false])('sends a one-shot proposal decision with approve=%s and t
   state.proposals = [proposalFixture()]; await mount(); await toggle('I confirm this is my own work');
   await click(approve ? 'Approve once' : 'Deny');
   expect(decisions()).toEqual([['mcp:proposal-decision', { proposalId: ids.proposal, approve }]]);
-  expect(document.querySelector('[role=dialog]')).toBeNull();
+  expect(document.querySelector('dialog[open]')).toBeNull();
 });
 
 it('uses Escape as a denial', async () => {
@@ -109,7 +109,7 @@ it.each(['pairing', 'proposal'])('disables %s approval at the exact expiry deadl
   await act(() => approve.click());
   expect(decisions()).toEqual([]);
   await click('Close');
-  expect(document.querySelector('[role=dialog]')).toBeNull();
+  expect(document.querySelector('dialog[open]')).toBeNull();
 });
 
 it('rejects approval when the wall clock passes expiry before the UI clock rerenders', async () => {
@@ -149,7 +149,7 @@ it('removes stale requests when the master is disabled or the backend cancels th
   const approve = button('Approve once');
   state = { ...state, enabled: false, proposals: [] };
   await act(() => vi.advanceTimersByTimeAsync(1000));
-  expect(document.querySelector('[role=dialog]')).toBeNull();
+  expect(document.querySelector('dialog[open]')).toBeNull();
   await act(() => approve.click());
   expect(decisions()).toEqual([]);
 });
@@ -179,7 +179,7 @@ it('blocks approval when polling goes offline and allows a safe local dismissal'
   expect(button('Approve once').disabled).toBe(true);
   expect(document.body.textContent).toContain(tr('agents:offline'));
   await click('Close');
-  expect(document.querySelector('[role=dialog]')).toBeNull();
+  expect(document.querySelector('dialog[open]')).toBeNull();
   expect(decisions()).toEqual([]);
 });
 
@@ -189,7 +189,7 @@ it('does not replace the active request when a different request arrives', async
   state = { ...state, proposals: [proposalFixture()] };
   await act(() => vi.advanceTimersByTimeAsync(1000));
   expect(document.body.textContent).toContain('Allow this agent to connect?');
-  expect(checkbox('I compared both codes').getAttribute('aria-checked')).toBe('true');
+  expect(checkbox('I compared both codes').checked).toBe(true);
   await click('Deny');
   expect(document.body.textContent).toContain('Approve this action?');
   expect(document.activeElement).toBe(button('Deny'));

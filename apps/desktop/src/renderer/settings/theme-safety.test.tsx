@@ -75,9 +75,9 @@ it('shows a specific deletion failure inside confirmation and returns focus afte
   render(<AppearanceSection/>);
   fireEvent.click(await screen.findByRole('button',{name:/Delete My theme/}));
   fireEvent.click(screen.getByRole('button',{name:tr('common:delete')}));
-  expect((await within(screen.getByRole('dialog')).findByRole('alert')).textContent).toBe(tr('storage:permission'));
+  expect((await within(screen.getByRole('alertdialog')).findByRole('alert')).textContent).toBe(tr('storage:permission'));
   fail=false;fireEvent.click(screen.getByRole('button',{name:tr('common:delete')}));
-  await waitFor(()=>expect(screen.queryByRole('dialog')).toBeNull());
+  await waitFor(()=>expect(screen.queryByRole('alertdialog')).toBeNull());
   await waitFor(()=>expect(document.activeElement?.textContent).toBe(tr('themes:system')));
 });
 

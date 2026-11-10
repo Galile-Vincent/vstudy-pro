@@ -1,11 +1,9 @@
 /** Global consent presents one immutable request at a time and sends each decision at most once. */
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { defaultScopes, type Pairing, type Proposal } from '../../shared/mcp';
 import { tr } from '../../shared/i18n';
-import { Button } from '../components/ui/button';
-import { Checkbox } from '../components/ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '../components/ui/dialog';
+import { Button, CheckboxInput, Dialog, DialogHeader } from '@astryxdesign/core';
 import { AgentAccount, AgentDate, AgentSelection, useAgentDeadline } from './agents-fields';
 import { useAgents } from './agents-state';
 import './agents.css';
@@ -18,37 +16,26 @@ function ConsentFrame({ id, expiresAt, pairing, canApprove, approve, deny, dismi
   const remaining = useAgentDeadline(expiresAt);
   const attempted = agents.attempted.has(id);
   const unavailable = agents.connection !== 'ready';
-  const previousFocus = useRef<HTMLElement | null>(null);
-  const denyRef = useRef<HTMLButtonElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
   const blocked = agents.pending || attempted || !remaining || unavailable || !agents.state?.enabled;
   const reject = () => {
     if (agents.pending) return;
     if (attempted || !remaining || unavailable || !agents.state?.enabled) dismiss();
     else deny();
   };
-  return <Dialog open onOpenChange={open => { if (!open) reject(); }}>
-    <DialogContent className="agents-dialog agents-consent-dialog" data-testid="agent-consent" data-request-id={id} data-request-kind={pairing ? 'pairing' : 'proposal'} showCloseButton={false} onInteractOutside={event => event.preventDefault()} onEscapeKeyDown={event => { if (agents.pending) event.preventDefault(); }} onCloseAutoFocus={event => {
-      if (previousFocus.current?.isConnected) {event.preventDefault();previousFocus.current.focus();}
-    }} onOpenAutoFocus={event => {
-      previousFocus.current = document.activeElement as HTMLElement | null;
-      event.preventDefault();
-      (denyRef.current?.disabled ? closeRef.current : denyRef.current)?.focus();
-    }}>
-      <DialogTitle>{tr(pairing ? 'agents:pair_title' : 'agents:proposal_title')}</DialogTitle>
-      <DialogDescription>{tr(pairing ? 'agents:pair_help' : 'agents:proposal_help')}</DialogDescription>
+  return <Dialog isOpen onOpenChange={open => { if (!open) reject(); }} width={640} purpose={agents.pending ? 'required' : 'form'} className="agents-dialog agents-consent-dialog"
+    data-testid="agent-consent" data-request-id={id} data-request-kind={pairing ? 'pairing' : 'proposal'}>
+      <DialogHeader title={tr(pairing ? 'agents:pair_title' : 'agents:proposal_title')} subtitle={tr(pairing ? 'agents:pair_help' : 'agents:proposal_help')} />
       <div className="agents-consent-body">{children}</div>
       <p className="agents-countdown" role="timer" aria-live="off">{remaining ? tr('agents:countdown', { seconds: remaining }) : tr('agents:request_expired')}</p>
       <p className="agents-muted">{tr('agents:request_expires')} <AgentDate value={expiresAt} /></p>
       {unavailable && <p role="alert">{tr('agents:offline')}</p>}
       {attempted && !agents.pending && <p role="status">{tr('agents:decision_uncertain')}</p>}
       {agents.failed && <p role="alert">{tr('agents:action_error')}</p>}
-      <div className="agents-actions">
-        {(!remaining || unavailable || attempted) && <Button ref={closeRef} variant="secondary" disabled={agents.pending} onClick={dismiss}>{tr('agents:close')}</Button>}
-        <Button ref={denyRef} variant="secondary" disabled={blocked} onClick={deny}>{tr('agents:deny')}</Button>
-        <Button disabled={blocked || !canApprove} onClick={approve}>{tr(pairing ? 'agents:pair_approve' : 'agents:approve')}</Button>
+      <div className="dialog-actions">
+        {(!remaining || unavailable || attempted) && <Button label={tr('agents:close')} variant="secondary" data-autofocus isDisabled={agents.pending} onClick={dismiss} />}
+        <Button label={tr('agents:deny')} variant="secondary" data-autofocus isDisabled={blocked} onClick={deny} />
+        <Button label={tr(pairing ? 'agents:pair_approve' : 'agents:approve')} variant="primary" isDisabled={blocked || !canApprove} onClick={approve} />
       </div>
-    </DialogContent>
   </Dialog>;
 }
 
@@ -67,7 +54,7 @@ function PairingConsent({ request, dismiss }: { request: Pairing; dismiss: () =>
   return <ConsentFrame id={request.id} expiresAt={request.expiresAt} pairing canApprove={valid} approve={() => decide(true)} deny={() => decide(false)} dismiss={dismiss}>
     <div><p className="agents-muted">{tr('agents:claimed_name')}</p><p className="agents-client-name">{request.clientName}</p><p className="agents-muted">{tr('agents:self_reported')}</p></div>
     <div><p>{tr('agents:pair_code')}</p><output className="agents-code" data-testid="agent-pairing-code">{request.code}</output></div>
-    <label className="agents-choice"><Checkbox checked={compared} disabled={disabled} onCheckedChange={checked => setCompared(checked === true)} /><span>{tr('agents:code_confirm')}</span></label>
+    <div className="agents-choice"><CheckboxInput label={tr('agents:code_confirm')} value={compared} isDisabled={disabled} onChange={setCompared} /></div>
     <AgentSelection availableScopes={request.requestedScopes} scopes={scopes} accountIds={accountIds} accounts={accounts} onScopes={setScopes} onAccounts={setAccountIds} disabled={disabled} />
     <p className="agents-muted">{tr('agents:pair_expiry')}</p>
   </ConsentFrame>;
@@ -87,7 +74,7 @@ function ProposalConsent({ request, dismiss }: { request: Proposal; dismiss: () 
       <div><dt>{tr('agents:risk')}</dt><dd className="agents-risk" data-risk={request.risk}>{tr(`agents:risk_${request.risk}`)}</dd></div>
     </dl>
     {request.risk === 'high' && <p className="agents-risk" data-risk="high">{tr('agents:high_risk')}</p>}
-    {needsOwnership && <label className="agents-choice"><Checkbox checked={studentOwned} disabled={agents.pending} onCheckedChange={value=>setStudentOwned(value===true)}/><span>{tr('agents:own_work')}</span></label>}
+    {needsOwnership && <div className="agents-choice"><CheckboxInput label={tr('agents:own_work')} value={studentOwned} isDisabled={agents.pending} onChange={setStudentOwned} /></div>}
     <section><h3>{tr('agents:payload')}</h3><pre className="agents-raw">{JSON.stringify(request.payload, null, 2)}</pre></section>
   </ConsentFrame>;
 }
@@ -127,8 +114,6 @@ export function AgentStatus() {
   if (!state.activeCalls && !queued) return null;
   return <div className="agents-live" role="status" aria-live="polite" data-testid="agent-status">
     <span className="agents-live-dot" aria-hidden="true" />
-    <Button variant="ghost" size="sm" onClick={() => window.dispatchEvent(new CustomEvent('vstudy:open-settings', { detail: { tab: 'agents' } }))}>
-      {state.activeCalls ? tr('agents:acting', { count: state.activeCalls }) : tr('agents:queued', { count: queued })}
-    </Button>
+    <Button label={state.activeCalls ? tr('agents:acting', { count: state.activeCalls }) : tr('agents:queued', { count: queued })} variant="ghost" size="sm" onClick={() => window.dispatchEvent(new CustomEvent('vstudy:open-settings', { detail: { tab: 'agents' } }))} />
   </div>;
 }

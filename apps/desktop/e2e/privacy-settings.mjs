@@ -22,7 +22,7 @@ try {
   const cliProviders=await page.evaluate(()=>window.desktop.invoke('providers:list',{}).then(providers=>providers.filter(provider=>provider.config.kind==='cli')));
   assert.equal(cliProviders.length,3);assert.ok(cliProviders.every(provider=>!provider.config.enabled));
   for(const screen of ['onboarding','providers','privacy']) {
-   if(screen==='providers') {await page.keyboard.press('Escape');await seedRoute(page,{view:'workspace'});await page.reload();await page.getByTestId('bridge-status').waitFor({state:'attached'});await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog[data-state=open]').waitFor();await page.locator('.settings-tabs [role=tab]').nth(2).click();}
+   if(screen==='providers') {await page.keyboard.press('Escape');await seedRoute(page,{view:'workspace'});await page.reload();await page.getByTestId('bridge-status').waitFor({state:'attached'});await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog[open]').waitFor();await page.locator('.settings-tabs [role=tab]').nth(2).click();}
    if(screen==='privacy')await page.locator('.settings-tabs [role=tab]').last().click();
    const findings=await new AxeBuilder({page}).setLegacyMode(true).withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa','best-practice']).analyze();
    results.push({language,theme,width,screen,violations:findings.violations});
@@ -34,7 +34,7 @@ try {
  }
  await page.evaluate(async()=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language:'en'});});await page.reload();
  await app.evaluate(({safeStorage})=>{safeStorage.isAsyncEncryptionAvailable=async()=>{await new Promise(resolve=>globalThis.setTimeout(resolve,1000));return false;};});
- await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog[data-state=open]').waitFor();await page.locator('.settings-tabs [role=tab]').nth(2).click();
+ await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));await page.locator('.settings-dialog[open]').waitFor();await page.locator('.settings-tabs [role=tab]').nth(2).click();
  const copy=JSON.parse(await readFile('src/shared/locales/en/settings.json','utf8'));
  await page.locator('.settings-pane:not([hidden]) details').first().evaluate(details=>{details.open=true;});
  const keyInput=page.getByLabel('Anthropic API key',{exact:true});const row=page.locator('.provider-row').filter({has:keyInput});
@@ -45,7 +45,7 @@ try {
  await row.getByRole('alert').filter({hasText:copy.keychain_failed}).waitFor();await row.getByRole('button',{name:`${copy.retry} — Anthropic`,exact:true}).waitFor();
  await page.screenshot({path:`${output}/en-keychain-denied.png`});
  const keychainAxe=await new AxeBuilder({page}).setLegacyMode(true).analyze();await writeFile(`${output}/keychain-axe.json`,JSON.stringify(keychainAxe.violations,null,2));assert.deepEqual(keychainAxe.violations,[]);
- await row.getByRole('button',{name:`${copy.session_key} — Anthropic`,exact:true}).click();await page.waitForFunction(()=>window.document.querySelector('input[aria-label="Anthropic API key"]')?.value==='');
+ await row.getByRole('button',{name:`${copy.session_key} — Anthropic`,exact:true}).click();await page.waitForFunction(()=>[...window.document.querySelectorAll('label')].find(label=>label.textContent==='Anthropic API key')?.control?.value==='');
  assert.equal((await page.evaluate(()=>window.desktop.invoke('secrets:has',{providerId:'anthropic-api'}))).hasKey,false,'session-only key is never persisted');
 } finally {await writeFile(`${output}/axe.json`,JSON.stringify(results,null,2));await app?.close();await rm(directory,{recursive:true,force:true});}
 assert.equal(results.length,36);assert.deepEqual(results.filter(r=>r.violations.length),[]);

@@ -45,7 +45,8 @@ export function button(name: string, scope: ParentNode = document) {
 }
 export async function click(name: string, scope: ParentNode = document) { await act(() => button(name, scope).click()); }
 export function checkbox(label: string) {
-  const element = [...document.querySelectorAll('label')].find(item => item.textContent?.includes(label))?.querySelector<HTMLButtonElement>('[role=checkbox]');
+  const target = [...document.querySelectorAll('label')].find(item => item.textContent?.includes(label));
+  const element = target?.htmlFor ? document.getElementById(target.htmlFor) as HTMLInputElement | null : null;
   expect(element, `checkbox ${label}`).toBeTruthy();
   return element!;
 }

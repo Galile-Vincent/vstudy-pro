@@ -1,14 +1,14 @@
-import { Checkbox as Control } from './ui/checkbox';
 import type { ComponentProps } from 'react';
+import { CheckboxInput } from '@astryxdesign/core';
 
-type Props = Omit<ComponentProps<typeof Control>, 'onCheckedChange' | 'onChange'> & { onChange?: (event:{target:{checked:boolean}})=>void };
+type Inherited = Pick<ComponentProps<typeof CheckboxInput>, 'id' | 'aria-describedby' | 'aria-invalid' | 'style'>;
 
-export function Checkbox({ className, onChange, ...props }: Props) {
-  return (
-    <Control
-      className={className}
-      {...props}
-      onCheckedChange={checked => onChange?.({ target: { checked: checked === true } })}
-    />
-  );
+export function Checkbox({ checked, disabled, onChange, 'aria-label': label = '', ...props }: Inherited & {
+  checked?: boolean;
+  disabled?: boolean;
+  'aria-label'?: string;
+  onChange?: (event: { target: { checked: boolean } }) => void;
+}) {
+  return <CheckboxInput {...props} label={label} isLabelHidden value={checked === true}
+    isDisabled={disabled ?? false} onChange={next => onChange?.({ target: { checked: next } })} />;
 }

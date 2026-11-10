@@ -1,7 +1,7 @@
 /** Explain optional AI access without requiring a student to understand developer tools. */
 import { useTranslation } from 'react-i18next';
 import { tr } from '../shared/i18n';
-import { Button } from './components/ui/button';
+import { Button } from '@astryxdesign/core';
 import './ai-setup.css';
 
 /** Keep reading available while offering an explicit route out of unavailable AI chat. */
@@ -10,7 +10,7 @@ export function AiSetupNotice({ onSettings }: { onSettings: () => void }) {
   return <aside className="ai-setup-notice" aria-label={tr('novice:ai_off')}>
     <strong>{tr('novice:ai_off')}</strong>
     <p>{tr('novice:without_ai')}</p>
-    <Button variant="secondary" size="sm" onClick={onSettings}>{tr('novice:connect_ai')}</Button>
+    <Button label={tr('novice:connect_ai')} variant="secondary" size="sm" onClick={onSettings} />
   </aside>;
 }
 
@@ -26,6 +26,6 @@ export function AiSetupGuide({ onClose }: { onClose: () => void }) {
     <h4>{tr('novice:no_account')}</h4>
     <p>{tr('novice:ask_school')}</p>
     <blockquote>{tr('novice:school_request')}</blockquote>
-    <Button variant="secondary" size="sm" onClick={onClose}>{tr('novice:continue_reading')}</Button>
+    <Button label={tr('novice:continue_reading')} variant="secondary" size="sm" onClick={onClose} />
   </section>;
 }

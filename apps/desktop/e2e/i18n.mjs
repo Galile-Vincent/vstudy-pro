@@ -23,10 +23,10 @@ for(const language of ['en','zh-Hant','ja']) {
   await page.getByTestId('document-markdown').waitFor();
   await page.locator('.aui-composer-input').waitFor();
   await page.locator('.aui-composer-input').waitFor();
-  await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();await page.locator('.settings-tabs [role=tab]').first().click();
+  await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();await page.locator('.settings-dialog[open] .settings-tabs [role=tab]').first().click();
   await page.getByTestId('language').click();await page.getByRole('option',{name:language==='en'?'English':language==='ja'?'日本語':'繁體中文',exact:true}).click();
   await page.waitForFunction(lang=>window.document.querySelector('[data-testid=language]')?.dataset.value===lang,language);
-  await page.getByRole('button',{name:catalog.close_settings}).click();
+  await page.getByRole('button',{name:catalog.close_settings}).click();await page.locator('.settings-dialog').waitFor({state:'detached'});
   for(const width of [720,900,1200]) {
    await app.evaluate(({BrowserWindow},width)=>BrowserWindow.getAllWindows()[0].setSize(width,800),width);
    for(const colorScheme of ['light','dark']) {
@@ -38,15 +38,15 @@ for(const language of ['en','zh-Hant','ja']) {
     await page.locator('[cmdk-item]').first().waitFor();
     await page.screenshot({path:`${evidence}/${language}-${width}-${colorScheme}-picker.png`,animations:'disabled'});
     await page.keyboard.press('Escape');
-    await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();await page.locator('.settings-tabs [role=tab]').first().click();
-    await page.waitForFunction(()=>!window.document.querySelector('[data-testid=language]')?.disabled);
+    await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();await page.locator('.settings-dialog[open] .settings-tabs [role=tab]').first().click();
+    await page.waitForFunction(()=>{const select=window.document.querySelector('[data-testid=language]');return select&&!select.disabled&&select.getAttribute('aria-disabled')!=='true';});
     assert.equal(await page.getByTestId('language').getAttribute('data-value'),language);
     await page.screenshot({path:`${evidence}/${language}-${width}-${colorScheme}-settings.png`,animations:'disabled'});
-    await page.getByRole('button',{name:catalog.close_settings}).click();
+    await page.getByRole('button',{name:catalog.close_settings}).click();await page.locator('.settings-dialog').waitFor({state:'detached'});
    }
   }
   // Change language in the same running window, retaining the workspace.
-  await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();await page.locator('.settings-tabs [role=tab]').first().click();
+  await page.getByRole('button',{name:catalog.open_settings,exact:true}).click();await page.locator('.settings-dialog[open] .settings-tabs [role=tab]').first().click();
   const next=language==='en'?'ja':'en';await page.getByTestId('language').click();await page.getByRole('option',{name:next==='en'?'English':'日本語',exact:true}).click();
   await page.waitForFunction(lang=>window.document.documentElement.lang===lang,next);
   assert.deepEqual(errors,[]);console.log(`${language}: live language switch, chat/picker/settings, 720/900/1200 light/dark passed`);

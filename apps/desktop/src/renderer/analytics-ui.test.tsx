@@ -28,9 +28,9 @@ const render = (ui:React.ReactNode) => act(() => root.render(ui));
 const button = (text:string) => [...host.querySelectorAll('button')].find(b=>b.textContent===text)!;
 it('defaults off and changes consent only on an explicit settings toggle', async () => {
   await render(<AnalyticsSettings/>);
-  expect(host.querySelector('[role=switch]')?.getAttribute('aria-checked')).toBe('false');
+  expect(host.querySelector<HTMLInputElement>('[role=switch]')?.checked).toBe(false);
   expect(invoke.mock.calls.some(([c])=>c==='analytics:setConsent')).toBe(false);
-  await act(() => { (host.querySelector('[role=switch]') as HTMLButtonElement).click(); });
+  await act(() => { (host.querySelector('[role=switch]') as HTMLInputElement).click(); });
   expect(invoke).toHaveBeenCalledWith('analytics:setConsent',{enabled:true});
 });
 it('decline completes onboarding without requiring analytics', async () => {
@@ -83,7 +83,7 @@ it('shows deletion instructions without claiming the cloud data is gone', async 
   expect(invoke.mock.calls.some(([c])=>c==='analytics:requestDeletion')).toBe(false);
   await act(()=>button('Show deletion instructions').click());
   expect(host.textContent).toContain('Contact privately.');expect(host.textContent).toContain('Cloud deletion is not complete');
-  expect(host.querySelector('[role=switch]')?.getAttribute('aria-checked')).toBe('false');
+  expect(host.querySelector<HTMLInputElement>('[role=switch]')?.checked).toBe(false);
 });
 
 it('keeps a failed newsletter submission retryable and separate from continuing setup', async () => {
@@ -94,7 +94,7 @@ it('keeps a failed newsletter submission retryable and separate from continuing 
   const input=host.querySelector('input[type=email]') as HTMLInputElement;
   await act(()=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(input,'student@example.org');input.dispatchEvent(new Event('input',{bubbles:true}));});
   await act(()=>button('Subscribe').click());
-  expect(host.querySelector('[role=status]')?.textContent).toContain('continue without subscribing');
+  expect(host.querySelector('p[role=status]')?.textContent).toContain('continue without subscribing');
   expect(button('Try again').disabled).toBe(false);expect(optedIn).toBe(false);
   await completeAnalyticsOnboarding(false,{acquisition_source:'prefer_not_to_say',email_provided:true,updates_opted_in:true,duration_ms:0});
   expect(completed).toBe(true);
@@ -103,7 +103,7 @@ it('keeps a failed newsletter submission retryable and separate from continuing 
 it('a settings choice dismisses the upgrade invitation too', async () => {
   await render(<><ExistingAnalyticsPrompt/><AnalyticsSettings/></>);
   expect(host.querySelector('aside')).not.toBeNull();
-  await act(()=>(host.querySelector('[role=switch]') as HTMLButtonElement).click());
+  await act(()=>(host.querySelector('[role=switch]') as HTMLInputElement).click());
   expect(completed).toBe(false);expect(host.querySelector('aside')).toBeNull();
   expect(invoke.mock.calls.some(([c])=>c==='analytics:completeOnboarding')).toBe(false);
 });
@@ -127,7 +127,7 @@ it('refreshes the displayed installation identity when consent regenerates it',a
     return original(channel,input);
   });
   await render(<AnalyticsSettings/>);
-  await act(()=>(host.querySelector('[role=switch]') as HTMLButtonElement).click());
+  await act(()=>(host.querySelector('[role=switch]') as HTMLInputElement).click());
   expect(host.querySelector('code')?.textContent).toBe('22222222-2222-4222-a222-222222222222');
 });
 it('disables both privacy choices while locked',async()=>{

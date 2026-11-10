@@ -1,4 +1,4 @@
-import { Card, Section, SettingRow } from './components/ui';
+import { Section, SettingRow, Toolbar } from './components/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AnalyticsState } from '../shared/analytics';
@@ -6,9 +6,7 @@ import type { IpcResponse } from '../shared';
 import { WEBSITE_URL } from '../shared/website';
 import { tr } from '../shared/i18n';
 import { desktop } from './bridge';
-import { Button } from './components/ui/button';
-import { Toolbar } from './components/ui';
-import { Switch } from './components/ui/switch';
+import { Button, Card, Switch } from '@astryxdesign/core';
 
 import './analytics.css';
 export function PolicyLinks() {
@@ -24,15 +22,7 @@ export function ConsentChoice({ onChoose, busy = false }: { onChoose: (enabled: 
   return (
     <Toolbar
       center={[false, true].map(enabled => (
-        <Button
-          key={String(enabled)}
-          variant="secondary"
-          className="h-auto min-h-[var(--control-height)] flex-1 basis-44 whitespace-normal"
-          disabled={busy}
-          onClick={() => onChoose(enabled)}
-        >
-          {tr(enabled ? 'analytics:share' : 'analytics:decline')}
-        </Button>
+        <Button label={tr(enabled ? 'analytics:share' : 'analytics:decline')} variant="secondary" key={String(enabled)} className="flex-1 basis-44" isDisabled={busy} onClick={() => onChoose(enabled)} />
       ))}
     />
   );
@@ -42,7 +32,7 @@ export function ConsentSaved({ enabled, onOpenPrivacy, busy = false }: { enabled
     <div className="grid gap-[var(--space-1)]">
       <Toolbar
         left={<strong>{tr('analytics:saved_state', { state: tr(enabled ? 'analytics:state_on' : 'analytics:state_off') })}</strong>}
-        right={<Button variant="link" disabled={busy} onClick={onOpenPrivacy}>{tr('analytics:open_privacy')}</Button>}
+        right={<Button label={tr('analytics:open_privacy')} variant="ghost" isDisabled={busy} onClick={onOpenPrivacy} />}
       />
       <p className="text-[var(--muted)]">{tr('analytics:saved_hint')}</p>
     </div>
@@ -82,8 +72,8 @@ export function AnalyticsSettings() {
   const [copied, setCopied] = useState(false);
   const load = () => { setError(false); void Promise.all([desktop.invoke('analytics:getState', {}), desktop.invoke('analytics:getInstallationId', {})]).then(([s,i]) => {setState(s); setId(i.installation_id);}).catch(() => setError(true)); };
   useEffect(load, []);
-  return <Section level={3} title={tr('analytics:title')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
-    <SettingRow htmlFor="analytics-enabled" label={tr('analytics:enabled')} description={tr('analytics:off_hint')}><Switch id="analytics-enabled" checked={state?.enabled ?? false} disabled={!state || busy} onCheckedChange={enabled => {
+  return <Section level={3} title={tr('analytics:title')}><Card padding={4} className="settings-stack">
+    <SettingRow label={tr('analytics:enabled')} description={tr('analytics:off_hint')}><Switch label={tr('analytics:enabled')} isLabelHidden value={state?.enabled ?? false} isDisabled={!state || busy} onChange={enabled => {
       setBusy(true); setError(false);
       void desktop.invoke('analytics:setConsent', {enabled}).then(async next => {
         setState(next);
@@ -94,15 +84,15 @@ export function AnalyticsSettings() {
       }).catch(() => setError(true)).finally(() => setBusy(false));
     }}/></SettingRow>
     <div className="analytics-details !p-0 text-[length:var(--type-sm)] leading-normal"><AnalyticsDisclosure/><details><summary>{tr('analytics:exact')}</summary><ul>{['device','activity','ai','school'].map(key => <li key={key}>{tr(`analytics:collect_${key}`)}</li>)}</ul></details>
-    <p>{tr('analytics:installation')}</p><div className="analytics-id"><code>{id ?? tr('analytics:unavailable')}</code><Button variant="secondary" disabled={!id} onClick={() => { if (id) void navigator.clipboard.writeText(id).then(() => setCopied(true)).catch(() => setError(true)); }}>{tr('analytics:copy')}</Button></div>
+    <p>{tr('analytics:installation')}</p><div className="analytics-id"><code>{id ?? tr('analytics:unavailable')}</code><Button label={tr('analytics:copy')} variant="secondary" isDisabled={!id} onClick={() => { if (id) void navigator.clipboard.writeText(id).then(() => setCopied(true)).catch(() => setError(true)); }} /></div>
     {copied && <p role="status">{tr('analytics:copied')}</p>}
     {(state?.deletion_pending || deletion) && <p role="status">{tr('analytics:pending')}</p>}
-    <Button variant="secondary" disabled={!state || busy} onClick={() => setConfirm(true)}>{tr('analytics:delete')}</Button>
-    {confirm && <div className="analytics-deletion"><p>{tr('analytics:delete_hint')}</p><Button variant="secondary" disabled={busy} onClick={() => {
+    <Button label={tr('analytics:delete')} variant="secondary" isDisabled={!state || busy} onClick={() => setConfirm(true)} />
+    {confirm && <div className="analytics-deletion"><p>{tr('analytics:delete_hint')}</p><Button label={tr('analytics:instructions')} variant="secondary" isDisabled={busy} onClick={() => {
       setBusy(true); setError(false);
       void desktop.invoke('analytics:requestDeletion', {}).then(result => { setDeletion(result); setId(result.installation_id); setState(s => s ? {...s, enabled:false, deletion_pending:true} : s); setConfirm(false); }).catch(() => setError(true)).finally(() => setBusy(false));
-    }}>{tr('analytics:instructions')}</Button><Button variant="ghost" onClick={() => setConfirm(false)}>{tr('analytics:cancel')}</Button></div>}
+    }} /><Button label={tr('analytics:cancel')} variant="ghost" onClick={() => setConfirm(false)} /></div>}
     {deletion && <div role="status"><p>{tr('analytics:contact_instructions')}</p><blockquote lang="en">{deletion.instructions}</blockquote><a href={deletion.contact_url} onClick={e => {e.preventDefault(); void desktop.invoke('shell:openExternal', {url:deletion.contact_url}).catch(() => setError(true));}}>{tr('analytics:publisher')}</a></div>}
-    {error && <p role="alert">{tr('errors:generic')} <Button variant="ghost" onClick={load}>{tr('analytics:retry')}</Button></p>}</div>
+    {error && <p role="alert">{tr('errors:generic')} <Button label={tr('analytics:retry')} variant="ghost" onClick={load} /></p>}</div>
   </Card></Section>;
 }

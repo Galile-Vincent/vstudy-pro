@@ -1,112 +1,52 @@
-/* Settings dialog: one fixed size, fixed header and tab list, only the pane scrolls. */
-.settings-dialog.settings-dialog[data-slot=dialog-content]:not(.library-dialog) {
-  width: min(1000px, calc(100vw - var(--space-8)));
-  height: min(700px, calc(100dvh - var(--space-8)));
-  max-width: calc(100vw - var(--space-8));
-  max-height: calc(100dvh - var(--space-8));
-  padding: 0;
-  display: flex;
-  flex-direction: column;
+/* Settings dialog: Astryx Dialog, a tab strip, and one scrolling pane. */
+.settings-dialog {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
   overflow: hidden;
-  gap: 0;
-  border: 0;
-  border-radius: var(--r-lg);
-  background: var(--material-sheet);
-  box-shadow: var(--elevation-floating);
-  container: settings-shell / inline-size;
 }
 
-.settings-header {
-  height: 56px;
-  flex: none;
+.settings-body {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-inline: var(--space-6) var(--space-4);
-}
-
-.settings-header h2 {
-  font-size: var(--type-base);
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.settings-body[data-slot=tabs] {
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
-  gap: 0;
-  container: settings / inline-size;
-}
-
-.settings-tabs[data-slot=tabs-list] {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: var(--space-3);
-  justify-content: start;
   flex-direction: column;
-  align-items: stretch;
-  gap: 2px;
-  background: transparent;
+  height: min(640px, calc(100dvh - var(--spacing-8) * 4));
+  min-height: 0;
 }
 
-.settings-tabs [data-slot=tabs-trigger] {
+.settings-tabs {
   flex: none;
-  height: 36px;
-  padding: 0 var(--space-3);
-  gap: var(--space-3);
-  font-size: var(--type-base);
-  border: 0;
-  border-radius: var(--r-sm);
-  color: var(--muted);
-  box-shadow: none;
-  justify-content: flex-start;
-  transition: background-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
-}
-
-.settings-tabs [data-slot=tabs-trigger]::after {
-  display: none;
-}
-
-.settings-tabs [data-slot=tabs-trigger][data-state=active] {
-  background: var(--active);
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.settings-tabs [data-slot=tabs-trigger]:hover:not([data-state=active]) {
-  background: color-mix(in oklab, var(--ink) 5%, transparent);
-  color: var(--ink);
-}
-
-html[data-input-modality=pointer] .settings-tabs [data-slot=tabs-trigger]:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: -2px;
-  box-shadow: none;
 }
 
 .settings-pane {
+  flex: 1;
   position: relative;
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: var(--line) var(--material-sheet);
+  scrollbar-color: var(--line) transparent;
   min-width: 0;
   min-height: 0;
-  padding: var(--space-6) var(--space-8) var(--space-8);
-  mask-image: linear-gradient(to bottom, transparent, CanvasText var(--space-4), CanvasText calc(100% - var(--space-8)), transparent);
+  padding: var(--spacing-6) var(--spacing-4) var(--spacing-8);
   container: settings-pane / inline-size;
 }
 
 .settings-pane[hidden] {
   display: none;
+}
+
+@media (max-width: 40rem) {
+  .settings-pane { padding: var(--spacing-4) var(--spacing-4) var(--spacing-6); }
+}
+
+.settings-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.settings-stack[data-danger=true] { border-color: var(--danger); }
+
+.settings-stack > [data-astryx-pressable] {
+  align-self: flex-start;
 }
 
 .settings-pane-inner {
@@ -156,9 +96,9 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 }
 
 .settings-disclosure {
-  border: 0;
-  border-radius: var(--r-md);
-  background: var(--glass-tone);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-muted);
   min-width: 0;
 }
 
@@ -173,7 +113,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   color: var(--ink);
   cursor: pointer;
   list-style: none;
-  border-radius: var(--r-md);
+  border-radius: var(--radius-container);
 }
 
 .settings-disclosure > summary::-webkit-details-marker {
@@ -275,7 +215,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 .provider-status-dot {
   width: 8px;
   height: 8px;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-full);
   flex-shrink: 0;
   background: color-mix(in oklab, var(--ink) 25%, transparent);
 }
@@ -377,7 +317,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 .preview-chat {
   font-size: var(--chat-size);
   background: var(--active);
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-element);
   padding: var(--space-2) var(--space-3);
   line-height: var(--chat-leading);
 }
@@ -386,7 +326,7 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   justify-self: start;
   padding: 2px var(--space-2);
   background: var(--selection-color);
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-inner);
   font-size: var(--type-sm);
 }
 
@@ -396,26 +336,9 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 
 .storage-bytes { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted); }
 
-.settings-section-select[data-slot=select-trigger] { display:none; }
-
-@container settings-shell (width < 40rem) {
-  .settings-header { gap:var(--space-2); padding-inline:var(--space-4); height:auto; min-height:56px; }
-  .settings-header h2 { flex:none; }
-  .settings-section-select[data-slot=select-trigger] { display:flex; flex:1; min-width:0; max-width:16rem; margin-inline-start:auto; }
-  .settings-body[data-slot=tabs] { grid-template-columns:minmax(0,1fr); }
-  .settings-tabs[data-slot=tabs-list] { display:none; }
-  .settings-pane { padding:var(--space-4) var(--space-4) var(--space-6); }
-}
-
 @media (prefers-contrast: more), (forced-colors: active) {
-  .settings-disclosure,
-  .settings-pane :is(input:not([type=checkbox], [type=radio], [type=range]), textarea, [data-slot=select-trigger]) {
+  .settings-disclosure {
     border: 1px solid var(--hairline);
-  }
-  .settings-header { border-bottom: 1px solid var(--hairline); }
-  .settings-tabs[data-slot=tabs-list] { border-inline-end: 1px solid var(--hairline); }
-  .settings-pane {
-    mask-image: none;
   }
 }
 
@@ -433,4 +356,3 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 }
 
 html:is([data-theme=contrast],[data-contrast=more]) .settings-disclosure { outline:1px solid var(--hairline); outline-offset:0; }
-html:is([data-theme=contrast],[data-contrast=more]) .settings-pane { mask-image:none; }

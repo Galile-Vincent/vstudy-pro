@@ -3,9 +3,8 @@ import { useState } from 'react';
 import type { CliActionSession } from '../../shared/ai-cli';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
-import { FormField, Toolbar } from '../components/ui';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
+import { Toolbar } from '../components/ui';
+import { Button, TextInput } from '@astryxdesign/core';
 import { outputLinks, readableOutput } from './model';
 
 export function SignInAction({ session, onRetry }: { session: CliActionSession; onRetry?: () => void }) {
@@ -29,22 +28,18 @@ export function SignInAction({ session, onRetry }: { session: CliActionSession; 
   };
   return <section className="ai-cli-sign-in" data-cancelled={cancelled || undefined} aria-label={tr('ai-cli:step_login')}>
     <p role="status" className={session.phase === 'succeeded' ? 'ai-cli-success' : undefined}>{tr(session.phase === 'succeeded' ? 'ai-cli:signin_verified' : active ? sent ? 'ai-cli:code_sent' : url ? 'ai-cli:signin_waiting' : 'ai-cli:signin_preparing' : cancelled ? 'ai-cli:signin_cancelled' : `ai-cli:phase_${session.phase}`)}</p>
-    {cancelled && onRetry && <Button variant="secondary" onClick={onRetry}>{tr('ai-cli:retry_signin')}</Button>}
+    {cancelled && onRetry && <Button label={tr('ai-cli:retry_signin')} variant="secondary" onClick={onRetry} />}
     {active && <>
       {url && <Toolbar left={<>
-        <Button onClick={() => void desktop.invoke('shell:openExternal', { url }).catch(() => setError(true))}>{tr('ai-cli:open_signin')}</Button>
-        <Button variant="secondary" onClick={() => void navigator.clipboard.writeText(url).then(() => setCopied(true)).catch(() => setError(true))}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_signin_link')}</Button>
+        <Button label={tr('ai-cli:open_signin')} variant="primary" onClick={() => void desktop.invoke('shell:openExternal', { url }).catch(() => setError(true))} />
+        <Button label={tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_signin_link')} variant="secondary" onClick={() => void navigator.clipboard.writeText(url).then(() => setCopied(true)).catch(() => setError(true))} />
       </>} />}
       {deviceCode && <p className="ai-cli-device-code">{tr('ai-cli:device_code')} <code>{deviceCode}</code></p>}
       <form onSubmit={event => { event.preventDefault(); void send(); }}>
-        <FormField label={tr('ai-cli:returned_code')} description={tr('ai-cli:returned_code_help')} controlId="ai-cli-returned-code">
-          {field => (
-            <Toolbar
-              center={<Input {...field} autoComplete="off" spellCheck={false} value={code} maxLength={4094} disabled={sending} onChange={event => { setCode(event.target.value); setSent(false); }} />}
-              right={<Button type="submit" variant="secondary" disabled={sending || !code.trim()}>{tr('ai-cli:send_code')}</Button>}
-            />
-          )}
-        </FormField>
+        <Toolbar
+          center={<TextInput width="100%" label={tr('ai-cli:returned_code')} description={tr('ai-cli:returned_code_help')} autoComplete="off" hasSpellCheck={false} value={code} isDisabled={sending} onChange={value => { setCode(value); setSent(false); }} />}
+          right={<Button label={tr('ai-cli:send_code')} variant="secondary" type="submit" isDisabled={sending || !code.trim()} />}
+        />
       </form>
     </>}
     {error && <p role="alert">{tr('ai-cli:terminal_error')}</p>}

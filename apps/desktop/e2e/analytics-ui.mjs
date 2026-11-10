@@ -41,9 +41,9 @@ for (const language of ['en','zh-Hant','ja']) for (const colorScheme of ['light'
     const privacy=page.getByTestId('privacy-settings');await privacy.waitFor();
     await privacy.locator('summary').filter({hasText:copy.exact}).click();
     const toggle=privacy.getByRole('switch',{name:copy.enabled,exact:true});
-    assert.equal(await toggle.getAttribute('aria-checked'),'false');
-    await toggle.click();await page.waitForFunction(()=>window.document.querySelector('[data-testid=privacy-settings] [role=switch]')?.getAttribute('aria-checked')==='true');
-    await toggle.click();await page.waitForFunction(()=>window.document.querySelector('[data-testid=privacy-settings] [role=switch]')?.getAttribute('aria-checked')==='false');
+    assert.equal(await toggle.isChecked(),false);
+    await toggle.click();await page.waitForFunction(()=>window.document.querySelector('[data-testid=privacy-settings] [role=switch]')?.checked===true);
+    await toggle.click();await page.waitForFunction(()=>window.document.querySelector('[data-testid=privacy-settings] [role=switch]')?.checked===false);
     await page.screenshot({path:join(evidence,`${language}-${colorScheme}-privacy.png`)});
     await privacy.getByRole('button',{name:copy.delete,exact:true}).scrollIntoViewIfNeeded();
     await page.screenshot({path:join(evidence,`${language}-${colorScheme}-privacy-id.png`)});

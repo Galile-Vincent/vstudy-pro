@@ -17,7 +17,7 @@ try {
  await page.locator('.home-page').waitFor();assert.equal(await page.locator('.welcome').count(),0);assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).welcomeSeen,false);results.noAutomaticTour=true;
  await page.evaluate(()=>window.dispatchEvent(new window.Event('vstudy:open-settings')));
  await page.locator('#welcome-settings-entry').click();await page.locator('.welcome').waitFor();
- await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('.settings-dialog[data-state=open] #welcome-settings-entry:focus').waitFor();results.settingsReturnFocus=true;
+ await page.getByRole('button',{name:'Close',exact:true}).click();await page.locator('.settings-dialog[open] #welcome-settings-entry:focus').waitFor();results.settingsReturnFocus=true;
  await page.getByRole('button',{name:'Close settings',exact:true}).click();await page.locator('#welcome-entry').click();
  await page.locator('#welcome-title').focus();await page.keyboard.press('Tab');await page.evaluate(()=>new Promise(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(resolve))));assert.equal(await page.locator('#welcome-pause').evaluate(e=>e===window.document.activeElement),true);results.pauseFirstTab=true;
  await page.getByRole('button',{name:'Pause animations',exact:true}).click();assert.equal(await page.locator('.welcome').getAttribute('data-motion'),'paused');
@@ -33,7 +33,7 @@ try {
 
  await page.getByRole('button',{name:'Go to Models',exact:true}).click();
  await page.getByRole('button',{name:'Set up a model',exact:true}).click();
- await page.locator('.settings-dialog[data-state=open]').waitFor();
+ await page.locator('.settings-dialog[open]').waitFor();
  await page.keyboard.press('Escape');
  await page.locator('.settings-dialog').waitFor({state:'hidden'});
  await page.locator('.welcome').waitFor();results.settingsEscapeKeepsTour=true;
