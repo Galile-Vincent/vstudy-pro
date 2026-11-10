@@ -2,8 +2,11 @@
 
 import { AuiIf, useAuiState, ThreadPrimitive } from "@assistant-ui/react";
 import { useCallback, useEffect, useRef, useState, type FC } from "react";
+import { useTranslation } from "react-i18next";
+import { localizeSuggestion } from "../../../chat-suggestions";
 
 const FollowupSuggestionsRow: FC = () => {
+  useTranslation();
   const suggestions = useAuiState((s) => s.thread.suggestions);
   const scrollRef = useRef<HTMLDivElement>(null);
   const rtlRef = useRef<boolean | null>(null);
@@ -53,10 +56,10 @@ const FollowupSuggestionsRow: FC = () => {
           <ThreadPrimitive.Suggestion
             key={idx}
             className="aui-thread-followup-suggestion border-foreground/10 hover:bg-foreground/[0.03] hover:border-foreground/25 rounded-md border px-2.5 py-1 text-sm whitespace-normal break-words transition-colors ease-in motion-reduce:transition-none"
-            prompt={suggestion.prompt}
+            prompt={localizeSuggestion(suggestion.prompt)}
             send
           >
-            {suggestion.title ?? suggestion.prompt}
+            {localizeSuggestion(suggestion.title ?? suggestion.prompt)}
             {suggestion.label && (
               <span className="aui-thread-followup-suggestion-label text-muted-foreground ms-1">
                 {suggestion.label}

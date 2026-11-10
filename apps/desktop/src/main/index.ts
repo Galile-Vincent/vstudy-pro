@@ -20,6 +20,8 @@ import { showAttachedMessage, showStartupError, type StartupStage } from './dial
 import { readWindowState, trackWindowState } from './window-state';
 import { coordinateShutdown } from './shutdown';
 import { acquireOwnership, restartOwnedApp } from './ownership';
+import { coordinateDraftClose, createDraftFlush } from './review/draft-flush';
+import { draftFlushAckChannel, draftFlushAckSchema, draftFlushRequestChannel } from '../shared/review-generate';
 import { tr } from './i18n';
 import { realpathSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -30,6 +32,7 @@ import { pathToFileURL } from "node:url";
 import { mkdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { openStore, type Store } from "./db";
+import { createUpdates } from './updates/runtime';
 import { registerIpc } from "./ipc";
 import { createWindowsStatePersistence } from "./mcp/windows-state";
 import { createSecretStore } from "./services/secrets";
@@ -210,6 +213,7 @@ async function createWindow(show = true): Promise<void> {
     unresponsiveTimeout.unref();
   });
   current.on('responsive', cancelUnresponsive);
+  coordinateDraftClose(current, () => flushWindowDrafts(current), () => quitting);
   current.on("closed", () => {
     cancelUnresponsive();
     clearTimeout(showTimeout);
@@ -296,6 +300,10 @@ if (ownsApplication) void app.whenReady().then(async () => {
       },
     }),
   );
+  let updaterWindowShown = () => {};
+  const updaterReady = new Promise<void>(resolve => { updaterWindowShown = resolve; });
+  let deleteRequested = false;
+  const updates = createUpdates(store, updaterReady);
   disposeIpc = registerIpc(
     store,
     secrets,
@@ -305,7 +313,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
     restoreMainWindow,
-    process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {},
+    { updates, canInstallUpdate: () => !deleteRequested && !deletingData && deletionFinished && cleanupFinished && !quitting, ...(process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {}) },
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deletionStatus');
@@ -340,9 +348,8 @@ if (ownsApplication) void app.whenReady().then(async () => {
       buttons:[tr('common:close')],
     });
   }, () => { restartOwnedApp(app); });
-  let deleteRequested = false;
   deletion.handle('settings:deleteAllData', async (_request, event) => {
-    if (deleteRequested) throw Error('VSTUDY_STATUS:' + JSON.stringify({
+    if (deleteRequested || updates.snapshot().installing || quitting) throw Error('VSTUDY_STATUS:' + JSON.stringify({
       code:'settings.delete_in_progress', params:{},
     }));
     deleteRequested = true;
@@ -361,6 +368,7 @@ if (ownsApplication) void app.whenReady().then(async () => {
   });
   startupStage = 'window';
   await createWindow(!process.argv.includes('--mcp-background'));
+  updaterWindowShown();
   analytics()?.track('app_performance_sample',{startup_ms:Math.round(performance.now()-analyticsStartup)});
   if (distributionSmokeRoot) { await runDistributionSmoke(window!, store!, distributionSmokeRoot); return; }
   await confirmRestoreStartup(userData);
@@ -380,8 +388,29 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 let quitting = false;
+function flushWindowDrafts(target: BrowserWindow) {
+ return createDraftFlush({
+  send: requestId => {
+    if (target.isDestroyed() || target.webContents.isLoading()) return false;
+    target.webContents.send(draftFlushRequestChannel, requestId);
+    return true;
+  },
+  listen: acknowledged => {
+    const receive = (event: Electron.IpcMainEvent, payload: unknown) => {
+      const id = draftFlushAckSchema.safeParse(payload);
+      if (id.success && !target.isDestroyed() && event.sender === target.webContents && event.senderFrame === target.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl)) acknowledged(id.data.requestId, id.data.status);
+    };
+    ipcMain.on(draftFlushAckChannel, receive);
+    return () => { ipcMain.removeListener(draftFlushAckChannel, receive); };
+  },
+ })().then(outcome => {
+  log({ phase: 'draft-flush', outcome });
+  return outcome;
+ });
+}
+const flushRendererDrafts = () => Promise.all(BrowserWindow.getAllWindows().map(flushWindowDrafts));
 const shutdown = coordinateShutdown({
-  stopWork: async () => { await disposeIpc?.(); await telemetry?.stop(); },
+  stopWork: async () => { await flushRendererDrafts(); await disposeIpc?.(); await telemetry?.stop(); },
   flush: () => { if (app.isReady()) session.defaultSession.flushStorageData(); },
   close: () => { store?.close(); store = undefined; },
   quit: () => { quitting = true; app.quit(); },

@@ -8,25 +8,26 @@ import { id, seedStudent } from '../planner/__fixtures__/student';
 let registerIpc: typeof import('./index').registerIpc;
 
 const mocks=vi.hoisted(()=>({
-  chatDispose:vi.fn(), focused:vi.fn(), save:vi.fn(), write:vi.fn(),
+  chatDispose:vi.fn(), focused:vi.fn(), save:vi.fn(), write:vi.fn(), confirm:vi.fn(), external:vi.fn(), idle:vi.fn(async()=>{}),
   exportCalendar:undefined as McpBackendOptions['exportCalendar'] | undefined,
 }));
 vi.mock('electron',()=>({
   app:{getPath:()=>'/unused',getAppPath:()=>'/unused',once:vi.fn(),removeListener:vi.fn()},
-  BrowserWindow:{getFocusedWindow:mocks.focused},dialog:{showSaveDialog:mocks.save},
-  nativeTheme:{},shell:{},ipcMain:{handle:vi.fn(),removeHandler:vi.fn()},
+  BrowserWindow:{getFocusedWindow:mocks.focused,getAllWindows:()=>[]},dialog:{showSaveDialog:mocks.save},
+  nativeTheme:{},shell:{openExternal:mocks.external},ipcMain:{handle:vi.fn(),removeHandler:vi.fn()},
 }));
+vi.mock('../dialogs',()=>({showAttachedMessage:mocks.confirm,ownerWindow:vi.fn()}));
 vi.mock('../providers/executable-pins',()=>({ExecutablePins:class {},setExecutablePins:vi.fn()}));
 vi.mock('../providers',()=>({createProviderRegistry:()=>({})}));
 vi.mock('../i18n',()=>({tr:(key:string)=>key,updateApplicationMenu:vi.fn()}));
 vi.mock('./usage',()=>({registerUsageIpc:vi.fn()}));
-vi.mock('./chat',()=>({registerChatIpc:()=>({dispose:mocks.chatDispose})}));
+vi.mock('./chat',()=>({registerChatIpc:()=>({dispose:mocks.chatDispose,waitForIdle:mocks.idle})}));
 vi.mock('./ai-cli',()=>({registerAiCliIpc:()=>vi.fn()}));
-vi.mock('./documents',()=>({registerDocumentsIpc:()=>vi.fn()}));
+vi.mock('./documents',()=>({registerDocumentsIpc:()=>Object.assign(vi.fn(),{waitForIdle:mocks.idle})}));
 vi.mock('./planner',()=>({registerPlannerIpc:()=>vi.fn()}));
-vi.mock('./moodle',()=>({registerMoodleIpc:()=>Object.assign(vi.fn(),{service:{repository:{}}})}));
+vi.mock('./moodle',()=>({registerMoodleIpc:()=>Object.assign(vi.fn(),{waitForIdle:mocks.idle,service:{repository:{}}})}));
 vi.mock('./mcp',()=>({registerMcpIpc:vi.fn()}));
-vi.mock('./library',()=>({registerLibraryIpc:()=>Object.assign(vi.fn(),{waitForIdle:vi.fn()})}));
+vi.mock('./library',()=>({registerLibraryIpc:()=>Object.assign(vi.fn(),{waitForIdle:mocks.idle})}));
 vi.mock('./storage',()=>({registerStorageIpc:vi.fn()}));
 vi.mock('../mcp/client-setup',()=>({createAgentClientSetup:vi.fn()}));
 vi.mock('../mcp/backend',()=>({createMcpBackend:(options:McpBackendOptions)=>{
@@ -38,7 +39,7 @@ vi.mock('../mcp/runtime',()=>({createMcpRuntime:(options:{backend:()=>unknown})=
   return {restore:vi.fn(),dispose:vi.fn()};
 }}));
 vi.mock('../services/export-file',()=>({exportText:mocks.write}));
-vi.mock('../services/search-runner',()=>({disposeSearchWorkers:vi.fn()}));
+vi.mock('../services/search-runner',()=>({disposeSearchWorkers:vi.fn(),waitForSearchWorkers:vi.fn(async()=>{})}));
 vi.mock('../providers/models',()=>({disposeDiscovery:vi.fn()}));
 
 const stores:ReturnType<typeof openStore>[]=[];
@@ -123,4 +124,78 @@ it('removes IPC and starts chat cancellation before deletion waits on review dis
     expect(ipcMain.removeHandler).toHaveBeenCalled();
     expect(mocks.chatDispose).toHaveBeenCalledOnce();
   } finally {release();await pending;}
+});
+
+it('wires all update channels, filters push owners, confirms notes and protects stored opt-out',async()=>{
+  const {ipcMain}=await import('electron');
+  const store=openStore(':memory:');stores.push(store);
+  const snapshot={state:{status:'available',version:'0.4.5',releaseUrl:'https://github.com/ava-apple/vstudy-pro/releases/tag/v0.4.5'},
+    currentVersion:'0.4.4',lastCheckedAt:null,automatic:false};
+  let listener: (value:unknown)=>void=()=>{};
+  const updates={snapshot:()=>snapshot,subscribe:vi.fn(fn=>{listener=fn;return ()=>{};}),
+    check:vi.fn(()=>snapshot),download:vi.fn(()=>snapshot),install:vi.fn(()=>snapshot),
+    waitForWork:vi.fn(async (work:()=>Promise<void>)=>{await work();return true;}),
+    cancelWait:vi.fn(()=>snapshot),setAuto:vi.fn(()=>snapshot),dispose:vi.fn()};
+  const frame={url:'app://index'};
+  const sender={id:1,mainFrame:frame,isDestroyed:()=>false,send:vi.fn()};
+  let trusted=true;
+  const event={sender,senderFrame:frame};
+  const dispose=registerIpc(store,{} as SecretStore,()=>trusted,async()=>undefined,{updates:updates as never});
+  const handlers=new Map(vi.mocked(ipcMain.handle).mock.calls);
+  try {
+    const channels=['state','check','download','install','cancel','setAuto','notes'];
+    for(const channel of channels)expect(handlers.has(`updates:${channel}`)).toBe(true);
+    await handlers.get('updates:state')!(event as never,{});
+    listener(snapshot);expect(sender.send).toHaveBeenCalledWith('updates:state',snapshot);
+    trusted=false;listener(snapshot);expect(sender.send).toHaveBeenCalledTimes(1);
+    await expect(handlers.get('updates:check')!(event as never,{})).rejects.toThrow('Untrusted');
+    trusted=true;mocks.confirm.mockResolvedValue({response:0});
+    await handlers.get('updates:notes')!(event as never,{});expect(mocks.external).not.toHaveBeenCalled();
+    mocks.confirm.mockResolvedValue({response:1});
+    await handlers.get('updates:notes')!(event as never,{});
+    expect(mocks.external).toHaveBeenCalledWith(snapshot.state.releaseUrl);
+    mocks.confirm.mockResolvedValue({response:0});
+    await handlers.get('updates:download')!(event as never,{});expect(updates.download).not.toHaveBeenCalled();
+    snapshot.state={status:'ready',version:'0.4.5'} as typeof snapshot.state;
+    await handlers.get('updates:install')!(event as never,{});expect(updates.install).not.toHaveBeenCalled();
+    const dialogs = mocks.confirm.mock.calls.length;
+    await handlers.get('updates:download')!(event as never,{});
+    expect(mocks.confirm).toHaveBeenCalledTimes(dialogs);
+    let consent: (value:{response:number})=>void = ()=>{};
+    mocks.confirm.mockImplementationOnce(()=>new Promise(resolve=>{consent=resolve;}));
+    let finish=()=>{};const drain=new Promise<void>(resolve=>{finish=resolve;});
+    mocks.idle.mockImplementationOnce(()=>drain);
+    const installing=handlers.get('updates:install')!(event as never,{});
+    await Promise.resolve();expect(updates.install).not.toHaveBeenCalled();
+    await handlers.get('updates:install')!(event as never,{});
+    expect(mocks.confirm).toHaveBeenCalledTimes(dialogs+1);
+    const {exclusiveStorage}=await import('../storage/maintenance');
+    await expect(exclusiveStorage(async()=>{},async()=>true)).resolves.toBe(true);
+    consent({response:1});
+    await Promise.resolve();await Promise.resolve();
+    await handlers.get('updates:install')!(event as never,{});
+    expect(updates.waitForWork).toHaveBeenCalledOnce();
+    finish();await installing;expect(mocks.idle).toHaveBeenCalledTimes(4);
+    expect(updates.install).toHaveBeenCalledOnce();
+    store.settings.set({autoCheckUpdates:false});
+    await handlers.get('settings:set')!(event as never,{...store.settings.get(),autoCheckUpdates:true});
+    expect(store.settings.get().autoCheckUpdates).toBe(false);
+  }finally{await dispose();}
+});
+
+it.each(['before consent','during drain'])('blocks update installation when deletion starts %s',async phase=>{
+  const {ipcMain}=await import('electron');
+  const store=openStore(':memory:');stores.push(store);
+  const snapshot={state:{status:'ready',version:'0.4.5'},currentVersion:'0.4.4',lastCheckedAt:null,automatic:false};
+  let allowed=phase!=='before consent';
+  const updates={snapshot:()=>snapshot,subscribe:()=>()=>{},dispose:vi.fn(),install:vi.fn(()=>snapshot),
+    waitForWork:vi.fn(async()=>{allowed=false;return true;})};
+  const dispose=registerIpc(store,{} as SecretStore,()=>true,undefined,{updates:updates as never,canInstallUpdate:()=>allowed});
+  mocks.confirm.mockResolvedValue({response:1});
+  const handler=new Map(vi.mocked(ipcMain.handle).mock.calls).get('updates:install')!;
+  try {
+    await handler({sender:{isDestroyed:()=>false}} as never,{});
+    expect(updates.install).not.toHaveBeenCalled();
+    expect(mocks.confirm).toHaveBeenCalledTimes(phase==='before consent'?0:1);
+  }finally{await dispose();}
 });

@@ -10,6 +10,7 @@ import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { installSchoolFixture } from './ux-fixture.mjs';
+import { onboardingForward } from './helpers/onboarding.mjs';
 const evidence = resolve('../../docs/evidence/ux');
 const profile = await mkdtemp(join(tmpdir(), 'vstudy-ux-audit-'));
 const phase = process.env.UX_PHASE ?? 'after';
@@ -71,7 +72,7 @@ try {
   await language('en-XA');
   await capture('guide-pseudo-min');
   await language('en');
-  for (let step=1;step<6;step++) { await page.locator('.onboarding footer .primary').click(); await capture(`guide-step-${step}-min`); }
+  for (let step=1;step<6;step++) { await onboardingForward(page).click(); await capture(`guide-step-${step}-min`); }
   await page.keyboard.press('Escape');
   await page.locator('.onboarding').waitFor({state:'detached'});
   await capture('home-fresh-min',true);

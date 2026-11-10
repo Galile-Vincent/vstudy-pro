@@ -1,0 +1,8 @@
+.aui-thread-root,
+.aui-thread-root [data-slot=aui_thread-viewport],
+.aui-thread-root [data-slot=aui_thread-viewport] > div,
+.aui-thread-root [data-message-id],
+.aui-thread-root [data-slot=aui_message-content],
+.aui-thread-root .aui-md { min-width: 0; }
+.aui-thread-root [data-slot=aui_thread-viewport] { min-height: 0; }
+.aui-thread-root .aui-md pre { overflow-x: auto; max-width: 100%; }

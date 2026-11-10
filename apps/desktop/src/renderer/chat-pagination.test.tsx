@@ -68,6 +68,7 @@ it.each([false,true])('reports a missing finder target when the cursor is exhaus
   mount([message('recent')],hasOlderPage?{id:'recent',createdAt:'2026-11-02T00:00:00Z'}:null,'deleted-target');
   expect((await screen.findByRole('status')).textContent).toBe(tr('history:message_not_found'));
   expect(bridge.invoke).toHaveBeenCalledTimes(hasOlderPage?1:0);
+  expect(screen.queryByRole('group', {name: tr('common:load_earlier_messages')})).toBeNull();
   expect(screen.queryByRole('button',{name:tr('common:load_earlier_messages')})).toBeNull();
   expect(screen.getByText('recent')).toBeTruthy();
 });
@@ -85,4 +86,58 @@ it('sends explicit branch context once the final earlier page is loaded',async()
   fireEvent.change(screen.getByRole('textbox'),{target:{value:'Follow up'}});
   fireEvent.click(screen.getByRole('button',{name:'Send'}));
   await waitFor(()=>expect(bridge.invoke).toHaveBeenCalledWith('chat:start',expect.objectContaining({contextTurnIds:['old-question','recent-question']})));
+});
+
+it('moves focus to the first newly loaded message when the final page removes the button', async () => {
+  await i18n.changeLanguage('en');
+  bridge.invoke.mockResolvedValue({items: [message('old-first'), message('old-second')], nextCursor: null});
+  mount([message('recent')], {id: 'recent', createdAt: '2026-11-02T00:00:00Z'});
+  const button = screen.getByRole('button', {name: tr('common:load_earlier_messages')});
+  button.focus();
+  fireEvent.click(button);
+  await waitFor(() => expect(document.activeElement?.getAttribute('data-message-id')).toBe('old-first'));
+  expect(screen.queryByRole('button', {name: tr('common:load_earlier_messages')})).toBeNull();
+});
+
+it.each([{items: []}, {items: [message('recent')]}])('does not steal composer focus after an exhausted page: %j', async ({items}) => {
+  await i18n.changeLanguage('en');
+  bridge.invoke.mockImplementation(async channel => {
+    if (channel === 'messages:page') return {items, nextCursor: null};
+    if (channel === 'chat:start') bridge.listener?.({type: 'done'});
+    return {ok: true};
+  });
+  mount([message('recent')], {id: 'recent', createdAt: '2026-11-02T00:00:00Z'});
+  const button = screen.getByRole('button', {name: tr('common:load_earlier_messages')});
+  button.focus();
+  fireEvent.click(button);
+  await waitFor(() => expect(screen.queryByRole('button', {name: tr('common:load_earlier_messages')})).toBeNull());
+  const input = screen.getByRole('textbox');
+  input.focus();
+  fireEvent.change(input, {target: {value: 'Follow up'}});
+  fireEvent.click(screen.getByRole('button', {name: 'Send'}));
+  await screen.findByText('Follow up');
+  expect(document.activeElement).toBe(input);
+});
+it('does not expose an earlier-messages group without a cursor', () => {
+  mount([message('recent')]);
+  expect(screen.queryByRole('group', {name: tr('common:load_earlier_messages')})).toBeNull();
+});
+it.each([false, true])('only scrolls newly focused history when outside the viewport: %s', async outside => {
+  const scroll = vi.fn();
+  const focus = vi.spyOn(HTMLElement.prototype, 'focus');
+  const bounds = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+    return {top: this.dataset.messageId === 'old-first' && outside ? -10 : 10, bottom: 20} as DOMRect;
+  });
+  Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {configurable: true, value: scroll});
+  bridge.invoke.mockResolvedValue({items: [message('old-first')], nextCursor: null});
+  try {
+    mount([message('recent')], {id: 'recent', createdAt: '2026-11-02T00:00:00Z'});
+    const button = screen.getByRole('button', {name: tr('common:load_earlier_messages')});
+    button.focus();
+    fireEvent.click(button);
+    await waitFor(() => expect(document.activeElement?.getAttribute('data-message-id')).toBe('old-first'));
+    expect(focus).toHaveBeenCalledWith({preventScroll: true});
+    expect(scroll.mock.calls.filter(([options]) => options?.block === 'nearest')).toHaveLength(outside ? 1 : 0);
+    expect(screen.queryByRole('group', {name: tr('common:load_earlier_messages')})).toBeNull();
+  } finally { focus.mockRestore(); bounds.mockRestore(); }
 });

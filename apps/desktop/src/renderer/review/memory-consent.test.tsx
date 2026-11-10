@@ -21,6 +21,8 @@ it.each([['en', en], ['ja', ja], ['zh-Hant', zhHant]] as const)('discloses what 
   render(<Card />);
   expect(await screen.findByText(catalog.memory_disclosure)).toBeTruthy();
   expect(screen.getByRole('heading', { name: catalog.consent_title })).toBeTruthy();
+  expect(screen.getAllByRole('region', {name: catalog.consent_title})).toHaveLength(1);
+  expect(screen.getAllByRole('region')).toHaveLength(1);
   expect(invoke).not.toHaveBeenCalledWith('review:prefs:set', expect.anything());
   fireEvent.click(screen.getByRole('button', { name: catalog.consent_turn_on }));
   await waitFor(() => expect(invoke).toHaveBeenCalledWith('review:prefs:set', { memoryEnabled: true, consentAcknowledged: true }));

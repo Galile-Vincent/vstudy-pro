@@ -22,7 +22,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   assert.equal(await page.locator('.w-content>section').count(),7);
   assert.equal((await page.evaluate(()=>window.desktop.invoke('settings:get',{}))).welcomeSeen,true);
   const capture=async(width,theme,section)=>{await page.locator(`#welcome-${section}`).evaluate(e=>e.scrollIntoView({behavior:'instant',block:'start'}));await page.waitForTimeout(100);const path=`${evidence}/${language}-${width}-${theme}-${section}.png`;await page.screenshot({path});screenshots.push({language,width,theme,section,path});if(section==='hero') {
-   const geometry=await page.locator('.hero-stack').evaluate(e=>{const cards=[...e.querySelectorAll('.w-glass')];return cards.slice(0,-1).map((card,i)=>({textBottom:Math.max(...[...card.children].map(c=>c.getBoundingClientRect().bottom)),nextTop:cards[i+1].getBoundingClientRect().top}));});
+   const geometry=await page.locator('.hero-stack').evaluate(e=>{const cards=[...e.querySelectorAll('[data-slot=card]')];return cards.slice(0,-1).map((card,i)=>({textBottom:Math.max(...[...card.children].map(c=>c.getBoundingClientRect().bottom)),nextTop:cards[i+1].getBoundingClientRect().top}));});
    assert.ok(geometry.every(g=>g.textBottom<=g.nextTop),JSON.stringify({language,width,theme,geometry}));
   }
   if(section==='who')assert.ok(await page.locator('.w-first strong').evaluateAll(nodes=>nodes.every(n=>parseFloat(window.getComputedStyle(n).fontSize)>= (window.document.documentElement.lang==='en'?12:13))));
@@ -40,7 +40,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
         if(signature==='hover')await page.locator('#welcome-who').evaluate(e=>e.scrollIntoView({behavior:'instant',block:'center'}));
         const started=Date.now();
         for(let frame=0;frame<12;frame++){
-          if(signature==='hover'){const box=await page.locator('.w-personas .w-glass').first().boundingBox();await page.mouse.move(box.x+20+frame*8,box.y+40);}
+          if(signature==='hover'){const box=await page.locator('.w-personas [data-slot=card]').first().boundingBox();await page.mouse.move(box.x+20+frame*8,box.y+40);}
           const path=`${evidence}/${language}-${width}-${theme}-${signature}-frame-${String(frame).padStart(2,'0')}.png`;
           await page.screenshot({path});screenshots.push({language,width,theme,signature,frame,elapsedMs:Date.now()-started,path});await page.waitForTimeout(signature==='demo'?900:signature==='hero'?100:16);
         }
@@ -88,7 +88,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
     for(const signature of ['hero','demo','hover','transition']) {
      if(signature==='hero'||signature==='transition'){await page.getByRole('button',{name:copy.close,exact:true}).click();await page.locator('#welcome-entry').waitFor();await page.locator('#welcome-entry').click();}
      if(signature==='demo'){await page.locator('#welcome-demo').evaluate(e=>e.scrollIntoView({behavior:'instant',block:'center'}));await page.getByRole('button',{name:copy.demo_replay,exact:true}).click();}
-     if(signature==='hover'){await page.locator('#welcome-who').evaluate(e=>e.scrollIntoView({behavior:'instant',block:'center'}));await page.locator('.w-personas .w-glass').first().hover();}
+     if(signature==='hover'){await page.locator('#welcome-who').evaluate(e=>e.scrollIntoView({behavior:'instant',block:'center'}));await page.locator('.w-personas [data-slot=card]').first().hover();}
      for(let frame=0;frame<12;frame++){const path=`${evidence}/${theme}-${signature}-${String(frame).padStart(2,'0')}.png`;await page.screenshot({path});screenshots.push({theme,signature,frame,path});await page.waitForTimeout(signature==='demo'?900:25);}
     }
    }

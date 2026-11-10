@@ -1,9 +1,11 @@
 /** Stage architecture-specific release assets and assemble a complete, checksum-verified release. */
+import {parseFeed} from '../src/main/updates/validate.mjs';
+import { parseUpdateInfo } from 'electron-updater/out/providers/Provider.js';
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { appendFile, copyFile, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { basename, join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { URL, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { assetNames, releaseVersion, targetFor, targetsFor } from './release-contract.mjs';
 import { validateSmokeReport } from './distribution-smoke.mjs';
@@ -51,10 +53,23 @@ export async function stageAssets({ target, version, input, smoke, output, env =
   }
   const date = new Date().toISOString();
   const metadata = target.platform === 'mac' ? 'latest-mac.yml' : 'latest.yml';
-  await copyFile(join(input, metadata), join(output, `latest-${target.key}.yml`));
-  if (target.key === 'mac-arm64' || target.key === 'win-x64') {
-    await copyFile(join(input, metadata), join(output, metadata));
+  const raw = await readFile(join(input,metadata),'utf8');
+  if (raw.length > 65536 || /[&*!]/.test(raw)) throw new Error('Unsafe update metadata');
+  const feed = parseUpdateInfo(raw,metadata,new URL('https://github.com/'));
+  if (feed.version !== version || !Array.isArray(feed.files) || !feed.files.length) throw new Error('Invalid update metadata');
+  for (const file of feed.files) {
+    if (![names.installer,names.archive].includes(file.url) ||
+      file.sha512 !== await digest(join(output,file.url),'sha512','base64') ||
+      file.size !== (await stat(join(output,file.url))).size) throw new Error('Invalid update metadata');
   }
+  const payload = target.platform === 'mac' ? names.archive : names.installer;
+  const selected = feed.files.find(file=>file.url === payload);
+  if (!selected) throw new Error('Missing update payload');
+  const content = JSON.stringify({version,path:payload,sha512:selected.sha512,
+    releaseDate:typeof feed.releaseDate === 'string' ? feed.releaseDate : date,
+    files:[{url:payload,sha512:selected.sha512,size:selected.size}]},null,2) + '\n';
+  await writeFile(join(output,`latest-${target.key}.yml`),content);
+  if (target.key === 'mac-arm64' || target.key === 'win-x64') await writeFile(join(output,metadata),content);
   const label = signing.signed ? 'signed' : 'unsigned';
   const provenance = {
     schemaVersion: 1, version, target: target.key, platform: target.platform, arch: target.arch, signing,
@@ -64,7 +79,7 @@ export async function stageAssets({ target, version, input, smoke, output, env =
   };
   await writeJson(join(output, `VStudy-Pro-${version}-${target.key}.provenance.json`), provenance);
   await writeFile(join(output, `VStudy-Pro-${version}-${target.key}.build-notes.txt`),
-    `${target.key} ${version}: ${label}, mode ${signing.mode}.\n${signing.notarized ? 'Mac notarization completed.' : 'No Mac notarization claim for this target.'}\nPackaged window, renderer, and native node:sqlite durability smoke passed.\nConverter resources and existing executable availability were probed. No converter download or conversion was performed.\nAuto-update is not enabled.\n`);
+    `${target.key} ${version}: ${label}, mode ${signing.mode}.\n${signing.notarized ? 'Mac notarization completed.' : 'No Mac notarization claim for this target.'}\nPackaged window, renderer, and native node:sqlite durability smoke passed.\nConverter resources and existing executable availability were probed. No converter download or conversion was performed.\nIn-app updates require a supported installation; see docs/UPDATES.md.\n`);
   const assets = await inventory(output);
   await writeJson(join(output, `target-${target.key}.json`), { schemaVersion: 1, version, target: target.key, signing, assets });
   if (env.GITHUB_OUTPUT) await appendFile(env.GITHUB_OUTPUT, `label=${label}\n`);
@@ -101,12 +116,31 @@ export async function assembleAssets({ version, input, output, notes, scope = 'r
     for (const file of actualFiles) await copyFile(join(directory, file), join(output, file));
     builds.push(manifest);
   }
+  for (const target of targets) {
+    const names = assetNames(target, version);
+    const metadata = `latest-${target.key}.yml`;
+    const payload = target.platform === 'mac' ? names.archive : names.installer;
+    for (const file of [metadata, ...(target.key === 'mac-arm64' ? ['latest-mac.yml'] : target.key === 'win-x64' ? ['latest.yml'] : []), names.archive, payload, `${payload}.blockmap`]) {
+      if (!(await stat(join(output, file))).size) throw new Error(`Missing update asset: ${file}`);
+    }
+    const feed = await readFile(join(output, metadata), 'utf8');
+    const info = parseFeed(feed, payload.slice(`VStudy-Pro-${version}-`.length));
+    const hash = await digest(join(output,payload),'sha512','base64');
+    const size = (await stat(join(output,payload))).size;
+    if (info.version !== version || info.path !== payload || info.sha512 !== hash ||
+      !Array.isArray(info.files) || !info.files.length || info.files.some(file =>
+        file.url !== payload || file.sha512 !== hash || file.size !== size)) {
+      throw new Error(`Invalid update metadata for ${payload}`);
+    }
+    const alias = target.key === 'mac-arm64' ? 'latest-mac.yml' : target.key === 'win-x64' ? 'latest.yml' : null;
+    if (alias && await readFile(join(output,alias),'utf8') !== feed) throw new Error(`Mismatched alias ${alias}`);
+  }
   await writeJson(join(output, 'distribution-manifest.json'), { schemaVersion: 1, version, scope, builds });
   const assets = await inventory(output);
   await writeFile(join(output, 'SHA256SUMS.txt'), assets.map(asset => `${asset.sha256}  ${asset.file}\n`).join(''));
   const releaseNotes = await readFile(notes, 'utf8');
   const statuses = builds.map(build => `| ${build.target} | ${build.signing.signed ? 'Signed' : 'Unsigned'} | ${build.signing.mode} | Passed |`).join('\n');
-  return `${releaseNotes.trim()}\n\n## Build verification\n\n| Target | Signing | Mode | Packaged smoke |\n| --- | --- | --- | --- |\n${statuses}\n\nUnsigned artifacts have no trusted publisher signature. Mac unsigned bundles use an ad-hoc signature and are not notarized. Stable installer filenames are identical across signing modes.\n\nSmoke launches the packaged application, creates a window, mounts the renderer, and checks native node:sqlite integrity and durable writes. Converter checks only probe bundled resources and existing executables. They do not download dependencies or establish conversion support. Auto-update is not enabled.\n\nSee SHA256SUMS.txt and the per-target provenance files for asset integrity and build details.\n`;
+  return `${releaseNotes.trim()}\n\n## Build verification\n\n| Target | Signing | Mode | Packaged smoke |\n| --- | --- | --- | --- |\n${statuses}\n\nUnsigned artifacts have no trusted publisher signature. Mac unsigned bundles use an ad-hoc signature and are not notarized. Stable installer filenames are identical across signing modes.\n\nSmoke launches the packaged application, creates a window, mounts the renderer, and checks native node:sqlite integrity and durable writes. Converter checks only probe bundled resources and existing executables. They do not download dependencies or establish conversion support. In-app updates require a supported installation; see docs/UPDATES.md.\n\nSee SHA256SUMS.txt and the per-target provenance files for asset integrity and build details.\n`;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {

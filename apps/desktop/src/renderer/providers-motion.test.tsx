@@ -6,7 +6,8 @@ import { createRoot, type Root } from 'react-dom/client';
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { defaultSettings } from '../shared';
 import { ProviderSettings } from './providers';
-vi.mock('./bridge', () => ({ desktop: { invoke: vi.fn(async () => defaultSettings) } }));
+vi.mock('./bridge', () => ({ desktop: { invoke: vi.fn(async (channel: string) => channel === 'updates:state'
+  ? {state:{status:'idle'},currentVersion:version,lastCheckedAt:null,automatic:true} : defaultSettings) } }));
 vi.mock('./shell', () => ({ useOptionalNavigation: () => null }));
 vi.mock('./components/ui/dialog', () => ({
   Dialog: ({ open, onOpenChange, children }: {open: boolean; onOpenChange: (open: boolean) => void; children: React.ReactNode}) => <div data-open={open}><button onClick={() => onOpenChange(false)}>Escape</button>{children}</div>,

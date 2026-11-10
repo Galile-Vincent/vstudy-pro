@@ -103,7 +103,9 @@ async function chooseMethod(trigger: HTMLElement, name: string) {
 
 it('places the document default in General under Documents', async () => {
   await i18n.changeLanguage('en');
-  vi.mocked(desktop.invoke).mockResolvedValue(defaultSettings);
+  vi.mocked(desktop.invoke).mockImplementation(async channel => channel === 'updates:state'
+    ? {state:{status:'idle'},currentVersion:'0.4.4',lastCheckedAt:null,automatic:true}
+    : defaultSettings);
   const host=document.createElement('div'); document.body.append(host); const root=createRoot(host);
   try {
     await act(async () => root.render(<ProviderSettings providers={[]} onClose={() => {}} onRefresh={async () => {}} />));

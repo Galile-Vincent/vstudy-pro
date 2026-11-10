@@ -1,3 +1,4 @@
+import {storageWorkRevision, waitForStorageRequests} from '../storage/maintenance';
 import { WebChats } from '../web-chat/views';
 import { getReviewAdmission } from '../review/admission';
 import { installReviewAdmission } from '../review/admission-port';
@@ -31,7 +32,7 @@ import { registerStorageIpc } from "./storage";
 import { applyNativeTheme } from '../theme';
 import { registerMoodleIpc } from './moodle';
 import { showAttachedMessage, ownerWindow } from '../dialogs';
-import { disposeSearchWorkers } from '../services/search-runner';
+import { waitForSearchWorkers, disposeSearchWorkers } from '../services/search-runner';
 import { disposeDiscovery } from '../providers/models';
 import { networkActivity, recordEgress } from '../services/egress';
 import { ExecutablePins, setExecutablePins } from '../providers/executable-pins';
@@ -49,6 +50,8 @@ import { registerChatIpc } from "./chat";
 
 /** App-owned transport and packaged paths are injected only by the composition root. */
 export interface AppIpcOptions {
+  canInstallUpdate?: () => boolean;
+  updates?: import('../updates/service').Updates;
   newsletterConsent?:NewsletterConsentHook;
   moodleRequest?:typeof fetch;
   mcpPaths?:{peerHelper?:string;serverBin:string};
@@ -91,7 +94,69 @@ export function registerIpc(
     const result = await showAttachedMessage({ type: 'question', message: tr("settings:external",{target:target.hostname || target.protocol}), detail: target.protocol === 'mailto:' ? tr('settings:mail_detail',{address:decodeURIComponent(target.pathname),subject:target.searchParams.get('subject') ?? '',length:(target.searchParams.get('body') ?? '').length,url}) : url, buttons: [tr('common:cancel'), tr('common:open')], defaultId: 0, cancelId: 0 }, owner);
     if (result.response === 1 && !owner.isDestroyed()) { recordEgress('external_open', target.protocol === 'mailto:' ? 'Default mail application' : target.origin); await shell.openExternal(url); }
   };
-  registrar.handle('shell:openExternal', async ({url},event)=>{await confirmExternal(event.sender,url);return {ok:true};});
+  const updates = options.updates;
+  const updateOwners = new Set<IpcMainInvokeEvent>();
+  const stopUpdates = updates?.subscribe(snapshot => {
+    for (const event of updateOwners) {
+      if (event.sender.isDestroyed() || !isTrusted(event)) updateOwners.delete(event);
+      else event.sender.send('updates:state', snapshot);
+    }
+  });
+  if (updates) {
+    for (const channel of ['updates:state', 'updates:check', 'updates:download',
+      'updates:install', 'updates:cancel', 'updates:setAuto', 'updates:notes'] as const) implemented.add(channel);
+    registrar.handle('updates:state', (_request, event) => {
+      for (const prior of updateOwners) if (prior.sender === event.sender) updateOwners.delete(prior);
+      updateOwners.add(event); return updates.snapshot();
+    });
+    registrar.handle('updates:check', () => updates.check());
+    const updateConsent = async (event:IpcMainInvokeEvent, action:'download' | 'install') => {
+      const state = updates.snapshot().state;
+      if (action === 'download' && state.status !== 'available') return false;
+      const detail = action === 'download' && state.status === 'available'
+        ? tr('updates:download_detail', {version:state.version,
+          size:state.size ? tr('updates:download_size', {size:(state.size / 1048576).toFixed(1)}) : ''})
+        : tr('updates:confirm_detail');
+      const result = await showAttachedMessage({type:'question',message:tr(`updates:confirm_${action}`),
+        detail,buttons:[tr('common:cancel'),tr('updates:continue')],
+        defaultId:0,cancelId:0}, event.sender);
+      return result.response === 1 && !event.sender.isDestroyed();
+    };
+    registrar.handle('updates:download', async (_request,event) =>
+      updates.snapshot().state.status === 'available' && await updateConsent(event,'download') ? updates.download() : updates.snapshot());
+    registrar.handle('updates:cancel', () => updates.cancelWait());
+    let installing = false;
+    registrar.handle('updates:install', async (_request,event) => {
+      if (options.canInstallUpdate?.() === false || installing || updates.snapshot().installing || updates.snapshot().state.status !== 'ready') return updates.snapshot();
+      installing = true;
+      try {
+        if (!await updateConsent(event,'install')) return updates.snapshot();
+        const proceed = await updates.waitForWork(async () => {
+          let revision: number;
+          do {
+            revision = storageWorkRevision();
+            await waitForStorageRequests();
+            await Promise.all([disposeMoodle.waitForIdle(), chat.waitForIdle(),
+              disposeDocuments.waitForIdle(), disposeLibrary.waitForIdle(),
+              reviewWorkers.waitForIdle(), waitForSearchWorkers()]);
+          } while (revision !== storageWorkRevision());
+        }, async () => {
+          const result = await showAttachedMessage({type:'warning', message:tr('updates:work_active'),
+            buttons:[tr('updates:not_now'), tr('updates:restart_now')], defaultId:0, cancelId:0}, event.sender);
+          return result.response === 1 && !event.sender.isDestroyed();
+        });
+        if (!proceed || options.canInstallUpdate?.() === false) return updates.snapshot();
+        return updates.install();
+      } finally { installing = false; }
+    });
+    registrar.handle('updates:setAuto', ({enabled}) => updates.setAuto(enabled));
+    registrar.handle('updates:notes', async (_request, event) => {
+      const state = updates.snapshot().state;
+      if (state.status === 'available') await confirmExternal(event.sender, state.releaseUrl);
+      return {ok:true};
+    });
+  }
+  registrar.handle('shell:openExternal' , async ({url},event)=>{await confirmExternal(event.sender,url);return {ok:true};});
   const webChats=new WebChats(confirmExternal);
   for(const channel of ['web-chat:open','web-chat:state','web-chat:layout','web-chat:action','web-chat:clear','web-chat:hide','web-chat:sync'] as const) implemented.add(channel);
   registrar.handle('web-chat:sync',({tabIds},event)=>webChats.sync(event.sender,tabIds));
@@ -115,7 +180,7 @@ export function registerIpc(
   registrar.handle("settings:appearance", () => ({reducedTransparency:nativeTheme.prefersReducedTransparency}));
   registrar.handle("settings:systemLocale", () => process.env.VSTUDY_LOCALE ?? app.getLocale());
   registrar.handle("settings:get", () => store.settings.get());
-  registrar.handle("settings:set", (settings) => { const saved = store.settings.set(settings); updateApplicationMenu(saved.language); applyNativeTheme(saved); return saved; });
+  registrar.handle("settings:set", (settings) => { const saved = store.settings.set({...settings,autoCheckUpdates:store.settings.get().autoCheckUpdates}); updateApplicationMenu(saved.language); applyNativeTheme(saved); return saved; });
   registrar.handle("secrets:set", async ({ providerId, key }) => {
     await secrets.set(providerId, key);
     providers.configure({ ...providers.config(providerId), enabled: true });
@@ -174,6 +239,7 @@ export function registerIpc(
       });
   }
   return async (deleting = false) => {
+    stopUpdates?.(); updates?.dispose();
     if (deleting) {
       registrar.dispose();
       app.removeListener('browser-window-created',restoreMcp);

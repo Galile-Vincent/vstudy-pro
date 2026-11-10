@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ExportedMessageRepository, type AssistantRuntime, useAuiState, type ThreadMessageLike } from '@assistant-ui/react';
 import { useTranslation } from 'react-i18next';
 import type { Conversation, Message } from '../shared';
@@ -28,19 +28,46 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jum
   const targetFound = useAuiState(state => state.thread.messages.some(message => message.id === jumpMessageId));
   const [cursor,setCursor] = useState(initialCursor), [loading,setLoading] = useState(false), [error,setError] = useState('');
   const [jump,setJump] = useState({id:jumpMessageId,pages:0});
+  const messageIds = useAuiState(state => state.thread.messages.map(message => message.id).join());
+  const control = useRef<HTMLButtonElement>(null);
+  const container = useRef<HTMLDivElement>(null);
+  const historyParent = useRef<HTMLElement | null>(null);
+  const focusMessage = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    if (cursor || focusMessage.current === null) return;
+    const id = focusMessage.current;
+    focusMessage.current = null;
+    const parent = historyParent.current ?? container.current?.parentElement;
+    queueMicrotask(() => {
+      const messages = parent?.querySelectorAll<HTMLElement>('[data-message-id]');
+      const target = Array.from(messages ?? []).find(message => message.dataset.messageId === id);
+      if (!target) return;
+      target.tabIndex = -1;
+      target.focus({preventScroll: true});
+      const bounds = target.getBoundingClientRect();
+      const viewport = target.closest('[data-slot="aui_thread-viewport"]')?.getBoundingClientRect();
+      if (bounds.top < (viewport?.top ?? 0) || bounds.bottom > (viewport?.bottom ?? window.innerHeight)) {
+        target.scrollIntoView({block: 'nearest'});
+      }
+    });
+  }, [cursor, messageIds]);
   const pending = useRef(false), live = useRef(true);
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
   const load = useCallback(async () => {
     if (!cursor || pending.current || runtime.thread.getState().isRunning) return;
+    historyParent.current = container.current?.parentElement ?? null;
+    const hadFocus = document.activeElement === control.current;
     pending.current = true; setLoading(true); setError('');
     try {
       const page = await desktop.invoke('messages:page',{conversationId,limit:50,direction:'backward',cursor:cursor as NonNullable<import('../shared/ipc').IpcRequest<'messages:page'>['cursor']>});
       if (!live.current || runtime.thread.getState().isRunning) return;
       const current = runtime.thread.export();
       const ids = new Set(current.messages.map(item => item.message.id));
-      const older = ExportedMessageRepository.fromArray(chatHistoryMessages(page.items.filter(message => !ids.has(message.id))));
+      const added = page.items.filter(message => !ids.has(message.id));
+      const older = ExportedMessageRepository.fromArray(chatHistoryMessages(added));
       const parentId = older.messages.at(-1)?.message.id;
       if (parentId) runtime.thread.import({...current,messages:[...older.messages,...current.messages.map(item => item.parentId === null ? {...item,parentId} : item)]});
+      if (!page.nextCursor && hadFocus) focusMessage.current = added[0]?.id ?? null;
       setCursor(page.nextCursor); onLoaded(page.items,page.nextCursor);
     } catch (failure) { if (live.current) setError(errorText(failure)); }
     finally { pending.current = false; if (live.current) setLoading(false); }
@@ -53,6 +80,7 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jum
     }
   }, [jumpMessageId, jump, cursor, loading, error, running, targetFound, load]);
   const missingTarget = jumpMessageId && !targetFound && !loading && !error && (!cursor || (jump.id === jumpMessageId && jump.pages >= 5));
-  if (!cursor && !missingTarget) return null;
-  return <div>{missingTarget && <p role="status">{tr('history:message_not_found')}</p>}{cursor && (error ? <LoadError message={error} retry={() => void load()}/> : <Button variant="ghost" disabled={loading || running} onClick={() => void load()}>{tr(loading ? 'common:loading_earlier_messages' : 'common:load_earlier_messages')}</Button>)}</div>;
+
+  if (!cursor) return missingTarget ? <p role="status">{tr('history:message_not_found')}</p> : null;
+  return <div ref={container} tabIndex={-1} role="group" aria-label={tr('common:load_earlier_messages')}>{missingTarget && <p role="status">{tr('history:message_not_found')}</p>}{cursor && (error ? <LoadError message={error} retry={() => void load()}/> : <Button ref={control} variant="ghost" disabled={loading || running} onClick={() => void load()}>{tr(loading ? 'common:loading_earlier_messages' : 'common:load_earlier_messages')}</Button>)}</div>;
 }

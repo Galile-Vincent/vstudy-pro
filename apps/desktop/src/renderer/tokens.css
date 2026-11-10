@@ -112,11 +112,11 @@ html[data-reduced-transparency=true] *,html[data-reduced-transparency=true] ::ba
  .home-grid { grid-template-columns:minmax(0,1fr); }
 }
 
-@media(max-width:719px) { .home-page,.library-view { padding:var(--space-3); } .library-title { flex-wrap:wrap; } .filter-panel { max-width:calc(100vw - var(--space-6)); } }
+@media(max-width:719px) { .home-page,.library-view { padding:var(--space-3); } .filter-panel { max-width:calc(100vw - var(--space-6)); } }
 
 .markdown p { position:relative; }
 .model-traits h3 { font-size:var(--type-xs); font-weight:600; margin:0 0 var(--space-1); }
-@media(max-width:599px) { .library-toolbar .library-search { flex-basis:100%; min-height:var(--space-8); } }
+@media(max-width:599px) { .library-toolbar .library-search { flex-basis:100%; min-height:40px; } }
 
 .markdown .section-action,.markdown .paragraph-action { position:static; margin-inline-start:var(--space-2); }
 .markdown p:hover .paragraph-action { opacity:1; pointer-events:auto; }
@@ -220,7 +220,7 @@ html[data-reduced-transparency=true],html[data-theme=contrast] { --glass-blur:no
  border:0; background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); color:var(--ink);
  transition:box-shadow var(--motion-fast) var(--ease-standard),background-color var(--motion-fast) var(--ease-standard),transform var(--motion-fast) var(--ease-standard);
 }
-:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):is(:hover,[aria-expanded=true]) { background:var(--glass-fill-hover); box-shadow:var(--glass-shadow-hover); color:var(--ink); }
+:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):is(:hover,[aria-expanded=true],[aria-pressed=true]) { background:var(--glass-fill-hover); box-shadow:var(--glass-shadow-hover); color:var(--ink); }
 :is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):active { box-shadow:var(--glass-shadow); transform:translateY(.5px); }
 :is([data-slot=button][data-variant=default],button.primary) { box-shadow:var(--primary-shadow); transition:box-shadow var(--motion-fast) var(--ease-standard),transform var(--motion-fast) var(--ease-standard),filter var(--motion-fast) var(--ease-standard); }
 :is([data-slot=button][data-variant=default],button.primary):active { transform:translateY(1px); box-shadow:none; filter:brightness(.92); }
@@ -242,3 +242,11 @@ html[data-reduced-transparency=true],html[data-theme=contrast] { --glass-blur:no
  .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup) { border:1px solid CanvasText; }
 }
 @media(prefers-reduced-motion:reduce) { .glass-lift,.glass-lift:hover { transition:none; transform:none; } }
+
+html[data-theme=contrast] :is([data-slot=card],[data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=input],[data-slot=textarea],[data-slot=select-trigger],[data-slot=button],[data-slot=aui_composer-shell]) { border:1px solid var(--ink); box-shadow:none; }
+@media(prefers-contrast:more) {
+ :root :is([data-slot=card],[data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=input],[data-slot=textarea],[data-slot=select-trigger],[data-slot=button],[data-slot=aui_composer-shell]) { border:1px solid var(--ink); box-shadow:none; }
+}
+@media(forced-colors:active) {
+ :root :is([data-slot=card],[data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=input],[data-slot=textarea],[data-slot=select-trigger],[data-slot=button],[data-slot=aui_composer-shell]) { border:1px solid CanvasText; box-shadow:none; }
+}

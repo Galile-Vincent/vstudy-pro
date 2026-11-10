@@ -49,5 +49,11 @@
   "shortcut": "{{modifier}} K",
   "model_change_error": "モデルを変更できませんでした。現在のチャットは引き続き利用できます。もう一度お試しください。",
   "message_not_found": "このメッセージが見つかりませんでした。会話は引き続き閲覧できます。",
-  "providers_error": "AI プロバイダーを読み込めませんでした。入力欄を使うには再試行してください。このチャットは引き続き閲覧できます。"
+  "providers_error": "AI プロバイダーを読み込めませんでした。入力欄を使うには再試行してください。このチャットは引き続き閲覧できます。",
+  "general_ask_label": "学習について質問する",
+  "general_ask_placeholder": "学習について質問する…",
+  "count_zero": "会話が見つかりません",
+  "count_one": "{{formatted}} 件の会話",
+  "count_other": "{{formatted}} 件の会話",
+  "count_more": "{{formatted}}+ 件の会話"
 }
