@@ -8,3 +8,5 @@
 .web-chat-compact .web-chat-slot{border-radius:var(--r-lg);overflow:hidden;box-shadow:inset 0 0 0 1px var(--hairline)}
 .web-chat-compact .web-chat-notice{padding:var(--space-2) var(--space-3)}
 #active-tab-panel[data-native=true] > .web-chat-hosted{height:100%}
+
+@media(max-width:760px){.web-chat-toolbar small{display:none}}

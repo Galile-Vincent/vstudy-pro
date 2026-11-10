@@ -1,4 +1,5 @@
 /** Run against `pnpm dev`; deterministic mock routes, no live accounts. */
+import { checkHeaderRegressions } from './header-regressions.mjs';
 import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -14,7 +15,7 @@ try {
    const page = await context.newPage();
    page.on('pageerror', error => errors.push({route, message:error.message, stack:error.stack}));
    await page.addInitScript(view => {localStorage.clear(); localStorage.setItem('vstudy-route', JSON.stringify({view}));}, route);
-   await page.goto(`http://localhost:5173/?libraryDemo=1&reviewDemo=1&updateState=ready${route === 'design' ? '#/design' : ''}`);
+   await page.goto(`${process.env.VSTUDY_RENDERER_URL ?? 'http://localhost:5173'}/?libraryDemo=1&reviewDemo=1&updateState=ready${route === 'design' ? '#/design' : ''}`);
    await page.locator('[data-slot=page-header]').first().waitFor();
    await page.evaluate(async ({language, scheme}) => {
     const { desktop } = await import('/bridge.ts');
@@ -44,7 +45,10 @@ try {
   }
   await context.close();
  }
+ const regressionPage = await browser.newPage();
+ results.push({regressions: await checkHeaderRegressions(regressionPage, output)});
+ await regressionPage.close();
  const unexpected = errors.filter(error => !(error.route === 'review' && error.message === "Cannot read properties of undefined (reading 'filter')" && error.stack.includes('materializeActiveMoodleCourses')));
  assert.deepEqual(unexpected, [], 'No new renderer error types relative to the before audit');
 } finally { await browser.close(); await writeFile(`${output}/measurements.json`, JSON.stringify({results,errors},null,2)); }
-console.log(`${results.length} captures; ${errors.length} renderer errors; library mode interaction passed`);
+console.log(`${results.filter(result => result.route).length} page captures plus 2 regression captures; ${errors.length} renderer errors; library mode interaction passed`);
