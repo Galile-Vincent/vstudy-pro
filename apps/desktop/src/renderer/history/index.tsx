@@ -1,3 +1,5 @@
+import { useId } from "react";
+import { Layout, LayoutPanel, LayoutContent, Dialog, DialogHeader } from "@astryxdesign/core";
 import type { IpcResponse } from '../../shared/ipc';
 import { LoadError } from '../components/load-error';
 import { errorText } from '../status';
@@ -12,12 +14,12 @@ import { desktop } from '../bridge';
 import { useNavigate } from '../shell';
 import { SurfaceErrorBoundary } from '../components/surface-error-boundary';
 import { HistorySearch } from './search';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
-import { PageContainer, PageHeader } from '../components/ui';
+import { PageContainer, PageHeader } from "../components/ui";
 import { useFormat } from '../i18n';
 const Chat = lazy(() => import('../chat').then(m => ({ default: m.Chat })));
 export function HistoryFinder() {
   useTranslation();
+  const dialogDescriptionId = useId();
   const { navigate } = useNavigate(), [open, setOpen] = useState(false);
   const trigger = useRef<HTMLElement | null>(null);
   useEffect(() => {
@@ -54,9 +56,7 @@ export function HistoryFinder() {
     window.addEventListener('vstudy:find-history', show);
     return () => { window.removeEventListener('keydown', key); window.removeEventListener('vstudy:find-history', show); };
   }, [open]);
-  return <Dialog open={open} onOpenChange={setOpen}><DialogContent className="history-dialog" onKeyDown={event => {
-    if (event.key === 'Escape' && !event.defaultPrevented) { event.preventDefault(); setOpen(false); }
-  }} onCloseAutoFocus={event => { event.preventDefault(); trigger.current?.focus(); }}><DialogTitle>{tr('history:title')}</DialogTitle><DialogDescription>{tr('history:subtitle')}</DialogDescription><HistorySearch compact onOpen={(hit, messageId) => { setOpen(false); navigate({ view: 'history', conversationId: hit.id, messageId }); }}/><button onClick={() => { setOpen(false); navigate('history'); }}>{tr('history:full_history')}</button></DialogContent></Dialog>;
+  return <>{open && <Dialog aria-describedby={dialogDescriptionId} role="dialog" isOpen={open} onOpenChange={setOpen} className="history-dialog"><DialogHeader title={<>{tr('history:title')}</>} /><div id={dialogDescriptionId} className="dialog-description">{tr('history:subtitle')}</div><HistorySearch compact onOpen={(hit, messageId) => { setOpen(false); navigate({ view: 'history', conversationId: hit.id, messageId }); }}/><button onClick={() => { setOpen(false); navigate('history'); }}>{tr('history:full_history')}</button></Dialog>}</>;
 }
 export function HistoryView() {
   return <SurfaceErrorBoundary><HistoryContent/></SurfaceErrorBoundary>;
@@ -115,12 +115,9 @@ function HistoryContent() {
   };
   const settings = () => window.dispatchEvent(new Event('vstudy:open-settings'));
   const count = summary && tr(summary.more ? 'history:count_more' : 'history:count', { count: summary.count, formatted: format.number(summary.count) });
-  return <PageContainer as="main" className="history-page"><PageHeader title={<span ref={heading} tabIndex={-1}>{tr('history:title')}</span>} description={tr('history:subtitle')} meta={count && <p className="text-[var(--muted)]">{count}</p>}/><div className="history-layout">
-  <section className="history-browser" aria-label={tr('history:title')}><HistorySearch onOpen={open} onSummary={setSummary} onFocusFallback={() => heading.current?.focus()}/></section>
-  {route.conversationId && <section className="history-conversation chat-pane" aria-label={tr('common:chat')}><button className="history-back" onClick={() => navigate('history')}>{tr('history:back')}</button>
+  return <PageContainer as="main" className="history-page"><PageHeader title={<span ref={heading} tabIndex={-1}>{tr('history:title')}</span>} description={tr('history:subtitle')} meta={count && <p className="text-[var(--muted)]">{count}</p>}/><Layout height="fill" className="history-layout" start={<LayoutPanel width={route.conversationId ? 320 : "100%"} className="history-browser" aria-label={tr('history:title')}><HistorySearch onOpen={open} onSummary={setSummary} onFocusFallback={() => heading.current?.focus()}/></LayoutPanel>} content={route.conversationId && <LayoutContent className="history-conversation chat-pane" aria-label={tr('common:chat')}><button className="history-back" onClick={() => navigate('history')}>{tr('history:back')}</button>
    {providersFailed && <LoadError message={tr('history:providers_error')} retry={() => void refreshProviders()}/>}
    {modelError && <p role="alert">{tr('history:model_change_error')}</p>}
    {failed ? <LoadError message={failed} retry={() => setRevision(value => value + 1)}/> : loaded ? <Suspense fallback={<p role="status">{tr('common:loading_conversation')}</p>}><Chat key={loaded.conversation.id} conversation={loaded.conversation} history={loaded.messages.items} historyCursor={loaded.messages.nextCursor} jumpMessageId={route.messageId} autoFocus={false} draft={draft} onDraft={setDraft} selection={null} onClearSelection={() => { }} providers={providers} model={loaded.conversation.providerId + '/' + loaded.conversation.modelId} onModel={value => { void changeModel(value); }} onSettings={settings} onProvidersChanged={refreshProviders} onUsage={settings}/></Suspense> : <p role="status">{tr('common:loading_conversation')}</p>}
-  </section>}
- </div></PageContainer>;
+  </LayoutContent>} /></PageContainer>;
 }

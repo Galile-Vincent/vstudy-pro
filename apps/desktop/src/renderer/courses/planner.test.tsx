@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import './test-platform';
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
@@ -54,7 +55,7 @@ it("shows draft assumptions and dates without writing until approval, and suppor
   expect(repo.snapshot().blocks.length).toBeGreaterThan(0);
   expect(host.querySelector(".planner-week li [data-slot=list-row]")).not.toBeNull();
   expect(host.querySelector(".planner-proposal")).toBeNull();
-  await act(async () => [...host.querySelectorAll<HTMLButtonElement>("[role=tab]")].find(b => b.textContent === "Next 7 days")!.focus());
+  await act(async () => [...host.querySelectorAll<HTMLButtonElement>("[role=tab]")].find(b => b.textContent?.startsWith("Next 7 days"))!.focus());
   expect(host.querySelectorAll(".planner-day")).toHaveLength(7);
   const active = host.querySelector('[role="tab"][aria-selected="true"]')!;
   expect(document.getElementById(active.getAttribute("aria-controls")!)?.getAttribute("role")).toBe("tabpanel");
@@ -98,11 +99,11 @@ it('keeps both tab panels addressable and supports Arrow, Home and End navigatio
 
 it('resets the displayed course and submitted course together after quick add', async () => {
   HTMLElement.prototype.scrollIntoView = vi.fn();
-  const { fireEvent, getByRole } = await import('@testing-library/react');
+  const { fireEvent, getByRole, getAllByRole } = await import('@testing-library/react');
   const { repo } = await mount();
   const trigger = getByRole(host.querySelector('form')!, 'combobox');
   await act(async () => { fireEvent.keyDown(trigger, { key: 'ArrowDown' }); });
-  const option = [...document.querySelectorAll<HTMLElement>('[role=option]')].at(-1)!;
+  const option = getAllByRole(document.body, 'option').at(-1)!;
   await act(async () => { option.click(); });
   await fill('input[name="title"]', 'First task');
   await act(async () => { fireEvent.submit(host.querySelector('form')!); });

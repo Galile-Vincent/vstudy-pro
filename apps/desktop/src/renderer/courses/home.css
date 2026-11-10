@@ -1,5 +1,5 @@
 .moodle-page { background:transparent; }
-[data-scroll-fade="true"] { scrollbar-width:none; --mask-start:-40px; --mask-end:0px; mask-image:linear-gradient(to right,transparent,color-mix(in srgb,CanvasText 65%,transparent) 12px,CanvasText 40px),linear-gradient(to left,transparent,color-mix(in srgb,CanvasText 65%,transparent) 12px,CanvasText 40px); mask-size:calc(100% + 40px) 100%; mask-repeat:no-repeat; mask-composite:intersect; mask-position:var(--mask-start) 0,var(--mask-end) 0; transition:mask-position 180ms ease-out; }
+[data-scroll-fade="true"] { scrollbar-width:none; --mask-start:-40px; --mask-end:0px; mask-image:linear-gradient(to right,transparent,color-mix(in srgb,CanvasText 65%,transparent) 12px,CanvasText 40px),linear-gradient(to left,transparent,color-mix(in srgb,CanvasText 65%,transparent) 12px,CanvasText 40px); mask-size:calc(100% + 40px) 100%; mask-repeat:no-repeat; mask-composite:intersect; mask-position:var(--mask-start) 0,var(--mask-end) 0;  }
 [data-scroll-fade="true"]::-webkit-scrollbar { display:none; width:0; height:0; }
 [data-scroll-fade="true"]:focus-visible { outline:2px solid var(--ink); outline-offset:-3px; }
 .moodle-tabs [role="tablist"]:focus-within { outline:2px solid var(--ink); outline-offset:2px; }
@@ -19,7 +19,7 @@
 
 
 .course-view-switch { --sw-hover:light-dark(color-mix(in srgb,var(--ink) 4%,var(--background)),color-mix(in srgb,var(--ink) 5%,var(--background))); --sw-on:light-dark(color-mix(in srgb,var(--ink) 10%,var(--background)),color-mix(in srgb,var(--ink) 14%,var(--background))); --sw-press:light-dark(color-mix(in srgb,var(--ink) 15%,var(--background)),color-mix(in srgb,var(--ink) 20%,var(--background))); display:flex; gap:2px; height:2.25rem; padding:2px; }
-.course-view-switch button { display:grid; place-items:center; width:2rem; height:2rem; padding:0; border:0; border-radius:var(--r-xs); background:transparent; color:var(--muted); cursor:pointer; }
+.course-view-switch button { display:grid; place-items:center; width:2rem; height:2rem; padding:0; border:0; border-radius:var(--radius-inner); background:transparent; color:var(--muted); cursor:pointer; }
 .course-view-switch button svg { width:1rem; height:1rem; stroke-width:1.75; }
 .course-view-switch button:hover { background:var(--sw-hover); color:var(--ink); }
 .course-view-switch button[aria-pressed=true] { background:var(--sw-on); color:var(--ink); }
@@ -28,7 +28,7 @@
 @media(prefers-reduced-motion:no-preference) { .course-view-switch button { transition:background-color 120ms ease-out,color 120ms ease-out; } }
 @media(forced-colors:active) { .course-view-switch button[aria-pressed=true] { outline:2px solid Highlight; outline-offset:-2px; } }
 
-.app-shell[data-view=courses] .context-coach { align-items:center; gap:var(--space-2); min-height:2.25rem; padding:var(--space-1) var(--space-2) var(--space-1) var(--space-4); margin-top:var(--space-2); border-radius:var(--r-pill); font-size:var(--type-sm); }
+.app-shell[data-view=courses] .context-coach { align-items:center; gap:var(--space-2); min-height:2.25rem; padding:var(--space-1) var(--space-2) var(--space-1) var(--space-4); margin-top:var(--space-2); border-radius:var(--radius-full); font-size:var(--type-sm); }
 .app-shell[data-view=courses] .context-coach > div { flex:1; display:flex; align-items:center; flex-wrap:wrap; gap:var(--space-1) var(--space-3); }
 .app-shell[data-view=courses] .context-coach details { flex:1 1 16rem; }
 .app-shell[data-view=courses] .context-coach summary { display:flex; align-items:center; min-height:1.75rem; font-weight:500; }

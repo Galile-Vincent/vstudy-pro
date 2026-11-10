@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import '../courses/test-platform';
 /** Deleting a result keeps keyboard focus inside History. */
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';

@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
+import '../courses/test-platform';
 import { recovery } from './recovery';
 import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import type { SelectHTMLAttributes } from 'react';
 import { LibraryView } from './index';
-import { TooltipProvider } from '../components/ui/tooltip';
 import { i18n, tr } from '../../shared/i18n';
 const state = vi.hoisted(() => ({ invoke: vi.fn(), route: { view: 'library', query: {} as Record<string, unknown> } }));
 vi.mock('../components/select',()=>({Select:(props:SelectHTMLAttributes<HTMLSelectElement>)=><select {...props}/>}));
@@ -20,7 +20,7 @@ async function mount(compact: boolean) {
   document.documentElement.style.setProperty('--library-row-height', '4');
   document.documentElement.style.setProperty('--library-search-row-height', '5');
   state.invoke.mockImplementation(async (channel: string) => channel === 'library:documents:list' ? { items: [item], nextCursor: null } : []);
-  render(<TooltipProvider><LibraryView /></TooltipProvider>);
+  render(<><LibraryView /></>);
   await screen.findByText('notes');
   return screen.getByRole('textbox', { name: tr('library:search') }).closest('.library-toolbar') as HTMLElement;
 }
@@ -32,12 +32,12 @@ describe('library toolbar', () => {
     expect(within(toolbar).getByRole('combobox', { name: tr('library:sort') })).toBeTruthy();
     expect(within(toolbar).getByRole('button', { name: tr('library:viewToggle') })).toBeTruthy();
   });
-  it('moves sort and layout into the filter popover on narrow windows so search keeps its width', async () => {
+  it('moves sort and layout into the filter header on narrow windows so search keeps its width', async () => {
     const toolbar = await mount(true);
     expect(within(toolbar).queryByRole('combobox', { name: tr('library:sort') })).toBeNull();
     expect(within(toolbar).queryByRole('button', { name: tr('library:viewToggle') })).toBeNull();
     fireEvent.click(within(toolbar).getByTestId('library-filters'));
-    const panel = await screen.findByRole('dialog', { name: tr('library:filters') });
+    const panel = await screen.findByRole('region', { name: tr('library:filters') });
     expect(within(panel).getByRole('combobox', { name: tr('library:sort') })).toBeTruthy();
     expect(within(panel).getByRole('button', { name: tr('library:direction') })).toBeTruthy();
     expect(within(panel).getByRole('button', { name: tr('library:viewToggle') })).toBeTruthy();
@@ -48,7 +48,7 @@ it('clears optional filters while preserving folder, sort, and search in both in
  state.route.query={folderId:'folder',text:'notes',status:'ready',sort:'name'};
  const toolbar=await mount(false);
  fireEvent.click(within(toolbar).getByTestId('library-filters'));
- const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ const panel=await screen.findByRole('region',{name:tr('library:filters')});
  fireEvent.click(within(panel).getByRole('button',{name:tr('library:clearFilters')}));
  await waitFor(()=>{
   const calls=state.invoke.mock.calls.filter(([channel])=>channel==='library:documents:list');
@@ -60,7 +60,7 @@ it('clears optional filters while preserving folder, sort, and search in both in
 
 it('clears the custom before bound when a relative preset is selected',async()=>{
  const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
- const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ const panel=await screen.findByRole('region',{name:tr('library:filters')});
  const preset=within(panel).getByRole('combobox',{name:tr('library:addedAfter')});
  fireEvent.change(preset,{target:{value:'custom'}});
  fireEvent.change(within(panel).getByLabelText(tr('library:addedBefore')),{target:{value:'2026-10-01'}});
@@ -72,7 +72,7 @@ it('clears the custom before bound when a relative preset is selected',async()=>
 });
 it('shows a reversed custom range error and never submits an impossible range',async()=>{
  const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
- const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ const panel=await screen.findByRole('region',{name:tr('library:filters')});
  fireEvent.change(within(panel).getByRole('combobox',{name:tr('library:addedAfter')}),{target:{value:'custom'}});
  fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:'2026-09-01'}});
  fireEvent.change(within(panel).getByLabelText(tr('library:addedBefore')),{target:{value:'2026-10-01'}});
@@ -103,7 +103,7 @@ it.each(['en','zh-Hant','ja'])('localizes converter, dates and sizes in filter c
 
 it('submits equal picked days inclusively through local 23:59',async()=>{
  const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
- const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ const panel=await screen.findByRole('region',{name:tr('library:filters')});
  fireEvent.change(within(panel).getByRole('combobox',{name:tr('library:addedAfter')}),{target:{value:'custom'}});
  for(const key of ['addedAfter','addedBefore'])fireEvent.change(within(panel).getByLabelText(tr(`library:${key}`),{selector:'input'}),{target:{value:'2026-11-02'}});
  await waitFor(()=>{
@@ -125,7 +125,7 @@ beforeEach(() => recovery.reset());
 it('does not resurrect a removed date chip when editing the other bound',async()=>{
  state.route.query={addedAfter:new Date(2026,9,1).toISOString()};
  const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
- const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ const panel=await screen.findByRole('region',{name:tr('library:filters')});
  fireEvent.change(within(panel).getByRole('combobox',{name:tr('library:addedAfter')}),{target:{value:'custom'}});
  fireEvent.click(within(document.querySelector('.filter-chips')! as HTMLElement).getByRole('button',{name:/Added after/}));
  expect((within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}) as HTMLInputElement).value).toBe('');
@@ -138,7 +138,7 @@ it('does not resurrect a removed date chip when editing the other bound',async()
 
 it('rejects a five digit year without breaking rendering',async()=>{
  const toolbar=await mount(false);fireEvent.click(within(toolbar).getByTestId('library-filters'));
- const panel=await screen.findByRole('dialog',{name:tr('library:filters')});
+ const panel=await screen.findByRole('region',{name:tr('library:filters')});
  fireEvent.change(within(panel).getByRole('combobox',{name:tr('library:addedAfter')}),{target:{value:'custom'}});
  fireEvent.change(within(panel).getByLabelText(tr('library:addedAfter'),{selector:'input'}),{target:{value:'20261-11-01'}});
  expect(document.querySelector('.library-live')?.textContent).toBe(tr('library:dateRangeInvalid'));
@@ -149,7 +149,7 @@ it('labels every filter above its control and offers one clear action', async ()
   state.route.query = {status:'ready'};
   const toolbar = await mount(false);
   fireEvent.click(within(toolbar).getByTestId('library-filters'));
-  const panel = await screen.findByRole('dialog', {name:tr('library:filters')});
+  const panel = await screen.findByRole('region', {name:tr('library:filters')});
   const fields = panel.querySelectorAll('[data-slot=form-field]');
   expect(fields).toHaveLength(10);
   for (const field of fields) {
@@ -172,7 +172,7 @@ it('offers Clear beside active chips while filters are closed', async () => {
 it('hides Clear without filters and preserves Escape dismissal', async () => {
  const toolbar = await mount(false);
  fireEvent.click(within(toolbar).getByTestId('library-filters'));
- const panel = await screen.findByRole('dialog', {name:tr('library:filters')});
+ const panel = await screen.findByRole('region', {name:tr('library:filters')});
  expect(within(panel).queryByRole('button', {name:tr('library:clearFilters')})).toBeNull();
  fireEvent.keyDown(panel, {key:'Escape'});
  await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());

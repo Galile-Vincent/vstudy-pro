@@ -1,9 +1,8 @@
-import { DropdownMenuLabel } from '../components/ui/dropdown-menu';
+import { Button } from "@astryxdesign/core";
 import { useNavigate } from '../shell';
 import { useState } from 'react';
 import { useFormat } from '../i18n';
 import { Checkbox } from '../components/checkbox';
-import { Button } from '../components/ui/button';
 import { FileText,Pencil,FolderInput,Tag,ExternalLink,Download,RefreshCw,Trash2,Pin,PinOff,Sparkles,Info } from 'lucide-react';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
@@ -39,13 +38,13 @@ export function LibraryMenus({busy,moveNotice,menu,move,tagging,anchor,items,fol
           menu anchor={anchor}
           onClose={() => setMenu(null)}
         >
-          <div className="document-menu"><DropdownMenuLabel>{tr("library:details")}</DropdownMenuLabel>
-            <Button variant="ghost" data-testid="document-details" onClick={()=>{setDetails(menu);setMenu(null);}}><Info/>{tr('library:viewDetails')}</Button>
-            <Button variant="ghost" onClick={() => {openTab({view:"workspace",documentId:menu.document.id,title:menu.document.title});setMenu(null);}}><FileText/>{tr("tabs:open")}</Button>
-            <Button variant="ghost" onClick={() => open(menu)}><FileText/>{tr("library:open")}</Button>
-            <Button variant="ghost" onClick={() => {navigate({view:'workspace',documentId:menu.document.id});setMenu(null);}}><FileText/>{tr('library:openReader')}</Button>
-            <Button variant="ghost" onClick={() => void run(() => desktop.invoke('library:openOriginal',{documentId:menu.document.id}))}><ExternalLink/>{tr('library:openOriginal')}</Button>
-            <Button variant="ghost"
+          <div className="document-menu"><h3>{tr("library:details")}</h3>
+            <Button icon={<Info/>} label={(tr('library:viewDetails'))} variant="ghost" data-testid="document-details" onClick={()=>{setDetails(menu);setMenu(null);}}>{tr('library:viewDetails')}</Button>
+            <Button icon={<FileText/>} label={(tr("tabs:open"))} variant="ghost" onClick={() => {openTab({view:"workspace",documentId:menu.document.id,title:menu.document.title});setMenu(null);}}>{tr("tabs:open")}</Button>
+            <Button icon={<FileText/>} label={(tr("library:open"))} variant="ghost" onClick={() => open(menu)}>{tr("library:open")}</Button>
+            <Button icon={<FileText/>} label={(tr('library:openReader'))} variant="ghost" onClick={() => {navigate({view:'workspace',documentId:menu.document.id});setMenu(null);}}>{tr('library:openReader')}</Button>
+            <Button icon={<ExternalLink/>} label={(tr('library:openOriginal'))} variant="ghost" onClick={() => void run(() => desktop.invoke('library:openOriginal',{documentId:menu.document.id}))}>{tr('library:openOriginal')}</Button>
+            <Button icon={<Pencil/>} label={(tr("library:rename"))} variant="ghost"
               onClick={async () => {
                 const title = await prompt(
                   tr("library:rename"),
@@ -61,10 +60,10 @@ export function LibraryMenus({busy,moveNotice,menu,move,tagging,anchor,items,fol
                 setMenu(null);
               }}
             >
-              <Pencil/>{tr("library:rename")}
+              {tr("library:rename")}
             </Button>
-            <Button variant="ghost" onClick={() => setMove(true)}><FolderInput/>{tr("library:move")}</Button>
-            <Button variant="ghost"
+            <Button icon={<FolderInput/>} label={(tr("library:move"))} variant="ghost" onClick={() => setMove(true)}>{tr("library:move")}</Button>
+            <Button icon={menu.pinned?<PinOff/>:<Pin/>} label={(tr(menu.pinned ? "library:unpin" : "library:pin"))} variant="ghost"
               onClick={() =>
                 void run(() =>
                   desktop.invoke("library:documents:pin", {
@@ -74,10 +73,10 @@ export function LibraryMenus({busy,moveNotice,menu,move,tagging,anchor,items,fol
                 )
               }
             >
-              {menu.pinned?<PinOff/>:<Pin/>}{tr(menu.pinned ? "library:unpin" : "library:pin")}
+              {tr(menu.pinned ? "library:unpin" : "library:pin")}
             </Button>
-            <Button variant="ghost" onClick={() => setTagging(true)}>
-              <Tag/>{tr("library:tag")}
+            <Button icon={<Tag/>} label={(tr("library:tag"))} variant="ghost" onClick={() => setTagging(true)}>
+              {tr("library:tag")}
             </Button>
             {(
               [
@@ -87,7 +86,7 @@ export function LibraryMenus({busy,moveNotice,menu,move,tagging,anchor,items,fol
                 "documents:reconvert",
               ] as const
             ).map((channel) => (
-              <Button variant="ghost"
+              <Button icon={channel === "documents:reconvert" ? <RefreshCw/> : channel === "library:reveal" ? <ExternalLink/> : <Download/>} label={(tr(`library:${channel.split(":")[1]}`))} variant="ghost"
                 key={channel}
                 onClick={() =>
                   void run(() =>
@@ -95,14 +94,14 @@ export function LibraryMenus({busy,moveNotice,menu,move,tagging,anchor,items,fol
                   )
                 }
               >
-                {channel === "documents:reconvert" ? <RefreshCw/> : channel === "library:reveal" ? <ExternalLink/> : <Download/>}{tr(`library:${channel.split(":")[1]}`)}
+                {tr(`library:${channel.split(":")[1]}`)}
               </Button>
             ))}
-            <Button variant="ghost" onClick={()=>{navigate({view:'workspace',documentId:menu.document.id,aiParse:true});setMenu(null);}}><Sparkles/>{tr('library:ai_parse.reparse')}</Button>
-            <Button variant="ghost"
-              disabled={busy} onClick={() => void remove(ids.length ? ids : [menu.document.id])}
+            <Button icon={<Sparkles/>} label={(tr('library:ai_parse.reparse'))} variant="ghost" onClick={()=>{navigate({view:'workspace',documentId:menu.document.id,aiParse:true});setMenu(null);}}>{tr('library:ai_parse.reparse')}</Button>
+            <Button icon={<Trash2/>} label={(tr("library:delete"))} variant="ghost"
+               isDisabled={busy} onClick={() => void remove(ids.length ? ids : [menu.document.id])}
             >
-              <Trash2/>{tr("library:delete")}
+              {tr("library:delete")}
             </Button>
           </div>
         </LibraryDialog>
@@ -117,11 +116,11 @@ export function LibraryMenus({busy,moveNotice,menu,move,tagging,anchor,items,fol
         >
           {moveNotice && <p>{moveNotice}</p>}
           <div className="folder-picker">
-            <Button variant="ghost" disabled={busy} onClick={() => void moveTo(null)}>
+            <Button label={(tr("library:unfiled"))} variant="ghost"  isDisabled={busy} onClick={() => void moveTo(null)}>
               {tr("library:unfiled")}
             </Button>
             {folders.map((f) => (
-              <Button variant="ghost" key={f.id} disabled={busy} onClick={() => void moveTo(f.id)}>
+              <Button label={(path(f.id))} variant="ghost" key={f.id}  isDisabled={busy} onClick={() => void moveTo(f.id)}>
                 {path(f.id)}
               </Button>
             ))}
@@ -158,7 +157,7 @@ export function LibraryMenus({busy,moveNotice,menu,move,tagging,anchor,items,fol
                 {tag.name}
               </label>
             ))}
-            <Button variant="ghost"
+            <Button label={(tr("library:newTag"))} variant="ghost"
               onClick={async () => {
                 const name = await prompt(tr("library:tag"));
                 if (name)

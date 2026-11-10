@@ -1,8 +1,8 @@
+import { IconButton } from "@astryxdesign/core";
+import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core";
 import { type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, Files, FolderClosed } from "lucide-react";
 import { tr } from "../../shared/i18n";
-import { SegmentedControl, SegmentedControlItem } from '../components/ui';
-import { Button } from "../components/ui/button";
 import { uncategorizedKey, type CourseGroup, type LibraryMode } from "./model";
 
 const tones = ["info", "success", "warning", "chart-2", "chart-3", "chart-4"];
@@ -15,15 +15,9 @@ function toneFor(key: string) {
 
 export function LibraryModeToggle({ mode, onChange }: { mode: LibraryMode; onChange: (mode: LibraryMode) => void }) {
   return (
-    <SegmentedControl type="single" value={mode} onValueChange={value => { if (value) onChange(value as LibraryMode); }} className="library-mode" aria-label={tr("library:viewMode")}>
-      <SegmentedControlItem value="files">
-        <Files aria-hidden="true" />
-        {tr("library:viewFiles")}
-      </SegmentedControlItem>
-      <SegmentedControlItem value="folders">
-        <FolderClosed aria-hidden="true" />
-        {tr("library:viewFolders")}
-      </SegmentedControlItem>
+    <SegmentedControl label={tr("library:viewMode")} value={mode} onChange={value => { if (value) onChange(value as LibraryMode); }} className="library-mode" aria-label={tr("library:viewMode")}>
+      <SegmentedControlItem value="files" label={tr("library:viewFiles")} icon={<Files />} />
+      <SegmentedControlItem value="folders" label={tr("library:viewFolders")} icon={<FolderClosed />} />
     </SegmentedControl>
   );
 }
@@ -63,9 +57,7 @@ export function FolderGrid({ groups, formatNumber, onOpen }: { groups: CourseGro
 export function FolderCrumbs({ name, onBack }: { name: string; onBack: () => void }) {
   return (
     <nav className="folder-crumbs" aria-label={tr("library:breadcrumb")}>
-      <Button variant="ghost" className="folder-back-button" onClick={onBack} aria-label={tr("library:backToFolders")}>
-        <ChevronLeft aria-hidden="true" />
-      </Button>
+      <IconButton label={tr("library:backToFolders")} variant="ghost" className="folder-back-button" onClick={onBack} aria-label={tr("library:backToFolders")} icon={<ChevronLeft aria-hidden="true" />} />
       <button type="button" className="folder-crumb-root" onClick={onBack}>{tr("library:viewFolders")}</button>
       <ChevronRight className="folder-crumb-separator" aria-hidden="true" />
       <span className="folder-crumb-current" aria-current="page">{name}</span>

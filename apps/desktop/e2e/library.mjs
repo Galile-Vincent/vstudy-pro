@@ -6,7 +6,7 @@ import { mkdtemp, rm, mkdir, writeFile, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 const directory = await mkdtemp(join(tmpdir(), "vstudy-library-e2e-"));
-const evidence = temporaryPath('vstudy-library');
+const evidence = process.env.VSTUDY_EVIDENCE_DIR ?? temporaryPath('vstudy-library');
 await mkdir(evidence, { recursive: true });
 const screenshots = [];
 let app;
@@ -131,6 +131,7 @@ try {
   await page.evaluate(() =>
     window.dispatchEvent(new window.Event("library-changed")),
   );
+  await page.locator(".library-mode").getByText("All files", {exact:true}).click();
   await page.getByRole("button", { name: "Lesson 0", exact: true }).waitFor();
   for (const text of ["Science", "資料", "通信"]) {
     await page
@@ -253,7 +254,7 @@ try {
     .locator(".bulk-bar")
     .getByRole("button", { name: "Delete", exact: true })
     .click();
-  await page.locator('.library-view').getByRole("button", { name: "Undo", exact: true }).click();
+  await page.locator('.library-view').getByRole("button", { name: /^Undo:/ }).click();
   await page.getByRole("button", { name: "Lesson 0", exact: true }).waitFor();
   await app.evaluate(
     ({ dialog }, path) => {
@@ -302,6 +303,13 @@ try {
           width,
         );
         await page.emulateMedia({ colorScheme });
+        const toggleView = async () => {
+          const toggle = page.getByRole("button", {name:catalog.viewToggle,exact:true});
+          const inFilters = !await toggle.isVisible();
+          if (inFilters) await page.getByTestId("library-filters").click();
+          await toggle.click();
+          if (inFilters) await page.getByTestId("library-filters").click();
+        };
         await shot(`${lang}-${width}-${colorScheme}-populated`);
         await page.getByTestId("library-filters").click();
         await page.locator('.filter-panel').getByRole('combobox',{name:catalog.status,exact:true}).click();
@@ -329,13 +337,9 @@ try {
         await page
           .getByRole("button", { name: catalog.clearFilters, exact: true })
           .click();
-        await page
-          .getByRole("button", { name: catalog.viewToggle, exact: true })
-          .click();
+        await toggleView();
         await shot(`${lang}-${width}-${colorScheme}-grid`);
-        await page
-          .getByRole("button", { name: catalog.viewToggle, exact: true })
-          .click();
+        await toggleView();
         const currentRow = page.locator(".library-document[role=listitem]").first();
         await currentRow.click({ position: { x: 4, y: 4 } });
         await shot(`${lang}-${width}-${colorScheme}-selection`);

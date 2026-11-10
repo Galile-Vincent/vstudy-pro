@@ -1,16 +1,16 @@
 // @vitest-environment jsdom
+import '../courses/test-platform';
 import { readFileSync } from 'node:fs';
 import { recovery } from './recovery';
 import type { ComponentProps } from 'react';
-import type { Card } from '../components/ui';
+import type { Card } from '@astryxdesign/core';
 import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { LibraryView } from './index';
-import { TooltipProvider } from '../components/ui/tooltip';
 import { i18n, tr } from '../../shared/i18n';
 const state=vi.hoisted(()=>({invoke:vi.fn(),cardRender:vi.fn(),open:vi.fn(),route:{view:'library',query:{}}}));
-vi.mock('../components/ui', async importOriginal => {
- const actual = await importOriginal<typeof import('../components/ui')>();
+vi.mock('@astryxdesign/core', async importOriginal => {
+ const actual = await importOriginal<typeof import('@astryxdesign/core')>();
  return {...actual, Card:(props:ComponentProps<typeof Card>) => {
    state.cardRender(props.id?.replace('library-document-', ''));
    return <actual.Card {...props}/>;
@@ -21,7 +21,7 @@ vi.mock('../bridge',()=>({desktop:{invoke:state.invoke}}));
 vi.mock('../shell',()=>({useNavigate:()=>({route:state.route,navigate:vi.fn()})}));
 vi.stubGlobal('ResizeObserver',class{observe(){}unobserve(){}disconnect(){}});
 const row=(id:string)=>({document:{id,title:id,sourceName:id+'.md',mime:'text/markdown',status:'ready',createdAt:'2026-11-01T00:00:00Z'},tags:[],folderId:null,sizeBytes:10,contentChars:null,pageCount:null,lastOpenedAt:null,pinnedAt:null,pinned:false});
-function mount(){localStorage.setItem('library-mode','files');document.documentElement.lang='en';document.documentElement.style.fontSize='16px';document.documentElement.style.setProperty('--library-row-height','4');return render(<TooltipProvider><LibraryView/></TooltipProvider>);}
+function mount(){localStorage.setItem('library-mode','files');document.documentElement.lang='en';document.documentElement.style.fontSize='16px';document.documentElement.style.setProperty('--library-row-height','4');return render(<><LibraryView/></>);}
 afterEach(()=>{state.route.query={};cleanup();vi.resetAllMocks();localStorage.clear();sessionStorage.clear();});
 it('offers Undo for the first deletion when the next deletion fails',async()=>{
   let deleted=false;
@@ -629,7 +629,7 @@ it('exposes the labelled Library region', async () => {
  state.invoke.mockImplementation(async c => c === 'library:documents:list'
   ? {items:[row('Notes')],nextCursor:null} : []);
  mount(); await screen.findByText('Notes');
- expect(screen.getByRole('region', {name:tr('common:library')})).toBeTruthy();
+ expect(screen.getByRole('main', {name:tr('common:library')})).toBeTruthy();
 });
 
 it('names the pinned indicator in grid cards', async () => {

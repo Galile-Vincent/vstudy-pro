@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import '../courses/test-platform';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { HistoryView } from './index';

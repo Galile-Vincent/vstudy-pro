@@ -1,8 +1,9 @@
+import { IconButton } from "@astryxdesign/core";
+import { LayoutPanel, Button } from "@astryxdesign/core";
 import { useEffect, useRef, useState, type ComponentProps } from "react";
-import { createPortal } from "react-dom";
 import { MessageCircle, X } from "lucide-react";
 import { tr } from "../../shared/i18n";
-import { Button, Card } from "../components/ui";
+
 import { CourseAgentPanel } from "./agent";
 
 export function CourseAssistant(
@@ -35,7 +36,7 @@ export function CourseAssistant(
           ),
         ).filter(
           (element) =>
-            element.offsetParent !== null && !element.hasAttribute("disabled"),
+            element.offsetParent !== null && !element.hasAttribute("disabled") && element.getAttribute("aria-disabled") !== "true",
         );
         const first = elements[0],
           last = elements.at(-1);
@@ -51,7 +52,7 @@ export function CourseAssistant(
       if (
         event.key === "Escape" &&
         !event.defaultPrevented &&
-        !document.querySelector('[data-slot="sheet-content"]')
+        !document.querySelector('dialog[open]')
       ) {
         event.preventDefault();
         setOpen(false);
@@ -60,26 +61,23 @@ export function CourseAssistant(
     document.addEventListener("keydown", escape);
     return () => document.removeEventListener("keydown", escape);
   }, [open]);
-  return createPortal(
-    <div className="moodle-assistant">
-      <Card variant="raised"
+  return (
+    <div className="moodle-assistant" data-open={open}>
+      <LayoutPanel hasDivider width="100%"
         id="course-assistant-panel"
         className="moodle-assistant-panel gap-0 py-0"
         hidden={!open}
         role="region"
         aria-label={tr("moodle:course_assistant")}
       >
-        <Button variant="ghost" size="icon"
+        <IconButton label={tr("moodle:close_assistant")} variant="ghost"  size="md"
           ref={close}
           className="moodle-assistant-close"
           onClick={collapse}
-          aria-label={tr("moodle:close_assistant")}
-        >
-          <X />
-        </Button>
+          aria-label={tr("moodle:close_assistant")} icon={<X />} />
         <CourseAgentPanel {...props} onPendingChange={setPending} />
-      </Card>
-      <Button
+      </LayoutPanel>
+      <Button icon={<MessageCircle />} label={tr("moodle:course_assistant")}
         ref={button}
         className="moodle-chat-button"
         onClick={() => (open ? collapse() : setOpen(true))}
@@ -87,7 +85,7 @@ export function CourseAssistant(
         aria-expanded={open}
         aria-controls="course-assistant-panel"
       >
-        <MessageCircle /><span>{tr("moodle:course_assistant")}</span>
+        <span>{tr("moodle:course_assistant")}</span>
         {pending && (
           <span
             className="moodle-proposal-dot"
@@ -96,7 +94,6 @@ export function CourseAssistant(
           />
         )}
       </Button>
-    </div>,
-    document.body,
+    </div>
   );
 }

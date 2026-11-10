@@ -1,3 +1,5 @@
+import { Drawer, DialogHeader } from "@astryxdesign/core";
+import { Button } from "@astryxdesign/core";
 import { CourseFileActions, type DocumentAction, type DocumentOutcome } from '../document-open';
 import { flushSync } from "react-dom";
 import { useMoodleWebview } from './webview';
@@ -30,14 +32,6 @@ import { externalUrlSchema } from "../../shared/ipc";
 import { tr, i18n } from "../../shared/i18n";
 import { desktop } from "../bridge";
 import { Section, Toolbar, ListRow, EmptyState } from "../components/ui";
-import { Button } from "../components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "../components/ui/sheet";
 
 export function openCourseUrl(url: string, onError: () => void) {
   const parsed = externalUrlSchema.safeParse(url);
@@ -161,7 +155,7 @@ function WeeklySection({
     <section className="moodle-week" data-current={section.current}>
       <h3 id={`week-heading-${section.id}`} tabIndex={-1}>
       <button
-        className="moodle-week-heading flex min-h-14 w-full items-center gap-3 rounded-[var(--r-sm)] bg-[var(--subtle)] px-3 py-2 text-start"
+        className="moodle-week-heading flex min-h-14 w-full items-center gap-3 rounded-[var(--radius-element)] bg-[var(--subtle)] px-3 py-2 text-start"
         aria-expanded={section.accessible ? open : false}
         aria-controls={`week-${section.id}`}
         onClick={() => section.accessible && setOpen(!open)}
@@ -251,7 +245,7 @@ export function CourseContent({
     <>
       <Section title={tr("moodle:content")} actions={
         detail.sections.some(section => section.current) && <Toolbar right={
-          <Button variant="ghost" onClick={() => {
+          <Button label={(tr("moodle:jump_current_week"))} variant="ghost" onClick={() => {
             const current = detail.sections.find(section => section.current);
             if (current?.accessible) flushSync(() => setWeekOpen(current.id, true));
             const heading = document.getElementById(`week-heading-${current?.id}`);
@@ -282,26 +276,10 @@ export function CourseContent({
         )}
       </div>
       </Section>
-      <Sheet
-        open={!!selected}
+      <Drawer data-slot="sheet-content" role="dialog" label={tr("moodle:course_sections")} className="moodle-detail-sheet" isOpen={!!selected}
         onOpenChange={(open) => {
           if (!open) setSelected(undefined);
-        }}
-      >
-        <SheetContent
-          className="moodle-detail-sheet"
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            trigger.current?.focus();
-          }}
-        >
-          <SheetHeader>
-            <SheetTitle>{selected?.name}</SheetTitle>
-            <SheetDescription>
-              {selected && tr(`moodle:kind_${selected.kind}`)}
-            </SheetDescription>
-          </SheetHeader>
-          {selected && (
+        }}><div><DialogHeader title={<>{selected?.name}</>} /><p>{selected && tr(`moodle:kind_${selected.kind}`)}</p></div>{selected && (
             <div className="moodle-sheet-body">
               {selected.descriptionHtml && (
                 <SafeCourseHtml html={selected.descriptionHtml} onLink={original} />
@@ -332,11 +310,11 @@ export function CourseContent({
                 );
               })}
               {selected.url && (
-                <Button
-                  variant="outline"
+                <Button icon={<Link />} label={(tr('webview:original'))}
+                  variant="secondary"
                   onClick={() => original(selected.url!)}
                 >
-                  <Link />
+
                   {tr('webview:original')}
                 </Button>
               )}
@@ -354,9 +332,7 @@ export function CourseContent({
                 </p>
               )}
             </div>
-          )}
-        </SheetContent>
-      </Sheet>
+          )}</Drawer>
     </>
   );
 }
@@ -389,34 +365,15 @@ export function Announcements({ items, accountId }: { items: MoodleAnnouncement[
       ) : (
         <EmptyState title={tr("moodle:no_announcements")} />
       )}
-      <Sheet
-        open={!!selected}
+      <Drawer data-slot="sheet-content" role="dialog" label={tr("moodle:course_sections")} className="moodle-detail-sheet" isOpen={!!selected}
         onOpenChange={(open) => {
           if (!open) setSelected(undefined);
-        }}
-      >
-        <SheetContent
-          className="moodle-detail-sheet"
-          onCloseAutoFocus={(event) => {
-            event.preventDefault();
-            trigger.current?.focus();
-          }}
-        >
-          <SheetHeader>
-            <SheetTitle>{selected?.subject}</SheetTitle>
-            <SheetDescription>
-              {selected?.author}
-              {selected && <> · {date(selected.createdAt)}</>}
-            </SheetDescription>
-          </SheetHeader>
-          {selected && (
+        }}><div><DialogHeader title={<>{selected?.subject}</>} /><p>{selected?.author}{selected && <> · {date(selected.createdAt)}</>}</p></div>{selected && (
             <div className="moodle-sheet-body">
               <SafeCourseHtml html={selected.bodyHtml} onLink={accountId ? original : undefined} />
-              {accountId && selected.url && <Button variant="outline" onClick={() => original(selected.url!)}><Link />{tr('webview:original')}</Button>}
+              {accountId && selected.url && <Button icon={<Link />} label={(tr('webview:original'))} variant="secondary" onClick={() => original(selected.url!)}>{tr('webview:original')}</Button>}
             </div>
-          )}
-        </SheetContent>
-      </Sheet>
+          )}</Drawer>
     </Section>
   );
 }

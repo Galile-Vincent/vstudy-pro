@@ -1,3 +1,4 @@
+import { Card, Button } from "@astryxdesign/core";
 import type { IpcResponse } from '../../shared/ipc';
 /** Course chat keeps model output as proposals. Only confirmation cards invoke planner writes or approve material access. */
 import { emptyPlanner, type MaterialRequest } from "../../shared/planner";
@@ -18,7 +19,7 @@ import type {
 } from "../../shared/moodle";
 import { moodleAgentActionSchema } from "../../shared/moodle";
 import { tr } from "../../shared/i18n";
-import { Button, Card, Toolbar } from "../components/ui";
+import { Toolbar } from "../components/ui";
 import { Suggestions } from "../components/assistant-ui/elements/suggestions";
 import type { MoodleApi } from "./api";
 
@@ -213,7 +214,7 @@ export function CourseAgentPanel({
     }
   };
   return (
-    <Card variant="flat" role="complementary" ref={panel} tabIndex={-1} className="moodle-agent gap-0 py-0" data-conversation={!!conversation} aria-label={tr("moodle:course_assistant")}>
+    <Card elevation="none" role="complementary" ref={panel} tabIndex={-1} className="moodle-agent gap-0 py-0" data-conversation={!!conversation} aria-label={tr("moodle:course_assistant")}>
       <Toolbar className="moodle-agent-heading" left={<>
         <Sparkles />
         <h2>{tr("moodle:course_assistant")}</h2>
@@ -258,7 +259,7 @@ export function CourseAgentPanel({
                   onChange={e => setSelectedDocuments(current => e.target.checked ? [...current, file.documentId!] : current.filter(id => id !== file.documentId))} />
                 {file.name}
               </label>)}
-              <div className="planner-actions">{(["summarize-course-materials", "generate-practice-quiz"] as const).map(type => <Button key={type} variant="ghost" disabled={!conversation || !selectedDocuments.length || status === "busy"}
+              <div className="planner-actions">{(["summarize-course-materials", "generate-practice-quiz"] as const).map(type => <Button label={(tr(`planner:action_${type}`))} key={type} variant="ghost"  isDisabled={!conversation || !selectedDocuments.length || status === "busy"}
                 onClick={() => setActions(current => [...current, { id: crypto.randomUUID(), action: { type, documentIds: selectedDocuments } }])}>{tr(`planner:action_${type}`)}</Button>)}</div>
             </fieldset>
             </details>
@@ -329,7 +330,7 @@ export function CourseAgentPanel({
         {actions.map(proposal => <PlannerProposal key={proposal.id} action={proposal.action} snapshot={snapshot} courses={[detail.course]} deadlines={detail.deadlines} files={detail.files}
           busy={status === "busy"} onApprove={() => void approve(proposal)} onDismiss={() => setActions(current => current.filter(item => item.id !== proposal.id))} />)}
       </div>
-      <footer>{tr("planner:agent_scope")}</footer>
+      {!conversation && <footer>{tr("planner:agent_scope")}</footer>}
     </Card>
   );
 }
