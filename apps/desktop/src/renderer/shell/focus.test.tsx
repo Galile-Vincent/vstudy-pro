@@ -135,3 +135,9 @@ it('does not carry no-op close focus into the next new tab', async () => {
   expect(host.querySelectorAll('[role=tab]')).toHaveLength(2);
   expect(document.activeElement).toBe(chosen);
 });
+
+it('leaves the Astryx content wrapper out of the landmark list so pages own the single main', async () => {
+  await mount();
+  expect(host.querySelector('#astryx-app-shell-main')?.hasAttribute('role')).toBe(false);
+  expect(host.querySelectorAll('[role=main]')).toHaveLength(0);
+});

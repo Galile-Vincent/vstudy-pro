@@ -73,6 +73,8 @@ export function AppShell({
 }) {
   useTranslation();
   useScrollChrome();
+  // Pages own the main landmark (PageContainer as="main"); Astryx's wrapper must not add a second one.
+  useLayoutEffect(() => { document.getElementById('astryx-app-shell-main')?.removeAttribute('role'); });
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [displayName, setDisplayName] = useState('');
   useEffect(() => {
