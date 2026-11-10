@@ -2,48 +2,45 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const css = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
-const declarations = [...css.matchAll(/(--[\w-]+):([^;{}]+);/g)];
-function resolve(value: string, dark: boolean): string {
-  return value.replace(/var\((--[\w-]+)\)/g, (original, name: string) => {
-    if (!/shadow|glass-(edge|depth)|elevation/.test(name) || name === '--shadow-color') return original;
-    const matches = declarations.filter(match => match[1] === name);
-    const definition = dark ? matches.at(-1) : matches[0];
-    if (!definition) throw new Error(`Missing shadow token ${name}`);
-    return resolve(definition[2]!, dark);
-  });
-}
+const rule = (selector: string) => css.split('\n').find(line => line.startsWith(selector));
 
-describe('surface shadow geometry', () => {
-  for (const dark of [false, true]) {
-    it(`keeps card and floating shadows centered in ${dark ? 'dark' : 'light'}`, () => {
-      for (const name of ['glass-shadow', 'glass-shadow-hover', 'glass-shadow-float', 'elevation-raised', 'elevation-floating', 'course-shadow', 'art-reader-shadow', 'primary-shadow', 'shadow-legacy-0', 'shadow-legacy-1', 'shadow-legacy-2', 'shadow-legacy-4']) {
-        const value = resolve(`var(--${name})`, dark);
-        const layers = [...value.matchAll(/(?:^|,)(?:inset\s+)?\s*(-?[\d.]+)(?:px)?\s+(-?[\d.]+)(?:px)?\s+([\d.]+)(?:px)?(?=\s)/g)];
-        expect(layers.length, name).toBeGreaterThan(0);
-        for (const layer of layers) {
-          expect(Number(layer[1]), name).toBe(0);
-          expect(Number(layer[2]), name).toBe(0);
-          expect(Number(layer[3]), name).toBeLessThanOrEqual(/float|legacy/.test(name) ? 12 : 2);
-        }
-      }
-    });
-  }
+describe('elevation policy', () => {
+  it('keeps every legacy shadow alias flat or on an Astryx overlay shadow', () => {
+    const names = ['elevation-flat', 'elevation-raised', 'glass-shadow', 'glass-shadow-hover', 'primary-shadow', 'glass-edge', 'glass-depth'];
+    for (const name of names) expect(css, name).toMatch(new RegExp(`--${name}:none;`));
+    for (const name of ['elevation-floating', 'glass-shadow-float', 'glass-depth-float'])
+      expect(css, name).toMatch(new RegExp(`--${name}:var\\(--shadow-med\\);`));
+  });
+
+  it('does not override the Astryx overlay shadows', () => {
+    expect(css).not.toMatch(/--shadow-(low|med|high):/);
+  });
+
+  it('uses no blur or glass fill on any surface', () => {
+    expect(css).not.toMatch(/backdrop-filter:\s*(?!none)/);
+    expect(css).toContain('--glass-blur:none;');
+    expect(css).toContain('--material-card:var(--surface);');
+  });
+
+  it('shadows only floating overlays: menus and popovers medium, dialogs high', () => {
+    expect(css).toMatch(/\[data-slot=popover-content\][^{]*\.conversation-list-popover\) \{[^}]*box-shadow:var\(--shadow-med\)/);
+    expect(css).toMatch(/\[data-slot=dialog-content\],\.settings-dialog\) \{[^}]*box-shadow:var\(--shadow-high\)/);
+    expect(rule('.glass,.glass-pill')).toContain('box-shadow:none');
+  });
+
+  it('keeps every radius on the Astryx scale', () => {
+    for (const name of ['r-xs', 'r-sm', 'r-md', 'r-lg', 'r-xl', 'r-pill'])
+      expect(css, name).toMatch(new RegExp(`--${name}:var\\(--radius-(inner|element|container|full)\\)`));
+  });
 });
 
-it('keeps opaque-mode hover fills distinct from their base fills', () => {
-  for (const selector of [
-    'html[data-reduced-transparency=true],html[data-theme=contrast]',
-    '@media(prefers-reduced-transparency:reduce)',
-    '@media(prefers-contrast:more)',
-  ]) {
-    const block = css.split(selector).slice(1).map(part => part.split('}')[0]!)
-      .find(part => part.includes('--glass-fill:'))!;
-    const base = block.match(/--glass-fill:([^;]+);/)?.[1];
-    const hover = block.match(/--glass-fill-hover:([^;]+);/)?.[1];
-    expect(base, selector).toBeTruthy();
-    expect(hover, selector).toContain('color-mix(');
-    expect(hover, selector).not.toBe(base);
-  }
+describe('focus ring', () => {
+  it('draws on keyboard focus of controls but not on programmatic focus of headings or dialogs', () => {
+    expect(css).toMatch(/^:focus-visible \{ outline:var\(--focus-ring\)/m);
+    const exemption = (css.match(/^:is\(([^)]*)\):focus-visible \{ outline:none; \}/m)?.[1] ?? '').split(',');
+    for (const target of ['h1', 'h2', '[role=heading]', 'dialog', '[role=dialog]']) expect(exemption).toContain(target);
+    for (const control of ['button', 'a', 'input', '[role=tab]']) expect(exemption).not.toContain(control);
+  });
 });
 
 it('keeps library focus distinct from selected outlines in contrast modes', () => {
