@@ -529,7 +529,6 @@ function CoursesBody({
   </PageContainer>;
   const header = (
     <PageHeader title={!courseId ? tr("moodle:courses") : loading ? <span role="status">{tr("moodle:loading")}</span> : undefined}
-      className="[&_h1]:whitespace-nowrap [&>div>div:last-child]:max-[1000px]:w-full"
       actions={<div className="flex flex-wrap gap-2 [&_button]:min-h-9 [&_button]:h-auto">
         {!courseId && <Button ref={updatesTrigger} variant="outline" className="updates-entry"
           onClick={() => setShowUpdates(true)}>
@@ -953,7 +952,7 @@ function CoursesBody({
                         className="py-0"
                       >
                         <ListRow
-                          className="w-full min-h-14 flex-wrap gap-3 [&>.ui-row-target]:py-2 [&>.ui-row-target]:min-w-[min(100%,14rem)]"
+                          className="w-full min-h-14 flex-wrap gap-3 [&>.ui-row-target]:min-w-[min(100%,14rem)]"
                           title={
                             <button
                               className="course-open block w-full text-start whitespace-normal break-words"

@@ -171,7 +171,7 @@ export function LibrarySidebar() {
     )}
   </nav>
   {!!pins.length && (
-    <SidebarGroupLabel asChild>
+    <SidebarGroupLabel className="mt-[var(--space-6)]" asChild>
       <h2>{tr('library:pinnedFolders')}</h2>
     </SidebarGroupLabel>
   )}
@@ -219,7 +219,7 @@ export function LibrarySidebar() {
       </Button>
     </div>
   ))}
-  <div className="relative mt-4">
+  <div className="relative mt-[var(--space-6)]">
     <SidebarGroupLabel asChild>
       <h2>{tr('library:folders')}</h2>
     </SidebarGroupLabel>
@@ -399,7 +399,7 @@ export function LibrarySidebar() {
     </div>
   </div>
   {!!saved.length && (
-    <SidebarGroupLabel asChild>
+    <SidebarGroupLabel className="mt-[var(--space-6)]" asChild>
       <h2>{tr('library:savedFilters')}</h2>
     </SidebarGroupLabel>
   )}

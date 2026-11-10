@@ -64,7 +64,7 @@ describe('library folders view', () => {
   it('switches to all files, shows the course on every row, and remembers the choice', async () => {
     const view = mount();
     await screen.findByRole('list', { name: tr('library:folderList') });
-    fireEvent.click(screen.getByRole('button', { name: tr('library:viewFiles') }));
+    fireEvent.click(screen.getByRole('radio', { name: tr('library:viewFiles') }));
     const results = await screen.findByRole('list', { name: tr('library:documents') });
     expect(within(results).getAllByRole('listitem')).toHaveLength(4);
     const places = Array.from(results.querySelectorAll('.document-folder')).map((e) => e.textContent);
@@ -73,7 +73,7 @@ describe('library folders view', () => {
     view.unmount();
     mount();
     expect(await screen.findByRole('list', { name: tr('library:documents') })).toBeTruthy();
-    expect(screen.getByRole('button', { name: tr('library:viewFiles') }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('radio', { name: tr('library:viewFiles') }).getAttribute('aria-checked')).toBe('true');
   });
   it('lists documents flat while searching even in folders mode', async () => {
     mount();

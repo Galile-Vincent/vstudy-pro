@@ -27,7 +27,7 @@ export function PageHeader({
           {title != null && title !== '' && <h1 className="text-[length:var(--type-display)] font-medium">{title}</h1>}
           {description && <p className="text-[var(--muted)]">{description}</p>}
         </div>
-        {actions && <div className="min-w-0 max-w-full">{actions}</div>}
+        {actions && <div className="flex min-w-0 max-w-full flex-wrap items-center gap-[var(--space-2)]">{actions}</div>}
       </div>
       {meta && <div>{meta}</div>}
     </header>

@@ -134,7 +134,7 @@ try {
   await call('providers:configure',enabled);settings=await call('settings:get',{});await call('settings:set',{...settings,uiScale:100});
   await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(1440,900));
   await page.evaluate(()=>window.localStorage.setItem('library-grid','true'));
-  await go('library');const layoutToggle=page.locator('.library-toolbar button[aria-pressed]');await layoutToggle.focus();await page.keyboard.press('Enter');
+  await go('library');const layoutToggle=page.getByRole('button', {name: 'Switch list or grid view', exact: true});await layoutToggle.focus();await page.keyboard.press('Enter');
   await page.waitForFunction(()=>window.document.querySelector('.library-results')?.getAttribute('data-view')==='list');
   assert.equal(await page.locator('.library-results').getAttribute('data-view'),'list');
   await page.locator('.library-document').first().focus();await page.keyboard.press('Enter');await page.locator('.reading-pane .markdown').waitFor();

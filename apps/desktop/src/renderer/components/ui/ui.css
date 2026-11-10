@@ -2,13 +2,17 @@
 [data-slot=card][data-variant=interactive]:is(:hover,[data-demo-state=hover]) { background:var(--glass-fill-hover); }
 [data-slot=card][aria-disabled=true] { pointer-events:none; opacity:var(--opacity-disabled); }
 [data-slot=list-row][data-selected=true] { background:var(--active); }
+.ui-row-target { min-block-size:calc(var(--space-8) + var(--space-6)); }
 .ui-row-target:is(button,a):hover { background:var(--glass-tone); }
 .ui-row-target:disabled,.ui-row-target[aria-disabled=true] { opacity:var(--opacity-disabled); }
 [data-slot=list-row][data-divider=true] { border-block-end:thin solid var(--hairline); }
-[data-slot=segmented-tabs-trigger][data-state=active] { background:color-mix(in oklab,var(--ink) 6%,transparent); color:var(--ink); font-weight:500; box-shadow:none; }
+:is([data-slot=segmented-tabs-trigger][data-state=active],[data-slot=segmented-control-item][data-state=on]) { background:color-mix(in oklab,var(--ink) 6%,transparent); color:var(--ink); font-weight:500; box-shadow:none; }
 .ui-page-container { max-inline-size:calc(var(--space-8) * 40); }
 @media(prefers-contrast:more),(forced-colors:active) {
- [data-slot=segmented-tabs-trigger][data-state=active],[data-slot=list-row][data-selected=true] { outline:thin solid var(--ink); }
+ :is([data-slot=segmented-tabs-trigger][data-state=active],[data-slot=segmented-control-item][data-state=on]),[data-slot=list-row][data-selected=true] { outline:thin solid var(--ink); }
 }
-html[data-theme=contrast] [data-slot=segmented-tabs-trigger][data-state=active] { outline:thin solid var(--ink); }
-html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=segmented-tabs-trigger]):is(:focus-visible,[data-demo-state=focus]) { outline:2px solid var(--focus); outline-offset:2px; }
+html[data-theme=contrast] :is([data-slot=segmented-tabs-trigger][data-state=active],[data-slot=segmented-control-item][data-state=on]) { outline:thin solid var(--ink); }
+html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=segmented-tabs-trigger],[data-slot=segmented-control-item]):is(:focus-visible,[data-demo-state=focus]) { outline:2px solid var(--focus); outline-offset:2px; }
+
+[data-slot=page-header]:not(.moodle-webview-header) > div h1 { font-size:var(--type-display); font-weight:500; white-space:normal; overflow-wrap:anywhere; line-height:1.35; margin:0; }
+[data-slot=page-header]:not(.moodle-webview-header) > div p { margin:0; line-height:1.5; }

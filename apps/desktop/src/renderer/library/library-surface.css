@@ -41,15 +41,8 @@
 
 .library-toolbar { flex-wrap:wrap; gap:var(--space-3); }
 .library-toolbar > div { display:contents; }
-.library-mode { display:inline-flex; flex:none; gap:var(--space-2); }
-.library-view .library-mode > button,
-.library-view .library-view-controls > button,
-.library-view-controls .app-select,
 .library-view .library-search { min-height:40px; border-radius:var(--r-sm); }
-.library-view .library-mode > button { gap:var(--space-2); }
 .library-mode svg { width:var(--space-4); height:var(--space-4); }
-.library-view .library-mode > button[aria-pressed=true] { background:var(--active); }
-.library-view-controls { gap:var(--space-3); }
 @container library-page (width < 42rem) {
   .library-view .library-toolbar { display:grid; grid-template-columns:minmax(0,1fr) auto; }
   .library-toolbar .library-mode { grid-column:1; min-width:0; }
@@ -58,7 +51,6 @@
   .library-view .library-toolbar .library-search { grid-column:1 / -1; width:100%; min-width:0; }
 }
 
-.library-view [data-slot=page-header] button { min-height:40px; }
 .library-toolbar [data-slot=button] { min-height:40px; border-radius:var(--r-sm); }
 
 .library-results[data-view=grid] .document-forms { flex-wrap:wrap; white-space:normal; overflow-wrap:anywhere; }
