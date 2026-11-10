@@ -30,7 +30,7 @@ import {
 import { TooltipIconButton } from "@/components/assistant-ui/elements/tooltip-icon-button";
 import { Sources } from "./sources.aui";
 import { ThinkingIndicator } from "./thinking-indicator";
-import { Button } from "@/components/ui/button";
+import { Button } from "@astryxdesign/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
@@ -205,7 +205,7 @@ const ThreadHistorySkeleton: FC = () => (
   <div
     data-slot="aui_thread-history-skeleton"
     role="status"
-    className="animate-in fade-in fill-mode-both flex flex-col gap-y-6 [animation-delay:150ms] [animation-duration:200ms]"
+    className="flex flex-col gap-y-6"
   >
     <span className="sr-only">{tr('common:loading_conversation')}</span>
     <Skeleton className="ml-auto h-9 w-2/5 rounded-xl motion-reduce:animate-none" />
@@ -265,7 +265,7 @@ const ThreadRoot: FC<{ autoFocus: boolean }> = ({ autoFocus }) => {
         <div
           className={cn(
             "mx-auto flex w-full max-w-(--thread-max-width) flex-1 flex-col px-4 pt-4",
-            
+
           )}
         >
           <AuiIf condition={isNewChatView}>
@@ -384,7 +384,7 @@ const SpokenMessage: FC = () => {
             <span
               data-slot="aui_spoken-message-indicator"
               role="status"
-              className="text-muted-foreground ms-1 animate-pulse font-sans"
+              className="text-muted-foreground ms-1 font-sans"
               aria-label={tr('common:assistant_is_speaking')}
             >
               ●
@@ -408,10 +408,10 @@ const SpokenActionBar: FC = () => {
       <ActionBarPrimitive.Copy asChild>
         <TooltipIconButton tooltip={tr('common:copy')} className="size-6">
           <AuiIf condition={(s) => s.message.isCopied}>
-            <CheckIcon className="animate-in zoom-in-50 fade-in duration-200 ease-out" />
+            <CheckIcon className="duration-200 ease-out" />
           </AuiIf>
           <AuiIf condition={(s) => !s.message.isCopied}>
-            <CopyIcon className="animate-in zoom-in-75 fade-in duration-150" />
+            <CopyIcon className="duration-150" />
           </AuiIf>
         </TooltipIconButton>
       </ActionBarPrimitive.Copy>
@@ -470,14 +470,12 @@ const ThreadLoadEarlier: FC = () => {
       </span>
       {visible && (
         <ThreadPrimitive.LoadEarlier asChild>
-          <Button
-            variant="ghost"
+          <Button label={loading ? tr('common:loading_earlier_messages') : tr('common:load_earlier_messages')} variant="ghost"
             size="sm"
             data-slot="aui_thread-load-earlier"
-            className="aui-thread-load-earlier text-muted-foreground mb-6 self-center rounded-full"
-          >
+            className="aui-thread-load-earlier text-muted-foreground mb-6 self-center rounded-full">
             <span
-              className={cn(loading && "shimmer motion-reduce:animate-none")}
+              className={cn(loading && "motion-reduce:animate-none")}
             >
               {loading ? tr('common:loading_earlier_messages') : tr('common:load_earlier_messages')}
             </span>
@@ -494,7 +492,7 @@ const ThreadScrollToBottom: FC = () => {
     <ThreadPrimitive.ScrollToBottom asChild>
       <TooltipIconButton
         tooltip={tr('common:scroll_to_bottom')}
-        variant="outline"
+        variant="secondary"
         className="aui-thread-scroll-to-bottom dark:border-border dark:bg-background dark:hover:bg-accent absolute -top-12 z-10 self-center rounded-full p-4 disabled:invisible"
       >
         <ArrowDownIcon />
@@ -508,7 +506,7 @@ const ThreadWelcome: FC = () => {
   const {WelcomeExtra} = useContext(ThreadComponentsContext);
   return (
     <div className="aui-thread-welcome-root mb-6 flex flex-col px-2">
-      <p className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-2xl font-medium tracking-tight duration-200">
+      <p className="aui-thread-welcome-message-inner fill-mode-both text-2xl font-medium tracking-tight duration-200">
         {tr('common:explore_your_document')}</p>
       {WelcomeExtra && <WelcomeExtra />}
     </div>
@@ -529,7 +527,7 @@ const ThreadSuggestions: FC = () => {
 const ThreadSuggestionItem: FC = () => {
   useTranslation();
   return (
-    <div className="aui-thread-welcome-suggestion-display fade-in slide-in-from-bottom-2 animate-in fill-mode-both duration-200">
+    <div className="aui-thread-welcome-suggestion-display fill-mode-both duration-200">
       <SuggestionPrimitive.Trigger send asChild>
         <button
           type="button"
@@ -630,7 +628,7 @@ const ComposerAction: FC = () => {
                 className="aui-composer-stop-dictation text-destructive size-7 rounded-full"
                 aria-label={tr('common:stop_voice_input')}
               >
-                <SquareIcon className="aui-composer-stop-dictation-icon size-3.5 animate-pulse fill-current" />
+                <SquareIcon className="aui-composer-stop-dictation-icon size-3.5 fill-current" />
               </TooltipIconButton>
             </ComposerPrimitive.StopDictation>
           </AuiIf>
@@ -651,7 +649,7 @@ const ComposerAction: FC = () => {
               tooltip={tr('common:send_message')}
               side="bottom"
               type="button"
-              variant="default"
+              variant="primary"
               size="icon"
               className="aui-composer-send size-7 rounded-full"
               aria-label={tr('common:send_message')}
@@ -666,7 +664,7 @@ const ComposerAction: FC = () => {
               tooltip={tr('common:resume_generating')}
               side="bottom"
               type="button"
-              variant="default"
+              variant="primary"
               size="icon"
               className="aui-composer-resume size-7 rounded-full"
               aria-label={tr('common:resume_generating')}
@@ -683,14 +681,12 @@ const ComposerAction: FC = () => {
           }
         >
           <ComposerPrimitive.Cancel onClick={focusComposer} asChild>
-            <Button
-              type="button"
-              variant="default"
-              size="icon"
+            <Button label={isSending ? tr('common:cancel_sending') : tr('common:stop_generating')} type="button"
+              variant="primary"
+              size="md"
               className="aui-composer-cancel size-7 rounded-full"
-              aria-label={isSending ? tr('common:cancel_sending') : tr('common:stop_generating')}
-            >
-              <SquareIcon className="aui-composer-cancel-icon size-3.5 fill-current" />
+              aria-label={isSending ? tr('common:cancel_sending') : tr('common:stop_generating')} icon={<SquareIcon className="aui-composer-cancel-icon size-3.5 fill-current" />} isIconOnly>
+
             </Button>
           </ComposerPrimitive.Cancel>
         </AuiIf>
@@ -704,9 +700,9 @@ const MessageError: FC = () => {
   const error = useAuiState(s => s.message.status?.type === "incomplete" && s.message.status.reason === "error" ? s.message.status.error : undefined);
   return (
     <MessagePrimitive.Error>
-      <ErrorPrimitive.Root className="aui-message-error-root border-destructive bg-destructive/10 text-destructive dark:bg-destructive/5 mt-2 rounded-md border p-3 text-sm dark:text-red-200">
+      <ErrorPrimitive.Root className="aui-message-error-root border-destructive bg-destructive/10 text-destructive dark:bg-destructive/5 mt-2 rounded-md border p-3 text-sm">
         <span className="aui-message-error-message">{typeof error === 'string' ? error : tr('library:chat_error')}</span>
-        <ActionBarPrimitive.Reload onClick={focusComposer} asChild><Button type="button" variant="outline" size="sm">{tr('common:retry')}</Button></ActionBarPrimitive.Reload>
+        <ActionBarPrimitive.Reload onClick={focusComposer} asChild><Button label={tr('common:retry')} type="button" variant="secondary" size="sm">{tr('common:retry')}</Button></ActionBarPrimitive.Reload>
       </ErrorPrimitive.Root>
     </MessagePrimitive.Error>
   );
@@ -737,7 +733,7 @@ const AssistantMessage: FC = () => {
       aria-label={tr("common:chat_author_assistant")}
       data-role="assistant"
       data-message-id={historyMessageId}
-      className="fade-in slide-in-from-bottom-1 animate-in relative -mb-7.5 pb-7.5 duration-150"
+      className="relative -mb-7.5 pb-7.5 duration-150"
     >
       <div
         data-slot="aui_assistant-message-content"
@@ -829,7 +825,7 @@ const AssistantActionBar: FC = () => {
     <ActionBarPrimitive.Root
       hideWhenRunning
       autohide="not-last"
-      className="aui-assistant-action-bar-root text-muted-foreground animate-in fade-in col-start-3 row-start-2 -ms-1 flex gap-1 duration-200"
+      className="aui-assistant-action-bar-root text-muted-foreground col-start-3 row-start-2 -ms-1 flex gap-1 duration-200"
     >
       {CopyAction ? <CopyAction /> : <ActionBarPrimitive.Copy asChild><TooltipIconButton tooltip={tr("common:copy")}><CopyIcon /></TooltipIconButton></ActionBarPrimitive.Copy>}
       <AuiIf condition={(s) => s.thread.capabilities.feedback}>
@@ -870,7 +866,7 @@ const AssistantActionBar: FC = () => {
           side="bottom"
           align="start"
           sideOffset={6}
-          className="aui-action-bar-more-content bg-popover text-popover-foreground data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:animate-out data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] overflow-hidden rounded-xl border p-1.5"
+          className="aui-action-bar-more-content bg-popover text-popover-foreground z-50 min-w-[8rem] overflow-hidden rounded-xl border p-1.5"
         >
           <ActionBarPrimitive.ExportMarkdown asChild>
             <ActionBarMorePrimitive.Item className="aui-action-bar-more-item hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm outline-none select-none">
@@ -918,7 +914,7 @@ const UserMessage: FC = () => {
   return (
     <MessagePrimitive.Root
       data-slot="aui_user-message-root"
-      className="fade-in slide-in-from-bottom-1 animate-in grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] content-start gap-y-2 px-2 duration-150 [&:where(>*)]:col-start-2"
+      className="grid auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] content-start gap-y-2 px-2 duration-150 [&:where(>*)]:col-start-2"
       role="article"
       aria-label={tr("common:chat_author_you")}
       data-role="user"
@@ -975,11 +971,11 @@ const EditComposer: FC = () => {
         />
         <div className="aui-edit-composer-footer mx-2.5 mb-2.5 flex items-center gap-1.5 self-end">
           <ComposerPrimitive.Cancel asChild>
-            <Button variant="ghost" size="sm" className="h-8 px-3">
+            <Button label={tr('common:cancel_edit')} variant="ghost" size="sm" className="h-8 px-3">
               {tr('common:cancel_edit')}</Button>
           </ComposerPrimitive.Cancel>
           <ComposerPrimitive.Send asChild>
-            <Button size="sm" className="h-8 px-3">
+            <Button label={tr('common:save_resend')} size="sm" className="h-8 px-3">
               {tr('common:save_resend')}</Button>
           </ComposerPrimitive.Send>
         </div>

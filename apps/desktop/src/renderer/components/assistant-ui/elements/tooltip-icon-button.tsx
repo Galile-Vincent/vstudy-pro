@@ -1,48 +1,20 @@
 "use client";
-
 import { type ComponentPropsWithRef, forwardRef } from "react";
-import { Slot } from "radix-ui";
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+import { Button, Tooltip } from "@astryxdesign/core";
 import { cn } from "@/lib/utils";
 
-export type TooltipIconButtonProps = ComponentPropsWithRef<typeof Button> & {
+export type TooltipIconButtonProps = Omit<ComponentPropsWithRef<typeof Button>, "label" | "size"> & {
   tooltip: string;
   side?: "top" | "bottom" | "left" | "right";
+  size?: "icon" | "sm" | "md" | "lg";
+  disabled?: boolean;
 };
 
-export const TooltipIconButton = forwardRef<
-  HTMLButtonElement,
-  TooltipIconButtonProps
->(({ children, tooltip, side = "bottom", className, ...rest }, ref) => {
-  return (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            {...rest}
-            className={cn(
-              "aui-button-icon size-6 p-1 active:scale-90",
-              className,
-            )}
-            ref={ref}
-          >
-            <Slot.Slottable>{children}</Slot.Slottable>
-            <span className="aui-sr-only sr-only">{tooltip}</span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side={side}>{tooltip}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-});
-
+export const TooltipIconButton = forwardRef<HTMLButtonElement, TooltipIconButtonProps>(
+  ({ children, tooltip, side = "bottom", className, size, disabled, isDisabled, ...rest }, ref) => (
+    <Tooltip content={tooltip} delay={0} placement={side === "top" ? "above" : side === "bottom" ? "below" : side === "left" ? "start" : "end"}>
+      <Button {...rest} label={tooltip} variant={rest.variant ?? "ghost"} size={size === "icon" ? "md" : (size ?? "md")} isDisabled={!!(disabled || isDisabled)} className={cn("aui-button-icon", className)} ref={ref} icon={children} isIconOnly/>
+    </Tooltip>
+  ),
+);
 TooltipIconButton.displayName = "TooltipIconButton";

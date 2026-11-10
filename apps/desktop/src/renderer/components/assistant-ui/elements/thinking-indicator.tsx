@@ -25,11 +25,11 @@ export function ThinkingIndicator({
     >
       <span
         aria-hidden
-        className="size-1.5 shrink-0 animate-pulse rounded-full bg-blue-500 motion-reduce:animate-none dark:bg-blue-400"
+        className="size-1.5 shrink-0 rounded-full bg-[var(--color-text-info)]"
       />
       <ShimmerLabel
         key={label}
-        className="fade-in slide-in-from-bottom-1 animate-in relative inline-block min-w-0 truncate leading-tight duration-300"
+        className="relative inline-block min-w-0 truncate leading-tight duration-300"
       >
         {label}
       </ShimmerLabel>

@@ -3,8 +3,8 @@ import { useFormat } from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import { tr } from '../../../../shared/i18n';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@astryxdesign/core";
+import { TextInput as Input } from "@astryxdesign/core";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import {
@@ -58,11 +58,11 @@ export const ThreadList: FC<{summaries?:ThreadSummaries}> = ({summaries = {}}) =
 
 export const ThreadListSearch = forwardRef<
   HTMLInputElement,
-  Omit<ComponentPropsWithoutRef<typeof Input>, "value" | "onChange"> & {
+  Omit<ComponentPropsWithoutRef<typeof Input>, "value" | "onChange" | "label"> & {
     value: string;
     onValueChange: (value: string) => void;
   }
->(({ className, value, onValueChange, ...props }, ref) => {
+>(({ controlClassName: className, value, onValueChange, ...props }, ref) => {
   return (
     <div data-slot="aui_thread-list-search" className="relative px-0.5 py-1">
       <SearchIcon
@@ -73,10 +73,10 @@ export const ThreadListSearch = forwardRef<
         ref={ref}
         type="search"
         value={value}
-        onChange={(event) => onValueChange(event.target.value)}
-        aria-label={tr('common:search_threads')}
+        onChange={(_value, event) => onValueChange(event.target.value)}
+        isLabelHidden label={tr('common:search_threads')}
         placeholder={tr('common:search_threads')}
-        className={cn("h-8 ps-8 text-sm", className)}
+        controlClassName={cn("h-8 ps-8 text-sm", className)}
         {...props}
       />
     </div>
@@ -272,20 +272,18 @@ const ThreadListItemGroups: FC<{ searchQuery?: string }> = ({
 
 export const ThreadListNew = forwardRef<
   HTMLButtonElement,
-  ComponentPropsWithoutRef<typeof Button> & { labelClassName?: string }
+  Omit<ComponentPropsWithoutRef<typeof Button>, "label"> & { labelClassName?: string }
 >(({ className, labelClassName, children, ...props }, ref) => {
   return (
     <ThreadListPrimitive.New asChild>
-      <Button
-        ref={ref}
+      <Button label={tr('common:new_thread')} ref={ref}
         variant="ghost"
         data-slot="aui_thread-list-new"
         className={cn(
           "hover:bg-muted data-active:bg-muted h-8 justify-start gap-2 rounded-md px-2.5 text-sm font-normal",
           className,
         )}
-        {...props}
-      >
+        {...props}>
         {children ?? (
           <>
             <PlusIcon
@@ -434,12 +432,12 @@ const ThreadListItemRename: FC<{
   return (
     <Input
       ref={inputRef}
-      autoFocus
+      hasAutoFocus
       data-slot="aui_thread-list-item-rename"
-      aria-label={tr('common:rename_thread')}
+      isLabelHidden label={tr('common:rename_thread')}
       value={value}
-      className="h-7 min-w-0 flex-1 ps-2.5 pe-9 text-sm"
-      onChange={(event) => setValue(event.target.value)}
+      controlClassName="h-7 min-w-0 flex-1 ps-2.5 pe-9 text-sm"
+      onChange={(_value, event) => setValue(event.target.value)}
       onBlur={() => commit(false)}
       onKeyDown={(event) => {
         if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229)
@@ -461,13 +459,11 @@ const ThreadListItemMore: FC<{ onRename: () => void }> = ({ onRename }) => {
   return (
     <ThreadListItemMorePrimitive.Root sharedFocusGroup>
       <ThreadListItemMorePrimitive.Trigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
+        <Button label={tr('common:more_options')} variant="ghost"
+          size="md"
           data-slot="aui_thread-list-item-more"
-          className="data-[state=open]:bg-accent absolute end-1.5 top-1/2 size-6 -translate-y-1/2 p-0 opacity-0 group-hover:opacity-100 group-has-focus-visible:opacity-100 group-data-active:opacity-100 data-[state=open]:opacity-100"
-        >
-          <MoreHorizontalIcon className="size-3.5" />
+          className="data-[state=open]:bg-accent absolute end-1.5 top-1/2 size-6 -translate-y-1/2 p-0 opacity-0 group-hover:opacity-100 group-has-focus-visible:opacity-100 group-data-active:opacity-100 data-[state=open]:opacity-100" icon={<MoreHorizontalIcon className="size-3.5" />}>
+
           <span className="sr-only">{tr('common:more_options')}</span>
         </Button>
       </ThreadListItemMorePrimitive.Trigger>
@@ -476,7 +472,7 @@ const ThreadListItemMore: FC<{ onRename: () => void }> = ({ onRename }) => {
         align="start"
         sideOffset={6}
         data-slot="aui_thread-list-item-more-content"
-        className="bg-popover text-popover-foreground data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:animate-out data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-32 overflow-hidden rounded-xl border p-1.5"
+        className="bg-popover text-popover-foreground z-50 min-w-32 overflow-hidden rounded-xl border p-1.5"
       >
         <ThreadListItemMorePrimitive.Item
           data-slot="aui_thread-list-item-more-item"

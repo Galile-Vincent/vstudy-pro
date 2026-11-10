@@ -5,9 +5,8 @@ import type { Providers } from './provider-metadata';
 import { pickerModels, effortLabel, optionLabel } from './model-catalog';
 import { ModelSelector } from './components/assistant-ui/elements/model-selector.aui';
 import { ClaudeLogo, OpenAILogo, GeminiLogo } from './components/assistant-ui/elements/logos';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from './components/ui/select';
-import { Toggle } from './components/ui/toggle';
-import { Button } from './components/ui/button';
+import { Selector, ToggleButton } from '@astryxdesign/core';
+import { Button } from "@astryxdesign/core";
 export function ModelControls({providers, model, onModel, onSettings, onProvidersChanged, onOpenChange, values = {}, onChange}: {
  providers: Providers; model: string; onModel: (value:string)=>void; onSettings:()=>void;
  onOpenChange?:(open:boolean)=>void; onProvidersChanged?:()=>Promise<void>; values?:Record<string,string|boolean>; onChange?:(values:Record<string,string|boolean>)=>void;
@@ -21,18 +20,9 @@ export function ModelControls({providers, model, onModel, onSettings, onProvider
  const fast = !!speed && ['true','priority'].includes(String(values[speed.id]??speed.default));
  const entries = all.map(m=>({id:m.value,name:m.name,description:m.available?'':m.reason,disabled:!m.available,keywords:[m.provider,m.id],icon:m.providerId.includes('claude')||m.providerId.includes('anthropic')?<ClaudeLogo/>:m.providerId==='agy-cli'?<GeminiLogo/>:<OpenAILogo/>}));
  return <div className="model-controls">
-  <ModelSelector.Root models={entries} value={selected?.value??model} onValueChange={onModel} onOpenChange={open=>{onOpenChange?.(open);if(open) void onProvidersChanged?.();}}>
-   <ModelSelector.Trigger aria-label={tr('common:model')} variant="ghost" size="sm"/>
-   <ModelSelector.Content aria-label={tr('common:model')} side="top" align="start" searchable>
-    <ModelSelector.Search aria-label={tr('common:search_models')} placeholder={tr('common:search_models_or_providers')}/>
-    <ModelSelector.List aria-label={tr('common:model')}>
-     <ModelSelector.Empty>{tr('common:no_models_found')}</ModelSelector.Empty>
-     {[...new Set(all.map(m=>m.provider))].map(group=><ModelSelector.Group key={group} heading={group}>{entries.filter(m=>all.find(a=>a.value===m.id)?.provider===group).map(m=><ModelSelector.Item key={m.id} model={m}/>)}</ModelSelector.Group>)}
-    </ModelSelector.List>
-   </ModelSelector.Content>
-  </ModelSelector.Root>
-  {!all.some(m=>m.available) && <Button variant="ghost" size="sm" onClick={onSettings}>{tr('novice:connect_ai')}</Button>}
-  {effort&&<Select value={String(values[effort.id]??effort.default)} onValueChange={value=>onChange?.({...values,[effort.id]:value})}><SelectTrigger aria-label={optionLabel(effort.id,effort.label)} size="sm"><SelectValue/></SelectTrigger><SelectContent>{effort.values.map(v=><SelectItem key={v.id} value={v.id}>{effort.id==='thinking'?tr(v.id==='enabled'?'picker:enabled':'picker:disabled'):effortLabel(v.id)}</SelectItem>)}</SelectContent></Select>}
-  {speed&&<Toggle size="sm" pressed={fast} aria-label={tr('common:fast')} onPressedChange={checked=>onChange?.({...values,[speed.id]:speed.id==='fastMode'?checked:checked?'priority':'default'})}><Zap size={14}/></Toggle>}
+  <ModelSelector models={entries} value={selected?.value??model} onValueChange={onModel} onOpenChange={open=>{onOpenChange?.(open);if(open) void onProvidersChanged?.();}}/>
+  {!all.some(m=>m.available) && <Button label={tr('novice:connect_ai')} variant="ghost" size="sm" onClick={onSettings}>{tr('novice:connect_ai')}</Button>}
+  {effort && <Selector label={optionLabel(effort.id,effort.label)} isLabelHidden value={String(values[effort.id]??effort.default)} onChange={value=>onChange?.({...values,[effort.id]:value})} options={effort.values.map(v=>({value:v.id,label:effort.id==='thinking'?tr(v.id==='enabled'?'picker:enabled':'picker:disabled'):effortLabel(v.id)}))}/>}
+  {speed && <ToggleButton label={tr('common:fast')} isPressed={fast} onPressedChange={checked=>onChange?.({...values,[speed.id]:speed.id==='fastMode'?checked:checked?'priority':'default'})} icon={<Zap size={14}/>} isIconOnly/>}
  </div>;
 }

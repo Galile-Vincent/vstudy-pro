@@ -37,8 +37,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "./collapsible-root";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@astryxdesign/core";
+import { TextArea as Textarea } from "@astryxdesign/core";
 
 const ANIMATION_DURATION = 200;
 
@@ -189,7 +189,7 @@ function ToolFallbackTrigger({
         className={cn(
           "aui-tool-fallback-trigger-label-wrapper inline-block min-w-0 text-start leading-none wrap-anywhere",
           isCancelled && "text-muted-foreground line-through",
-          isRunning && "shimmer motion-reduce:animate-none",
+          isRunning && "motion-reduce:animate-none",
         )}
       >
         {label}: <b>{toolName}</b>
@@ -220,8 +220,6 @@ function ToolFallbackContent({
       className={cn(
         "aui-tool-fallback-content relative overflow-hidden text-sm outline-none",
         "group/collapsible-content ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:animate-none",
-        "data-closed:animate-collapsible-up",
-        "data-open:animate-collapsible-down",
         "data-closed:fill-mode-forwards",
         "data-closed:pointer-events-none",
         "[--tw-duration:var(--animation-duration)]",
@@ -232,8 +230,6 @@ function ToolFallbackContent({
       <div
         className={cn(
           "flex flex-col gap-2 ps-6 pt-1 pb-2 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:animate-none",
-          "group-data-open/collapsible-content:animate-in group-data-open/collapsible-content:fade-in-0 group-data-open/collapsible-content:blur-in-[2px] group-data-open/collapsible-content:slide-in-from-top-1",
-          "group-data-closed/collapsible-content:animate-out group-data-closed/collapsible-content:fade-out-0 group-data-closed/collapsible-content:blur-out-[2px] group-data-closed/collapsible-content:slide-out-to-top-1",
           "group-data-closed/collapsible-content:animation-duration-(--animation-duration) group-data-open/collapsible-content:animation-duration-(--animation-duration)",
         )}
       >
@@ -620,10 +616,9 @@ function ToolFallbackApprovalQuestions({
                 {question.options.map((option) => {
                   const pressed = chosen.includes(option.id);
                   return (
-                    <Button
-                      key={option.id}
+                    <Button label={option.label} key={option.id}
                       size="sm"
-                      variant={pressed ? "default" : "outline"}
+                      variant={pressed ? "primary" : "secondary"}
                       className={cn(
                         pressable,
                         described &&
@@ -631,8 +626,7 @@ function ToolFallbackApprovalQuestions({
                       )}
                       aria-pressed={pressed}
                       onClick={() => toggle(question, option.id)}
-                      disabled={locked}
-                    >
+                      isDisabled={locked}>
                       <span>{option.label}</span>
                       {option.description ? (
                         <span className="text-xs font-normal opacity-80">
@@ -647,13 +641,13 @@ function ToolFallbackApprovalQuestions({
             {questionAcceptsText(question) ? (
               <Textarea
                 value={typed.get(question.id) ?? ""}
-                onChange={(event) =>
+                onChange={(_value, event) =>
                   setTyped((current) =>
                     new Map(current).set(question.id, event.target.value),
                   )
                 }
-                disabled={locked}
-                aria-label={question.prompt}
+                isDisabled={locked}
+                isLabelHidden label={question.prompt}
                 placeholder={
                   question.options?.length
                     ? tr('common:or_type_an_answer')
@@ -665,21 +659,17 @@ function ToolFallbackApprovalQuestions({
         );
       })}
       <div className="flex items-center gap-2">
-        <Button
-          size="sm"
+        <Button label={tr('common:send')} size="sm"
           className={pressable}
           onClick={send}
-          disabled={locked || !complete}
-        >
+          isDisabled={locked || !complete}>
           {tr('common:send')}</Button>
         {dismissible ? (
-          <Button
-            size="sm"
-            variant="outline"
+          <Button label={tr('common:dismiss')} size="sm"
+            variant="secondary"
             className={pressable}
             onClick={onDismiss}
-            disabled={locked}
-          >
+            isDisabled={locked}>
             {tr('common:dismiss')}</Button>
         ) : null}
       </div>
@@ -946,13 +936,11 @@ function ToolFallbackApprovalImpl({
     question && respondToApproval != null && approval?.dismissible === true;
 
   const dismissButton = dismissible ? (
-    <Button
-      size="sm"
-      variant="outline"
+    <Button label={tr('common:dismiss')} size="sm"
+      variant="secondary"
       className={pressable}
       onClick={dismiss}
-      disabled={locked}
-    >
+      isDisabled={locked}>
       {tr('common:dismiss')}</Button>
   ) : null;
 
@@ -969,21 +957,19 @@ function ToolFallbackApprovalImpl({
     <div className="aui-tool-fallback-approval-answer flex flex-col items-start gap-2">
       <Textarea
         value={answer}
-        onChange={(event) => setAnswer(event.target.value)}
-        disabled={locked}
-        aria-label={question ? (approval?.prompt ?? tr('common:answer')) : tr('common:note')}
+        onChange={(_value, event) => setAnswer(event.target.value)}
+        isDisabled={locked}
+        isLabelHidden label={question ? (approval?.prompt ?? tr('common:answer')) : tr('common:note')}
         placeholder={
           question ? tr('common:type_your_answer') : tr('common:add_a_note_to_your_decision')
         }
       />
       {question && (
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
+          <Button label={tr('common:send')} size="sm"
             className={pressable}
             onClick={submitAnswer}
-            disabled={locked}
-          >
+            isDisabled={locked}>
             {tr('common:send')}</Button>
           {dismissButton}
         </div>
@@ -1052,23 +1038,19 @@ function ToolFallbackApprovalImpl({
           </ul>
         )}
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
+          <Button label={tr('common:confirm')} size="sm"
             className={pressable}
             onClick={() => respondWithOption(confirming)}
-            disabled={locked}
-          >
+            isDisabled={locked}>
             {tr('common:confirm')}</Button>
-          <Button
-            size="sm"
-            variant="outline"
+          <Button label={tr('common:back')} size="sm"
+            variant="secondary"
             className={pressable}
             onClick={() => {
               focusPendingGroup();
               setConfirmingId(null);
             }}
-            disabled={locked}
-          >
+            isDisabled={locked}>
             {tr('common:back')}</Button>
         </div>
       </div>
@@ -1096,26 +1078,22 @@ function ToolFallbackApprovalImpl({
         <div className="flex flex-wrap items-center gap-2">
           {[...allowOptions, ...customOptions, ...rejectOptions].map(
             (option) => (
-              <Button
-                key={option.id}
+              <Button label={approvalOptionLabel(option)} key={option.id}
                 size="sm"
-                variant={option === allowOptions[0] ? "default" : "outline"}
+                variant={option === allowOptions[0] ? "primary" : "secondary"}
                 className={pressable}
                 onClick={() => handleOption(option)}
-                disabled={locked}
-              >
+                isDisabled={locked}>
                 {approvalOptionLabel(option)}
               </Button>
             ),
           )}
           {rejectOptions.length === 0 && !question && (
-            <Button
-              size="sm"
-              variant="outline"
+            <Button label={tr('common:deny')} size="sm"
+              variant="secondary"
               className={pressable}
               onClick={() => respond(false)}
-              disabled={locked}
-            >
+              isDisabled={locked}>
               {tr('common:deny')}</Button>
           )}
           {!acceptsText && dismissButton}
@@ -1163,20 +1141,16 @@ function ToolFallbackApprovalImpl({
     >
       {promptText}
       <div className="flex items-center gap-2">
-        <Button
-          size="sm"
+        <Button label={tr('common:allow')} size="sm"
           className={pressable}
           onClick={() => respond(true)}
-          disabled={locked}
-        >
+          isDisabled={locked}>
           {tr('common:allow')}</Button>
-        <Button
-          size="sm"
-          variant="outline"
+        <Button label={tr('common:deny')} size="sm"
+          variant="secondary"
           className={pressable}
           onClick={() => respond(false)}
-          disabled={locked}
-        >
+          isDisabled={locked}>
           {tr('common:deny')}</Button>
       </div>
       {answerField}

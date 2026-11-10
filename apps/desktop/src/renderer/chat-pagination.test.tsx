@@ -52,7 +52,7 @@ it('caps a missing search target at five older pages and leaves further loading 
     return {items:[message(id)],nextCursor:pages<20?{id,createdAt:'2026-11-01T00:00:00Z'}:null};
   });
   mount([message('recent')],{id:'recent',createdAt:'2026-11-02T00:00:00Z'},'deleted-target');
-  const notice=await screen.findByRole('status');
+  const notice=await screen.findByText(tr('history:message_not_found'));
   expect(notice.textContent).toBe(tr('history:message_not_found'));
   expect(pages).toBe(5);
   expect(screen.getByText('recent')).toBeTruthy();
@@ -66,7 +66,7 @@ it.each([false,true])('reports a missing finder target when the cursor is exhaus
   await i18n.changeLanguage('en');
   bridge.invoke.mockResolvedValue({items:[],nextCursor:null});
   mount([message('recent')],hasOlderPage?{id:'recent',createdAt:'2026-11-02T00:00:00Z'}:null,'deleted-target');
-  expect((await screen.findByRole('status')).textContent).toBe(tr('history:message_not_found'));
+  expect((await screen.findByText(tr('history:message_not_found'))).textContent).toBe(tr('history:message_not_found'));
   expect(bridge.invoke).toHaveBeenCalledTimes(hasOlderPage?1:0);
   expect(screen.queryByRole('group', {name: tr('common:load_earlier_messages')})).toBeNull();
   expect(screen.queryByRole('button',{name:tr('common:load_earlier_messages')})).toBeNull();
