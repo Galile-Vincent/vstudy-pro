@@ -177,6 +177,7 @@ export function UsageSettings() {
             <SettingRow stack htmlFor="usage-price_overrides_usd_per_1m_tokens" label={tr('common:price_overrides_usd_per_1m_tokens')}>
               <Textarea
                 id="usage-price_overrides_usd_per_1m_tokens"
+                className="font-mono text-[length:var(--type-sm)]"
                 rows={5}
                 value={overrides}
                 onChange={(e) => setOverrides(e.target.value)}

@@ -8,7 +8,7 @@ import { id, seedStudent } from '../planner/__fixtures__/student';
 let registerIpc: typeof import('./index').registerIpc;
 
 const mocks=vi.hoisted(()=>({
-  chatDispose:vi.fn(), focused:vi.fn(), save:vi.fn(), write:vi.fn(), confirm:vi.fn(), external:vi.fn(), idle:vi.fn(async()=>{}),
+  log:vi.fn(), chatDispose:vi.fn(), focused:vi.fn(), save:vi.fn(), write:vi.fn(), confirm:vi.fn(), external:vi.fn(), idle:vi.fn(async()=>{}),
   exportCalendar:undefined as McpBackendOptions['exportCalendar'] | undefined,
 }));
 vi.mock('electron',()=>({
@@ -16,6 +16,7 @@ vi.mock('electron',()=>({
   BrowserWindow:{getFocusedWindow:mocks.focused,getAllWindows:()=>[]},dialog:{showSaveDialog:mocks.save},
   nativeTheme:{},shell:{openExternal:mocks.external},ipcMain:{handle:vi.fn(),removeHandler:vi.fn()},
 }));
+vi.mock('../logging',()=>({log:mocks.log}));
 vi.mock('../dialogs',()=>({showAttachedMessage:mocks.confirm,ownerWindow:vi.fn()}));
 vi.mock('../providers/executable-pins',()=>({ExecutablePins:class {},setExecutablePins:vi.fn()}));
 vi.mock('../providers',()=>({createProviderRegistry:()=>({})}));
@@ -194,8 +195,20 @@ it.each(['before consent','during drain'])('blocks update installation when dele
   mocks.confirm.mockResolvedValue({response:1});
   const handler=new Map(vi.mocked(ipcMain.handle).mock.calls).get('updates:install')!;
   try {
-    await handler({sender:{isDestroyed:()=>false}} as never,{});
+    expect(await handler({sender:{isDestroyed:()=>false}} as never,{})).toEqual(snapshot);
+    expect(snapshot).toEqual({state:{status:'ready',version:'0.4.5'},currentVersion:'0.4.4',lastCheckedAt:null,automatic:false});
+    expect(mocks.log).toHaveBeenCalledWith({phase:'updates-install-blocked'});
     expect(updates.install).not.toHaveBeenCalled();
     expect(mocks.confirm).toHaveBeenCalledTimes(phase==='before consent'?0:1);
   }finally{await dispose();}
+});
+
+it.each([false,true])('disposes updates and unsubscribes on deleting=%s',async deleting=>{
+  const store=openStore(':memory:');stores.push(store);
+  const unsubscribe=vi.fn();
+  const updates={snapshot:vi.fn(),subscribe:vi.fn(()=>unsubscribe),dispose:vi.fn()};
+  const dispose=registerIpc(store,{} as SecretStore,()=>true,undefined,{updates:updates as never});
+  await dispose(deleting);
+  expect(unsubscribe).toHaveBeenCalledOnce();
+  expect(updates.dispose).toHaveBeenCalledOnce();
 });

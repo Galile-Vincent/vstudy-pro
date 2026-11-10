@@ -125,9 +125,10 @@ export function registerIpc(
     registrar.handle('updates:download', async (_request,event) =>
       updates.snapshot().state.status === 'available' && await updateConsent(event,'download') ? updates.download() : updates.snapshot());
     registrar.handle('updates:cancel', () => updates.cancelWait());
+    const blockedInstall = () => { log({phase:'updates-install-blocked'}); return updates.snapshot(); };
     let installing = false;
     registrar.handle('updates:install', async (_request,event) => {
-      if (options.canInstallUpdate?.() === false || installing || updates.snapshot().installing || updates.snapshot().state.status !== 'ready') return updates.snapshot();
+      if (options.canInstallUpdate?.() === false || installing || updates.snapshot().installing || updates.snapshot().state.status !== 'ready') return blockedInstall();
       installing = true;
       try {
         if (!await updateConsent(event,'install')) return updates.snapshot();
@@ -145,7 +146,7 @@ export function registerIpc(
             buttons:[tr('updates:not_now'), tr('updates:restart_now')], defaultId:0, cancelId:0}, event.sender);
           return result.response === 1 && !event.sender.isDestroyed();
         });
-        if (!proceed || options.canInstallUpdate?.() === false) return updates.snapshot();
+        if (!proceed || options.canInstallUpdate?.() === false) return blockedInstall();
         return updates.install();
       } finally { installing = false; }
     });
