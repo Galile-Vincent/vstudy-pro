@@ -3,7 +3,7 @@ import type { DocumentOpenMethod } from '../../shared/domain';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { OpenMethodSelect } from '../document-open';
-import { SettingsRow } from './layout';
+import { SettingRow } from '../components/ui';
 
 export function DocumentSettings() {
   const [method, setMethod] = useState<DocumentOpenMethod>();
@@ -19,7 +19,7 @@ export function DocumentSettings() {
     } catch {setError(tr('errors:generic'));}
     finally {setBusy(false);}
   };
-  return <><SettingsRow label={tr('library:defaultOpenMethod')} description={method === 'original' ? tr('library:originalHint') : undefined}>
+  return <><SettingRow label={tr('library:defaultOpenMethod')} description={method === 'original' ? tr('library:originalHint') : undefined}>
     <OpenMethodSelect value={method ?? 'reader'} disabled={busy || !method} onChange={value => void update(value)}/>
-  </SettingsRow>{error && <p role="alert">{error}</p>}</>;
+  </SettingRow>{error && <p role="alert">{error}</p>}</>;
 }

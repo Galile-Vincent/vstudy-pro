@@ -634,10 +634,6 @@ h3 {
   padding-top: var(--space-4);
   margin-top: var(--space-4);
 }
-.provider-row .row {
-  justify-content: space-between;
-  font-size: 0.75rem;
-}
 .provider-row form {
   display: flex;
   gap: 6px;

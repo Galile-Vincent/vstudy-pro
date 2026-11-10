@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { Checkbox } from './components/checkbox';
 import { Switch } from './components/ui/switch';
 import { Button } from './components/ui/button';
+import { FormField, ListRow } from './components/ui';
 import { Input } from './components/ui/input';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -79,18 +80,15 @@ export function ProviderRow({
       : tr('common:no_key_saved');
 
   return (
-    <section className={settingsView ? 'provider-row settings-row' : 'provider-row'} data-layout={settingsView ? 'stack' : undefined} aria-busy={busy}>
+    <section className="provider-row" aria-busy={busy}>
       {busy && !waitingKeychain && <p role="status">{tr('common:checking_provider')}</p>}
-      <div className="row">
-        <span className="provider-title">
-          <strong>{providerName[provider.config.id]}</strong>
+      <ListRow className="flex-wrap" title={providerName[provider.config.id]} subtitle={<>
           <span className="muted provider-status">
             <span className={`provider-status-dot ${statusTone}`} aria-hidden="true" />
             {hasKey && !isCli && <Check size={14} aria-hidden="true" />}
             <span>{statusText}</span>
           </span>
-        </span>
-        <span className="provider-actions">
+        </>} actions={<span className="provider-actions">
           {isCli ? (
             <>
               <Button aria-label={tr('settings:provider_action',{action:tr('ai-cli:wizard'),name:providerName[provider.config.id]})} variant="secondary" size="sm" disabled={busy || unsupportedCli} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
@@ -108,8 +106,7 @@ export function ProviderRow({
               })}>{tr('settings:test_connection')}</Button>
             </>
           )}
-        </span>
-      </div>
+        </span>} />
       {isCli && (
         <>
           {unsupportedCli && <p role="note">{tr('distribution:codex_unavailable')}</p>}
@@ -180,14 +177,15 @@ export function ProviderRow({
               }, true);
             }}
           >
-            <Input
+            <FormField className="min-w-0 flex-[1_1_12rem]" label={tr('settings:api_key', { provider: providerName[provider.config.id] })}>
+              {control => <Input {...control}
               aria-label={tr('settings:api_key', { provider: providerName[provider.config.id] })}
               type="password"
               autoComplete="off"
               placeholder={tr('common:enter_api_key')}
               value={key}
               onChange={(e) => setKey(e.target.value)}
-            />
+            />}</FormField>
             <Button aria-label={tr('settings:provider_action',{action:tr(error && key.trim() ? 'settings:retry' : 'common:save_key'),name:providerName[provider.config.id]})} variant="default" size="sm" disabled={busy || !key.trim()}>
               {tr(error && key.trim() ? 'settings:retry' : 'common:save_key')}
             </Button>
@@ -244,13 +242,14 @@ export function ProviderRow({
                 );
               }}
             >
-              <Input
+              <FormField className="min-w-0 flex-[1_1_12rem]" label={tr('common:openai_compatible_base_url')}>
+                {control => <Input {...control}
                 type="url"
                 required
                 aria-label={tr('common:openai_compatible_base_url')}
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
-              />
+              />}</FormField>
               <Button variant="secondary" size="sm" disabled={busy}>
                 {tr('common:save_url')}
               </Button>

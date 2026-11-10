@@ -128,10 +128,12 @@ try {
   await transfer.getByLabel('Theme JSON',{exact:true}).fill('{"script":"alert(1)"}');
   await transfer.getByRole('button',{name:'Import theme',exact:true}).click();
   await transfer.getByRole('alert').waitFor();
+  const selectedBeforeImport=await page.evaluate(()=>window.desktop.invoke('settings:get',{}).then(s=>s.themeId));
   exported.name='Imported Ocean';
   await transfer.getByLabel('Theme JSON',{exact:true}).fill(JSON.stringify(exported));
   await transfer.getByRole('button',{name:'Import theme',exact:true}).click();
   await transfer.waitFor({state:'hidden'});
+  assert.equal(await page.evaluate(()=>window.desktop.invoke('settings:get',{}).then(s=>s.themeId)),selectedBeforeImport);
   await page.getByRole('button',{name:'Imported Ocean',exact:true}).click();
   const slider=page.getByRole('slider',{name:'Contrast',exact:true});
   await slider.focus();await slider.press('ArrowRight');

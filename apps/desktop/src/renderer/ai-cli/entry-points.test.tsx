@@ -13,14 +13,17 @@ import { ReaderOfflineNotice } from '../workspace/offline-notice';
 import { AiCliSetupHost } from './setup';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-it('keeps API keys and custom connections inside one Settings disclosure', async () => {
+it('shows API setup content directly and keeps only the guide in a disclosure', async () => {
   await i18n.changeLanguage('en'); bridge.invoke.mockImplementation(cliFixture().invoke);
   const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
   try {
     await act(async () => root.render(<ProviderSettings initialTab="providers" providers={[]} onRefresh={async () => {}} onClose={() => {}} />));
     expect(document.querySelector<HTMLDetailsElement>('.settings-pane:not([hidden]) > div > details')?.open).toBe(false);
-    expect(document.querySelector('.settings-intro')?.closest('details')?.open).toBe(false);
+    expect(document.querySelector('.settings-intro')?.closest('details')).toBeNull();
+    expect(document.querySelectorAll('.settings-pane:not([hidden]) details')).toHaveLength(1);
     expect(document.querySelector('.settings-tabs[role=tablist]')).not.toBeNull();
+    expect([...document.querySelectorAll('[data-slot=setting-row] label')].some(label => label.textContent === i18n.t('ai-cli:tools'))).toBe(false);
+    expect(document.querySelector('.settings-pane:not([hidden]) [role=status]')).not.toBeNull();
   } finally { await act(async () => root.unmount()); host.remove(); }
 });
 

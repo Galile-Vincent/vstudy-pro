@@ -62,13 +62,6 @@
     "backdrop": 0,
     "surface-class": 14
   },
-  "settings/settings.css": {
-    "shadow": 0,
-    "radius": 0,
-    "color": 0,
-    "backdrop": 0,
-    "surface-class": 11
-  },
   "shell/art-reader.css": {
     "shadow": 1,
     "radius": 0,

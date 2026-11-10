@@ -31,7 +31,7 @@ try {
       await onboardingForward(page).click();
       await page.locator('input[name=onboarding-scheme]').first().waitFor();
       assert.equal(await page.locator('input[name=onboarding-scheme]').count(), 3);
-      assert.equal(await page.locator('.onboarding .themes-grid, .onboarding .settings-row').count(), 0);
+      assert.equal(await page.locator('.onboarding .themes-grid, .onboarding [data-slot=setting-row]').count(), 0);
     }
     const before = await page.locator('.onboarding').boundingBox();
     await page.emulateMedia({ reducedMotion: 'no-preference' });

@@ -4,12 +4,12 @@ import { UpdateSettings } from './settings/updates';
 import { AppVersion } from './components/app-version';
 import { aiCliSetupEvent } from './ai-cli/entry';
 import { AiCliInventory } from './ai-cli/inventory';
+import { DocumentSettings } from './settings/documents';
 import { StorageSettings } from "./settings/storage";
 import { AiSetupGuide } from './ai-setup';
 import { Switch } from './components/ui/switch';
 import { SlidersHorizontal, Palette, KeyRound, BarChart3, Shield, HardDrive, Bot, X } from 'lucide-react';
 import { AgentsSettings } from './settings/agents';
-import { SettingsGroup, SettingsRow } from './settings/layout';
 import { AppearanceSection } from './settings/appearance';
 import './settings/settings.css';
 import { Dialog, DialogContent, DialogTitle } from './components/ui/dialog';
@@ -180,6 +180,9 @@ export function ProviderSettings({
                           </Button>
                         </SettingRow>
                       </Card></Section>
+                      <Section level={3} title={tr('library:documents')}><Card variant="flat" className="p-[var(--space-4)]">
+                        <DocumentSettings />
+                      </Card></Section>
                       <AppVersion/>
                     </>
                   ) : id === 'appearance' ? (
@@ -195,9 +198,6 @@ export function ProviderSettings({
                   ) : (
                     <>
                       <AiCliInventory settings />
-                      <details className="settings-disclosure">
-                      <summary>{tr('ai-cli:more_options')}</summary>
-                      <div className="settings-disclosure-body">
                       <div className="settings-intro">
                         <p>{tr('novice:privacy')}</p>
                         <ol>
@@ -209,14 +209,14 @@ export function ProviderSettings({
                         <summary>{tr('novice:setup_title')}</summary>
                         <div className="settings-disclosure-body"><AiSetupGuide onClose={requestClose} /></div>
                       </details>
-                      <SettingsGroup title={tr('settings:api_keys')}>
+                      <Section level={3} title={tr('settings:api_keys')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
                         {providers.filter(provider => provider.config.kind === 'api').map(provider => (
                           <ProviderRow settingsView key={provider.config.id} provider={provider} onRefresh={onRefresh} />
                         ))}
-                      </SettingsGroup>
+                      </Card></Section>
 
-                      <SettingsGroup>
-                        <SettingsRow
+                      <Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
+                        <SettingRow
                           label={tr('common:read_only_structured_tables_api_providers_only')}
                           description={tr('common:optional_table_presentations_off_by_default_cli_tools_remain_disabled')}
                         >
@@ -234,10 +234,10 @@ export function ProviderSettings({
                                 });
                             }}
                           />
-                        </SettingsRow>
+                        </SettingRow>
                         {featureError && <p role="alert">{featureError}</p>}
-                      </SettingsGroup>
-                      <SettingsGroup title={tr('common:providers')}>
+                      </Card>
+                      <Section level={3} title={tr('common:providers')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
                         {providers.filter(provider => provider.config.kind !== 'api').map((provider) => (
                           <ProviderRow
                             settingsView
@@ -246,9 +246,7 @@ export function ProviderSettings({
                             onRefresh={onRefresh}
                           />
                         ))}
-                      </SettingsGroup>
-                      </div>
-                      </details>
+                      </Card></Section>
                     </>
                   ))}
               </div>
