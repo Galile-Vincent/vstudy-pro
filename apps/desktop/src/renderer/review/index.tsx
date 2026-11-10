@@ -224,7 +224,7 @@ export function ReviewView() {
         }
       />
 
-      <p role="status" aria-live="polite" aria-atomic="true">{tab === "notes" ? bounded.note : tab === "tests" ? bounded.test : ""}</p>
+      <p className="review-announcement" role="status" aria-live="polite" aria-atomic="true">{tab === "notes" ? bounded.note : tab === "tests" ? bounded.test : ""}</p>
       <MemoryConsentCard />
       {!online && <p role="status">{tr("review:offline")}</p>}
       <Toolbar

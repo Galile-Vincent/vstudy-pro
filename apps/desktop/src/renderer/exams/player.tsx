@@ -11,14 +11,13 @@ import {
 } from "lucide-react";
 import {
   Badge,
-  FormField,
-  Input,
   Stat,
   Toolbar,
 } from "../components/ui";
 import { Progress } from "../components/ui/progress";
 import {
   Button,
+  TextInput,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
@@ -372,7 +371,7 @@ export function ExamPlayer({
             </div>
           </section>
           <Button
-            variant="secondary"
+            variant="primary"
             className="justify-self-start"
             label={tr("review:review_answers")}
             icon={<ArrowLeft aria-hidden="true" size={16} />}
@@ -449,38 +448,17 @@ export function ExamPlayer({
                       </label>
                     ))}
                   {(item.type === "cloze" || item.type === "calculation") && (
-                    <FormField
-                      label={tr(
-                        item.type === "calculation"
-                          ? "exams:numeric_answer"
-                          : "exams:blank_answer",
-                      )}
-                    >
-                      {(field) => (
-                        <div className="flex items-center gap-[var(--space-3)]">
-                          <Input
-                            {...field}
-                            autoComplete="off"
-                            inputMode={
-                              item.type === "calculation" ? "decimal" : "text"
-                            }
-                            maxLength={2000}
-                            value={typeof draft === "string" ? draft : ""}
-                            placeholder={tr(
-                              item.type === "calculation"
-                                ? "exams:numeric_hint"
-                                : "exams:blank_hint",
-                            )}
-                            onChange={(e) => onDraft(e.target.value)}
-                          />
-                          {item.type === "calculation" && item.unit && (
-                            <span className="text-[var(--muted)]">
-                              {item.unit}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </FormField>
+                    <div className="flex items-center gap-[var(--space-3)]">
+                      <TextInput
+                        label={tr(item.type === "calculation" ? "exams:numeric_answer" : "exams:blank_answer")}
+                        autoComplete="off"
+                        inputMode={item.type === "calculation" ? "decimal" : "text"}
+                        value={typeof draft === "string" ? draft : ""}
+                        placeholder={tr(item.type === "calculation" ? "exams:numeric_hint" : "exams:blank_hint")}
+                        onChange={(value) => onDraft(value.slice(0, 2000))}
+                      />
+                      {item.type === "calculation" && item.unit && <span className="text-[var(--muted)]">{item.unit}</span>}
+                    </div>
                   )}
                   {item.type === "multi_select" && (
                     <p className="text-[var(--muted)]">
@@ -568,6 +546,7 @@ export function ExamPlayer({
                 {locked && index < items.length - 1 && (
                   <Button
                     type="button"
+                    variant="primary"
                     onClick={() => onMove(index + 1)}
                     endContent={<ArrowRight aria-hidden="true" />}
                     label={tr("review:next_item")}
@@ -576,6 +555,7 @@ export function ExamPlayer({
                 {!locked && (
                   <Button
                     type="submit"
+                    variant="primary"
                     form="exam-answer"
                     isDisabled={
                       busy ||

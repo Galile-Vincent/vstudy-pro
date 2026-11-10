@@ -41,7 +41,7 @@ export function MemorySettings() {
         <SettingRow htmlFor="memory-enabled" label={tr('review:memory_enabled')} description={tr('review:memory_disclosure')} stack>
           {prefs && (
             <Switch
-              htmlName="memory-enabled"
+              id="memory-enabled"
               label={tr('review:memory_enabled')}
               isLabelHidden
               value={studyMemoryActive(prefs)}

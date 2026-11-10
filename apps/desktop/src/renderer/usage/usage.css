@@ -388,3 +388,12 @@
   .subscription-progress { outline:1px solid CanvasText; background:Canvas; }
   .subscription-progress [data-slot=progress-indicator] { background:Highlight; forced-color-adjust:none; }
 }
+
+.usage-settings, .subscription-meters {
+  --color-overlay-hover: color-mix(in srgb, var(--ink) 6%, transparent);
+  --color-overlay-pressed: color-mix(in srgb, var(--ink) 10%, transparent);
+}
+:is(.usage-settings, .subscription-meters) .astryx-button[data-variant="primary"] {
+  --color-overlay-hover: color-mix(in srgb, var(--accent-foreground) 8%, transparent);
+  --color-overlay-pressed: color-mix(in srgb, var(--accent-foreground) 12%, transparent);
+}

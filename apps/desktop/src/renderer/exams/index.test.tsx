@@ -125,9 +125,9 @@ it("requires a document and sends per-type counts, custom prompt and language", 
   fireEvent.change(screen.getByLabelText("exams:calculation"), {
     target: { value: "4" },
   });
-  fireEvent.change(screen.getByLabelText("exams:language"), {
-    target: { value: "ja" },
-  });
+  fireEvent.blur(screen.getByLabelText("exams:calculation"));
+  fireEvent.click(screen.getByRole("combobox", { name: "exams:language" }));
+  fireEvent.click(await screen.findByRole("option", { name: "日本語" }));
   fireEvent.click(generate);
   await waitFor(() =>
     expect(invoke).toHaveBeenCalledWith(

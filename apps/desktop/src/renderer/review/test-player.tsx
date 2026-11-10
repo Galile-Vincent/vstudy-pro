@@ -151,7 +151,7 @@ export function TestPlayer({ artifact, onRetake, onConfirmed, actions }: { artif
      {item.type === 'cloze' && <label>{tr('review:your_answer')}<input autoComplete="off" maxLength={2000} value={typeof draft === 'string' ? draft : ''} onChange={event => setDraft(event.target.value)} /></label>}
     </fieldset>
     <p>{tr('review:commit_notice')}</p>
-    <Button type="submit" isDisabled={busy || draft === null || draft === ''} label={tr(index === items.length - 1 ? 'review:finish_test' : 'review:answer_next')} />
+    <Button variant="primary" type="submit" isDisabled={busy || draft === null || draft === ''} label={tr(index === items.length - 1 ? 'review:finish_test' : 'review:answer_next')} />
    </form> : <div ref={feedbackRegion} tabIndex={-1} role="status" aria-live="polite" aria-label={tr('review:item_feedback')}>
     {gradedEarlier === item.id && <p>{tr('review:graded_earlier')}</p>}
     <p>{tr(result?.reportedBad ? 'review:question_reported' : result?.correct ? 'review:answer_matches' : 'review:worth_another_look')}</p>
@@ -177,7 +177,7 @@ export function TestPlayer({ artifact, onRetake, onConfirmed, actions }: { artif
    <h4>{tr('review:worth_another_look')}</h4>
    <ul>{[...new Set(missed.map(result => result.conceptKey))].map(key => <li key={key}>{tr('review:concept_missed', { label: labels[key] ?? key, count: missed.filter(result => result.conceptKey === key).length })}</li>)}</ul>
    {!exam&&<><p>{tr('review:confirm_notice')}</p>
-   {attempt.phase === 'confirmed' ? <p role="status">{tr('review:review_list_updated')}</p> : <Button isDisabled={busy} label={tr('review:update_review_list')} onClick={() => void run(async () => {
+   {attempt.phase === 'confirmed' ? <p role="status">{tr('review:review_list_updated')}</p> : <Button variant="primary" isDisabled={busy} label={tr('review:update_review_list')} onClick={() => void run(async () => {
     setAttempt(await desktop.invoke('review:attempt:confirm', { attemptId: attempt.id }));
     onConfirmed?.();
    })} />}

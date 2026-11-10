@@ -43,13 +43,14 @@ export function MemoryConsentCard() {
   if (state === 'hidden' || !prefs || !prefs.memoryEnabled || prefs.consentAcknowledged) return null;
   return (
     <Card ref={card} className="review-consent" elevation="none">
-      <div className="review-consent-body" role="region" aria-labelledby="review-consent-title" tabIndex={0}>
+      <div className="review-consent-body" role="region" aria-labelledby="review-consent-title">
         <h2 id="review-consent-title">{tr('review:consent_title')}</h2>
         <p>{tr('review:memory_disclosure')}</p>
       </div>
       <div className="review-actions">
         <Button
           type="button"
+          variant="primary"
           isDisabled={busy}
           label={tr('review:consent_turn_on')}
           onClick={() => void turnOn()}
