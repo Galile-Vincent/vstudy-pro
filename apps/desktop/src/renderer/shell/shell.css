@@ -1,15 +1,21 @@
-/* App frame: Astryx AppShell with a SideNav rail and one chrome row (tabs, then the page header). Flat, hairline-separated. */
+/* App frame: Astryx AppShell. The SideNav rail runs the full window height; tabs and the page header stack over the content column only. */
 .app-shell { color:var(--ink); background:var(--background); min-width:0; }
 .app-shell .shell-sidebar { background:var(--sidebar-surface); }
 .shell-brand { display:flex; align-items:center; gap:var(--space-3); font-size:var(--type-md); font-weight:600; letter-spacing:-.02em; }
 .art-reader-brand-mark { width:32px; height:32px; display:grid; place-items:center; flex:none; border-radius:var(--r-sm); color:var(--accent-foreground); background:var(--accent-color); }
 .app-shell[data-sidebar=collapsed] .shell-sidebar .shell-brand > span:last-child { display:none; }
-.shell-sidebar .library-smart button { min-height:36px; font-size:var(--type-sm); }
+/* One compact density for the whole rail: 32px rows, 16px icons, small text. The selected row takes --active because Astryx paints it with --color-neutral, which equals the rail surface. */
+.shell-sidebar { --color-neutral:var(--active); --color-overlay-hover:color-mix(in oklab,var(--ink) 5%,transparent); }
+.shell-sidebar .astryx-side-nav-item { min-height:32px; font-size:var(--type-sm); }
+.shell-sidebar .astryx-side-nav-item svg { width:16px; height:16px; }
+.shell-sidebar .library-smart button { min-height:32px; font-size:var(--type-sm); }
+.shell-sidebar [data-slot=sidebar-group] { padding-inline:0; }
 .shell-footer { display:flex; flex-direction:column; gap:var(--space-2); min-width:0; }
 .shell-footer[data-collapsed] { align-items:center; }
 .shell-footer[data-collapsed] .update-row > button > span:not(.sr-only) { display:none; }
 
-.shell-chrome { position:relative; background:var(--surface); border-bottom:1px solid var(--line); }
+.shell-column { display:flex; flex-direction:column; height:100%; min-height:0; min-width:0; background:var(--surface); }
+.shell-chrome { position:relative; flex:none; background:var(--surface); border-bottom:1px solid var(--line); }
 .shell-topbar { display:flex; align-items:center; gap:var(--space-3); min-height:var(--topbar-height); padding-inline:var(--space-6); color:var(--muted); }
 .shell-chrome:has(.app-tabs-single) .shell-topbar { padding-inline-end:calc(var(--space-8) + var(--space-6)); }
 .shell-title { flex:1; font-size:var(--type-base); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -19,7 +25,7 @@
 .shell-history-trigger kbd { white-space:nowrap; margin-inline-start:var(--space-2); }
 @media(max-width:1000px) { .shell-history-trigger > span,.shell-history-trigger kbd { display:none; } }
 .shell-workspace-status:empty { display:none; }
-.shell-content { position:relative; height:100%; min-height:0; overflow:hidden; }
+.shell-content { position:relative; flex:1; min-height:0; overflow:hidden; }
 .shell-content > .workspace { height:100%; }
 @media(max-width:800px) { .shell-topbar { padding-inline:var(--space-4); } }
 

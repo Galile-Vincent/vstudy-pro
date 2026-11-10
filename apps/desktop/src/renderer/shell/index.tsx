@@ -276,7 +276,6 @@ export function AppShell({
     data-view={route.view}
     data-sidebar={sidebarVisible ? 'expanded' : 'collapsed'}
     variant="section"
-    banner={<ShellChrome route={route} status={status} sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible} />}
     sideNav={
       <SideNav
         className="shell-sidebar"
@@ -287,21 +286,24 @@ export function AppShell({
         {navigation}
       </SideNav>
     }
-    mobileNav={{ hasToggle: false, content: <MobileNav header={<ShellBrand />}>{navigation}</MobileNav> }}
+    mobileNav={{ hasToggle: false, content: <MobileNav className="shell-sidebar" header={<ShellBrand />}>{navigation}</MobileNav> }}
   >
-    <div
-      id="shell-content"
-      role={route.view === 'library' ? 'main' : undefined}
-      className="shell-content"
-      tabIndex={-1}
-      onKeyDown={forwardScrollKeys}
-    >
-      {children}
-      <HistorySwipeNavigation
-        canGoBack={canMoveHistory(history, 'back')}
-        canGoForward={canMoveHistory(history, 'forward')}
-        onNavigate={goHistory}
-      />
+    <div className="shell-column">
+      <ShellChrome route={route} status={status} sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible} />
+      <div
+        id="shell-content"
+        role={route.view === 'library' ? 'main' : undefined}
+        className="shell-content"
+        tabIndex={-1}
+        onKeyDown={forwardScrollKeys}
+      >
+        {children}
+        <HistorySwipeNavigation
+          canGoBack={canMoveHistory(history, 'back')}
+          canGoForward={canMoveHistory(history, 'forward')}
+          onNavigate={goHistory}
+        />
+      </div>
     </div>
   </AstryxAppShell>
   </TooltipProvider>
