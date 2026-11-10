@@ -250,3 +250,45 @@ html[data-theme=contrast] :is([data-slot=card],[data-slot=popover-content],[data
 @media(forced-colors:active) {
  :root :is([data-slot=card],[data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=input],[data-slot=textarea],[data-slot=select-trigger],[data-slot=button],[data-slot=aui_composer-shell]) { border:1px solid CanvasText; box-shadow:none; }
 }
+
+/* Unlayered aliases beat the shipped theme on both the provider and portal root. */
+[data-astryx-theme="neutral"] {
+ --color-background-body:var(--background);
+ --color-background-surface:var(--surface);
+ --color-background-card:var(--surface);
+ --color-background-popover:var(--surface);
+ --color-background-muted:var(--subtle);
+ --color-text-primary:var(--ink);
+ --color-text-secondary:var(--muted);
+ --color-text-disabled:var(--muted);
+ --color-icon-primary:var(--ink);
+ --color-icon-secondary:var(--muted);
+ --color-icon-disabled:var(--muted);
+ --color-accent:var(--accent-color);
+ --color-text-accent:var(--accent-color);
+ --color-icon-accent:var(--accent-color);
+ --color-on-accent:var(--accent-foreground);
+ --color-accent-muted:var(--active);
+ --color-border:var(--line);
+ --color-border-emphasized:var(--line);
+ --color-neutral:var(--subtle);
+ --color-overlay:var(--overlay);
+ --color-overlay-hover:var(--active);
+ --color-overlay-pressed:var(--active);
+ --color-skeleton:var(--subtle);
+ --color-shadow:var(--shadow-soft);
+ --color-error:var(--danger);
+ --color-text-error:var(--danger);
+ --color-success:var(--success);
+ --color-text-success:var(--success);
+ --color-warning:var(--warning);
+ --color-text-warning:var(--warning);
+ --color-info:var(--info);
+ --color-text-info:var(--info);
+ --font-family-body:var(--font-ui);
+ --font-family-heading:var(--font-ui);
+ --shadow-low:none;
+ --shadow-med:none;
+ --shadow-high:none;
+}
+html > body > #root > [data-astryx-theme] { height:100%; }

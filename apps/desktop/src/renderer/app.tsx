@@ -10,7 +10,7 @@ import { ExistingAnalyticsPrompt } from './analytics-ui';
 import { track } from './analytics';
 import { HistoryView, HistoryFinder } from "./history";
 import { lazy, Suspense, useEffect, useMemo, useState, type ComponentType } from "react";
-const DevGallery = import.meta.env.DEV ? lazy(() => import('./design')) : null;
+const DevGallery = (import.meta.env.DEV || import.meta.env.MODE === 'astryx-spike') ? lazy(() => import('./design')) : null;
 const galleryHash = '#/design';
 let loadedWelcome: ComponentType | undefined;
 const loadWelcome = () => import("./welcome").then(module => { loadedWelcome = module.default; return module; });

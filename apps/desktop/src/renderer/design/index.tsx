@@ -1,3 +1,4 @@
+import { AstryxGallery } from './astryx-gallery';
 import { useEffect, useState } from 'react';
 import { builtinThemes, themePreferencesSchema, type ThemePreferences } from '../../shared/themes';
 import { applyTheme, previewTheme } from '../settings/apply-appearance';
@@ -76,7 +77,7 @@ function Choice({
   return (
     <label className="flex items-center gap-[var(--space-2)]">
       <span>{label}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)}>
+      <select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>
         {values.map((item) => (
           <option key={item.value} value={item.value}>
             {item.label}
@@ -166,6 +167,7 @@ export default function DesignGallery() {
             </>
           }
         />
+        <AstryxGallery />
         <SettingRow label={copy.converter} description={copy.converterHint}>
         <SegmentedControl type="single" aria-label={copy.converter} value={converterMode} onValueChange={value => { if (value) setConverterMode(value); }}>
           <SegmentedControlItem value="online">{copy.downloads}</SegmentedControlItem>

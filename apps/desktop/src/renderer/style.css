@@ -1,3 +1,7 @@
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/theme-neutral/theme.css";
 @import "tailwindcss";
 @import "./chat-fixes.css";
 @import "tw-animate-css";
@@ -25,7 +29,7 @@ textarea,
 select {
   font: inherit;
 }
-button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *, [data-slot], [data-slot] *)) {
+button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *, [data-slot], [data-slot] *, [class*="astryx-"])) {
   border: 0;
   border-radius: var(--r-sm);
   background: color-mix(in oklab, var(--ink) 6%, var(--surface));
@@ -33,10 +37,10 @@ button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *, [
   padding: 6px 12px;
   cursor: pointer;
 }
-button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *, [data-slot], [data-slot] *)):hover {
+button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *, [data-slot], [data-slot] *, [class*="astryx-"])):hover {
   background: var(--active);
 }
-button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *, [data-slot], [data-slot] *)):disabled {
+button:not(:where(.aui-root *, .model-popover *, .conversation-list-popover *, [data-slot], [data-slot] *, [class*="astryx-"])):disabled {
   cursor: default;
   opacity: 0.4;
 }
@@ -46,7 +50,7 @@ a:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
-input:not([data-slot]):not([cmdk-input]),
+input:not([data-slot]):not([cmdk-input]):not([class*="astryx-"]),
 select:not([data-slot]) {
   color: inherit;
   border: 0;
