@@ -31,7 +31,7 @@ import { TooltipIconButton } from "@/components/assistant-ui/elements/tooltip-ic
 import { Sources } from "./sources.aui";
 import { ThinkingIndicator } from "./thinking-indicator";
 import { Button } from "@astryxdesign/core";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@astryxdesign/core";
 import { cn } from "@/lib/utils";
 import {
   ActionBarMorePrimitive,
@@ -208,16 +208,16 @@ const ThreadHistorySkeleton: FC = () => (
     className="flex flex-col gap-y-6"
   >
     <span className="sr-only">{tr('common:loading_conversation')}</span>
-    <Skeleton className="ml-auto h-9 w-2/5 rounded-xl motion-reduce:animate-none" />
+    <Skeleton className="ml-auto" width="40%" height={36} radius={4} />
     <div className="flex flex-col gap-y-2">
-      <Skeleton className="h-4 w-11/12 motion-reduce:animate-none" />
-      <Skeleton className="h-4 w-4/5 motion-reduce:animate-none" />
-      <Skeleton className="h-4 w-3/5 motion-reduce:animate-none" />
+      <Skeleton width="91%" height={16} index={1} />
+      <Skeleton width="80%" height={16} index={2} />
+      <Skeleton width="60%" height={16} index={3} />
     </div>
-    <Skeleton className="ml-auto h-9 w-1/3 rounded-xl motion-reduce:animate-none" />
+    <Skeleton className="ml-auto" width="33%" height={36} radius={4} index={4} />
     <div className="flex flex-col gap-y-2">
-      <Skeleton className="h-4 w-10/12 motion-reduce:animate-none" />
-      <Skeleton className="h-4 w-2/3 motion-reduce:animate-none" />
+      <Skeleton width="83%" height={16} index={5} />
+      <Skeleton width="67%" height={16} index={6} />
     </div>
   </div>
 );

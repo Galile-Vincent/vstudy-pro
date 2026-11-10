@@ -1,32 +1,13 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { Card, CardContent, CardHeader } from './card';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { PageContainer, PageHeader, Section, Toolbar } from './page-layout';
 import { FormField } from './form-field';
 import { ListRow } from './list-row';
 import { EmptyState } from './empty-state';
 import { Stat } from './stat';
-import { SegmentedControl, SegmentedControlItem, Tabs, TabsContent, SegmentedTabsList, SegmentedTabsTrigger } from './segmented-tabs';
+import { SegmentedControl, SegmentedControlItem } from './segmented-tabs';
 afterEach(cleanup);
-it('uses native card activation and preserves composition', () => {
-  const click = vi.fn();
-  render(<Card variant="interactive" onClick={click}><CardHeader>Open</CardHeader><CardContent>Details</CardContent></Card>);
-  const button = screen.getByRole('button');
-  expect(button.tagName).toBe('BUTTON');
-  expect(button.getAttribute('type')).toBe('button');
-  button.focus();
-  expect(document.activeElement).toBe(button);
-  fireEvent.click(button);
-  expect(click).toHaveBeenCalledOnce();
-});
-it('renders card links and disables their navigation', () => {
-  const { rerender } = render(<Card variant="interactive" href="#course">Course</Card>);
-  expect(screen.getByRole('link').getAttribute('href')).toBe('#course');
-  rerender(<Card variant="interactive" href="#course" disabled>Course</Card>);
-  expect(screen.getByText('Course').getAttribute('href')).toBeNull();
-  expect(screen.getByText('Course').getAttribute('aria-disabled')).toBe('true');
-});
 it('wires label, description, error and caller description to the control', () => {
   const { rerender } = render(<FormField label="Name" description="Hint" error="Required" describedBy="external">{props => <input {...props}/>}</FormField>);
   const control = screen.getByRole('textbox');
@@ -62,18 +43,6 @@ it('renders caller empty copy, action and stat units and delta', () => {
   expect(screen.getByText('min').parentElement?.textContent).toBe('12 min');
   expect(screen.getByText('+2')).toBeTruthy();
 });
-it('exposes selected tabs and uses roving keyboard focus', async () => {
-  render(<Tabs defaultValue="one"><SegmentedTabsList aria-label="Views"><SegmentedTabsTrigger value="one">One</SegmentedTabsTrigger><SegmentedTabsTrigger value="two">Two</SegmentedTabsTrigger><SegmentedTabsTrigger value="three" disabled>Three</SegmentedTabsTrigger></SegmentedTabsList><TabsContent value="one">First</TabsContent><TabsContent value="two">Second</TabsContent></Tabs>);
-  expect(screen.getByRole('tab', {name:'One'}).getAttribute('aria-selected')).toBe('true');
-  fireEvent.mouseDown(screen.getByRole('tab', {name:'Two'}), {button:0, ctrlKey:false});
-  expect(screen.getByRole('tab', {name:'Two'}).getAttribute('aria-selected')).toBe('true');
-  expect(screen.getByRole('tabpanel').textContent).toBe('Second');
-  expect(screen.getByRole('tab', {name:'Three'}).hasAttribute('disabled')).toBe(true);
-  screen.getByRole('tab', {name:'Two'}).focus();
-  fireEvent.keyDown(screen.getByRole('tab', {name:'Two'}), {key:'ArrowRight'});
-  await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('tab', {name:'One'})));
-});
-
 it('supports contextual empty-state heading levels', () => {
   const { rerender } = render(<EmptyState title="Empty" />);
   expect(screen.getByRole('heading', { level: 3 }).textContent).toBe('Empty');

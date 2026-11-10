@@ -1,9 +1,0 @@
---- a/apps/desktop/src/renderer/components/ui/textarea.tsx
-+++ b/apps/desktop/src/renderer/components/ui/textarea.tsx
-@@ -1,5 +1,5 @@
- import * as React from "react"
--import { cn } from "cn"
-+import { cn } from "@/lib/utils"
- 
- function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
-   return (

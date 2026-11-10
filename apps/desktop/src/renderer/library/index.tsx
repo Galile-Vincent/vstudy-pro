@@ -1,12 +1,11 @@
 import { IconButton } from "@astryxdesign/core";
-import { CheckboxInput, TextInput, Tooltip, Card, Layout, LayoutContent, LayoutHeader, LayoutFooter, Button } from "@astryxdesign/core";
+import { Badge, CheckboxInput, TextInput, Tooltip, Card, Layout, LayoutContent, LayoutHeader, LayoutFooter, Button } from "@astryxdesign/core";
 import { provesExistence } from './selection';
 import { virtualWindow } from './window';
 import { localDate, dayBound, validDay } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import { PageContainer, PageHeader, Toolbar, FormField, EmptyState } from "../components/ui";
-import { Badge } from '../components/ui/badge';
 import './ui3.css';
 import { contentLanguage } from "../../shared/content-language";
 import { Select } from "../components/select";
@@ -1257,11 +1256,11 @@ export function LibraryView() {
                     <div className="document-course-inline" title={placeOf(item)}>{placeOf(item)}</div>
                     {item.snippet&&<p className="search-snippet"><Snippet text={item.snippet}/></p>}
                   </div>
-                  <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge variant="outline" key={t.id}>{t.name}</Badge>)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>
+                  <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge key={t.id} label={t.name} />)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>
                   <div className="document-folder" title={placeOf(item)}>{placeOf(item)}</div>
                   <div className="document-size">{item.pageCount!=null&&<>{tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)})} · </>}{item.sizeBytes===null?tr("library:unknown_size"):new Intl.NumberFormat(document.documentElement.lang,{style:"unit",unit:"kilobyte",unitDisplay:"short",maximumFractionDigits:1}).format(item.sizeBytes/1000)}</div>
                   <div className="document-added">{format.date(d.createdAt)}</div>
-                  <div className="document-type"><Badge variant="secondary">{d.sourceName.split('.').pop()?.toUpperCase()}</Badge></div>
+                  <div className="document-type"><Badge label={d.sourceName.split('.').pop()?.toUpperCase()} /></div>
                   <IconButton label={tr('library:actions',{name:d.title})} variant="ghost"  size="md" className="document-actions" aria-label={tr('library:actions',{name:d.title})} tabIndex={-1} onClick={e=>{menuAnchor.current=e.currentTarget;setMenu(item);}} icon={<MoreHorizontal/>} /></>}
                   {d.status !== 'ready' && <StatusBlock id={d.id} measure={measureStatus}>
                     <span className="status-badge" data-status={d.status}>

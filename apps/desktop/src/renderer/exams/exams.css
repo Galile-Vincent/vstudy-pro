@@ -22,8 +22,6 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
 .exam-breakdown { display:grid; gap:var(--space-2); }
 .exam-breakdown summary { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3); cursor:pointer; }
 .exam-breakdown details > div { display:grid; gap:var(--space-3); padding:0 var(--space-3) var(--space-3); }
-.exam-answer-state { border:0; background:color-mix(in oklab,var(--danger) 10%,transparent); color:var(--danger); }
-.exam-answer-state[data-correct="true"] { color:var(--success); background:color-mix(in oklab,var(--success) 10%,transparent); }
 @media (forced-colors:active) { .exam-answer-state { border:1px solid Highlight; } }
 .exam-answer-comparison { display:grid; grid-template-columns:repeat(auto-fit,minmax(12rem,1fr)); gap:var(--space-3); }
 .exam-answer-comparison dt { color:var(--muted); }

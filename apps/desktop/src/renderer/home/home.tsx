@@ -3,7 +3,7 @@ import { Brand } from '../components/brand';
 import { contentLanguage } from '../../shared/content-language';
 import { DocumentArt } from '../shell/document-art';
 import { ArrowDown, ArrowUp, ArrowUpRight, BookOpen, Info } from 'lucide-react';
-import { Button, Card as AstryxCard, IconButton, Tooltip } from '@astryxdesign/core';
+import { Button, Card as AstryxCard, IconButton, ProgressBar, Skeleton, Tooltip } from '@astryxdesign/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
@@ -15,8 +15,6 @@ import { useFormat } from '../i18n';
 import { UploadCard } from './upload-card';
 import './home.css';
 import { PageContainer, PageHeader, Section, Stat, ListRow } from '../components/ui';
-import { Skeleton } from '../components/ui/skeleton';
-import { Progress } from '../components/ui/progress';
 import { plainText } from '../../shared/plain-text';
 export type HomeNavigate = (view: 'home' | 'library' | 'workspace' | 'welcome', documentId?: Document['id']) => void;
 export type Dashboard = z.infer<typeof dashboardSchema>;
@@ -255,7 +253,7 @@ export function Home({
           !error && (
             <div className="home-grid" role="status" aria-busy="true" aria-label={tr('home:loading')}>
               {Array.from({ length: 6 }, (_, i) => (
-                <Skeleton className="home-skeleton" key={i} />
+                <Skeleton key={i} height="calc(var(--space-8) * 6)" index={i} />
               ))}
             </div>
           )
@@ -343,7 +341,7 @@ export function Home({
                     <>
                       <label>
                         {tr('home:budget', { percent: fmt.number(percent) })}
-                        <Progress aria-label={tr('common:monthly_budget_used')} value={Math.min(100, percent)} />
+                        <ProgressBar label={tr('common:monthly_budget_used')} isLabelHidden value={Math.min(100, percent)} />
                       </label>
                     </>
                   )}

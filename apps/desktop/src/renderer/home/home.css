@@ -24,7 +24,6 @@
 .home-pins .home-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-2) var(--space-4); }
 .home-activity summary { cursor:pointer; font-size:var(--type-base); font-weight:600; color:var(--muted); border-radius:var(--r-sm); }
 .home-activity .home-list { margin-top:var(--space-4); }
-.home-skeleton { min-height:calc(var(--space-8) * 6); }
 
 .art-reader-launchpad {
   display:grid;

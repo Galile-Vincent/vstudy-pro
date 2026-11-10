@@ -4,8 +4,7 @@ import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { tr } from '../../shared/i18n';
 import type { SubscriptionUsage } from '../../shared/subscription-usage';
 import { desktop } from '../bridge';
-import { Button } from '@astryxdesign/core';
-import { Progress } from '../components/ui/progress';
+import { Button, ProgressBar } from '@astryxdesign/core';
 import { SubscriptionWindowMeter } from './meter';
 import './usage.css';
 
@@ -78,12 +77,12 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
     {compact && <div className="subscription-summary">
       <span className="subscription-summary-label" title={summaryLabel}>{summaryLabel}</span>
       <span className="subscription-summary-percent">{highest ? `${Math.round(highest.usedPercent)}%` : '—'}</span>
-      <Progress
+      <ProgressBar
         className="subscription-progress"
         value={highest?.usedPercent ?? 0}
-        aria-label={summaryLabel}
-        aria-valuenow={highest?.usedPercent}
-        aria-valuetext={summaryValue}
+        label={summaryLabel}
+        isLabelHidden
+        formatValueLabel={() => summaryValue}
       />
       {(error || unavailable > 0) && <small className="subscription-summary-unavailable">
         {error ? tr('usage:quota_unavailable') : tr('usage:quota_unavailable_count', { count: unavailable })}

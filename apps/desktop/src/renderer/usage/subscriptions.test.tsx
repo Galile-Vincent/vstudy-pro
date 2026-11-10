@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, cleanup, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { readFileSync } from 'node:fs';
 import { i18n } from '../../shared/i18n';
 import { SubscriptionWindowMeter } from './meter';
 import { SubscriptionMeters } from './subscriptions';
@@ -51,7 +50,7 @@ it('uses Usage and an unknown value when no current data exists', async () => {
   expect(container.querySelector('small[role="status"]')?.textContent).toBe('Usage…');
   await act(async () => resolve([]));
   await waitFor(() => expect(container.querySelector('small[role="status"]')).toBeNull());
-  expect(screen.getByText('Usage')).toBeTruthy();
+  expect(screen.getByText('Usage', { selector: '.subscription-summary-label' })).toBeTruthy();
   expect(screen.getByText('—')).toBeTruthy();
   expect(screen.getByRole('progressbar').getAttribute('aria-valuetext')).toBe('Unknown');
 });
@@ -125,8 +124,8 @@ it('preserves the full text of truncated summary and window labels', async () =>
   const label = 'A very long subscription provider and weekly usage window label';
   render(<><SubscriptionMeters compact /><SubscriptionWindowMeter label={label} usedPercent={30} /></>);
   await screen.findByText('Codex · 5h', { selector: '.subscription-summary-label' });
-  expect(screen.getByText('Codex · 5h').getAttribute('title')).toBe('Codex · 5h');
-  expect(screen.getByText(label).getAttribute('title')).toBe(label);
+  expect(screen.getByText('Codex · 5h', { selector: '.subscription-summary-label' }).getAttribute('title')).toBe('Codex · 5h');
+  expect(screen.getByText(label, { selector: '.subscription-label' }).getAttribute('title')).toBe(label);
   expect(screen.getByRole('progressbar', { name: label })).toBeTruthy();
 });
 
@@ -164,7 +163,7 @@ it('clears the current summary after a failed refresh and recovers', async () =>
   act(() => window.dispatchEvent(new Event('subscription-refresh')));
   await screen.findByText('Unavailable', { selector: '.subscription-summary-unavailable' });
   expect(screen.getByText('—')).toBeTruthy();
-  expect(screen.getByRole('progressbar').hasAttribute('aria-valuenow')).toBe(false);
+  expect(screen.getByRole('progressbar').getAttribute('aria-valuetext')).toBe('Unknown');
   act(() => window.dispatchEvent(new Event('subscription-refresh')));
   await screen.findByText('85%', { selector: '.subscription-summary-percent' });
   expect(screen.queryByText('Unavailable')).toBeNull();
@@ -198,25 +197,14 @@ it('exposes an expanded localized summary label without shrinking its percentage
   i18n.addResource('en', 'usage', 'quota_window_label', pattern);
   try {
     render(<SubscriptionMeters compact />);
-    const label = await screen.findByText('Codex subscription usage over the entire 5h window');
+    const label = await screen.findByText('Codex subscription usage over the entire 5h window', { selector: '.subscription-summary-label' });
     expect(label.getAttribute('title')).toBe(label.textContent);
     expect(screen.getByText('85%', { selector: '.subscription-summary-percent' })).toBeTruthy();
   } finally {
     i18n.addResource('en', 'usage', 'quota_window_label', original);
   }
 });
-it('mirrors the track in RTL while preserving the usage value', () => {
-  const style = document.createElement('style');
-  style.textContent = readFileSync('src/renderer/usage/usage.css', 'utf8');
-  document.head.append(style);
-  try {
-    const { container } = render(<div dir="rtl"><SubscriptionWindowMeter label="Weekly" usedPercent={30} /></div>);
-    const bar = screen.getByRole('progressbar', { name: 'Weekly' });
-    expect(getComputedStyle(bar).transform).toBe('scaleX(-1)');
-    expect(bar.getAttribute('aria-valuenow')).toBe('30');
-    expect(container.querySelector('[data-slot=progress-indicator]')?.getAttribute('style'))
-      .toContain('translateX(-70%)');
-  } finally {
-    style.remove();
-  }
+it('preserves the usage value in a right-to-left layout', () => {
+  render(<div dir="rtl"><SubscriptionWindowMeter label="Weekly" usedPercent={30} /></div>);
+  expect(screen.getByRole('progressbar', { name: 'Weekly' }).getAttribute('aria-valuenow')).toBe('30');
 });

@@ -1,4 +1,4 @@
-import { Button } from '@astryxdesign/core';
+import { Badge, Button } from '@astryxdesign/core';
 import { AstryxGallery } from './astryx-gallery';
 import { useEffect, useState } from 'react';
 import { builtinThemes, themePreferencesSchema, type ThemePreferences } from '../../shared/themes';
@@ -13,7 +13,6 @@ import {
   SettingRow,
   SegmentedControl,
   SegmentedControlItem,
-  Badge,
 } from '../components/ui';
 
 const copy = {
@@ -141,7 +140,7 @@ export default function DesignGallery() {
       </SettingRow>
         <Section title={copy.structure} actions={action}>
           <ListRow
-            leading={<Badge>1</Badge>}
+            leading={<Badge label="1" />}
             title={copy.rest}
             subtitle={copy.hint}
             meta={copy.meta}

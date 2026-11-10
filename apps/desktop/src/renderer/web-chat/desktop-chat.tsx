@@ -11,7 +11,8 @@ import { tr } from '../../shared/i18n';
 import type { IpcResponse } from '../../shared/ipc';
 import type { Conversation, Message } from '../../shared/domain';
 import type { Providers } from '../providers';
-import { Button, EmptyState, Toolbar } from '../components/ui';
+import { Button } from '@astryxdesign/core';
+import { EmptyState, Toolbar } from '../components/ui';
 import type { ReactNode } from 'react';
 export function DesktopChat({active,launcher,toolbarSlot}:{active:boolean;launcher?:ReactNode;toolbarSlot?:HTMLElement|null}) {
   useTranslation();
@@ -54,9 +55,9 @@ export function DesktopChat({active,launcher,toolbarSlot}:{active:boolean;launch
     } catch {setFailed(true);}
     finally {switching.current=false;}
   };
-  const toolbar=<Toolbar className="gap-[var(--space-4)]" left={launcher} right={conversation && <Button variant="ghost" disabled={busy} onClick={()=>void start()}><Plus/>{tr('web-chat:new')}</Button>}/>;
+  const toolbar=<Toolbar className="gap-[var(--space-4)]" left={launcher} right={conversation && <Button variant="ghost" isDisabled={busy} icon={<Plus size={16}/>} label={tr('web-chat:new')} onClick={()=>void start()}/>}/>;
   return <div className="web-chat-local chat-pane">{toolbarSlot===undefined ? toolbar : toolbarSlot && createPortal(toolbar,toolbarSlot)}
     {failed && <p role="alert">{tr('web-chat:desktop_error')}</p>}
-    {conversation ? <Chat key={conversation.id} conversation={conversation} history={messages} historyCursor={cursor} autoFocus={false} draft={draft} onDraft={setDraft} selection={null} onClearSelection={()=>{}} providers={providers} model={conversation.providerId+'/'+conversation.modelId} onModel={value=>void model(value)} onSettings={settings} onProvidersChanged={refresh} onUsage={settings}/> : <EmptyState className="web-chat-empty" headingLevel={2} title={tr('web-chat:desktop')} description={tr('web-chat:desktop_hint')} action={<Button disabled={busy || !active} onClick={()=>void start()}>{tr('web-chat:new')}</Button>}/>}
+    {conversation ? <Chat key={conversation.id} conversation={conversation} history={messages} historyCursor={cursor} autoFocus={false} draft={draft} onDraft={setDraft} selection={null} onClearSelection={()=>{}} providers={providers} model={conversation.providerId+'/'+conversation.modelId} onModel={value=>void model(value)} onSettings={settings} onProvidersChanged={refresh} onUsage={settings}/> : <EmptyState className="web-chat-empty" headingLevel={2} title={tr('web-chat:desktop')} description={tr('web-chat:desktop_hint')} action={<Button variant="secondary" isDisabled={busy || !active} label={tr('web-chat:new')} onClick={()=>void start()}/>}/>}
   </div>;
 }

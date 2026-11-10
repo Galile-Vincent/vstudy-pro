@@ -112,7 +112,7 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/sources.aui.tsx",
       "registrySha256": "032a55cdcb9e9067c10667c21f09f4d17efdd1ca4bba58c8e11601f50480b354",
-      "patchedSha256": "03539776b22ada18786655e03ee7ae92aaba2f0465ffae160a49bd3880559a7e",
+      "patchedSha256": "bee06bcaf0561c9c8cc8e9af0fb83b8fd2a473ac6a97d18669a4cf47fa7518b7",
       "patch": "docs/vendor-patches/assistant-ui--elements--sources.aui.tsx.patch",
       "reason": "Use tonal source cards and semantic theme colors without changing source actions."
     },
@@ -138,14 +138,14 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread-list.aui.tsx",
       "registrySha256": "56af673ffdff7365cb07d94dda204c606d39991dcc54a89092bddf76e2e624d0",
-      "patchedSha256": "25ce693f173b82f662354e224e77fb48e62b3c81bf26af35604eb8eaf8ae224f",
+      "patchedSha256": "82f41f86d03f28061c28defb10908cb7362abdc7287ae18b577632cc1aa07fc3",
       "patch": "docs/vendor-patches/assistant-ui--elements--thread-list.aui.tsx.patch",
       "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread.aui.tsx",
       "registrySha256": "a3bffd8e670e51a48eedb6cf0a5ea884ffc1d212cc28e2a8bf31f7a7961399da",
-      "patchedSha256": "6346f1fa58303d1d049d6ad17eeabe94ef28756cf195dcb3c647ac6c96f5fca0",
+      "patchedSha256": "5321bc2714a3247353ac2414fee054a9d0210860acafd60f83c23d5e32597ed4",
       "patch": "docs/vendor-patches/assistant-ui--elements--thread.aui.tsx.patch",
       "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
@@ -193,161 +193,6 @@
       "registrySha256": "8db117d730e640655e5099e086af4e00d545c283839d9ef5885ca93419d51893"
     },
     {
-      "path": "apps/desktop/src/renderer/components/ui/avatar.tsx",
-      "registrySha256": "0c5c48b8a1dff4fdc5ff9b6cb79cc9cd138682b7d86868068f571befe9675e88",
-      "patchedSha256": "d6b19fe40f7e7d5fd4ba8a4dc38632defa4df0e2a82adde6347773427148f882",
-      "patch": "docs/vendor-patches/ui--avatar.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/badge.tsx",
-      "registrySha256": "d8386d947b8a8c6d965de680503e6af5ed66068cd61b4d9ecc722a4cee1d6ffc",
-      "patchedSha256": "e9908fa7ebf536aa860fadeec29fb8dbd5ed61f7f9bd1ea6fc41d046bceb503a",
-      "patch": "docs/vendor-patches/ui--badge.tsx.patch",
-      "reason": "Use semantic theme colors for badge states."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/button.tsx",
-      "registrySha256": "79dd6f75f8136394442202d6b8b922fb269eaad0a5dba579397c9d5b41f893bb",
-      "patchedSha256": "6bda08e1ce580d7aeaba64120a638975b840f67a03e2023dc0b3cd068dcd7af2",
-      "patch": "docs/vendor-patches/ui--button.tsx.patch",
-      "reason": "Use the local cn helper and semantic theme colors for tonal button states."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/card.tsx",
-      "registrySha256": "ef8305b12c3112dab42a4708b41b1ebcc042fa5ab4c20f039da8d45b09ed5059",
-      "patchedSha256": "732daf1b2b2a35756450785cbc8e93cef39250e051c5e2d0d3139a5c1a915131",
-      "patch": "docs/vendor-patches/ui--card.tsx.patch",
-      "reason": "Use the local cn helper and the translucent card surface tokens with a hairline border. Extend with token-based variants and native interactive targets.",
-      "foundationPatch": "docs/vendor-patches/ui--card-foundation.patch"
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/checkbox.tsx",
-      "registrySha256": "d3da4d7c35a3e3ebc80724fca69407e892127851d3c89d707ae1cc0d4d13dfb6",
-      "patchedSha256": "9b09bfa4425d410dd854e43d6143d84dbd0d31472feb5a053f87e5868c6edc7b",
-      "patch": "docs/vendor-patches/ui--checkbox.tsx.patch",
-      "reason": "Use the local cn helper and semantic theme colors for checkbox states."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/command.tsx",
-      "registrySha256": "8063fbe58e0c7ca013403cb58871b7c2ce104dbf3d8f7b4162d4e7107db9abfa",
-      "patchedSha256": "47f33e1a635a0236d4a0c6f905e0d03b37ca08a6c8dde6c1f4bc0249bc9e07e3",
-      "patch": "docs/vendor-patches/ui--command.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/dialog.tsx",
-      "registrySha256": "0d2e82ed5e7040abda714a0471aff54535e05bad6249da049cc0c3bf3ae024e5",
-      "patchedSha256": "838213cdfc466ccdf4f2fe94a2f4daf611cc206be5c0f2b54de48565fa7f4f6c",
-      "patch": "docs/vendor-patches/ui--dialog.tsx.patch",
-      "reason": "Use the local cn helper, localized accessible labels, and semantic theme colors."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/dropdown-menu.tsx",
-      "registrySha256": "d954efb735f13734751207ad22cb0cddd7f6ec53c59d16675d103dae08cb61fb",
-      "patchedSha256": "c84b54bc6c8ae8f3ec5a8999000623b25776318739f2e91de3c70d85bb56e95a",
-      "patch": "docs/vendor-patches/ui--dropdown-menu.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/input.tsx",
-      "registrySha256": "0c9457181f6ddc80969bcf854e92c362903a55b6e889fbef3fd85343ecc4af5b",
-      "patchedSha256": "7bfd0eff6c53a38c99184394a09f55e7a86c725de12d6a300fa46b3765114091",
-      "patch": "docs/vendor-patches/ui--input.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/popover.tsx",
-      "registrySha256": "d8bfac795e9750a8994836b9f773ddceb4892730f9ee1e02e498fb6892c3be44",
-      "patchedSha256": "d5ebc8cb60ef8a8aa283cff6b642bf8e63512b76bfaae3cb4b0c735a550d6a61",
-      "patch": "docs/vendor-patches/ui--popover.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/progress.tsx",
-      "registrySha256": "cf5de49b1c6d9ba6753d1d2f62820c543935cf426b8af8b49b277cfda6cc2c5b",
-      "patchedSha256": "2fd866791c06cdcb6aee5631a6c8e3ff24fe3105f0d2f8e04bdf7c92eccf4dbd",
-      "patch": "docs/vendor-patches/ui--progress.tsx.patch",
-      "reason": "Resolve the local cn helper and forward determinate value/max with proportional indicator geometry."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/select.tsx",
-      "registrySha256": "9293fd75923693411cd443049fba313135014c4ad6997cfcde1e37693fc85b04",
-      "patchedSha256": "6d3a0333c0f2dd5bd4ffc4e1a68369d8cb29bed161b3cdd3410a9a1274e0b991",
-      "patch": "docs/vendor-patches/ui--select.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/separator.tsx",
-      "registrySha256": "7d943e8c309f8d530f25433ffc9167f771e635f2eeb1c3b55fa16955068c1657",
-      "patchedSha256": "27e605bf54abe12bf878318ed5bd0e8b475c7fdaa15519df05d0e44b5c7b5720",
-      "patch": "docs/vendor-patches/ui--separator.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/sheet.tsx",
-      "registrySha256": "7e4e3e2a5976ad75c1e0f63624fb3748ad84b27ca1ec85c0a6d33e6f300dc80d",
-      "patchedSha256": "daebae471ad1bac14d8825d884318c35a55b67314072d1b57b89badc419ae824",
-      "patch": "docs/vendor-patches/ui--sheet.tsx.patch",
-      "reason": "Use the local cn helper, localized accessible labels, and semantic theme colors."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/sidebar.tsx",
-      "registrySha256": "546f6900af7d9102bdcb6157c0e52c289cdede0e9d624c506fda66d3d8039be0",
-      "patchedSha256": "5cc0362d34442fd1229cd42debebccaa0f104f1e85f55703fad297d0aedea1a9",
-      "patch": "docs/vendor-patches/ui--sidebar.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility. Translate accessible labels. Support a controlled inline sidebar at mobile widths without a separate sheet state."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/skeleton.tsx",
-      "registrySha256": "f51ce0fcd31e5c31437382e80ea0af94b4fc3d64221d27091d36824546780a43",
-      "patchedSha256": "ba48dd5be5a6a1378bd4e011028654b5bf419f1e7d20ee4b9f8330c1264e7239",
-      "patch": "docs/vendor-patches/ui--skeleton.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/switch.tsx",
-      "registrySha256": "743676f33f823ffa8008bbd5eb94cb68e227599447d60e132a202291a395f8e4",
-      "patchedSha256": "62bd507d11a7abe5d0fc0b0bb805c794dcff5f75cff8c63e7dd58aec763d9cf5",
-      "patch": "docs/vendor-patches/ui--switch.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/tabs.tsx",
-      "registrySha256": "e1df6e2f95ece373ca909c1d54b8ba8cf4c47dd425c1784bbb9a01c38dd0936b",
-      "patchedSha256": "bc6b1c115fcc9d63d8f14cecd4fcb43cd0b8b201a5d295419296fe9e0ba1623f",
-      "patch": "docs/vendor-patches/ui--tabs.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/textarea.tsx",
-      "registrySha256": "5cafcfeeee29534f449387a16b585f5923d2faab1a0cdc50a874416b175f59ce",
-      "patchedSha256": "7c7122fc969c62228c691388aa1fe8b1eafe787ac25305a7a768f77d87d3c567",
-      "patch": "docs/vendor-patches/ui--textarea.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/toggle-group.tsx",
-      "registrySha256": "659d8d40849a9b23e86682e5cbb3dfef6cbd5a8536a5f50eecef8d60a5f66b63",
-      "patchedSha256": "f9d2c8102caef32186085a6e60fac79af27e9566f429b3fac85ccbb8f02383c6",
-      "patch": "docs/vendor-patches/ui--toggle-group.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/toggle.tsx",
-      "registrySha256": "28ae7d72730890a3ba6c668fd511c63a358ad26534c2c25d5922748d47e1fa99",
-      "patchedSha256": "05a7ea1345d08b6d61b78b95407ec67af9ede7cd090ecdf7736ddde5363a534d",
-      "patch": "docs/vendor-patches/ui--toggle.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
-      "path": "apps/desktop/src/renderer/components/ui/tooltip.tsx",
-      "registrySha256": "908d99c8aaea79508c94b48c3278a08856f32d1d4ce531860fde038fdacb7c9d",
-      "patchedSha256": "8b1a0c07f276ccc4982134938e6989d60b2e31f5e661a9e19b1d551d30b8ed93",
-      "patch": "docs/vendor-patches/ui--tooltip.tsx.patch",
-      "reason": "Resolve the registry cn helper to the existing local utility."
-    },
-    {
       "path": "apps/desktop/src/renderer/hooks/use-attachment-src.ts",
       "registrySha256": "dfb621f1a18f4013994aa29815beddb436020105164526ab7c86b0b0a32040a1",
       "patchedSha256": "4a77bf6c1256070a2469265d73aba534f3a462eb4444cd4b1def35f4b79a2a93",
@@ -381,12 +226,12 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/foundation.test.tsx",
-      "sha256": "7176f7a44a94121273b750832d6fe96460fb0b54303992a122f4a842bc43f9ba",
+      "sha256": "48661c27e4f69711ef678d179c61f692b3aa5506101db2c0adbdca9e327998c4",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/index.ts",
-      "sha256": "022be3e62959ded2515578605230b2b285ab5215cbdd2ae0cfceab6fcdffb6dc",
+      "sha256": "7fb2d9b1df4061e25605bc3fc3368045d3334f264a1f8d16ab43af997143ffc8",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -396,12 +241,12 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
-      "sha256": "2b6d328814a330e2c279c7b66a61fe1d2ece80bd54ef9eff9af628a12ac30bda",
+      "sha256": "cfe96b777d44cff98c95d77de81be88283210513be2ecb2fe7114cc5458859f6",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/segmented-tabs.tsx",
-      "sha256": "5fb0038906d27c08d4b39679cfcd64f7844c13dda7c3fb280d5542aa388ead1e",
+      "sha256": "172f0c3388d927f7a6caa5d014a504cff282beb7af4b9b9105809363651f860d",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {

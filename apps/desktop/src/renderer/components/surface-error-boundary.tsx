@@ -3,14 +3,14 @@ import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import { reportRendererError } from '../renderer-errors';
-import { Button } from './ui/button';
+import { Button } from '@astryxdesign/core';
 
 function Recovery({ retry }: { retry: () => void }) {
   useTranslation();
   return <section role="alert" className="m-6 space-y-3 rounded-lg bg-muted p-6 text-foreground">
     <h2 className="text-lg font-semibold">{tr('common:something_went_wrong')}</h2>
     <p>{tr('common:surface_render_error')}</p>
-    <Button onClick={retry}>{tr('common:retry')}</Button>
+    <Button label={tr('common:retry')} onClick={retry} />
   </section>;
 }
 

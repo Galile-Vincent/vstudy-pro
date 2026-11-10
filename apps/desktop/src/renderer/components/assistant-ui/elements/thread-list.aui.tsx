@@ -5,7 +5,7 @@ import { tr } from '../../../../shared/i18n';
 
 import { Button } from "@astryxdesign/core";
 import { TextInput as Input } from "@astryxdesign/core";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@astryxdesign/core";
 import { cn } from "@/lib/utils";
 import {
   AuiIf,
@@ -321,7 +321,8 @@ const ThreadListSkeleton: FC = () => {
         >
           <Skeleton
             data-slot="aui_thread-list-skeleton"
-            className="h-3.5 w-full"
+            height={14}
+            index={i}
           />
         </div>
       ))}

@@ -5,7 +5,8 @@ import { Check, X } from 'lucide-react';
 import type { CliActionId, CliActionPlan, CliProvider } from '../../shared/ai-cli';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
-import { Badge, EmptyState, Toolbar } from '../components/ui';
+import { Badge } from '@astryxdesign/core';
+import { EmptyState, Toolbar } from '../components/ui';
 import { Button, Dialog, DialogHeader, IconButton } from '@astryxdesign/core';
 import { aiCliChanged } from './entry';
 import { cliNames, cliProviders, currentStep, setupAction, setupSteps, recommendedProvider } from './model';
@@ -100,7 +101,7 @@ export function AiCliSetup({ initialProvider, onClose }: { initialProvider?: Cli
           {tool && <>
             <div className="ai-cli-tool-heading">
               <strong>{cliNames[provider]}</strong>
-              <Badge variant="secondary" className="ai-cli-chip" data-status={displayStatus}>{tr(`ai-cli:status_${displayStatus}`)}</Badge>
+              <Badge className="ai-cli-chip" data-status={displayStatus} label={tr(`ai-cli:status_${displayStatus}`)} />
               <span className="ai-cli-live" role="status">{announcement}</span>
             </div>
             <ol className="ai-cli-steps" aria-label={tr('ai-cli:steps')}>

@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import type { UpdateSnapshot } from '../../shared/updates';
 import { desktop } from '../bridge';
-import { Button, IconButton } from '@astryxdesign/core';
-import { Progress } from '../components/ui/progress';
+import { Button, IconButton, ProgressBar } from '@astryxdesign/core';
 import './update-row.css';
 export function useUpdates() {
   const [snapshot, setSnapshot] = useState<UpdateSnapshot>();
@@ -43,8 +42,7 @@ export function UpdateRow() {
       {state?.status === 'available' && <IconButton variant="ghost" size="sm" label={tr('updates:notes')} tooltip={tr('updates:notes')} icon={<FileText aria-hidden="true" />}
         onClick={() => void desktop.invoke('updates:notes', {})} />}
       {(state?.status === 'error' || snapshot?.installError) && <Button variant="ghost" size="sm" label={tr('updates:retry')} onClick={action} />}
-      {state?.status === 'downloading' && <Progress value={state.percent} aria-valuenow={state.percent} aria-valuemin={0} aria-valuemax={100}
-        aria-label={tr('updates:download_progress')} />}
+      {state?.status === 'downloading' && <ProgressBar value={state.percent} label={tr('updates:download_progress')} isLabelHidden />}
     </div>}
   </>;
 }

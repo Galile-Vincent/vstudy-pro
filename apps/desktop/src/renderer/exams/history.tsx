@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
-import { Badge, ListRow } from "../components/ui";
-import { Button, Dialog } from "@astryxdesign/core";
+import { ListRow } from "../components/ui";
+import { Badge, Button, Dialog } from "@astryxdesign/core";
 import { useExamFormat } from "./format";
 type Row = IpcResponse<"review:exam:history">["items"][number];
 export function ExamHistory({
@@ -64,13 +64,13 @@ export function ExamHistory({
                       })}
                     </span>
                   ) : (
-                    <Badge variant="secondary">
-                      {tr(
+                    <Badge
+                      label={tr(
                         attempt
                           ? "exams:in_progress"
                           : `review:artifact_${artifact.status}`,
                       )}
-                    </Badge>
+                    />
                   )
                 }
                 disabled={busy}

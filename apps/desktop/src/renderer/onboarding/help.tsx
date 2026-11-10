@@ -1,5 +1,5 @@
 /** Global Help entry points and contextual, profile-local learning guidance. */
-import { Button, Card, Dialog, DialogHeader, DropdownMenu, IconButton, Popover, SegmentedControl, SegmentedControlItem } from '@astryxdesign/core';
+import { Button, Card, Dialog, DialogHeader, DropdownMenu, IconButton, Popover, ProgressBar, SegmentedControl, SegmentedControlItem } from '@astryxdesign/core';
 import { ListRow, Section } from '../components/ui';
 import { Brand } from '../components/brand';
 import { useEffect, useRef, useState } from 'react';
@@ -7,7 +7,6 @@ import { Check, CircleHelp, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
-import { Progress } from '../components/ui/progress';
 import { useNavigate } from '../shell';
 import { Onboarding } from './onboarding';
 import { isInsideDialog, returnFocusTo } from './return-focus';
@@ -135,9 +134,10 @@ export function GettingStarted({ detailed = false, dialogTitle = false, onNaviga
       actions={<span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>}
     >
       <p>{tr('onboarding:checklist_body')}</p>
-      <Progress
+      <ProgressBar
         className="art-reader-setup-progress"
-        aria-label={tr('onboarding:checklist')}
+        label={tr('onboarding:checklist')}
+        isLabelHidden
         value={(progress.done.length / items.length) * 100}
       />
       <div role="list">

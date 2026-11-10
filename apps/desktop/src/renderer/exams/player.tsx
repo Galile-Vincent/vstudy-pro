@@ -10,13 +10,13 @@ import {
   XCircle,
 } from "lucide-react";
 import {
-  Badge,
   Stat,
   Toolbar,
 } from "../components/ui";
-import { Progress } from "../components/ui/progress";
 import {
+  Badge,
   Button,
+  ProgressBar,
   TextInput,
   LayoutContent,
   LayoutFooter,
@@ -77,13 +77,11 @@ function State({ correct }: { correct: boolean | null }) {
   const Icon = correct ? CheckCircle2 : XCircle;
   return (
     <Badge
-      variant="outline"
+      variant={correct ? "success" : "error"}
       className="exam-answer-state"
-      data-correct={correct}
-    >
-      <Icon aria-hidden="true" />
-      {tr(correct ? "exams:correct" : "exams:incorrect")}
-    </Badge>
+      icon={<Icon aria-hidden="true" />}
+      label={tr(correct ? "exams:correct" : "exams:incorrect")}
+    />
   );
 }
 export function ExamPlayer({
@@ -178,13 +176,13 @@ export function ExamPlayer({
                     total: items.length,
                   })}
                 </span>
-                <Badge variant="secondary">{tr(`exams:${item.type}`)}</Badge>
-                <Progress
-                  className="h-1.5 w-24"
+                <Badge label={tr(`exams:${item.type}`)} />
+                <ProgressBar
+                  className="w-24"
+                  label={tr("exams:progress")}
+                  isLabelHidden
                   value={(committed / items.length) * 100}
-                  aria-label={tr("exams:progress")}
-                  aria-valuenow={Math.round((committed / items.length) * 100)}
-                  aria-valuetext={`${committed}/${items.length}`}
+                  formatValueLabel={() => `${committed}/${items.length}`}
                 />
                 <span className="text-[var(--muted)]">
                   {tr("exams:answered", {
@@ -262,12 +260,13 @@ export function ExamPlayer({
                   key={type}
                 >
                   <span className="flex-[1_1_8rem]">{tr(`exams:${type}`)}</span>
-                  <Progress
-                    className="flex-[2_1_12rem] [&>[data-slot=progress-indicator]]:bg-[var(--success)]"
+                  <ProgressBar
+                    className="flex-[2_1_12rem]"
+                    variant="success"
+                    label={tr(`exams:${type}`)}
+                    isLabelHidden
                     value={value}
-                    aria-label={tr(`exams:${type}`)}
-                    aria-valuenow={value}
-                    aria-valuetext={`${matched}/${rows.length}`}
+                    formatValueLabel={() => `${matched}/${rows.length}`}
                   />
                   <span className="min-w-[8ch] text-end tabular-nums">
                     {matched}/{rows.length}{" "}

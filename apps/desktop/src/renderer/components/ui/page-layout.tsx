@@ -1,6 +1,6 @@
 import { useId, type ComponentProps, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { Badge } from './badge';
+import { Badge } from '@astryxdesign/core';
 import './ui.css';
 
 type DivProps = ComponentProps<'div'>;
@@ -59,7 +59,7 @@ export function Section({
           className="flex items-center gap-[var(--space-2)] text-[length:var(--type-lg)] font-medium"
         >
           {title}
-          {count !== undefined && <Badge variant="secondary">{count}</Badge>}
+          {count !== undefined && <Badge label={count} />}
         </Heading>
         {actions}
       </div>
