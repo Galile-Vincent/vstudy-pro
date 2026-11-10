@@ -8,7 +8,7 @@ import { type Settings } from '../../shared';
 import { builtinThemes, resolveTheme, type ThemePack } from '../../shared/themes';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
-import { Card, Section, SettingRow, SegmentedControl } from '../components/ui';
+import { Card, Section, SettingRow, SegmentedControl, SegmentedControlItem } from '../components/ui';
 import { Select } from '../components/select';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
 import { Button } from '../components/ui/button';
@@ -64,9 +64,13 @@ export function AppearanceSection() {
       customThemes: [...latest.customThemes.filter(t => t.id !== theme.id), theme] });
   };
   const toggles = (field: 'uiScale' | 'density' | 'readerSize', values: readonly (string | number)[]) => (
-    <SegmentedControl aria-label={tr(`settings:${field}`)} value={String(settings?.[field] ?? '')}
+    <SegmentedControl type="single" aria-label={tr(`settings:${field}`)} value={String(settings?.[field] ?? '')}
       onValueChange={value => { if (value) void update({[field]:field === 'uiScale' ? Number(value) : value}); }}
-      options={values.map(value => ({value:String(value),label:field === 'uiScale' ? `${value}%` : tr(`settings:${value}`)}))} />
+    >
+      {values.map(value => <SegmentedControlItem key={value} value={String(value)}>
+        {field === 'uiScale' ? `${value}%` : tr(`settings:${value}`)}
+      </SegmentedControlItem>)}
+    </SegmentedControl>
   );
   if (!settings) return error ? <p role="alert">{error}</p> : <p role="status">{tr('themes:loading')}</p>;
   const theme = resolveTheme(settings);
@@ -94,9 +98,11 @@ export function AppearanceSection() {
     </Section>
     <Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
       <SettingRow label={tr('themes:cardTransparency')} description={tr('themes:cardTransparency_hint')}>
-        <SegmentedControl aria-label={tr('themes:cardTransparency')} value={settings.cardTransparency}
+        <SegmentedControl type="single" aria-label={tr('themes:cardTransparency')} value={settings.cardTransparency}
           onValueChange={value => { if (value) void update({cardTransparency:value as Settings['cardTransparency']}); }}
-          options={(['solid','soft','glass'] as const).map(value => ({value,label:tr(`themes:card_${value}`)}))} />
+        >
+          {(['solid','soft','glass'] as const).map(value => <SegmentedControlItem key={value} value={value}>{tr(`themes:card_${value}`)}</SegmentedControlItem>)}
+        </SegmentedControl>
       </SettingRow>
       {slider('contrast')}
     </Card>

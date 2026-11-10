@@ -107,7 +107,7 @@ for (const locale of locales) for (const scheme of ['dark', 'light']) {
               { selector: 'scrollbar thumb', fg: over(rgba(scrollbar[0]), backdrop(pane)), bg: over(rgba(scrollbar[1]), backdrop(pane)) },
               ...edge('[data-slot=switch][data-state=unchecked]', 'switch off edge'), ...edge('[data-slot=switch][data-state=checked]', 'switch on fill'),
               ...edge('[data-slot=select-trigger]', 'select edge'), ...edge('input:not([type=checkbox], [type=radio], [type=range])', 'input edge'),
-              ...edge('[data-slot=segmented-control]', 'segmented edge'), ...edge('[data-slot=segmented-control] > [role=radio][data-state=checked]', 'segmented selected fill'),
+              ...edge('[data-slot=segmented-control]', 'segmented edge'), ...edge('[data-slot=segmented-control-item][data-state=on]', 'segmented selected fill'),
               ...edge('.scheme-card[aria-pressed=true]', 'selected scheme edge'), ...edge('.theme-card[data-selected=true]', 'selected theme edge'),
               ...edge('[data-slot=button][data-variant=secondary]', 'secondary button edge'),
             ];
