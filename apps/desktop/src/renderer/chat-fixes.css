@@ -110,8 +110,8 @@
 .workspace [data-slot=aui_thread-viewport] > div {
  padding:var(--space-6) var(--space-8) 0;
 }
-.workspace [data-slot=aui_message-group] { gap:var(--space-8); margin-bottom:var(--space-8); }
-.workspace .aui-thread-viewport-footer { gap:var(--space-3); padding-block:var(--space-3) var(--space-6); }
+.workspace [data-slot=aui_message-group] { gap:var(--space-4); margin-bottom:0; }
+.workspace .aui-thread-viewport-footer { gap:var(--space-3); padding-block:var(--space-2) var(--space-4); }
 .web-chat-local .aui-thread-viewport-footer { gap:var(--space-3); padding:var(--space-3) var(--space-4) var(--space-4); }
 .aui-thread-root:has([data-slot=aui_message-group]:empty) .aui-thread-scroll-to-bottom { display:none; }
 :is(.workspace,.web-chat-local) .aui-thread-scroll-to-bottom { top:auto; bottom:calc(100% + var(--space-2)); inset-inline-end:var(--space-4); align-self:auto; }
@@ -228,7 +228,7 @@ html:not([data-input-modality=keyboard]) .workspace .reading-pane:focus { outlin
 :is(.workspace,.web-chat-local) .aui-user-message-content { border-radius:var(--radius-chat); }
 :is(.workspace,.web-chat-local) [data-role=assistant] { border-radius:var(--radius-container); background:var(--color-background-card); }
 :is(.workspace,.web-chat-local) :is(.blank-chat,.chat-start) > * { animation:none; }
-:is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],summary) { min-height:40px; min-width:40px; }
+:is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],summary):not(.paragraph-action,.section-action,[data-slot=document-citation],.model-controls *) { min-height:40px; min-width:40px; }
 :is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],input,textarea,summary):focus-visible {
  outline:var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
  outline-offset:var(--focus-outline-offset);
@@ -238,7 +238,7 @@ html:not([data-input-modality=keyboard]) .workspace .reading-pane:focus { outlin
 .model-controls { flex-wrap:wrap; gap:var(--spacing-2); }
 .model-controls [role=combobox] { max-width:none; }
 @media (pointer:coarse) {
- :is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],summary) { min-height:44px; min-width:44px; }
+ :is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],summary):not(.paragraph-action,.section-action,[data-slot=document-citation],.model-controls *) { min-height:44px; min-width:44px; }
 }
 @media (prefers-reduced-motion:reduce) {
  :is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) button { transition:none; }

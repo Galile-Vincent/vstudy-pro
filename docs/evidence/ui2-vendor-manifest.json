@@ -91,7 +91,7 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/model-selector.tsx",
       "registrySha256": "eeee32542590ef726200994a681e704b4903e22c06ebf5d0fb8959e5ef8514c7",
-      "patchedSha256": "8b225adb508ac8f718b397cb9f6019bfe147a61d6640061f67b4195547dd8774",
+      "patchedSha256": "8507bd4c7460d2564d56ac2f442dfd51ae592b27221ae07ab59c7cb1dd7d6e76",
       "patch": "docs/vendor-patches/assistant-ui--elements--model-selector.tsx.patch",
       "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },

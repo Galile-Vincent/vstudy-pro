@@ -22,7 +22,7 @@ export function ModelControls({providers, model, onModel, onSettings, onProvider
  return <div className="model-controls">
   <ModelSelector models={entries} value={selected?.value??model} onValueChange={onModel} onOpenChange={open=>{onOpenChange?.(open);if(open) void onProvidersChanged?.();}}/>
   {!all.some(m=>m.available) && <Button label={tr('novice:connect_ai')} variant="ghost" size="sm" onClick={onSettings}>{tr('novice:connect_ai')}</Button>}
-  {effort && <Selector label={optionLabel(effort.id,effort.label)} isLabelHidden value={String(values[effort.id]??effort.default)} onChange={value=>onChange?.({...values,[effort.id]:value})} options={effort.values.map(v=>({value:v.id,label:effort.id==='thinking'?tr(v.id==='enabled'?'picker:enabled':'picker:disabled'):effortLabel(v.id)}))}/>}
-  {speed && <ToggleButton label={tr('common:fast')} isPressed={fast} onPressedChange={checked=>onChange?.({...values,[speed.id]:speed.id==='fastMode'?checked:checked?'priority':'default'})} icon={<Zap size={14}/>} isIconOnly/>}
+  {effort && <Selector size="sm" variant="ghost" label={optionLabel(effort.id,effort.label)} isLabelHidden value={String(values[effort.id]??effort.default)} onChange={value=>onChange?.({...values,[effort.id]:value})} options={effort.values.map(v=>({value:v.id,label:effort.id==='thinking'?tr(v.id==='enabled'?'picker:enabled':'picker:disabled'):effortLabel(v.id)}))}/>}
+  {speed && <ToggleButton size="sm" label={tr('common:fast')} isPressed={fast} onPressedChange={checked=>onChange?.({...values,[speed.id]:speed.id==='fastMode'?checked:checked?'priority':'default'})} icon={<Zap size={14}/>} isIconOnly/>}
  </div>;
 }
