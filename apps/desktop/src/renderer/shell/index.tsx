@@ -1,26 +1,22 @@
-import { UpdateRow } from './update-row';
-import { TabStrip } from './tab-strip';
+import { AppShell as AstryxAppShell, MobileNav, SideNav } from '@astryxdesign/core';
+import { ShellBrand, ShellDestinations, ShellFooter } from './shell-nav';
+import { ShellChrome } from './shell-chrome';
+import { SidebarProvider } from '../components/ui/sidebar';
+import { TooltipProvider } from '../components/ui/tooltip';
 import { mergeTabPresentation, activeTab, currentRoute, createTab, loadTabs, saveTabs, tabReducer, type TabAction } from './tab-state';
 import { MAX_APP_TABS, type TabSet, type TabRoute } from '../../shared/app-tabs';
 import { HistorySwipeNavigation, hasNavigationOverlay } from './history-swipe-navigation';
 import { canMoveHistory, historyRoute, type HistoryDirection } from './navigation-history';
-import { ClipboardCheck } from "lucide-react";
 /** Navigation frame and profile-local routes shared by the study views. */
-import { Brand } from '../components/brand';
 import { useScrollChrome } from './use-scroll-chrome';
-import { SubscriptionMeters } from '../usage/subscriptions';
 import './scroll-chrome.css';
-import { HelpMenu } from "../onboarding/help";
-import { useSidebarOverlay } from './use-sidebar-overlay';
+import '../motion/motion.css';
 import { applyAppearance } from '../settings/apply-appearance';
-import { Button } from '../components/ui/button';
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarContent, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel } from '../components/ui/sidebar';
 import { transitionTo } from "./view-transition";
 import { desktop } from "../bridge";
 import { applyLanguage } from "../i18n";
 import {
   createContext,
-  useCallback,
   startTransition,
   useContext,
   useState,
@@ -30,7 +26,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from "react";
-import { Home, BookOpen, ArrowLeft, Menu, Settings, GraduationCap, Search, History as HistoryIcon } from "lucide-react";
+import { Home } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
 import "./shell.css";
@@ -79,13 +75,6 @@ export function AppShell({
   useScrollChrome();
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [displayName, setDisplayName] = useState('');
-  useEffect(() => {
-    const toggle = () => setSidebarVisible(visible => !visible);
-    window.addEventListener('vstudy:toggle-sidebar', toggle);
-    return () => window.removeEventListener('vstudy:toggle-sidebar', toggle);
-  }, []);
-  const closeSidebar = useCallback(() => setSidebarVisible(false), []);
-  const sidebarOverlay = useSidebarOverlay(closeSidebar, sidebarVisible);
   useEffect(() => {
     const pointer=()=>{document.documentElement.dataset.inputModality='pointer';};
     const keyboard=(event:KeyboardEvent)=>{if(['Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(event.key))document.documentElement.dataset.inputModality='keyboard';};
@@ -178,7 +167,6 @@ export function AppShell({
   const goHistory = (direction: HistoryDirection) => {
     if (performance.now() - lastHistoryMove.current < 300 || hasNavigationOverlay() || !canMoveHistory(activeTab(tabsRef.current).history, direction)) return;
     lastHistoryMove.current = performance.now();
-    if (sidebarOverlay) closeSidebar();
     transitionTo(() => { setTransientRoute({}); dispatch({ type: 'history', id: tabsRef.current.activeId, direction }); }, false, false, direction);
   };
   const previous = useRef<Route>({ view: "home" });
@@ -188,7 +176,6 @@ export function AppShell({
     clearTimeout(focusTimer.current);
     focusTimer.current = undefined;
     welcomeReturn.current = null;
-    if (sidebarOverlay) closeSidebar();
     const next = typeof value === "string" ? { view: value } : value;
     const id = tabs.activeId;
     const apply = () => {
@@ -224,6 +211,11 @@ export function AppShell({
       else document.getElementById("welcome-entry")?.focus();
     }, 0);
   }, [route.view]);
+  const navigation = (
+    <SidebarProvider mobileSheet={false} open onOpenChange={() => {}} className="contents min-h-0">
+      <ShellDestinations route={route} navigate={navigate} openTab={openTab} library={sidebar} />
+    </SidebarProvider>
+  );
   return (
     <NavigationContext.Provider
   value={{
@@ -276,247 +268,41 @@ export function AppShell({
     closeWelcome,
   }}
 >
-  <SidebarProvider
-    mobileSheet={false}
-    open={sidebarVisible}
-    onOpenChange={setSidebarVisible}
+  <TooltipProvider delayDuration={0}>
+  <AstryxAppShell
+    className="app-shell"
+    data-view={route.view}
+    data-sidebar={sidebarVisible ? 'expanded' : 'collapsed'}
+    variant="section"
+    banner={<ShellChrome route={route} status={status} sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible} />}
+    sideNav={
+      <SideNav
+        className="shell-sidebar"
+        header={<ShellBrand />}
+        collapsible={{ isCollapsed: !sidebarVisible, onCollapsedChange: collapsed => setSidebarVisible(!collapsed), hasButton: false }}
+        footer={<ShellFooter displayName={displayName} onSettings={() => window.dispatchEvent(new Event('vstudy:open-settings'))} />}
+      >
+        {navigation}
+      </SideNav>
+    }
+    mobileNav={{ hasToggle: false, content: <MobileNav header={<ShellBrand />}>{navigation}</MobileNav> }}
   >
     <div
-      className="app-shell"
-      data-view={route.view}
-      data-sidebar-overlay={sidebarOverlay}
+      id="shell-content"
+      role={route.view === 'library' ? 'main' : undefined}
+      className="shell-content"
+      tabIndex={-1}
+      onKeyDown={forwardScrollKeys}
     >
-      <a
-        className="skip-link"
-        href="#shell-content"
-      >
-        {tr('common:skip_content')}
-      </a>
-      <Sidebar
-        role="complementary"
-        collapsible="none"
-        hidden={!sidebarVisible}
-        className="shell-sidebar"
-        aria-label={tr('common:document_library')}
-      >
-        <SidebarHeader className="shell-brand">
-          <span
-            className="art-reader-brand-mark"
-            aria-hidden="true"
-          >
-            <Brand beta />
-          </span>
-          <span>
-            {tr('library:brand')}
-            <span className="sr-only"> {tr('library:beta')}</span>
-          </span>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>{tr('art-reader:workspace')}</SidebarGroupLabel>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={route.view === 'home'}
-                  aria-current={route.view === 'home' ? 'page' : undefined}
-                  onClick={(event) =>
-                    (event.metaKey || event.ctrlKey ? openTab : navigate)('home')
-                  }
-                >
-                  <Home />
-                  {tr('library:home')}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={route.view === 'ai-chats'}
-                  aria-current={route.view === 'ai-chats' ? 'page' : undefined}
-                  onClick={(event) =>
-                    (event.metaKey || event.ctrlKey ? openTab : navigate)('ai-chats')
-                  }
-                >
-                  <HistoryIcon />
-                  {tr('web-chat:title')}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  data-parent={!!route.query?.folderId}
-                  isActive={route.view === 'library' || route.view === 'workspace'}
-                  aria-current={
-                    route.view === 'library' || route.view === 'workspace'
-                      ? 'page'
-                      : undefined
-                  }
-                  onClick={(event) =>
-                    (event.metaKey || event.ctrlKey ? openTab : navigate)('library')
-                  }
-                >
-                  <BookOpen />
-                  {tr('common:library')}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={route.view === 'courses'}
-                  aria-current={route.view === 'courses' ? 'page' : undefined}
-                  onClick={(event) =>
-                    (event.metaKey || event.ctrlKey ? openTab : navigate)('courses')
-                  }
-                >
-                  <GraduationCap />
-                  {tr('moodle:courses')}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={route.view === 'exams'}
-                  aria-current={route.view === 'exams' ? 'page' : undefined}
-                  onClick={(event) =>
-                    (event.metaKey || event.ctrlKey ? openTab : navigate)('exams')
-                  }
-                >
-                  <ClipboardCheck />
-                  {tr('exams:title')}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={route.view === 'review'}
-                  aria-current={route.view === 'review' ? 'page' : undefined}
-                  onClick={(event) =>
-                    (event.metaKey || event.ctrlKey ? openTab : navigate)('review')
-                  }
-                >
-                  <BookOpen />
-                  {tr('review:title')}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={route.view === 'history'}
-                  aria-current={route.view === 'history' ? 'page' : undefined}
-                  onClick={(event) =>
-                    (event.metaKey || event.ctrlKey ? openTab : navigate)('history')
-                  }
-                >
-                  <HistoryIcon />
-                  {tr('history:title')}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-          {sidebar}
-        </SidebarContent>
-        <SidebarFooter>
-          <SubscriptionMeters compact />
-          <UpdateRow />
-          <div className="art-reader-profile">
-            <span
-              className="art-reader-avatar"
-              aria-hidden="true"
-            >
-              {displayName ? Array.from(displayName)[0]?.toLocaleUpperCase() : <Brand />}
-            </span>
-            <span>
-              <strong>{displayName || tr('library:brand')}</strong>
-              <small>{tr('art-reader:local')}</small>
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={tr('common:settings')}
-              title={tr('common:settings')}
-              onClick={() => window.dispatchEvent(new Event('vstudy:open-settings'))}
-            >
-              <Settings aria-hidden="true" />
-            </Button>
-          </div>
-        </SidebarFooter>
-      </Sidebar>
-      <div className="shell-main">
-        <TabStrip />
-        <header className="shell-topbar">
-          <Button
-            variant="ghost"
-            className="shell-toggle"
-            aria-label={tr('common:toggle_document_library')}
-            aria-expanded={sidebarVisible}
-            onClick={() => setSidebarVisible((v) => !v)}
-          >
-            <Menu />
-          </Button>
-          {route.view === 'workspace' ? (
-            <Button
-              variant="ghost"
-              onClick={() =>
-                navigate({
-                  view: 'library',
-                  query: route.query,
-                  title: route.title,
-                })
-              }
-            >
-              <ArrowLeft />
-              {route.title ?? tr('common:library')}
-            </Button>
-          ) : (
-            <span>
-              {route.view === 'home'
-                ? tr('library:home')
-                : route.view === 'hosted-chat' && route.provider
-                  ? tr(`web-chat:${route.provider}`)
-                  : route.view === 'ai-chats'
-                    ? tr('web-chat:title')
-                    : route.view === 'exams'
-                      ? tr('exams:title')
-                      : route.view === 'review'
-                        ? tr('review:title')
-                        : route.view === 'history'
-                          ? tr('history:title')
-                          : route.view === 'moodle'
-                            ? tr('webview:title')
-                            : route.view === 'courses'
-                              ? tr('moodle:courses')
-                              : route.view === 'welcome'
-                                ? tr('welcome:page_title')
-                                : tr('common:library')}
-            </span>
-          )}
-          {route.view !== 'workspace' && status}
-          <HelpMenu />
-          <Button
-            variant="ghost"
-            className="shell-history-trigger"
-            aria-label={tr('history:find')}
-            title={tr('history:find') + ' (' + tr('history:shortcut') + ')'}
-            onClick={() => window.dispatchEvent(new Event('vstudy:find-history'))}
-          >
-            <Search size={16} />
-            <span>{tr('history:find')}</span>
-            <kbd>{tr('history:shortcut')}</kbd>
-          </Button>
-        </header>
-        {route.view === 'workspace' && (
-          <div className="shell-workspace-status">{status}</div>
-        )}
-        <div
-          id="shell-content"
-          role={route.view === 'library' ? 'main' : undefined}
-          className="shell-content"
-          tabIndex={-1}
-          onKeyDown={forwardScrollKeys}
-        >
-          {children}
-          <HistorySwipeNavigation
-            canGoBack={canMoveHistory(history, 'back')}
-            canGoForward={canMoveHistory(history, 'forward')}
-            onNavigate={goHistory}
-          />
-        </div>
-      </div>
+      {children}
+      <HistorySwipeNavigation
+        canGoBack={canMoveHistory(history, 'back')}
+        canGoForward={canMoveHistory(history, 'forward')}
+        onNavigate={goHistory}
+      />
     </div>
-  </SidebarProvider>
+  </AstryxAppShell>
+  </TooltipProvider>
 </NavigationContext.Provider>
   );
 }

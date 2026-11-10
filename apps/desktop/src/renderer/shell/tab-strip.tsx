@@ -1,4 +1,4 @@
-import { Button } from '../components/ui/button';
+import { Button, IconButton, Popover, TextInput } from '@astryxdesign/core';
 import { useEffect, useRef, useState } from 'react';
 import { Home, BookOpen, FileText, GraduationCap, History, ClipboardCheck, Plus, List, X } from 'lucide-react';
 import { useNavigate, type View } from './index';
@@ -6,7 +6,6 @@ import { hasNavigationOverlay } from './history-swipe-navigation';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { MAX_APP_TABS, type TabRoute } from '../../shared/app-tabs';
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import './tab-strip.css';
 
 const icons = { Home, BookOpen, FileText, GraduationCap, History, ClipboardCheck };
@@ -141,10 +140,8 @@ export function TabStrip() {
               }
             }}
           >
-            <Button
-              variant="ghost"
+            <button
               type="button"
-              className="h-8 shrink justify-start px-2 font-inherit"
               role="tab"
               id={`tab-${tab.id}`}
               aria-controls="active-tab-panel"
@@ -199,123 +196,110 @@ export function TabStrip() {
               {nativeStatus === 'discarded' && (
                 <span className="sr-only">{tr('tabs:discarded')}</span>
               )}
-            </Button>
-            <Button
+            </button>
+            <IconButton
               variant="ghost"
-              type="button"
+              size="sm"
               tabIndex={-1}
-              size="icon-sm"
               className="app-tab-close"
-              aria-label={tr('tabs:close', { title: labels[index] })}
+              label={tr('tabs:close', { title: labels[index] })}
+              icon={<X size={13} />}
               onClick={() => closeTab(tab.id)}
-            >
-              <X size={13} />
-            </Button>
+            />
           </div>
         );
       })}
     </div>
   )}
   <Popover
-    open={picker}
+    isOpen={picker}
     onOpenChange={setPicker}
+    placement="below"
+    alignment="end"
+    label={tr('tabs:new')}
+    content={
+      <div className="app-tabs-menu">
+        {tabs.tabs.length >= MAX_APP_TABS ? (
+          <p role="status">{tr('tabs:limit')}</p>
+        ) : (
+          <>
+            {(['home', 'courses', 'library', 'ai-chats'] satisfies View[]).map((view) => (
+              <Button
+                variant="ghost"
+                key={view}
+                label={tabLabel(view)}
+                onClick={() => {
+                  setPicker(false);
+                  openTab(view);
+                }}
+              />
+            ))}
+            <small>{tr('tabs:recent')}</small>
+            {recent.map((route) => (
+              <Button
+                variant="ghost"
+                key={route.documentId}
+                label={route.title ?? ''}
+                onClick={() => {
+                  setPicker(false);
+                  openTab(route);
+                }}
+              />
+            ))}
+          </>
+        )}
+      </div>
+    }
   >
-    <PopoverTrigger asChild>
-      <Button
-        variant="ghost"
-        type="button"
-        size="icon-sm"
-        className="app-tabs-add"
-        aria-label={tr('tabs:new')}
-        title={tr('tabs:new')}
-      >
-        <Plus size={17} />
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent
-      className="app-tabs-menu"
-      aria-label={tr('tabs:new')}
-    >
-      {tabs.tabs.length >= MAX_APP_TABS ? (
-        <p role="status">{tr('tabs:limit')}</p>
-      ) : (
-        <>
-          {(['home', 'courses', 'library', 'ai-chats'] satisfies View[]).map((view) => (
-            <Button
-              variant="ghost"
-              type="button"
-              key={view}
-              onClick={() => {
-                setPicker(false);
-                openTab(view);
-              }}
-            >
-              {tabLabel(view)}
-            </Button>
-          ))}
-          <small>{tr('tabs:recent')}</small>
-          {recent.map((route) => (
-            <Button
-              variant="ghost"
-              type="button"
-              key={route.documentId}
-              onClick={() => {
-                setPicker(false);
-                openTab(route);
-              }}
-            >
-              {route.title}
-            </Button>
-          ))}
-        </>
-      )}
-    </PopoverContent>
+    <IconButton
+      variant="ghost"
+      size="sm"
+      className="app-tabs-add"
+      label={tr('tabs:new')}
+      tooltip={tr('tabs:new')}
+      icon={<Plus size={17} />}
+    />
   </Popover>
   {tabs.tabs.length > 1 && (
     <Popover
-      open={all}
+      isOpen={all}
       onOpenChange={setAll}
+      placement="below"
+      alignment="end"
+      label={tr('tabs:all')}
+      content={
+        <div className="app-tabs-menu">
+          <TextInput
+            type="search"
+            label={tr('tabs:search')}
+            isLabelHidden
+            placeholder={tr('tabs:search')}
+            value={search}
+            onChange={setSearch}
+          />
+          {tabs.tabs.map(
+            (tab, index) =>
+              labels[index]!.toLocaleLowerCase().includes(search.toLocaleLowerCase()) && (
+                <Button
+                  variant="ghost"
+                  key={tab.id}
+                  label={labels[index]!}
+                  aria-current={tab.id === tabs.activeId ? 'page' : undefined}
+                  onClick={() => {
+                    setAll(false);
+                    activateTab(tab.id);
+                  }}
+                />
+              ),
+          )}
+        </div>
+      }
     >
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          type="button"
-          size="icon-sm"
-          aria-label={tr('tabs:all')}
-        >
-          <List size={17} />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="app-tabs-menu">
-        <input
-          type="search"
-          aria-label={tr('tabs:search')}
-          placeholder={tr('tabs:search')}
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-        {tabs.tabs.map(
-          (tab, index) =>
-            labels[index]!.toLocaleLowerCase().includes(search.toLocaleLowerCase()) && (
-              <Button
-                variant="ghost"
-                type="button"
-                key={tab.id}
-                aria-current={tab.id === tabs.activeId ? 'page' : undefined}
-                onClick={() => {
-                  setAll(false);
-                  activateTab(tab.id);
-                }}
-              >
-                {labels[index]}
-              </Button>
-            ),
-        )}
-      </PopoverContent>
+      <IconButton variant="ghost" size="sm" label={tr('tabs:all')} tooltip={tr('tabs:all')} icon={<List size={17} />} />
     </Popover>
   )}
   <span
-    className="sr-only"
+    className="sr-only tab-announcement"
     role="status"
   >
     {announcement}

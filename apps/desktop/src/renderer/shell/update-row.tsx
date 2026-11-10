@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import type { UpdateSnapshot } from '../../shared/updates';
 import { desktop } from '../bridge';
-import { Button } from '../components/ui/button';
+import { Button, IconButton } from '@astryxdesign/core';
 import { Progress } from '../components/ui/progress';
 import './update-row.css';
 export function useUpdates() {
@@ -30,19 +30,19 @@ export function UpdateRow() {
       : state?.status === 'available' ? 'updates:download' : 'updates:check';
     void desktop.invoke(channel, {}).catch(() => {});
   };
+  const busy = !!(snapshot?.waiting || snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading');
+  const name = state?.status === 'downloading' ? tr('updates:download_progress') : label;
   return <>
-    <span className="sr-only" aria-live="polite" aria-atomic="true">{state?.status === 'downloading' ? tr('updates:download_progress') : label}</span>
+    <span className="sr-only" aria-live="polite" aria-atomic="true">{name}</span>
     {label && <div className="update-row" data-testid="update-row">
-      {<Button variant="ghost" onClick={action} aria-label={state?.status === 'downloading' ? tr('updates:download_progress') : label} title={label}
-          aria-disabled={snapshot?.waiting || snapshot?.installing || state?.status === 'checking' || state?.status === 'downloading'}>
-          <RefreshCw aria-hidden="true" /><span>{label}</span>
-        </Button>}
-      {snapshot?.waiting && <Button variant="ghost" size="sm"
-        onClick={() => void desktop.invoke('updates:cancel', {})}>{tr('common:cancel')}</Button>}
-      {state?.status === 'available' && <Button variant="link" size="icon-sm" aria-label={tr('updates:notes')} title={tr('updates:notes')}
-        onClick={() => void desktop.invoke('updates:notes', {})}><FileText aria-hidden="true" /></Button>}
-      {(state?.status === 'error' || snapshot?.installError) && <Button variant="link" size="sm" onClick={action}>
-        {tr('updates:retry')}</Button>}
+      <Button variant="ghost" size="sm" label={name} tooltip={label} icon={<RefreshCw aria-hidden="true" />} isDisabled={busy} onClick={action}>
+        <span>{label}</span>
+      </Button>
+      {snapshot?.waiting && <Button variant="ghost" size="sm" label={tr('common:cancel')}
+        onClick={() => void desktop.invoke('updates:cancel', {})} />}
+      {state?.status === 'available' && <IconButton variant="ghost" size="sm" label={tr('updates:notes')} tooltip={tr('updates:notes')} icon={<FileText aria-hidden="true" />}
+        onClick={() => void desktop.invoke('updates:notes', {})} />}
+      {(state?.status === 'error' || snapshot?.installError) && <Button variant="ghost" size="sm" label={tr('updates:retry')} onClick={action} />}
       {state?.status === 'downloading' && <Progress value={state.percent} aria-valuenow={state.percent} aria-valuemin={0} aria-valuemax={100}
         aria-label={tr('updates:download_progress')} />}
     </div>}

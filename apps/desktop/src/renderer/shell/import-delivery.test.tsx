@@ -16,7 +16,7 @@ let root:Root,host:HTMLDivElement,reduced=false;
 beforeEach(()=>{
   vi.useFakeTimers();invoke.mockReset();invoke.mockResolvedValue(defaultSettings);localStorage.clear();reduced=false;
   vi.stubGlobal('matchMedia',()=>({matches:reduced,addEventListener(){},removeEventListener(){}}));
-  vi.stubGlobal('ResizeObserver',class {observe(){} disconnect(){}});
+  vi.stubGlobal('ResizeObserver',class {observe(){} unobserve(){} disconnect(){}});
   host=document.createElement('div');document.body.append(host);root=createRoot(host);
 });
 afterEach(async()=>{await act(async()=>root.unmount());host.remove();vi.useRealTimers();vi.unstubAllGlobals();});

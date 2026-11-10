@@ -67,7 +67,7 @@ it.each(['pairing', 'proposal'])('mounts global %s consent on Home with Settings
   await act(() => root.render(<App />));
   expect(host.textContent).toContain('Home fixture');
   expect(document.querySelector('[data-testid=agents-settings]')).toBeNull();
-  expect(document.querySelector('[role=dialog]')?.textContent).toContain(tr(kind === 'pairing' ? 'agents:pair_title' : 'agents:proposal_title'));
+  expect(document.querySelector('[data-testid=agent-consent]')?.textContent).toContain(tr(kind === 'pairing' ? 'agents:pair_title' : 'agents:proposal_title'));
 });
 
 it('keeps consent open when Settings closes underneath it', async () => {
