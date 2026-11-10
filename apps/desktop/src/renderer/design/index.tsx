@@ -17,6 +17,7 @@ import {
   EmptyState,
   Stat,
   FormField,
+  SettingRow,
   Tabs,
   TabsContent,
   SegmentedControl,
@@ -32,6 +33,10 @@ import {
 } from '../components/ui';
 
 const copy = {
+  converter: 'Converter mode',
+  converterHint: 'Choose how converters access downloads.',
+  downloads: 'Downloads',
+  offline: 'Offline',
   title: 'VStudy component gallery',
   description: 'UI_FOUNDATION_GALLERY_DEV_ONLY_2026',
   scheme: 'Scheme',
@@ -83,6 +88,7 @@ function Choice({
 }
 const choices = (values: string[]) => values.map((value) => ({ value, label: value }));
 export default function DesignGallery() {
+  const [converterMode, setConverterMode] = useState('online');
   const [preferences, setPreferences] = useState(() =>
     themePreferencesSchema.parse({ colorScheme: 'light' }),
   );
@@ -160,7 +166,13 @@ export default function DesignGallery() {
             </>
           }
         />
-        <Section title={copy.cards} count={3}>
+        <SettingRow label={copy.converter} description={copy.converterHint}>
+        <SegmentedControl type="single" aria-label={copy.converter} value={converterMode} onValueChange={value => { if (value) setConverterMode(value); }}>
+          <SegmentedControlItem value="online">{copy.downloads}</SegmentedControlItem>
+          <SegmentedControlItem value="offline">{copy.offline}</SegmentedControlItem>
+        </SegmentedControl>
+      </SettingRow>
+      <Section title={copy.cards} count={3}>
           <div className="grid gap-[var(--space-4)] md:grid-cols-3">
             {(['flat', 'raised', 'interactive'] as const).map((variant) => (
               <Card

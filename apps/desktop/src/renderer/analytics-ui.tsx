@@ -1,3 +1,4 @@
+import { Card, Section, SettingRow } from './components/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AnalyticsState } from '../shared/analytics';
@@ -8,7 +9,7 @@ import { desktop } from './bridge';
 import { Button } from './components/ui/button';
 import { Toolbar } from './components/ui';
 import { Switch } from './components/ui/switch';
-import { SettingsGroup, SettingsRow } from './settings/layout';
+
 import './analytics.css';
 export function PolicyLinks() {
   useTranslation();
@@ -81,8 +82,8 @@ export function AnalyticsSettings() {
   const [copied, setCopied] = useState(false);
   const load = () => { setError(false); void Promise.all([desktop.invoke('analytics:getState', {}), desktop.invoke('analytics:getInstallationId', {})]).then(([s,i]) => {setState(s); setId(i.installation_id);}).catch(() => setError(true)); };
   useEffect(load, []);
-  return <SettingsGroup title={tr('analytics:title')}>
-    <SettingsRow label={tr('analytics:enabled')} description={tr('analytics:off_hint')}><Switch aria-label={tr('analytics:enabled')} checked={state?.enabled ?? false} disabled={!state || busy} onCheckedChange={enabled => {
+  return <Section level={3} title={tr('analytics:title')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
+    <SettingRow htmlFor="analytics-enabled" label={tr('analytics:enabled')} description={tr('analytics:off_hint')}><Switch id="analytics-enabled" checked={state?.enabled ?? false} disabled={!state || busy} onCheckedChange={enabled => {
       setBusy(true); setError(false);
       void desktop.invoke('analytics:setConsent', {enabled}).then(async next => {
         setState(next);
@@ -91,8 +92,8 @@ export function AnalyticsSettings() {
         if (!next.deletion_pending) setDeletion(undefined);
         window.dispatchEvent(new Event('analytics-consent-changed'));
       }).catch(() => setError(true)).finally(() => setBusy(false));
-    }}/></SettingsRow>
-    <div className="analytics-details"><AnalyticsDisclosure/><details><summary>{tr('analytics:exact')}</summary><ul>{['device','activity','ai','school'].map(key => <li key={key}>{tr(`analytics:collect_${key}`)}</li>)}</ul></details>
+    }}/></SettingRow>
+    <div className="analytics-details !p-0 text-[length:var(--type-sm)] leading-normal"><AnalyticsDisclosure/><details><summary>{tr('analytics:exact')}</summary><ul>{['device','activity','ai','school'].map(key => <li key={key}>{tr(`analytics:collect_${key}`)}</li>)}</ul></details>
     <p>{tr('analytics:installation')}</p><div className="analytics-id"><code>{id ?? tr('analytics:unavailable')}</code><Button variant="secondary" disabled={!id} onClick={() => { if (id) void navigator.clipboard.writeText(id).then(() => setCopied(true)).catch(() => setError(true)); }}>{tr('analytics:copy')}</Button></div>
     {copied && <p role="status">{tr('analytics:copied')}</p>}
     {(state?.deletion_pending || deletion) && <p role="status">{tr('analytics:pending')}</p>}
@@ -103,5 +104,5 @@ export function AnalyticsSettings() {
     }}>{tr('analytics:instructions')}</Button><Button variant="ghost" onClick={() => setConfirm(false)}>{tr('analytics:cancel')}</Button></div>}
     {deletion && <div role="status"><p>{tr('analytics:contact_instructions')}</p><blockquote lang="en">{deletion.instructions}</blockquote><a href={deletion.contact_url} onClick={e => {e.preventDefault(); void desktop.invoke('shell:openExternal', {url:deletion.contact_url}).catch(() => setError(true));}}>{tr('analytics:publisher')}</a></div>}
     {error && <p role="alert">{tr('errors:generic')} <Button variant="ghost" onClick={load}>{tr('analytics:retry')}</Button></p>}</div>
-  </SettingsGroup>;
+  </Card></Section>;
 }

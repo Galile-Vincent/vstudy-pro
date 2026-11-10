@@ -1,3 +1,5 @@
+import { Select } from './components/select';
+import { Card, Section, SettingRow } from './components/ui';
 import { UpdateSettings } from './settings/updates';
 import { AppVersion } from './components/app-version';
 import { aiCliSetupEvent } from './ai-cli/entry';
@@ -112,6 +114,14 @@ export function ProviderSettings({
         }}>
         <div className="settings-header">
           <DialogTitle>{tr('common:settings')}</DialogTitle>
+          <Select position="popper" className="settings-section-select" aria-label={tr('settings:section_picker')}
+            value={tab} onChange={event => setTab(event.target.value)}>
+            {['general', 'appearance', 'providers', 'agents', 'usage', 'storage', 'privacy'].map(id => (
+              <option key={id} value={id}>
+                {tr(id === 'agents' ? 'agents:title' : id === 'storage' ? 'storage:title' : `settings:${id}`)}
+              </option>
+            ))}
+          </Select>
           <Button variant="ghost" size="icon-sm" onClick={requestClose} aria-label={tr('common:close_settings')}>
             <X size={16} />
           </Button>
@@ -146,17 +156,17 @@ export function ProviderSettings({
                 {tab === id &&
                   (id === 'general' ? (
                     <>
-                      <SettingsGroup title={tr('settings:languages')}>
+                      <Section level={3} title={tr('settings:languages')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
                         <LanguageSettings />
-                      </SettingsGroup>
+                      </Card></Section>
                       <UpdateSettings />
-                      <SettingsGroup title={tr('settings:welcome')}>
-                        <SettingsRow label={tr('settings:welcomeGuide')} description={tr('settings:welcome_guide_hint')}>
+                      <Section level={3} title={tr('settings:welcome')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
+                        <SettingRow label={tr('settings:welcomeGuide')} description={tr('settings:welcome_guide_hint')}>
                           <Button size="sm" variant="secondary" onClick={() => setGuide(true)}>
                             {tr('settings:show')}
                           </Button>
-                        </SettingsRow>
-                        <SettingsRow label={tr('settings:aboutApp')} description={tr('settings:about_hint')}>
+                        </SettingRow>
+                        <SettingRow label={tr('settings:aboutApp')} description={tr('settings:about_hint')}>
                           <Button
                             size="sm"
                             variant="secondary"
@@ -168,8 +178,8 @@ export function ProviderSettings({
                           >
                             {tr('settings:open')}
                           </Button>
-                        </SettingsRow>
-                      </SettingsGroup>
+                        </SettingRow>
+                      </Card></Section>
                       <AppVersion/>
                     </>
                   ) : id === 'appearance' ? (

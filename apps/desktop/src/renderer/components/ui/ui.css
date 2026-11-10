@@ -16,3 +16,19 @@ html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=se
 
 [data-slot=page-header]:not(.moodle-webview-header) > div h1 { font-size:var(--type-display); font-weight:500; white-space:normal; overflow-wrap:anywhere; line-height:1.35; margin:0; }
 [data-slot=page-header]:not(.moodle-webview-header) > div p { margin:0; line-height:1.5; }
+
+[data-slot=setting-row] { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-3) var(--space-6); min-width:0; }
+[data-slot=setting-row] > div:first-child { flex:1; min-width: min(100%,12rem); }
+[data-slot=setting-row] label { font-weight:500; }
+[data-slot=setting-row] p { color:var(--muted); font-size:var(--type-sm); margin-top:var(--space-1); }
+[data-slot=setting-control] { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-2); max-width:100%; min-width:0; }
+[data-slot=setting-control] > :is(input,textarea) { width:8rem; max-width:100%; }
+[data-slot=setting-control] > [data-slot=select-trigger] { width:16rem; max-width:100%; }
+[data-slot=setting-row][data-layout=stack] { flex-direction:column; align-items:stretch; }
+[data-slot=setting-row][data-layout=stack] > [data-slot=setting-control] { width:100%; }
+[data-slot=setting-row][data-layout=stack] textarea { width:100%; font-family:var(--font-mono); }
+
+html:is([data-theme=contrast],[data-contrast=more]) :is([data-slot=card],[data-slot=segmented-control]) { outline:1px solid var(--hairline); outline-offset:0; }
+@media (prefers-contrast:more), (forced-colors:active) {
+ :is([data-slot=card],[data-slot=segmented-control]) { outline:1px solid var(--hairline); outline-offset:0; }
+}

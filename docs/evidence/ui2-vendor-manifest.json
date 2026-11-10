@@ -378,7 +378,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/index.ts",
-      "sha256": "a464a174a9ec3594bb9d8956c878158074cf0069f834ceab0fcf6950e756d433",
+      "sha256": "022be3e62959ded2515578605230b2b285ab5215cbdd2ae0cfceab6fcdffb6dc",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -388,12 +388,12 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
-      "sha256": "27eb7bd9b1ff688da0b665249d25677e059e08825e9f31420c24dc43b350080e",
+      "sha256": "2b6d328814a330e2c279c7b66a61fe1d2ece80bd54ef9eff9af628a12ac30bda",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/segmented-tabs.tsx",
-      "sha256": "1da21c6849bae699e7a960e934cb5fa5a33fe65ae8fae96c7290c6a0426c0f66",
+      "sha256": "580ececcf1dd20c7ed7240103f7e75de9f726bb58cd88e8d27e508aa33392dfe",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -403,8 +403,23 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/ui.css",
-      "sha256": "abe937d261e3eb3b2302c9c7e6610e9bb5eccb1fe5802734e3b32a9509d37402",
+      "sha256": "1b58dab350e01410661e797df46ea76a767ac3a963d4412a53a6791825c5b985",
       "reason": "Shared application UI foundation and behavior tests."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/setting-row.tsx",
+      "sha256": "26825d1ca36ab7ffe3ab57b3ca79196aacce0ab0ca59ed43a0eda6e85c00bc5a",
+      "reason": "Shared settings row and radio choice, with keyboard behavior coverage."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/segmented-control.test.tsx",
+      "sha256": "a9d1e1b3e2502dd429346aca2e00cea08ef306ae94b40df15b79c1a7a4c32370",
+      "reason": "Shared settings row and radio choice, with keyboard behavior coverage."
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/ui/setting-row.test.tsx",
+      "sha256": "fad6388e7f047f0dc41d4425fbf94adf6435a37766acf3720546412414985037",
+      "reason": "Shared settings label activation and group semantics regression coverage."
     }
   ]
 }

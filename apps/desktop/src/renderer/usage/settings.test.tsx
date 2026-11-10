@@ -20,7 +20,7 @@ it('labels the budget fields and saves their values', async () => {
   const cap = screen.getByLabelText('Monthly token cap') as HTMLInputElement;
   const warn = screen.getByLabelText('Warn at (%)') as HTMLInputElement;
   expect([budget.type, cap.type, warn.type]).toEqual(['number', 'number', 'number']);
-  expect(container.querySelector('[data-slot=form-field]')).not.toBeNull();
+  for (const field of [budget, cap, warn]) expect(field.labels).toHaveLength(1);
   fireEvent.change(budget, { target: { value: '12.5' } });
   fireEvent.change(cap, { target: { value: '5000' } });
   fireEvent.change(warn, { target: { value: '70' } });

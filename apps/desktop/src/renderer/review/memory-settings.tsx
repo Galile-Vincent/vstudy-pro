@@ -1,3 +1,4 @@
+import { Card, Section, SettingRow } from '../components/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { studyMemoryActive, type StudyPrefs } from '../../shared/review';
@@ -6,7 +7,7 @@ import { desktop } from '../bridge';
 import { Switch } from '../components/ui/switch';
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
-import { SettingsGroup, SettingsRow } from '../settings/layout';
+
 
 export function MemorySettings() {
   useTranslation();
@@ -36,15 +37,15 @@ export function MemorySettings() {
     } catch { setError(true); }
     finally { setBusy(false); }
   }
-  return <SettingsGroup title={tr('review:memory_title')}>
-    <SettingsRow label={tr('review:memory_enabled')} description={tr('review:memory_disclosure')} stack>
-      {prefs && <Switch aria-label={tr('review:memory_enabled')} checked={studyMemoryActive(prefs)} disabled={busy} onCheckedChange={checked => void save(checked ? {memoryEnabled:true,consentAcknowledged:true} : {memoryEnabled:false})} />}
+  return <Section level={3} title={tr('review:memory_title')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
+    <SettingRow htmlFor="memory-enabled" label={tr('review:memory_enabled')} description={tr('review:memory_disclosure')} stack>
+      {prefs && <Switch id="memory-enabled" checked={studyMemoryActive(prefs)} disabled={busy} onCheckedChange={checked => void save(checked ? {memoryEnabled:true,consentAcknowledged:true} : {memoryEnabled:false})} />}
       <Button variant="secondary" disabled={!prefs || busy} onClick={() => setConfirm(true)}>{tr('review:erase_memory')}</Button>
       {erased && <p role="status">{tr('review:erase_done')}</p>}
       {error && <div role="alert"><p>{tr('review:error')}</p><Button onClick={() => void load()}>{tr('review:retry')}</Button></div>}
       <Dialog open={confirm} onOpenChange={value => { if (!busy) setConfirm(value); }}>
         <DialogContent><DialogTitle>{tr('review:erase_confirm')}</DialogTitle><DialogDescription>{tr('review:erase_confirm_copy')}</DialogDescription><Button variant="secondary" disabled={busy} onClick={() => setConfirm(false)}>{tr('review:cancel')}</Button><Button variant="destructive" disabled={busy} onClick={() => void erase()}>{tr('review:erase_confirm')}</Button></DialogContent>
       </Dialog>
-    </SettingsRow>
-  </SettingsGroup>;
+    </SettingRow>
+  </Card></Section>;
 }

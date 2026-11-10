@@ -23,6 +23,7 @@ export function applyTheme(preferences: ThemePreferences, preview?: ThemePack): 
   root.dataset.cardTransparency = preferences.cardTransparency;
   root.style.setProperty('--glass-opacity', `${preferences.glassOpacity}%`);
   root.dataset.theme = theme.id;
+  root.dataset.contrast = preferences.contrast >= 125 ? 'more' : 'normal';
   root.dataset.scheme = scheme;
   root.classList.toggle('dark', scheme === 'dark');
   root.style.colorScheme = scheme;

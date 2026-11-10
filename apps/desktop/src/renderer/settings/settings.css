@@ -1,6 +1,5 @@
 /* Settings dialog: one fixed size, fixed header and tab list, only the pane scrolls. */
 .settings-dialog.settings-dialog[data-slot=dialog-content]:not(.library-dialog) {
-  --settings-control: 16rem;
   width: min(1000px, calc(100vw - var(--space-8)));
   height: min(700px, calc(100dvh - var(--space-8)));
   max-width: calc(100vw - var(--space-8));
@@ -173,13 +172,21 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   box-shadow: none;
   overflow: hidden;
   min-width: 0;
+  .settings-disclosure-body & {
+    margin-inline:calc(var(--space-4) * -1);
+    border:0;
+    border-top:1px solid var(--glass-tone);
+    border-radius:0;
+    background:transparent;
+  }
+  .settings-disclosure-body > .settings-group:last-child & { border-radius:0 0 var(--r-md) var(--r-md); }
 }
 
 .settings-card > * + * {
   border-top: 1px solid var(--glass-tone);
 }
 
-.settings-card > :is(p, div, details, [role=status], [role=alert]):not(.settings-row, .provider-row, .network-event, .analytics-details, .ai-cli-preferences, .row, .appearance-preview, .ai-cli-tool-row) {
+.settings-card > :is(p, div, details, [role=status], [role=alert]):not(.settings-row, .provider-row, .network-event, .row, .appearance-preview) {
   padding: var(--space-3) var(--space-4);
   font-size: var(--type-sm);
   line-height: 1.5;
@@ -187,10 +194,6 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
 
 .settings-card[data-danger=true] {
   background: color-mix(in oklab, var(--danger) 7%, transparent);
-}
-
-.settings-danger {
-  color: var(--danger);
 }
 
 .settings-row {
@@ -244,10 +247,9 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   justify-content: flex-end;
 }
 
-/* Controls: filled, with a 3:1 edge from the line token. */
-.settings-pane input:not([type=checkbox], [type=radio], [type=range]),
-.settings-pane textarea,
-.settings-pane [data-slot=select-trigger] {
+.settings-control input:not([type=checkbox], [type=radio], [type=range]),
+.settings-control textarea,
+.settings-control [data-slot=select-trigger] {
   border: 0;
   outline: none;
   background: var(--surface);
@@ -258,17 +260,17 @@ html[data-input-modality=keyboard] .settings-tabs [data-slot=tabs-trigger]:focus
   transition: border-color var(--motion-fast) var(--ease-standard);
 }
 
-.settings-pane input:not([type=checkbox], [type=radio], [type=range]),
-.settings-pane textarea {
+.settings-control input:not([type=checkbox], [type=radio], [type=range]),
+.settings-control textarea {
   padding: var(--space-2) var(--space-3);
 }
 
-.settings-pane :is(input:not([type=checkbox], [type=radio], [type=range]), textarea, [data-slot=select-trigger]):hover:not(:disabled) {
+.settings-control :is(input:not([type=checkbox], [type=radio], [type=range]), textarea, [data-slot=select-trigger]):hover:not(:disabled) {
   background: var(--surface);
   box-shadow: var(--glass-depth);
 }
 
-html[data-input-modality=keyboard] .settings-pane :is(input, textarea, [data-slot=select-trigger], summary):focus-visible {
+html[data-input-modality=keyboard] .settings-control :is(input, textarea, [data-slot=select-trigger], summary):focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
@@ -284,11 +286,11 @@ html[data-input-modality=keyboard] .settings-pane :is(input, textarea, [data-slo
 }
 
 .settings-control [data-slot=select-trigger] {
-  width: var(--settings-control);
+  width: 16rem;
   max-width: 100%;
 }
 
-.settings-pane [data-slot=switch][data-state=unchecked] {
+.settings-control [data-slot=switch][data-state=unchecked] {
   border-color: var(--line);
 }
 
@@ -327,20 +329,7 @@ html[data-input-modality=keyboard] .settings-pane :is(input, textarea, [data-slo
   background: color-mix(in oklab, var(--ink) 6%, transparent);
 }
 
-.settings-pane button:not([data-slot=toggle-group-item]),
-.settings-pane :is(input, textarea, [data-slot=select-trigger]) {
-  font-size: var(--type-base);
-}
 
-.settings-pane button {
-  border-radius: var(--r-sm);
-  transition: background-color var(--motion-fast) var(--ease-standard), opacity var(--motion-fast) var(--ease-standard);
-}
-
-.settings-pane [data-slot=button][data-variant=default] { background: var(--ink); color: var(--surface); }
-.settings-pane [data-slot=button]:is([data-variant=secondary], [data-variant=outline]) { color: var(--ink); border: 0; }
-
-/* Disclosures: one quiet row with a chevron, content below. */
 .settings-disclosure {
   border: 0;
   border-radius: var(--r-md);
@@ -390,21 +379,7 @@ html[data-input-modality=keyboard] .settings-pane :is(input, textarea, [data-slo
   line-height: 1.5;
 }
 
-.settings-disclosure-body .settings-card {
-  margin-inline: calc(var(--space-4) * -1);
-  border: 0;
-  border-top: 1px solid var(--glass-tone);
-  border-radius: 0;
-  background: transparent;
-}
-
-.settings-disclosure-body:has(> .settings-group:last-child) {
-  padding-bottom: 0;
-}
-
-.settings-disclosure-body > .settings-group:last-child .settings-card {
-  border-radius: 0 0 var(--r-md) var(--r-md);
-}
+.settings-disclosure-body:has(> .settings-group:last-child) { padding-bottom:0; }
 
 .settings-pane details:not(.settings-disclosure) > summary {
   display: flex;
@@ -435,66 +410,8 @@ html[data-input-modality=keyboard] .settings-pane :is(input, textarea, [data-slo
   transform: rotate(45deg);
 }
 
-[data-testid=storage-settings] > .settings-intro:first-child,
-.usage-settings > .settings-intro:first-child,
 .settings-pane .agents-settings > .agents-intro:first-child {
   margin-top: calc(var(--space-5) * -1);
-}
-
-/* AI tools: one row per tool, one action per row. */
-.ai-cli-tool-row {
-  display: flex;
-  flex-direction: column;
-}
-
-.ai-cli-tool {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: var(--space-3);
-  width: 100%;
-  min-height: 52px;
-  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
-  background: transparent;
-  color: var(--ink);
-  text-align: start;
-  border-radius: 0;
-}
-
-.ai-cli-tool:hover {
-  background: color-mix(in oklab, var(--ink) 4%, transparent);
-}
-
-html[data-input-modality=keyboard] .ai-cli-tool:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: -2px;
-}
-
-.ai-cli-tool-name {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.ai-cli-tool-name strong {
-  font-size: var(--type-base);
-  font-weight: 500;
-}
-
-.ai-cli-tool-name small,
-.ai-cli-tool-status {
-  font-size: var(--type-sm);
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.ai-cli-tool svg {
-  color: var(--muted);
-}
-
-.ai-cli-tool-row > [data-slot=button] {
-  align-self: flex-start;
-  margin: 0 var(--space-4) var(--space-2);
 }
 
 .ai-cli-tool-actions {
@@ -510,10 +427,6 @@ html[data-input-modality=keyboard] .ai-cli-tool:focus-visible {
 .ai-cli-tool-actions [data-slot=button] svg {
   width: 14px;
   height: 14px;
-}
-
-.ai-cli-tool-notes {
-  color: var(--muted);
 }
 
 /* Setup guide inside its disclosure: the summary is the title. */
@@ -697,37 +610,6 @@ html[data-input-modality=keyboard] .ai-cli-tool:focus-visible {
   font-size: var(--type-sm);
 }
 
-/* Usage pane */
-.settings-pane .usage-settings {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.settings-pane .usage-settings > .settings-group {
-  margin: 0;
-}
-
-.settings-pane .usage-fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
-  gap: var(--space-4);
-}
-
-.settings-pane .usage-prices {
-  display: grid;
-  gap: var(--space-4);
-  padding-block-start: var(--space-3);
-}
-
-.settings-pane .usage-settings .settings-card > .row {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-  padding: var(--space-3) var(--space-4);
-}
-
 .settings-intro p + p {
   margin-top: var(--space-2);
 }
@@ -744,83 +626,15 @@ html[data-input-modality=keyboard] .ai-cli-tool:focus-visible {
 
 .storage-bytes { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted); }
 
-/* Privacy: consent detail, CLI privacy choices. Wording lives in analytics-ui and ai-cli. */
-.settings-card > .analytics-details {
-  padding: var(--space-4);
-  gap: var(--space-3);
-  font-size: var(--type-sm);
-  line-height: 1.5;
-}
+.settings-section-select[data-slot=select-trigger] { display:none; }
 
-.settings-pane .analytics-details > p {
-  color: var(--muted);
-}
-
-.settings-pane .analytics-details details > summary {
-  width: fit-content;
-  color: var(--ink);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.settings-pane .analytics-details ul {
-  list-style: disc;
-  padding-inline-start: var(--space-5);
-  margin-top: var(--space-2);
-  color: var(--muted);
-}
-
-.settings-pane .analytics-details > [data-slot=button],
-.settings-pane .analytics-deletion [data-slot=button] {
-  justify-self: start;
-}
-
-.settings-pane .analytics-id code {
-  font-size: var(--type-xs);
-}
-
-.settings-pane .ai-cli-preferences p,
-.settings-pane .ai-cli-consent {
-  font-size: var(--type-base);
-  line-height: 1.5;
-}
-
-.settings-pane .ai-cli-consent small {
-  font-size: var(--type-sm);
-}
-
-.settings-pane .ai-cli-consent input {
-  accent-color: var(--ink);
-}
-
-.settings-pane .ai-cli-preferences [data-slot=button] {
-  min-height: 0;
-}
-
-/* Narrow windows: tab list becomes a scrolling row above the pane. */
-@container settings-shell (max-width: 40rem) {
-  .settings-body[data-slot=tabs] {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: 44px minmax(0, 1fr);
-  }
-}
-
-@container settings (max-width: 40rem) {
-  .settings-tabs[data-slot=tabs-list] {
-    grid-column: 1 / -1;
-    flex-direction: row;
-    height: 44px;
-    overflow-x: auto;
-    border-inline-end: 0;
-    padding: var(--space-1);
-  }
-  .settings-tabs [data-slot=tabs-trigger] {
-    width: auto;
-  }
-  .settings-pane {
-    grid-column: 1 / -1;
-    padding: var(--space-4) var(--space-4) var(--space-6);
-  }
+@container settings-shell (width < 40rem) {
+  .settings-header { gap:var(--space-2); padding-inline:var(--space-4); height:auto; min-height:56px; }
+  .settings-header h2 { flex:none; }
+  .settings-section-select[data-slot=select-trigger] { display:flex; flex:1; min-width:0; max-width:16rem; margin-inline-start:auto; }
+  .settings-body[data-slot=tabs] { grid-template-columns:minmax(0,1fr); }
+  .settings-tabs[data-slot=tabs-list] { display:none; }
+  .settings-pane { padding:var(--space-4) var(--space-4) var(--space-6); }
 }
 
 @container settings-pane (max-width: 34rem) {
@@ -866,3 +680,6 @@ html[data-input-modality=keyboard] .ai-cli-tool:focus-visible {
     transition: none;
   }
 }
+
+html:is([data-theme=contrast],[data-contrast=more]) :is(.settings-card,.settings-row,.settings-disclosure) { outline:1px solid var(--hairline); outline-offset:0; }
+html:is([data-theme=contrast],[data-contrast=more]) .settings-pane { mask-image:none; }
