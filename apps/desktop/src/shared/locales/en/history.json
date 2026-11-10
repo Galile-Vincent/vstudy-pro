@@ -49,5 +49,11 @@
   "shortcut": "{{modifier}} K",
   "model_change_error": "The model could not be changed. Your current chat is still available. Try again.",
   "message_not_found": "Could not locate this message. You can continue reading the conversation.",
-  "providers_error": "Could not load AI providers. Retry to use the composer. You can still read this chat."
+  "providers_error": "Could not load AI providers. Retry to use the composer. You can still read this chat.",
+  "general_ask_label": "Ask a study question",
+  "general_ask_placeholder": "Ask a study question…",
+  "count_zero": "No conversations found",
+  "count_one": "{{formatted}} conversation",
+  "count_other": "{{formatted}} conversations",
+  "count_more": "{{formatted}}+ conversations"
 }

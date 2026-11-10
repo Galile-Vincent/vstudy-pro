@@ -19,7 +19,7 @@ import { ActionSessions, type RunningAction, type SetupOwner } from './sessions'
 import { authStatus, probeVersion, tinyTest } from './probes';
 import { ActionPty } from './pty';
 import { manualInstallation } from './authenticity';
-import { failure, initialState, newer, providerId, providers, SetupError, transition, type Release } from './types';
+import { cancelledAction, failure, initialState, newer, providerId, providers, SetupError, transition, type Release } from './types';
 export interface SetupDependencies {
   store: SetupStore; source: ReleaseSource; pins: ExecutablePins;
   registry: Pick<ProviderRegistry, 'config' | 'configure' | 'get'>;
@@ -164,7 +164,7 @@ export class AiCliSetup {
       const assertConsent = () => { if (!consented()) action.controller.abort(); action.controller.signal.throwIfAborted(); };
       const consentWatcher = setInterval(() => { if (!consented()) action.controller.abort(); }, 100);
       try { await this.execute(action, automatic, assertConsent); } finally { clearInterval(consentWatcher); }
-    }, code => { if (plan.provider) this.apply(plan.provider, { type: 'failed', code }); });
+    }, code => { if (plan.provider) this.apply(plan.provider, { type: 'failed', code, action: cancelledAction(plan.verb) }); });
   }
   private async trustedPlan(plan: ActionPlan) {
     if (!plan.provider || plan.verb === 'terminal') return;

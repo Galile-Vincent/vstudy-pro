@@ -324,3 +324,25 @@ Views remain alive across tabs and route changes, preserving conversations in me
 Offline acceptance: `pnpm build`, then `node e2e/web-chat.mjs` from `apps/desktop`. This intercepts HTTPS in test-only session protocol handlers, uses a temporary profile and never logs into a real account. Origin and strict-contract tests are in `src/main/web-chat/policy.test.ts`.
 
 Tab presentation, including drafts and Moodle page titles, is stored in plaintext localStorage in the local app profile.
+
+App update checks GET the fixed GitHub release `latest-mac.yml` / `latest.yml` feed,
+without identifiers or user content. Automatic checks default on; disable them in
+Settings > General. Downloads require a click and fetch release assets via GitHub
+and its CDN. See [update privacy](PRIVACY.md) and [updates](UPDATES.md).
+
+Update request destinations: metadata begins only at
+https://github.com/ava-apple/vstudy-pro/releases/latest/download/latest-mac.yml
+or latest.yml. Explicit payload downloads use that release's assets and GitHub's
+release CDN redirects. The generic provider uses no authentication, API calls,
+staging headers or cache query identifiers. Existing TLS validation stays enabled.
+
+macOS updates rely on Squirrel.Mac's Developer ID signature check after download.
+GitHub release write access controls the feed and permits replay of an older
+correctly signed build newer than the installed version. SHA-512 is not publisher
+authentication or rollback protection. Windows updates remain disabled until
+publisherName is configured, and require x64 NSIS. Recommend ed25519-signed feed
+files and an explicit rollback policy as follow-up. See UPDATES.md for egress hosts.
+
+The GitHub/CDN host list in UPDATES.md describes expected redirects, not an
+enforced redirect-host allowlist. On macOS, Squirrel also fetches the downloaded
+ZIP through a temporary authenticated HTTP server on 127.0.0.1 (no remote egress).

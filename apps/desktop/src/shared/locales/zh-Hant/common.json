@@ -212,7 +212,7 @@
   "price_unknown": "價格不明",
   "tokens_unavailable": "無法取得 token 用量",
   "daily_tokens": "每日 token 用量",
-  "input": "輸入，",
+  "input": "輸入",
   "output_peak": "輸出 · 最高",
   "daily_input_and_output_tokens_exact_values_are_available_in_the_daily_totals_table": "每日輸入與輸出 token 用量，確切數值請見每日合計表格。",
   "output": "輸出",
@@ -369,5 +369,11 @@
   "uploading": "上傳中",
   "reload": "重新載入",
   "copy_diagnostics": "複製診斷資訊",
-  "reload_application": "重新載入應用程式"
+  "reload_application": "重新載入應用程式",
+  "scrollable_code": "可水平捲動的程式碼區塊",
+  "tool_started": "工具 {{tool}} 已開始",
+  "tool_cancelled": "工具 {{tool}} 已取消",
+  "tool_waiting": "工具 {{tool}} 正在等待你",
+  "tool_finished": "工具 {{tool}} 已完成",
+  "tool_failed": "工具 {{tool}} 執行失敗"
 }

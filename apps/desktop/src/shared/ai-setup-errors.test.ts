@@ -7,6 +7,8 @@ describe('setup recovery', () => {
     ['unknown', 'session expired', 'login-expired'], ['unknown', 'ENOTFOUND', 'offline'],
     ['unknown', 'EACCES permission denied', 'permission-denied'], ['unknown', 'ENOENT', 'command-not-found'],
     ['unknown', 'version too old', 'wrong-version'], ['unknown', '429 quota exceeded', 'rate-limit'],
+    ['unknown', 'ENOSPC: no space left on device', 'disk-full'], ['unknown', 'EDQUOT disk quota exceeded', 'disk-full'],
+    ['disk-full', '', 'disk-full'],
     ['unknown', 'TLS certificate expired', 'certificate'],
     ['unknown', 'SSL certificate verification failed', 'certificate'],
     ['unknown', 'token expired', 'login-expired'],
@@ -29,6 +31,9 @@ describe('setup recovery', () => {
     const result = setupDiagnostic({ tool: 'Codex', version: '0.166.0', os: 'darwin', exitCode: 1, error });
     expect(result).not.toMatch(/swordfish123|PRIVATE KEY|PRIVATEKEYMATERIAL123|AliceNg|hostileToken123|hiddenPassword123/);
     expect(result).toContain('Exit code: 1');
+  });
+  it.each([['ENOSPC: no space left on device', 'disk-full'], ['permission-denied', 'permission-denied'], ['offline', 'offline'], ['EPERM: operation not permitted', 'permission-denied']])('keeps the classified cause %s in copied diagnostics', (error, cause) => {
+    expect(setupDiagnostic({ tool: 'Codex', version: null, os: 'darwin', exitCode: 1, error })).toContain(`Last error: ${cause}`);
   });
   it('rejects injected diagnostic metadata', () => {
     const result = setupDiagnostic({ tool: 'Codex\nuser AliceNg', version: 'secret123', os: '/Users/AliceNg', exitCode: NaN, error: 'private output' });

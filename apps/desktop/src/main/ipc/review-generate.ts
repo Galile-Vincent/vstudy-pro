@@ -96,6 +96,7 @@ export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpc
     });
     for (const channel of Object.keys(reviewGenerateIpc) as (keyof typeof reviewGenerateIpc)[])
         implemented.add(channel);
+    registrar.handle('review:scope:preview', r => service.preview(r.courseId, r.scope));
     registrar.handle('review:artifact:generate', async (r, event) => { await assertCatalogModel(providers, r.providerId, r.modelId, 'review.model_unavailable'); return rendererArtifact(service.generate(r, progressFor(event))); });
     registrar.handle('review:artifact:retry', (r, event) => rendererArtifact(service.retry(r.artifactId, r.requestId, r.locale, progressFor(event))));
     registrar.handle('review:artifact:cancel', ({ artifactId }) => { service.cancel(artifactId); return { ok: true }; });
@@ -124,6 +125,7 @@ export function registerReviewGenerateIpc(registrar: ReturnType<typeof createIpc
     registrar.handle('review:attempt:get', ({attemptId}) => attempts.get(attemptId));
     registrar.handle('review:attempt:start', ({ artifactId }) => attempts.start(artifactId));
     registrar.handle('review:attempt:answer', ({ attemptId, itemId, answer }) => attempts.answer(attemptId, itemId, answer));
+    registrar.handle('review:attempt:draft', ({ attemptId, itemId, answer, seq }) => attempts.saveDraft(attemptId, itemId, answer, seq));
     registrar.handle('review:attempt:commit', ({ attemptId, itemId }) => attempts.commit(attemptId, itemId));
     registrar.handle('review:attempt:confirm', ({ attemptId }) => attempts.confirm(attemptId));
     registrar.handle('review:attempt:report-bad', ({ attemptId, itemId }) => attempts.reportBad(attemptId, itemId));

@@ -276,6 +276,7 @@ export type DocumentOpenMethod = z.infer<typeof documentOpenMethodSchema>;
 export const settingsSchema = z
   .object({
     ...themePreferencesSchema.shape,
+    autoCheckUpdates: z.boolean().default(true),
     uiScale: z.union([z.literal(100),z.literal(125),z.literal(150),z.literal(200)]).default(100),
     density: z.enum(['comfortable','compact']).default('comfortable'),
     coursesSort: z.object({future:z.enum(['smart','name']).optional(),current:z.enum(['smart','name']).optional(),past:z.enum(['smart','name']).optional(),all:z.enum(['smart','name']).optional()}).strict().optional(),
@@ -309,6 +310,7 @@ export const settingsSchema = z
 export const settingsPatchSchema = settingsSchema.partial();
 export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
+  autoCheckUpdates: true,
   ...themePreferencesSchema.parse({}),
   uiScale:100, density:"comfortable", accent:"neutral", readerFont:"system", readerSize:"m", material:"solid",
   language: "auto", replyLanguage: "auto", welcomeSeen: false,

@@ -43,6 +43,7 @@ it("shows draft assumptions and dates without writing until approval, and suppor
   await click("Plan my week");
   expect(host.querySelector(".planner-proposal")?.textContent).toContain("Assumptions");
   expect(host.querySelectorAll(".planner-proposed-blocks time").length).toBeGreaterThan(0);
+  expect(host.querySelector(".planner-proposed-blocks li [data-slot=list-row]")).not.toBeNull();
   expect(repo.snapshot().blocks).toEqual([]);
   await click("Dismiss", host.querySelector(".planner-proposal")!);
   expect(repo.snapshot().blocks).toEqual([]);
@@ -51,6 +52,7 @@ it("shows draft assumptions and dates without writing until approval, and suppor
   await act(async () => { button.click(); button.click(); });
   expect(approve).toHaveBeenCalledTimes(1);
   expect(repo.snapshot().blocks.length).toBeGreaterThan(0);
+  expect(host.querySelector(".planner-week li [data-slot=list-row]")).not.toBeNull();
   expect(host.querySelector(".planner-proposal")).toBeNull();
   await act(async () => [...host.querySelectorAll<HTMLButtonElement>("[role=tab]")].find(b => b.textContent === "Next 7 days")!.focus());
   expect(host.querySelectorAll(".planner-day")).toHaveLength(7);
@@ -92,4 +94,33 @@ it('keeps both tab panels addressable and supports Arrow, Home and End navigatio
     expect(tabs[index]!.getAttribute('aria-selected')).toBe('true');
     expect(document.getElementById(tabs[index]!.getAttribute('aria-controls')!)?.hidden).toBe(false);
   }
+});
+
+it('resets the displayed course and submitted course together after quick add', async () => {
+  HTMLElement.prototype.scrollIntoView = vi.fn();
+  const { fireEvent, getByRole } = await import('@testing-library/react');
+  const { repo } = await mount();
+  const trigger = getByRole(host.querySelector('form')!, 'combobox');
+  await act(async () => { fireEvent.keyDown(trigger, { key: 'ArrowDown' }); });
+  const option = [...document.querySelectorAll<HTMLElement>('[role=option]')].at(-1)!;
+  await act(async () => { option.click(); });
+  await fill('input[name="title"]', 'First task');
+  await act(async () => { fireEvent.submit(host.querySelector('form')!); });
+  expect(repo.snapshot().tasks[0]?.courseId).not.toBeNull();
+  expect(trigger.textContent).toBe(i18n.t('planner:no_course'));
+  await fill('input[name="title"]', 'Second task');
+  await act(async () => { fireEvent.submit(host.querySelector('form')!); });
+  expect(repo.snapshot().tasks.find(task => task.title === 'Second task')?.courseId).toBeNull();
+});
+
+it('associates quick-add validation errors with the affected control', async () => {
+  const { fireEvent, getByRole } = await import('@testing-library/react');
+  await mount();
+  await fill('input[name="title"]', '   ');
+  await act(async () => { fireEvent.submit(host.querySelector('form')!); });
+  const title = getByRole(host.querySelector('form')!, 'textbox');
+  expect(title.getAttribute('aria-invalid')).toBe('true');
+  const error = document.getElementById(title.getAttribute('aria-describedby')!);
+  expect(error?.getAttribute('role')).toBe('alert');
+  expect(error?.textContent).toBeTruthy();
 });

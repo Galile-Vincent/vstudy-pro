@@ -1,3 +1,4 @@
+import { updatesContract, type UpdateSnapshot } from './updates';
 import { subscriptionUsageSchema } from './subscription-usage';
 import { webChatContract, type WebChatProvider } from './web-chat';
 import { reviewGenerateIpc, type ReviewProgress } from './review-generate';
@@ -48,6 +49,7 @@ export const externalUrlSchema = z.string().max(8192).url().refine((value) => {
 }, "Only http, https and mailto URLs are allowed");
 /** Source of request and response types for the narrow preload bridge. Every main handler validates both directions. */
 export const ipcContract = {
+  ...updatesContract,
   'documents:originalPage': {request:z.object({documentId:documentIdSchema,page:z.number().int().min(1).max(10000)}).strict(),response:z.object({image:documentContextAttachmentSchema.shape.image,previewOnly:z.boolean()}).strict()},
   'documents:copyContext': {request:documentContextAttachmentSchema,response:ack},
   'app:reportError': { request: z.object({phase:z.enum(['render','bootstrap']),code:z.string().max(100),componentStack:z.string().max(4000).optional()}).strict(), response:ack },
@@ -217,9 +219,11 @@ export const trackpadEventArgumentsSchema = z.tuple([]);
 
 /** Renderer capability boundary. Invoke only declared channels and unsubscribe event listeners on teardown. */
 export interface DesktopApi {
+  onUpdateState?(listener: (snapshot: UpdateSnapshot) => void): () => void;
   onWebChatCleared?(listener:(provider:WebChatProvider)=>void):()=>void;
   onNativeTabShortcut?(listener:(shortcut:NativeTabShortcut)=>void):()=>void;
   onReviewProgress(listener:(event:ReviewProgress)=>void):()=>void;
+  onDraftFlushRequest?(listener:()=>Promise<'clean' | 'pending'>):()=>void;
   onTrackpadScrollBegin?(listener: () => void): () => void;
   onTrackpadScrollEnd?(listener: () => void): () => void;
   onMoodleProgress?(listener:(event:MoodleProgress)=>void):()=>void;

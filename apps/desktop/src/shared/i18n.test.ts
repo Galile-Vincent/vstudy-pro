@@ -12,9 +12,12 @@ describe('locale contracts', () => {
     it(`${locale} has identical keys, variables and valid plural categories`, () => {
       for (const ns of Object.keys(resources.en) as (keyof typeof resources.en)[]) {
         const reference = resources.en[ns], catalog = resources[locale][ns];
-        expect(Object.keys(catalog).sort()).toEqual(Object.keys(reference).sort());
+        const localized = catalog as Record<string, string>;
+        const required = Object.keys(reference).filter(key => !key.endsWith('_one')
+          || key in localized || !(`${key.slice(0, -4)}_other` in localized));
+        expect(Object.keys(catalog).sort()).toEqual(required.sort());
         for (const key of Object.keys(reference)) {
-          const a = (reference as Record<string,string>)[key]!, b = (catalog as Record<string,string>)[key]!;
+          const a = (reference as Record<string,string>)[key]!, b = localized[key] ?? localized[key.replace(/_one$/, '_other')]!;
           expect(b.trim()).not.toBe(''); expect(variables(b),`${ns}:${key}`).toEqual(variables(a));
           const suffix = /_(zero|one|two|few|many|other)$/.exec(key)?.[1];
           if(suffix) expect(['zero','one',...new Intl.PluralRules(locale).resolvedOptions().pluralCategories]).toContain(suffix);

@@ -11,6 +11,8 @@ import {
 import { ChevronDownIcon, LoaderIcon } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useScrollLock } from "@assistant-ui/react";
+import { useTranslation } from "react-i18next";
+import { tr } from "../../../../shared/i18n";
 import { cn } from "@/lib/utils";
 import {
   CollapsibleRoot as Collapsible,
@@ -101,7 +103,8 @@ function ToolGroupTrigger({
   count: number;
   active?: boolean;
 }) {
-  const label = `${count} tool ${count === 1 ? "call" : "calls"}`;
+  useTranslation();
+  const label = tr("chat:tool_calls", { count });
 
   return (
     <CollapsibleTrigger

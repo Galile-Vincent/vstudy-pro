@@ -46,7 +46,7 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/follow-up-suggestions.aui.tsx",
       "registrySha256": "f0db1e9cfc5f648adeb57c8ac61fbeca4ebbb4d55267a9c107709af01b73abb4",
-      "patchedSha256": "b93a21927710d2ef57fadc3493e0aa41a4b4d99948b83fc4e46ccf658497a747",
+      "patchedSha256": "74d54b8a4578c90049432898613ba9b10095660bdf001b31ddae08f85638a373",
       "patch": "docs/vendor-patches/assistant-ui--elements--follow-up-suggestions.aui.tsx.patch",
       "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
     },
@@ -139,7 +139,7 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread.aui.tsx",
       "registrySha256": "a3bffd8e670e51a48eedb6cf0a5ea884ffc1d212cc28e2a8bf31f7a7961399da",
-      "patchedSha256": "1889dbd31a95d3b83d1b3354d3c25a0e9a4764ca014e066ba18e2c77d30e56aa",
+      "patchedSha256": "36bdfb83d8d26aa4fd5eff40acaf19f31fd80f1331da092e5f64bd250fb530ef",
       "patch": "docs/vendor-patches/assistant-ui--elements--thread.aui.tsx.patch",
       "reason": "Retain localized slots, grouping and history IDs. Dock ViewportFooter outside the scrolling viewport and add a ThreadNotice slot for inline provider setup."
     },
@@ -153,9 +153,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-group.aui.tsx",
       "registrySha256": "757caf28ee232d4f500c8af7d6837fe7d6d2b144774a6a0bcdaff8c0c517bd9e",
-      "patchedSha256": "04b1ddf84898ac0b96340a7a5eb698060e60245c6f342a55143b3e49d4aa4363",
+      "patchedSha256": "e817fa2741b7e75e6343b92e2baafa7ed06f64a5f27b2af72a59209b7090f84d",
       "patch": "docs/vendor-patches/assistant-ui--elements--tool-group.aui.tsx.patch",
-      "reason": "Use tonal tool groups and semantic theme colors while retaining existing interactions."
+      "reason": "Use tonal tool groups and semantic theme colors, and translate the tool-call count, while retaining existing interactions."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tooltip-icon-button.tsx",
@@ -373,7 +373,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/foundation.test.tsx",
-      "sha256": "6adef30ec45c907d4632ce26562bfda0b94687d7bad376e65564fc0ecedfe773",
+      "sha256": "4fa2bdfcdb2c3eac51f24e3fd427b267e631aab2b208575d92db464dd9bacad6",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -388,7 +388,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/page-layout.tsx",
-      "sha256": "4f3096a4b2070b0559794f7e368986cc1ccfa436aedbda022dec6c810bfd3459",
+      "sha256": "9d1a69658d14c588e55b7dc8686635cccf6ba4521460b41613f5586201b499b2",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {

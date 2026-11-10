@@ -1,0 +1,23 @@
+.aui-root .review-consent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+}
+.review-consent-body {
+  max-height: min(18vh, 10rem);
+  overflow-y: auto;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.review-consent-body > :is(h2, p) { margin: 0; }
+.aui-root .review-consent .review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  gap: var(--space-2);
+  margin: 0;
+}

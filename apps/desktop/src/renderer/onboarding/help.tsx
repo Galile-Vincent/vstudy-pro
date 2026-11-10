@@ -1,5 +1,5 @@
 /** Global Help entry points and contextual, profile-local learning guidance. */
-import { Card, Section } from '../components/ui';
+import { Card, ListRow, SegmentedTabsList, SegmentedTabsTrigger, Section, Tabs, TabsContent } from '../components/ui';
 import { Brand } from '../components/brand';
 import { useEffect, useRef, useState } from 'react';
 import { Check, CircleHelp, X } from 'lucide-react';
@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popove
 import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip';
 import { useNavigate } from '../shell';
 import { Onboarding } from './onboarding';
+import { isInsideDialog, returnFocusTo } from './return-focus';
 import { markLearned, saveProgress, useLearningProgress } from './progress';
 import { lessons, Walkthrough, type Lesson } from './walkthrough';
 import './guidance.css';
@@ -31,6 +32,8 @@ export function LearningHelp() {
   const [view, setView] = useState<HelpView>();
   const { route } = useNavigate();
   const navigating = useRef(false);
+  const opener = useRef<Element | null>(null);
+  const restoreFocus = returnFocusTo(() => opener.current);
   const focusDestination = () => {
     document.querySelector<HTMLElement>('#shell-content[role=main]')?.focus();
   };
@@ -42,25 +45,65 @@ export function LearningHelp() {
     const show = (event: Event) => {
       const next = (event as CustomEvent<HelpView>).detail;
       navigating.current = false;
+      if (!isInsideDialog(document.activeElement)) opener.current = document.activeElement;
       setView(next);
       try { markLearned('help'); } catch { /* Help must open when profile storage is unavailable. */ }
     };
     window.addEventListener('vstudy:learning-help', show);
     return () => window.removeEventListener('vstudy:learning-help', show);
   }, []);
-  if (view === 'setup') return <Onboarding onComplete={() => setView(undefined)}/>;
+  if (view === 'setup') return <Onboarding onComplete={() => setView(undefined)} onCloseAutoFocus={restoreFocus}/>;
   if (view === 'checklist') return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}>
-    <DialogContent aria-describedby={undefined} onCloseAutoFocus={event => {
-      if (navigating.current) { event.preventDefault(); focusDestination(); }
+    <DialogContent className="learning-dialog" data-compact aria-describedby={undefined} onCloseAutoFocus={event => {
+      if (navigating.current) { event.preventDefault(); focusDestination(); } else restoreFocus(event);
     }}>
       <GettingStarted detailed dialogTitle onNavigate={() => { navigating.current = true; setView(undefined); }}/>
     </DialogContent>
   </Dialog>;
   if (!view) return null;
-  return <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}><DialogContent className="learning-dialog" aria-describedby={undefined} showCloseButton={false}>
-    <Brand lockup/><header><DialogTitle>{tr(`onboarding:help_${view}`)}</DialogTitle><Button variant="ghost" size="icon" aria-label={tr('common:close')} onClick={() => setView(undefined)}><X size={18}/></Button></header>
-    {view === 'walkthroughs' ? <><p>{tr('onboarding:walkthroughs_body')}</p><nav className="learning-lessons" aria-label={tr('onboarding:help_walkthroughs')}>{lessons.map(item => <Button variant={lesson === item ? 'secondary' : 'ghost'} aria-pressed={lesson === item} key={item} onClick={() => setLesson(item)}>{tr(`onboarding:lesson_${item}`)}</Button>)}</nav><Walkthrough key={lesson} lesson={lesson}/></> : <><p>{tr('onboarding:shortcuts_body')}</p><dl className="learning-shortcuts">{['selection', 'sidebar', 'send', 'newline', 'dismiss', 'navigate'].map(key => <div key={key}><dt>{tr(`onboarding:shortcut_${key}`)}</dt><dd><kbd>{tr(`onboarding:keys_${key}`)}</kbd></dd></div>)}</dl></>}
-  </DialogContent></Dialog>;
+  return (
+    <Dialog open onOpenChange={open => { if (!open) setView(undefined); }}>
+      <DialogContent
+        className="learning-dialog"
+        aria-describedby={undefined}
+        showCloseButton={false}
+        onCloseAutoFocus={restoreFocus}
+      >
+        <Brand lockup/>
+        <header>
+          <DialogTitle>{tr(`onboarding:help_${view}`)}</DialogTitle>
+          <Button variant="ghost" size="icon" aria-label={tr('common:close')} onClick={() => setView(undefined)}>
+            <X size={18}/>
+          </Button>
+        </header>
+        {view === 'walkthroughs' ? (
+          <>
+            <p>{tr('onboarding:walkthroughs_body')}</p>
+            <Tabs value={lesson} onValueChange={value => setLesson(value as Lesson)}>
+              <SegmentedTabsList aria-label={tr('onboarding:help_walkthroughs')}>
+                {lessons.map(item => (
+                  <SegmentedTabsTrigger key={item} value={item}>{tr(`onboarding:lesson_${item}`)}</SegmentedTabsTrigger>
+                ))}
+              </SegmentedTabsList>
+              <TabsContent value={lesson}><Walkthrough key={lesson} lesson={lesson}/></TabsContent>
+            </Tabs>
+          </>
+        ) : (
+          <>
+            <p>{tr('onboarding:shortcuts_body')}</p>
+            <dl className="learning-shortcuts">
+              {['selection', 'sidebar', 'send', 'newline', 'dismiss', 'navigate'].map(key => (
+                <div key={key}>
+                  <dt>{tr(`onboarding:shortcut_${key}`)}</dt>
+                  <dd><kbd>{tr(`onboarding:keys_${key}`)}</kbd></dd>
+                </div>
+              ))}
+            </dl>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 }
 export function GettingStarted({ detailed = false, dialogTitle = false, onNavigate }: {
   detailed?: boolean; dialogTitle?: boolean; onNavigate?: () => void;
@@ -102,62 +145,56 @@ export function GettingStarted({ detailed = false, dialogTitle = false, onNaviga
       </div>
     );
   }
-  return (
-    <Card
-      variant="flat"
-      className="getting-started min-w-0 p-[var(--space-6)]"
+  const body = (
+    <Section
+      title={dialogTitle ? <DialogTitle asChild><span>{tr('onboarding:checklist')}</span></DialogTitle> : tr('onboarding:checklist')}
+      actions={<span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>}
     >
-      <Section
-        title={dialogTitle ? <DialogTitle asChild><span>{tr('onboarding:checklist')}</span></DialogTitle> : tr('onboarding:checklist')}
-        actions={
-          <span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>
-        }
-      >
-        <p>{tr('onboarding:checklist_body')}</p>
-        <Progress
-          className="art-reader-setup-progress"
-          aria-label={tr('onboarding:checklist')}
-          value={(progress.done.length / items.length) * 100}
-        />
-        <ol>
-          {items.map((item) => (
-            <li key={item} data-complete={progress.done.includes(item)}>
-              <span aria-hidden="true">{progress.done.includes(item) ? <Check size={16} /> : null}</span>
-              <Button
-                variant="ghost"
-                onClick={() =>
-                  item === 'document'
-                    ? (onNavigate?.(), navigate('library'))
-                    : openLearningHelp(
-                        item === 'walkthrough' ? 'walkthroughs' : item === 'help' ? 'shortcuts' : 'setup'
-                      )
-                }
-              >
-                {tr(`onboarding:check_${item}`)}
-                {progress.done.includes(item) && <small>{tr('onboarding:completed')}</small>}
-              </Button>
-            </li>
-          ))}
-        </ol>
-        {progress.status === 'paused' && (
-          <Button
-            variant="outline"
-            onClick={() => {
-              try {
-                saveProgress({ status: 'active' });
-                openLearningHelp('setup');
-              } catch {
-                setError(tr('onboarding:save_error'));
+      <p>{tr('onboarding:checklist_body')}</p>
+      <Progress
+        className="art-reader-setup-progress"
+        aria-label={tr('onboarding:checklist')}
+        value={(progress.done.length / items.length) * 100}
+      />
+      <div role="list">
+        {items.map((item) => {
+          const done = progress.done.includes(item);
+          return (
+            <ListRow
+              key={item}
+              role="listitem"
+              data-complete={done}
+              leading={<span className="grid size-[var(--space-5)] place-items-center">{done && <Check size={16} aria-hidden="true" />}</span>}
+              title={tr(`onboarding:check_${item}`)}
+              meta={done ? tr('onboarding:completed') : undefined}
+              onClick={() =>
+                item === 'document'
+                  ? (onNavigate?.(), navigate('library'))
+                  : openLearningHelp(item === 'walkthrough' ? 'walkthroughs' : item === 'help' ? 'shortcuts' : 'setup')
               }
-            }}
-          >
-            {tr('onboarding:resume')}
-          </Button>
-        )}
-        {error && <p role="alert">{error}</p>}
-      </Section>
-    </Card>
+            />
+          );
+        })}
+      </div>
+      {progress.status === 'paused' && (
+        <Button
+          variant="outline"
+          onClick={() => {
+            try {
+              saveProgress({ status: 'active' });
+              openLearningHelp('setup');
+            } catch {
+              setError(tr('onboarding:save_error'));
+            }
+          }}
+        >
+          {tr('onboarding:resume')}
+        </Button>
+      )}
+      {error && <p role="alert">{error}</p>}
+    </Section>
   );
+  return dialogTitle ? body : <Card variant="flat" className="min-w-0 p-[var(--space-6)]">{body}</Card>;
 }
 export function ContextCoach({ inline = false }: { inline?: boolean }) {
   useTranslation();

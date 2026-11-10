@@ -59,3 +59,8 @@ Give your AI agent the [install prompt](docs/INSTALL.md#option-3---let-an-ai-age
 `apps/website/` contains the website; `apps/newsletter/` handles newsletter signup.
 `docs/` holds guides and design references.
 `scripts/` holds repository and installation tools.
+
+App update checks GET the fixed GitHub release `latest-mac.yml` / `latest.yml` feed,
+without identifiers or user content. Automatic checks default on; disable them in
+Settings > General. Downloads require a click and fetch release assets via GitHub
+and its CDN. See [update privacy](docs/PRIVACY.md) and [updates](docs/UPDATES.md).

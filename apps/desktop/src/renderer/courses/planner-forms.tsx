@@ -1,15 +1,21 @@
 /** Direct student input stays separate from model proposals. Exam input creates a reviewable proposal. */
+import { ZodError } from "zod";
 import { useState, type FormEvent } from "react";
 import type { MoodleCourse } from "../../shared/moodle";
 import { examInputSchema, taskInputSchema, type PlannerAction } from "../../shared/planner";
 import { tr, i18n } from "../../shared/i18n";
 import { displayTitle } from "../../shared/moodle-course-display";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
+import { Input, FormField, Card } from "../components/ui";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../components/ui/select";
+import { Textarea } from "../components/ui/textarea";
 import type { PlannerApi } from "./planner-api";
 export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
   courses: MoodleCourse[]; api: PlannerApi; onSaved: () => Promise<void>; onExam: (action: PlannerAction) => void; onError: () => void;
 }) {
+  const [taskCourse, setTaskCourse] = useState("none");
+  const [examCourse, setExamCourse] = useState("none");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const submitTask = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -17,41 +23,65 @@ export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
     const form = event.currentTarget, data = new FormData(form);
     setBusy(true);
     try {
-      await api.quickAdd(taskInputSchema.parse({ title: data.get("title"), courseId: data.get("courseId") || null,
+      await api.quickAdd(taskInputSchema.parse({ title: data.get("title"), courseId: (data.get("courseId") === "none" ? null : data.get("courseId")) || null,
         dueAt: data.get("dueAt") ? new Date(String(data.get("dueAt"))).toISOString() : null, estimateMinutes: Number(data.get("estimate")) }));
+      setErrors({});
       form.reset();
+      setTaskCourse("none");
       await onSaved();
-    } catch { onError(); } finally { setBusy(false); }
+    } catch (error) {
+      if (error instanceof ZodError) {
+        setErrors(Object.fromEntries(error.issues.map(issue => [String(issue.path[0]), tr("planner:error")])));
+      }
+      onError();
+    } finally { setBusy(false); }
   };
   const submitExam = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     try {
-      const exam = examInputSchema.parse({ title: data.get("title"), courseId: data.get("courseId") || null, date: new Date(String(data.get("date"))).toISOString(), scopeTopics: String(data.get("topics")).split("\n").map(t => t.trim()).filter(Boolean), materialIds: [] });
+      const exam = examInputSchema.parse({ title: data.get("title"), courseId: (data.get("courseId") === "none" ? null : data.get("courseId")) || null, date: new Date(String(data.get("date"))).toISOString(), scopeTopics: String(data.get("topics")).split("\n").map(t => t.trim()).filter(Boolean), materialIds: [] });
       onExam({ type: "create-exam", exam });
     } catch { onError(); }
   };
-  const courseOptions = <><option value="">{tr("planner:no_course")}</option>{courses.map(c => <option key={c.id} value={c.id}>{displayTitle(c.identity, i18n.resolvedLanguage || "en", c.fullName)}</option>)}</>;
+  const courseField = (value: string, onValueChange: (value: string) => void) => <FormField label={tr("planner:course")} children={field =>
+    <Select name="courseId" value={value} onValueChange={onValueChange}>
+      <SelectTrigger {...field} className="w-full"><SelectValue /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="none">{tr("planner:no_course")}</SelectItem>
+        {courses.map(c => <SelectItem key={c.id} value={c.id}>
+          {displayTitle(c.identity, i18n.resolvedLanguage || "en", c.fullName)}
+        </SelectItem>)}
+      </SelectContent>
+    </Select>
+  } />;
   return <div className="planner-forms">
-    <details className="planner-panel" open>
+    <Card variant="flat" className="p-6"><details open>
       <summary>{tr("planner:quick_add")}</summary>
-      <form className="planner-form" onSubmit={e => void submitTask(e)}>
-        <label className="planner-wide">{tr("planner:task_title")}<Input name="title" required maxLength={200} autoComplete="off" /></label>
-        <label>{tr("planner:course")}<select name="courseId">{courseOptions}</select></label>
-        <label>{tr("planner:due")}<Input type="datetime-local" name="dueAt" /></label>
-        <label>{tr("planner:estimate")}<Input type="number" name="estimate" min={5} max={2880} step={5} defaultValue={30} required /></label>
+      <form className="planner-form" onSubmit={e => void submitTask(e)}
+        onInvalid={event => {
+          const input = event.target as HTMLInputElement;
+          setErrors(current => ({ ...current, [input.name === "estimate" ? "estimateMinutes" : input.name]: input.validationMessage }));
+        }} onInput={event => {
+          const input = event.target as HTMLInputElement;
+          setErrors(current => ({ ...current, [input.name === "estimate" ? "estimateMinutes" : input.name]: "" }));
+        }}>
+        <FormField className="planner-wide" error={errors.title || undefined} label={tr("planner:task_title")}  children={field => <Input {...field} name="title" required maxLength={200} autoComplete="off" />} />
+        {courseField(taskCourse, setTaskCourse)}
+        <FormField error={errors.dueAt || undefined} label={tr("planner:due")}  children={field => <Input {...field} type="datetime-local" name="dueAt" />} />
+        <FormField error={errors.estimateMinutes || undefined} label={tr("planner:estimate")}  children={field => <Input {...field} type="number" name="estimate" min={5} max={2880} step={5} defaultValue={30} required />} />
         <Button type="submit" disabled={busy}>{tr("planner:quick_add")}</Button>
       </form>
-    </details>
-    <details className="planner-panel">
+    </details></Card>
+    <Card variant="flat" className="p-6"><details>
       <summary>{tr("planner:add_exam")}</summary>
       <form className="planner-form" onSubmit={submitExam}>
-        <label className="planner-wide">{tr("planner:exam_title")}<Input name="title" required maxLength={200} /></label>
-        <label>{tr("planner:course")}<select name="courseId">{courseOptions}</select></label>
-        <label>{tr("planner:exam_date")}<Input type="datetime-local" name="date" required /></label>
-        <label className="planner-wide">{tr("planner:topics")}<textarea name="topics" rows={3} maxLength={8000} /></label>
+        <FormField className="planner-wide" label={tr("planner:exam_title")} children={field => <Input {...field} name="title" required maxLength={200} />} />
+        {courseField(examCourse, setExamCourse)}
+        <FormField label={tr("planner:exam_date")} children={field => <Input {...field} type="datetime-local" name="date" required />} />
+        <FormField className="planner-wide" label={tr("planner:topics")} children={field => <Textarea {...field} name="topics" rows={3} maxLength={8000} />} />
         <Button type="submit">{tr("planner:confirm")}</Button>
       </form>
-    </details>
+    </details></Card>
   </div>;
 }

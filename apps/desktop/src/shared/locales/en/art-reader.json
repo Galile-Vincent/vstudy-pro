@@ -18,5 +18,12 @@
   "setup": "Set up AI",
   "without_ai": "Use without AI",
   "local": "Your personal study space",
-  "tip": "Reading tip"
+  "tip": "Reading tip",
+  "general_welcome_body": "Ask anything about your studies: plan, practise or understand a topic.",
+  "general_plan": "Plan a study session",
+  "general_explain": "Explain a concept",
+  "general_quiz": "Quiz me",
+  "prompt_general_plan": "Help me plan a focused study session. Ask what I am studying and how much time I have first.",
+  "prompt_general_explain": "Explain a concept I am studying in simple terms, with everyday examples. Ask which concept first.",
+  "prompt_general_quiz": "Quiz me on a topic I am studying. Ask which topic first, then one question at a time."
 }

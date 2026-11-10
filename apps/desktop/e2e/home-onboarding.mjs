@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
+import { onboardingForward, onboardingConsent } from './helpers/onboarding.mjs';
 const evidence=temporaryPath('vstudy-home'); await mkdir(evidence,{recursive:true});
 const screenshots=[],checks=[];
 const full=process.env.VSTUDY_FULL_MATRIX==='1';
@@ -42,8 +43,8 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
     await page.locator('.onboarding').getByRole('button',{name:copy.sample_added,exact:true}).waitFor();
    }
    await audit(`onboarding-${step}`); await capture(`onboarding-${step}`);
-   if (step === 'privacy') await page.locator('.analytics-choices button').last().click();
-   else await page.locator('.onboarding footer .primary').click();
+   if (step === 'privacy') await onboardingConsent(page).click();
+   else await onboardingForward(page).click();
   }
   await page.locator('.onboarding').waitFor({state:'detached'});
   await page.getByRole('button',{name:'Home',exact:true}).click();

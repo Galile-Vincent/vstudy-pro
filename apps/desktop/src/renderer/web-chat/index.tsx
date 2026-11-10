@@ -7,6 +7,7 @@ import { tr } from '../../shared/i18n';
 import { type WebChatProvider, type WebChatState } from '../../shared/web-chat';
 import { hasNavigationOverlay } from '../shell/history-swipe-navigation';
 import { Button } from '../components/ui/button';
+import { PageContainer, PageHeader } from '../components/ui';
 import { DesktopChat } from './desktop-chat';
 import './web-chat.css';
 type Tab='desktop'|WebChatProvider;
@@ -15,14 +16,14 @@ export function WebChatHub() {
   useTranslation();
   const {openTab}=useNavigate();
   const tab:Tab='desktop';
+  const [toolbar,setToolbar]=useState<HTMLDivElement|null>(null);
   const choose=(next:Tab)=>{if(next!=='desktop')openTab({view:'hosted-chat',provider:next,title:tr(`web-chat:${next}`)});};
   const label=(value:Tab)=>tr(`web-chat:${value}`);
-  return <section className="web-chat-hub" aria-label={tr('web-chat:title')}>
-    <header className="web-chat-header"><div><h1>{tr('web-chat:title')}</h1><p>{tr('web-chat:subtitle')}</p></div>
-      <div className="web-chat-tabs" role="group" aria-label={tr('web-chat:choose')}>{tabs.map(value=><button key={value} id={`web-chat-tab-${value}`} aria-pressed={value===tab} onClick={()=>choose(value)}>{label(value)}</button>)}</div>
-    </header>
-    <div className="web-chat-desktop"><DesktopChat active/></div>
-  </section>;
+  const launcher=<div className="web-chat-tabs" role="group" aria-label={tr('web-chat:choose')}>{tabs.map(value=><button key={value} id={`web-chat-tab-${value}`} aria-pressed={value===tab} onClick={()=>choose(value)}>{label(value)}</button>)}</div>;
+  return <PageContainer as="main" className="web-chat-hub" aria-label={tr('web-chat:title')}>
+    <PageHeader title={tr('web-chat:title')} description={tr('web-chat:subtitle')} actions={<div ref={setToolbar} className="min-w-0 max-w-full"/>}/>
+    <DesktopChat active launcher={launcher} toolbarSlot={toolbar}/>
+  </PageContainer>;
 }
 export function HostedChat({provider,compact=false}:{provider:WebChatProvider;compact?:boolean}) {
   const {activeTabId,tabs,updateNativePresentation}=useNavigate();

@@ -42,6 +42,8 @@
   "loading": "Loading your review…",
   "load_more": "Load more",
   "retry": "Try again",
+  "draft_save_failed": "Your latest choice could not be saved yet. It stays on screen and we will keep trying.",
+  "graded_earlier": "This question was already graded with your earlier answer. That answer stays final.",
   "error": "Could not load or save your study memory. Please try again.",
   "offline": "Your provider is offline. Saved questions are still available. Reconnect and try again.",
   "budget": "Memory collection is paused by your review budget. Check your limits, then try again.",
@@ -149,5 +151,11 @@
   "concept_missed_other": "{{label}}: {{count}} questions worth another look",
   "assumption_sources_omitted": "Some sources were left out to keep this review within its size limit.",
   "assumption_excerpt_limited": "Only the first part of {{document}} was used.",
-  "assumption_undated_units": "Units without dates were placed by when you asked: {{units}}"
+  "assumption_undated_units": "Units without dates were placed by when you asked: {{units}}",
+  "bounded_session_one": "Reviewing {{selected}} of {{total}} concepts; {{count}} left for another session",
+  "bounded_session_other": "Reviewing {{selected}} of {{total}} concepts; {{count}} left for another session",
+  "scope_required": "Choose a valid scope to generate. Select 1–{{max}} items or a valid date range.",
+  "scope_limit_one": "The session limit is {{count}} concept. Uncheck one to choose another.",
+  "scope_limit_other": "The session limit is {{count}} concepts. Uncheck one to choose another.",
+  "row_actions": "Actions for {{concept}}"
 }

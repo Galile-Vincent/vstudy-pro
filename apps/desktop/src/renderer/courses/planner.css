@@ -7,8 +7,6 @@
 .planner-heading, .planner-actions { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .planner-heading { justify-content: space-between; align-items: flex-start; }
 .planner-heading p { color: var(--muted); max-width: 65ch; }
-.planner-panel, .planner-proposal { background: color-mix(in oklab, var(--ink) 4%, var(--surface)); border-radius: var(--r-md); padding: var(--space-5); }
-.planner-proposal.moodle-proposal { background: var(--active); }
 .planner-proposal h4 { font-size: var(--type-sm); margin: var(--space-4) 0 var(--space-2); }
 .planner-proposal li { margin-block: var(--space-2); }
 .planner-proposal strong, .planner-proposal p { overflow-wrap: anywhere; }
@@ -17,8 +15,6 @@
 .planner-forms, .planner-form, .planner-capacity { display: grid; gap: var(--space-4); }
 .planner-form { margin-block-start: var(--space-4); grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; }
 .planner-wide { grid-column: 1 / -1; }
-.planner-form label, .planner-capacity label { display: grid; gap: var(--space-2); font-size: var(--type-sm); }
-.planner-form select, .planner-form textarea, .planner-form input, .planner-capacity input { background: var(--surface); color: var(--ink); border: 0; border-radius: var(--r-sm); padding: var(--space-2) var(--space-3); min-height: 36px; font: inherit; width: 100%; }
 .planner-form textarea { resize: vertical; }
 .planner-capacity { grid-template-columns: repeat(3, minmax(0, 200px)); }
 .planner summary { font-weight: 600; cursor: pointer; }
@@ -27,11 +23,9 @@
 .planner-columns > div { display: grid; gap: var(--space-6); }
 .planner-task-list, .planner-week ol { list-style: none; padding: 0; margin: 0; }
 .planner-task-list li { display: flex; gap: var(--space-3); padding-block: var(--space-3); }
-.planner-task-list li > div, .planner-week li, .planner-proposed-blocks li { display: grid; gap: var(--space-1); min-width: 0; }
 .planner-task-list span, .planner-task-list time, .planner-week li span, .planner-week time, .planner-proposed-blocks span, .planner-proposed-blocks time { color: var(--muted); font-size: var(--type-sm); }
 .planner-task-list [data-overdue=true] { color: var(--danger); }
 .planner-day + .planner-day { margin-top: var(--space-6); }
-.planner-week li { background: var(--surface); border-radius: var(--r-sm); padding: var(--space-3); margin-top: var(--space-2); }
 .planner-exam + .planner-exam { margin-top: var(--space-5); }
 .planner-changes { display: grid; grid-template-columns: auto 1fr; gap: var(--space-2); }
 .planner-changes dd { margin: 0; overflow-wrap: anywhere; }
@@ -41,11 +35,9 @@
 @media (max-width: 760px) {
   .planner-columns, .planner-form { grid-template-columns: 1fr; }
   .planner-capacity { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .planner-panel, .planner-proposal { padding: var(--space-4); }
 }
-@media (prefers-contrast: more) {
-  .planner-panel, .planner-proposal { outline: 1px solid var(--ink); }
-}
+
 
 .planner-view-tabs [data-slot=tabs-trigger] { color: var(--ink); }
 .planner-view-tabs [data-slot=tabs-list] { margin-bottom: var(--space-4); }
+.planner-task-list [data-slot="list-row"] { width:100%; }

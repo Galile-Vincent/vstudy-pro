@@ -13,6 +13,8 @@ import { useNavigate } from '../shell';
 import { SurfaceErrorBoundary } from '../components/surface-error-boundary';
 import { HistorySearch } from './search';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../components/ui/dialog';
+import { PageContainer, PageHeader } from '../components/ui';
+import { useFormat } from '../i18n';
 const Chat = lazy(() => import('../chat').then(m => ({ default: m.Chat })));
 export function HistoryFinder() {
   useTranslation();
@@ -67,8 +69,9 @@ function HistoryContent() {
     messages: IpcResponse<'messages:page'>;
   } | null>(null);
   const [providers, setProviders] = useState<Providers>([]), [draft, setDraft] = useState(''), [failed, setFailed] = useState(''), [modelError, setModelError] = useState(false);
-  const [revision, setRevision] = useState(0);
+  const [revision, setRevision] = useState(0), heading = useRef<HTMLSpanElement>(null);
   const [providersFailed, setProvidersFailed] = useState(false);
+  const [summary, setSummary] = useState<{ count: number; more: boolean } | null>(null), format = useFormat();
   const refreshProviders = useCallback(async () => {
     try { setProviders(await desktop.invoke('providers:list', {})); setProvidersFailed(false); }
     catch { setProvidersFailed(true); }
@@ -111,12 +114,13 @@ function HistoryContent() {
     }
   };
   const settings = () => window.dispatchEvent(new Event('vstudy:open-settings'));
-  return <main className="history-page"><header><h1>{tr('history:title')}</h1><p>{tr('history:subtitle')}</p></header><div className="history-layout">
-  <section className="history-browser" aria-label={tr('history:title')}><HistorySearch onOpen={open}/></section>
+  const count = summary && tr(summary.more ? 'history:count_more' : 'history:count', { count: summary.count, formatted: format.number(summary.count) });
+  return <PageContainer as="main" className="history-page"><PageHeader title={<span ref={heading} tabIndex={-1}>{tr('history:title')}</span>} description={tr('history:subtitle')} meta={count && <p className="text-[var(--muted)]">{count}</p>}/><div className="history-layout">
+  <section className="history-browser" aria-label={tr('history:title')}><HistorySearch onOpen={open} onSummary={setSummary} onFocusFallback={() => heading.current?.focus()}/></section>
   {route.conversationId && <section className="history-conversation chat-pane" aria-label={tr('common:chat')}><button className="history-back" onClick={() => navigate('history')}>{tr('history:back')}</button>
    {providersFailed && <LoadError message={tr('history:providers_error')} retry={() => void refreshProviders()}/>}
    {modelError && <p role="alert">{tr('history:model_change_error')}</p>}
    {failed ? <LoadError message={failed} retry={() => setRevision(value => value + 1)}/> : loaded ? <Suspense fallback={<p role="status">{tr('common:loading_conversation')}</p>}><Chat key={loaded.conversation.id} conversation={loaded.conversation} history={loaded.messages.items} historyCursor={loaded.messages.nextCursor} jumpMessageId={route.messageId} autoFocus={false} draft={draft} onDraft={setDraft} selection={null} onClearSelection={() => { }} providers={providers} model={loaded.conversation.providerId + '/' + loaded.conversation.modelId} onModel={value => { void changeModel(value); }} onSettings={settings} onProvidersChanged={refreshProviders} onUsage={settings}/></Suspense> : <p role="status">{tr('common:loading_conversation')}</p>}
   </section>}
- </div></main>;
+ </div></PageContainer>;
 }

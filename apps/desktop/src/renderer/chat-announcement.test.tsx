@@ -59,3 +59,30 @@ it('leaves plain ASCII and 300 CJK characters cut at 240 with the ellipsis cue',
  expect(announcementExcerpt('short answer')).toBe('short answer');
  expect(announcementExcerpt('字'.repeat(300))).toBe('字'.repeat(240)+'…');
 });
+
+it('announces each tool transition once without token or timer chatter', async () => {
+  const { render, screen, waitFor, cleanup, fireEvent } = await import('@testing-library/react');
+  let finish!: () => void;
+  let fail!: () => void;
+  const finished = new Promise<void>(resolve => { finish = resolve; });
+  const failed = new Promise<void>(resolve => { fail = resolve; });
+  const tool = {type: 'tool-call' as const, toolCallId: 'one', toolName: 'lookup', args: {}, argsText: '{}'};
+  const adapter: ChatModelAdapter = {async *run() {
+    yield {content: [tool]};
+    await finished;
+    yield {content: [{...tool, result: 'found'}]};
+    await failed;
+    yield {content: [{...tool, result: 'found'}, {...tool, toolCallId: 'two', isError: true, result: 'failed'}]};
+  }};
+  render(<Harness adapter={adapter}/>);
+  fireEvent.change(screen.getByRole('textbox'), {target: {value: 'Question'}});
+  fireEvent.submit(document.querySelector('form')!);
+  await waitFor(() => expect(screen.getByTestId('tool-announcement').textContent).toContain('lookup started'));
+  await act(async () => finish());
+  await waitFor(() => expect(screen.getByTestId('tool-announcement').textContent).toContain('lookup finished'));
+  await act(async () => fail());
+  await waitFor(() => expect(screen.getByTestId('tool-announcement').textContent).toContain('lookup failed'));
+  const log = screen.getByTestId('tool-announcement');
+  expect(log.children).toHaveLength(3);
+  cleanup();
+});

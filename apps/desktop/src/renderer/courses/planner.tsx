@@ -12,7 +12,7 @@ import { plannerApi, type PlannerApi } from "./planner-api";
 import { PlannerProposal, plannerDate } from "./planner-proposal";
 import { PlannerForms } from "./planner-forms";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
+import { Input, FormField, Card, PageHeader, Section, ListRow } from "../components/ui";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import "./planner.css";
 import { SurfaceErrorBoundary } from "../components/surface-error-boundary";
@@ -73,19 +73,19 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
   };
   const validWindow = Number.isInteger(budget) && budget >= 15 && budget <= 480 && Number.isInteger(startHour) && Number.isInteger(endHour) && startHour >= 0 && endHour <= 24 && startHour < endHour;
   return <section className="planner" aria-label={tr("planner:title")} data-testid="student-planner">
-    <header className="planner-heading"><div><h1>{tr("planner:title")}</h1><p>{tr("planner:intro")}</p></div>
+    <PageHeader title={tr("planner:title")} description={tr("planner:intro")} actions={<>
       <Button variant="ghost" onClick={() => void refresh().catch(() => setState("error"))}>{tr("planner:retry")}</Button>
-    </header>
+    </>} />
     {state === "loading" && <p role="status">{tr("planner:loading")}</p>}
     {state === "error" && <p role="alert">{tr("planner:planner_unavailable")}</p>}
     <p role="status" className="planner-notice">{notice}</p>
     {state === "ready" && <>
       <PlannerForms courses={courses} api={api} onSaved={saved} onExam={propose} onError={fail} />
-      <section className="planner-panel planner-draft-controls" aria-label={tr("planner:plan_week")}>
+      <section className=" planner-draft-controls" aria-label={tr("planner:plan_week")}><Card variant="flat" className="p-6">
         <div className="planner-capacity">
-          <label>{tr("planner:daily_budget")}<Input type="number" min={15} max={480} step={15} value={budget} onChange={e => setBudget(Number(e.target.value))} /></label>
-          <label>{tr("planner:start_hour")}<Input type="number" min={0} max={23} value={startHour} onChange={e => setStartHour(Number(e.target.value))} /></label>
-          <label>{tr("planner:end_hour")}<Input type="number" min={1} max={24} value={endHour} onChange={e => setEndHour(Number(e.target.value))} /></label>
+          <FormField label={tr("planner:daily_budget")} children={field => <Input {...field} type="number" min={15} max={480} step={15} value={budget} onChange={e => setBudget(Number(e.target.value))} />} />
+          <FormField label={tr("planner:start_hour")} children={field => <Input {...field} type="number" min={0} max={23} value={startHour} onChange={e => setStartHour(Number(e.target.value))} />} />
+          <FormField label={tr("planner:end_hour")} children={field => <Input {...field} type="number" min={1} max={24} value={endHour} onChange={e => setEndHour(Number(e.target.value))} />} />
         </div>
         <p>{tr("planner:assumed_window", { start: startHour, end: endHour, zone })}</p>
         <div className="planner-actions">
@@ -94,42 +94,40 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
           <Button variant="ghost" disabled={!snapshot.blocks.some(b => dayKeys.includes(localDay(b.startsAt, zone)))} onClick={() => void exportWeek()}><CalendarDays />{tr("planner:export_week")}</Button>
         </div>
         <p className="planner-muted">{tr("planner:approval_notice")}</p>
-      </section>
-      {unallocated.length > 0 && <section className="planner-panel" aria-label={tr("planner:unallocated")}><h2>{tr("planner:unallocated")}</h2><ul>{unallocated.map((item, index) => <li key={index}>{tr(`planner:unallocated_${item.reason}`, { title: item.title, minutes: item.minutes })}</li>)}</ul></section>}
-      {pending && <PlannerProposal action={pending.action} courses={courses} deadlines={deadlines} snapshot={snapshot} busy={busy} onApprove={() => void approve()} onDismiss={() => setPending(undefined)} />}
+      </Card></section>
+      {unallocated.length > 0 && <Section aria-label={tr("planner:unallocated")} title={tr("planner:unallocated")}><ul>{unallocated.map((item, index) => <li key={index}>{tr(`planner:unallocated_${item.reason}`, { title: item.title, minutes: item.minutes })}</li>)}</ul></Section>}
+      {pending && <PlannerProposal headingLevel={2} action={pending.action} courses={courses} deadlines={deadlines} snapshot={snapshot} busy={busy} onApprove={() => void approve()} onDismiss={() => setPending(undefined)} />}
       <Tabs value={view} onValueChange={setView} className="planner-view-tabs"><TabsList aria-label={tr("planner:title")}><TabsTrigger value="today">{tr("planner:today")}</TabsTrigger><TabsTrigger value="week">{tr("planner:week")}</TabsTrigger></TabsList>
       {['today','week'].map(panel => <TabsContent key={panel} value={panel} forceMount hidden={view !== panel}>{view === panel && <div className="planner-columns"><div>
-        <section className="planner-panel"><h2>{tr(view === "today" ? "planner:today" : "planner:week")}</h2>
+        <Section title={tr(view === "today" ? "planner:today" : "planner:week")}>
           {!tasks.length && <p className="planner-muted">{tr("planner:empty_today")}</p>}
-          <ul className="planner-task-list">{tasks.map(task => <li key={task.id}>
+          <ul className="planner-task-list">{tasks.map(task => <li key={task.id}><ListRow title={task.title} actions={
             <Button size="icon" variant="ghost" disabled={busy} aria-label={tr("planner:complete", { title: task.title })} onClick={() => {
               setBusy(true); void api.approve(crypto.randomUUID(), { type: "update-task", taskId: task.id, changes: { status: "done" } }).then(saved).catch(fail).finally(() => setBusy(false));
-            }}><Check /></Button>
-            <div><strong>{task.title}</strong><span>{courseTitle(task.courseId)} · {tr("planner:minutes", { minutes: task.estimateMinutes })}</span>
+            }}><Check /></Button>} subtitle={<><span>{courseTitle(task.courseId)} · {tr("planner:minutes", { minutes: task.estimateMinutes })}</span>
               <span>{tr(`planner:source_${task.source}`)} · {tr(`planner:status_${task.status}`)}</span>
               {task.dueAt && <time dateTime={task.dueAt} data-overdue={Date.parse(task.dueAt) < now}>{plannerDate(task.dueAt)}</time>}
-            </div>
+            </>} />
           </li>)}</ul>
-        </section>
-        {snapshot.tasks.some(t => plannerTaskDone(t, deadlines)) && <section className="planner-panel" data-completed-tasks><h2>{tr("planner:status_done")}</h2><ul>{snapshot.tasks.filter(t => plannerTaskDone(t, deadlines)).map(t => <li key={t.id}>{t.title}</li>)}</ul></section>}
-        <section className="planner-panel"><h2>{tr("planner:source_deadlines")}</h2><ul className="planner-task-list">{sourceDeadlines.map(d => <li key={d.id}><div>
-          <strong>{d.title}</strong><span>{courseTitle(d.courseId)}</span><time dateTime={d.dueAt} data-overdue={Date.parse(d.dueAt) < now}>{plannerDate(d.dueAt)}</time>
+        </Section>
+        {snapshot.tasks.some(t => plannerTaskDone(t, deadlines)) && <Section data-completed-tasks title={tr("planner:status_done")}><ul>{snapshot.tasks.filter(t => plannerTaskDone(t, deadlines)).map(t => <li key={t.id}><ListRow title={t.title} /></li>)}</ul></Section>}
+        <Section title={tr("planner:source_deadlines")}><ul className="planner-task-list">{sourceDeadlines.map(d => <li key={d.id}><ListRow title={d.title} subtitle={<><span>{courseTitle(d.courseId)}</span><time dateTime={d.dueAt} data-overdue={Date.parse(d.dueAt) < now}>{plannerDate(d.dueAt)}</time>
           {Date.parse(d.dueAt) < now && <span>{tr("planner:overdue")}</span>}{d.submitted === null && <span>{tr("planner:submitted_unknown")}</span>}
-        </div></li>)}</ul></section>
-        <section className="planner-panel"><h2>{tr("planner:exams")}</h2>{!exams.length && <p className="planner-muted">{tr("planner:empty_exams")}</p>}
+        </>} /></li>)}</ul></Section>
+        <Section title={tr("planner:exams")}>{!exams.length && <p className="planner-muted">{tr("planner:empty_exams")}</p>}
           {exams.map(exam => <article className="planner-exam" key={exam.id}><strong>{tr("planner:countdown", { title: exam.title, days: Math.max(0, Math.round((Date.parse(localDay(exam.date, zone)) - Date.parse(today)) / 86400000)) })}</strong>
             <p>{courseTitle(exam.courseId)} · {plannerDate(exam.date)}</p><p>{exam.scopeTopics.join(" · ") || tr("planner:scope_unknown")}</p></article>)}
-        </section>
-      </div><section className="planner-panel planner-week" aria-label={tr("planner:week")}>
+        </Section>
+      </div><section className=" planner-week" aria-label={tr("planner:week")}><Card variant="flat" className="p-6">
         <h2>{tr("planner:week")}</h2>{!snapshot.blocks.length && <p className="planner-muted">{tr("planner:empty_week")}</p>}
         {(view === "today" ? [today] : dayKeys).map(day => {
           const blocks = snapshot.blocks.filter(b => localDay(b.startsAt, zone) === day);
           return <section className="planner-day" key={day}><h3>{new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(day + "T12:00:00Z"))}</h3>
             <span className="planner-muted">{tr("planner:reserved", { minutes: blocks.reduce((n, b) => n + b.durationMinutes, 0) })}</span>
-            <ol>{blocks.map(b => <li key={b.id}><strong>{b.title}</strong><span>{courseTitle(b.courseId)}</span><time dateTime={b.startsAt}>{tr("planner:duration_window", { start: new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { hour: "numeric", minute: "2-digit", timeZone: zone }).format(new Date(b.startsAt)), minutes: b.durationMinutes })}</time></li>)}</ol>
+            <ol>{blocks.map(b => <li key={b.id}><ListRow title={b.title} subtitle={courseTitle(b.courseId)} meta={<time dateTime={b.startsAt}>{tr("planner:duration_window", { start: new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { hour: "numeric", minute: "2-digit", timeZone: zone }).format(new Date(b.startsAt)), minutes: b.durationMinutes })}</time>} /></li>)}</ol>
           </section>;
         })}
-      </section></div>}</TabsContent>)}</Tabs>
+      </Card></section></div>}</TabsContent>)}</Tabs>
     </>}
   </section>;
 }
