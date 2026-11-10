@@ -12,4 +12,3 @@ export * from './input';
 export * from './toggle-group';
 
 export * from './setting-row';
-export * from './segmented-control';

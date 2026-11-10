@@ -1,4 +1,4 @@
-import { Card, Section, SettingRow, SegmentedControl } from './components/ui';
+import { Card, Section, SettingRow, SegmentedControl, SegmentedControlItem } from './components/ui';
 import { useTrailingCommit } from './settings/use-trailing-commit';
 import { MemorySettings } from './review/memory-settings';
 import { AnalyticsSettings } from './analytics-ui';
@@ -106,13 +106,13 @@ export function PrivacySettings() {
           />
         </SettingRow>
         <SettingRow label={tr('settings:converterMode')}>
-          <SegmentedControl aria-label={tr('settings:converterMode')}
+          <SegmentedControl type="single" aria-label={tr('settings:converterMode')}
             value={offline === undefined ? '' : offline ? 'offline' : 'online'}
-            disabled={!loaded} onValueChange={value => void mode(value === 'offline')}
-            options={[
-              { value: 'online', label: tr('settings:enable_downloads') },
-              { value: 'offline', label: tr('settings:offline') },
-            ]} />
+            disabled={!loaded} onValueChange={value => { if (value) void mode(value === 'offline'); }}
+          >
+            <SegmentedControlItem value="online">{tr('settings:enable_downloads')}</SegmentedControlItem>
+            <SegmentedControlItem value="offline">{tr('settings:offline')}</SegmentedControlItem>
+          </SegmentedControl>
         </SettingRow>
       </Card></Section>
       <Section level={3} title={tr('settings:delete')}>

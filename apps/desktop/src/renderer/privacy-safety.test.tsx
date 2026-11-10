@@ -38,3 +38,21 @@ it('flushes typed idle minutes on Escape and unmount without blur', async () => 
   await waitFor(()=>expect(invoke.mock.calls.filter(([c])=>c==='settings:set')).toHaveLength(1));
   expect(invoke.mock.calls.find(([c])=>c==='settings:set')?.[1].converterIdleMinutes).toBe(45);
 });
+
+it('keeps converter mode selected on repeated clicks and persists a different choice', async () => {
+  invoke.mockImplementation(async channel => channel === 'settings:networkActivity' ? [] : {converterIdleMinutes:5,converterOffline:false});
+  render(<PrivacySettings/>);
+  const online = await screen.findByRole('radio', {name:tr('settings:enable_downloads')});
+  await waitFor(() => expect(online.getAttribute('aria-checked')).toBe('true'));
+  expect(screen.getByRole('radiogroup', {name:tr('settings:converterMode')})).toBeTruthy();
+  fireEvent.click(online);
+  expect(invoke.mock.calls.filter(([c])=>c==='converter:mode')).toHaveLength(0);
+  expect(online.getAttribute('aria-checked')).toBe('true');
+  const offline = screen.getByRole('radio', {name:tr('settings:offline')});
+  fireEvent.click(offline);
+  await waitFor(() => expect(offline.getAttribute('aria-checked')).toBe('true'));
+  expect(invoke).toHaveBeenCalledWith('converter:mode', {offline:true});
+  fireEvent.click(offline);
+  expect(offline.getAttribute('aria-checked')).toBe('true');
+  expect(invoke.mock.calls.filter(([c])=>c==='converter:mode')).toHaveLength(1);
+});

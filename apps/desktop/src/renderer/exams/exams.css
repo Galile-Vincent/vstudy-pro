@@ -15,7 +15,6 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
 }
 @media (prefers-contrast:more),(forced-colors:active) { .exam-choice:has(:checked) { outline:thin solid var(--ink); } }
 .exam-history > li { container-type:inline-size; }
-.exam-history .ui-row-target { padding:var(--space-4); }
 @container (max-width:36rem) { .exam-history .ui-row-target { flex-direction:column; align-items:stretch; } }
 .exam-player { display:grid; gap:var(--space-6); overflow-wrap:anywhere; }
 .exam-player h3:focus-visible { outline:2px solid var(--focus); outline-offset:4px; }

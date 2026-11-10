@@ -7,7 +7,7 @@ import { FormField } from './form-field';
 import { ListRow } from './list-row';
 import { EmptyState } from './empty-state';
 import { Stat } from './stat';
-import { Tabs, TabsContent, SegmentedTabsList, SegmentedTabsTrigger } from './segmented-tabs';
+import { SegmentedControl, SegmentedControlItem, Tabs, TabsContent, SegmentedTabsList, SegmentedTabsTrigger } from './segmented-tabs';
 afterEach(cleanup);
 it('uses native card activation and preserves composition', () => {
   const click = vi.fn();
@@ -99,4 +99,19 @@ it('omits a page heading when no title is supplied', () => {
   render(<PageHeader title={undefined} actions={<button>Refresh</button>} />);
   expect(screen.queryByRole('heading')).toBeNull();
   expect(screen.getByRole('button', {name: 'Refresh'})).toBeTruthy();
+});
+
+it('selects a mode with the shared control and preserves disabled choices', () => {
+  const change = vi.fn();
+  render(<SegmentedControl type="single" defaultValue="files" onValueChange={change} aria-label="View">
+    <SegmentedControlItem value="files">Files</SegmentedControlItem>
+    <SegmentedControlItem value="folders">Folders</SegmentedControlItem>
+    <SegmentedControlItem value="disabled" disabled>Unavailable</SegmentedControlItem>
+  </SegmentedControl>);
+  const folders = screen.getByRole('radio', { name: 'Folders' });
+  fireEvent.click(folders);
+  expect(change).toHaveBeenLastCalledWith('folders');
+  expect(folders.getAttribute('aria-checked')).toBe('true');
+  fireEvent.click(screen.getByRole('radio', { name: 'Unavailable' }));
+  expect(change).toHaveBeenCalledTimes(1);
 });

@@ -1,5 +1,5 @@
 .home-page { height:100%; overflow:auto; color:var(--ink); }
-.home-content { display:flex; flex-direction:column; gap:var(--space-6); container-type:inline-size; }
+.home-content { display:flex; flex-direction:column; gap:var(--space-8); container-type:inline-size; }
 .home-grid { display:grid; gap:var(--space-6); align-items:start; }
 .home-secondary { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:var(--space-6); }
 .home-secondary:empty { display:none; }

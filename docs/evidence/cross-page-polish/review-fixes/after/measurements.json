@@ -1,0 +1,30 @@
+[
+  {
+    "width": 900,
+    "height": 76,
+    "font": "17px",
+    "weight": "700",
+    "whiteSpace": "nowrap",
+    "overflow": "ellipsis",
+    "lineHeight": "22px",
+    "descriptionMargin": "4px",
+    "session": "inline",
+    "plannerTitleMargin": "0px",
+    "plannerDescriptionMargin": "0px",
+    "reviewLeading": "19.5px"
+  },
+  {
+    "width": 600,
+    "height": 72,
+    "font": "17px",
+    "weight": "700",
+    "whiteSpace": "nowrap",
+    "overflow": "ellipsis",
+    "lineHeight": "22px",
+    "descriptionMargin": "4px",
+    "session": "none",
+    "plannerTitleMargin": "0px",
+    "plannerDescriptionMargin": "0px",
+    "reviewLeading": "19.5px"
+  }
+]
