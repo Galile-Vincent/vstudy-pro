@@ -18,7 +18,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
  try {
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:language,VSTUDY_FAKE_PROVIDER:'1'}});
   const page=await app.firstWindow(),errors=[]; await page.emulateMedia({colorScheme:'light',reducedMotion:'reduce'}); page.on('pageerror',e=>errors.push(e.message));
-  await page.locator('.onboarding[data-state=open]').waitFor();
+  await page.locator('.onboarding').waitFor();
   const audit=async state=>{
    const results=await new AxeBuilder({page}).setLegacyMode(true).analyze();
    const severe=results.violations.filter(v=>['serious','critical'].includes(v.impact)).map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}));

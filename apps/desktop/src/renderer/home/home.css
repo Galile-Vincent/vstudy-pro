@@ -1,12 +1,15 @@
 .home-page { height:100%; overflow:auto; color:var(--ink); }
-.home-content { display:flex; flex-direction:column; gap:var(--space-8); container-type:inline-size; }
-.home-grid { display:grid; gap:var(--space-6); align-items:start; }
-.home-secondary { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:var(--space-6); }
+.home-content { display:flex; flex-direction:column; gap:var(--space-8); container-type:inline-size; width:100%; max-width:1120px; margin-inline:auto; }
+/* Asymmetric 2/1 grid: reading launchpad on the left, stats on the right, pins and activity full width below. */
+.home-grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:var(--space-6); align-items:start; }
+.home-grid > * { grid-column:1; min-width:0; }
+.home-grid > .home-secondary { grid-column:2; grid-row:1 / span 2; }
+.home-grid > .home-pins,.home-grid > .home-activity { grid-column:1 / -1; }
+.home-secondary { display:grid; gap:var(--space-6); }
 .home-secondary:empty { display:none; }
+.home-continue { display:flex; flex-direction:row; align-items:center; gap:var(--space-3); }
 .home-upload { display:grid; gap:var(--space-4); }
 .home-upload p { color:var(--muted); overflow-wrap:anywhere; }
-.home-upload button[data-slot=button][data-size=default],
-.home-page #welcome-entry { height:auto; white-space:normal; padding-block:var(--space-3); }
 .home-list { list-style:none; padding:0; margin:0; display:grid; gap:var(--space-2); }
 .home-empty { color:var(--muted); margin-block:var(--space-6); }
 .home-sparkline { width:100%; height:var(--space-6); color:var(--muted); }
@@ -21,17 +24,17 @@
 
 .art-reader-launchpad {
   display:grid;
-  grid-template-columns:minmax(0,2fr) minmax(0,1fr);
+  grid-template-columns:minmax(0,1fr);
   gap:var(--space-6);
   align-items:start;
 }
-.art-reader-launchpad > :only-child { grid-column:1 / -1; }
 @container (width < 720px) {
-  .art-reader-launchpad { grid-template-columns:minmax(0,1fr); }
+  .home-grid { grid-template-columns:minmax(0,1fr); }
+  .home-grid > .home-secondary { grid-column:1; grid-row:auto; }
   .home-pins .home-list { grid-template-columns:minmax(0,1fr); }
 }
 @media(prefers-contrast:more),(forced-colors:active) {
-  .home-page [data-slot=card] { outline:1px solid var(--ink); }
+  .home-page [class*="astryx-card"] { outline:1px solid var(--ink); }
 }
 
 .home-recent-thumbnail { display:block; flex-shrink:0; }

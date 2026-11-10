@@ -2,8 +2,8 @@
 import { Brand } from '../components/brand';
 import { contentLanguage } from '../../shared/content-language';
 import { DocumentArt } from '../shell/document-art';
-import { ArrowUpRight, BookOpen, Info } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../components/ui/tooltip';
+import { ArrowDown, ArrowUp, ArrowUpRight, BookOpen, Info } from 'lucide-react';
+import { Button, Card as AstryxCard, IconButton, Tooltip } from '@astryxdesign/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
@@ -12,11 +12,9 @@ import type { Document, Settings } from '../../shared';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { useFormat } from '../i18n';
-import { AnimatedText } from '../motion/animated-text';
 import { UploadCard } from './upload-card';
 import './home.css';
-import { Card as SurfaceCard, PageContainer, PageHeader, Section, Stat, ListRow } from '../components/ui';
-import { Button } from '../components/ui/button';
+import { PageContainer, PageHeader, Section, Stat, ListRow } from '../components/ui';
 import { Skeleton } from '../components/ui/skeleton';
 import { Progress } from '../components/ui/progress';
 import { plainText } from '../../shared/plain-text';
@@ -24,9 +22,9 @@ export type HomeNavigate = (view: 'home' | 'library' | 'workspace' | 'welcome', 
 export type Dashboard = z.infer<typeof dashboardSchema>;
 export function Card({ title, children, className = '' }: { title: string; children: ReactNode; className?: string }) {
   return (
-    <SurfaceCard variant="flat" className={`min-w-0 p-[var(--space-6)] ${className}`}>
+    <AstryxCard padding={6} className={`min-w-0 ${className}`}>
       <Section title={title}>{children}</Section>
-    </SurfaceCard>
+    </AstryxCard>
   );
 }
 export function sparklinePoints(values: number[]) {
@@ -88,13 +86,10 @@ export function Streak({ streak }: { streak: Dashboard['streak'] }) {
           </li>
         ))}
       </ul>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <small className="muted" tabIndex={0}>
-            {tr('home:best', { count: streak.best, formatted: fmt.number(streak.best) })}
-          </small>
-        </TooltipTrigger>
-        <TooltipContent>{tr('home:streak_definition')}</TooltipContent>
+      <Tooltip content={tr('home:streak_definition')}>
+        <small className="muted" tabIndex={0}>
+          {tr('home:best', { count: streak.best, formatted: fmt.number(streak.best) })}
+        </small>
       </Tooltip>
     </>
   );
@@ -150,22 +145,22 @@ function Pins({
             onClick={() => onOpen(item.id)}
             actions={
               <>
-                <Button
+                <IconButton
                   variant="ghost"
-                  disabled={!i}
-                  aria-label={tr('home:move_up', { title: item.title })}
+                  size="sm"
+                  isDisabled={!i}
+                  label={tr('home:move_up', { title: item.title })}
+                  icon={<ArrowUp size={14} />}
                   onClick={() => void reorder(i, i - 1)}
-                >
-                  ↑
-                </Button>
-                <Button
+                />
+                <IconButton
                   variant="ghost"
-                  disabled={i === items.length - 1}
-                  aria-label={tr('home:move_down', { title: item.title })}
+                  size="sm"
+                  isDisabled={i === items.length - 1}
+                  label={tr('home:move_down', { title: item.title })}
+                  icon={<ArrowDown size={14} />}
                   onClick={() => void reorder(i, i + 1)}
-                >
-                  ↓
-                </Button>
+                />
               </>
             }
           />
@@ -244,21 +239,16 @@ export function Home({
               {displayName ? tr('home:greeting_name', { name: displayName }) : ''}
             </>
           }
-          description={<AnimatedText texts={[tr('home:prompt_1'), tr('home:prompt_2'), tr('home:prompt_3')]} />}
+          description={tr('home:prompt_1')}
           actions={
-            <Button variant="ghost" id="welcome-entry" onClick={() => navigate('welcome')}>
-              <Info size={14} />
-              {tr('home:how_to_use')} · {tr('welcome:try_title')}
-            </Button>
+            <Button variant="ghost" id="welcome-entry" icon={<Info size={14} />} label={`${tr('home:how_to_use')} · ${tr('welcome:try_title')}`} onClick={() => navigate('welcome')} />
           }
         />
 
         {error && (
           <div role="alert">
             {error}
-            <Button variant="ghost" onClick={refresh}>
-              {tr('common:retry')}
-            </Button>
+            <Button variant="ghost" label={tr('common:retry')} onClick={refresh} />
           </div>
         )}
         {!data ? (
@@ -288,11 +278,7 @@ export function Home({
                       <span className="line-clamp-2">{plainText(recent.lastChat)}</span>
                     );
                     return index === 0 ? (
-                      <SurfaceCard
-                        key={recent.document.id}
-                        variant="flat"
-                        className="flex-row items-center gap-[var(--space-3)] p-[var(--space-3)]"
-                      >
+                      <AstryxCard key={recent.document.id} padding={3} className="home-continue">
                         {thumbnail}
                         <div className="min-w-0 flex-1">
                           <h3 className="font-medium break-words" lang={contentLanguage(title) ?? 'en'}>
@@ -301,13 +287,14 @@ export function Home({
                           <p className="text-[var(--muted)]">{snippet}</p>
                         </div>
                         <Button
-                          aria-label={tr('home:resume_title', { title })}
+                          variant="primary"
+                          label={tr('home:resume_title', { title })}
                           onClick={() => navigate('workspace', recent.document.id)}
                         >
                           {tr('home:resume')}
                           <ArrowUpRight size={16} aria-hidden="true" />
                         </Button>
-                      </SurfaceCard>
+                      </AstryxCard>
                     ) : (
                       <ListRow
                         key={recent.document.id}
@@ -328,14 +315,11 @@ export function Home({
             <div className="art-reader-launchpad">
               <UploadCard
                 title={tr('home:upload')}
+                primary={!data.recentDocuments.length}
                 folders={folders}
                 onImported={refresh}
                 footer={
-                  <Button variant="ghost" className="justify-start" onClick={() => navigate('library')}>
-                    <BookOpen size={16} />
-                    {tr('common:library')}
-                    <ArrowUpRight size={16} aria-hidden="true" />
-                  </Button>
+                  <Button variant="ghost" icon={<BookOpen size={16} />} endContent={<ArrowUpRight size={16} aria-hidden="true" />} label={tr('common:library')} onClick={() => navigate('library')} />
                 }
               />
               {guidance}
@@ -363,9 +347,7 @@ export function Home({
                       </label>
                     </>
                   )}
-                  <Button variant="ghost" onClick={onUsage}>
-                    {tr('home:view_usage')}
-                  </Button>
+                  <Button variant="ghost" label={tr('home:view_usage')} onClick={onUsage} />
                 </Card>
               )}
               {data.streak.best > 0 && (

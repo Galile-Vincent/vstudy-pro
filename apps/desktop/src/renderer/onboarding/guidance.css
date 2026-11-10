@@ -1,9 +1,9 @@
 /* Learning surfaces inherit the product palette and remain readable without animation. */
 .learning-help-trigger { margin-inline-start:auto; }
-.learning-dialog[data-slot=dialog-content][data-state] { width:min(var(--learning-width,760px),calc(100vw - var(--space-8))); max-width:none; max-height:calc(100dvh - var(--space-8)); overflow:auto; padding:var(--space-6); background:var(--surface); backdrop-filter:none; }
+.learning-body { display:grid; gap:var(--space-4); padding:var(--space-4) var(--space-6) var(--space-6); }
 .learning-dialog[data-compact] { --learning-width:520px; }
 .learning-dialog[data-compact] > [data-slot=section] > :first-child { padding-inline-end:var(--space-6); }
-.learning-dialog > header { display:flex; align-items:center; justify-content:space-between; gap:var(--space-4); }
+
 .learning-dialog p,.walkthrough-caption,.walkthrough-transcript { line-height:1.7; }
 .learning-actions { display:flex; gap:var(--space-2); flex-wrap:wrap; }
 .walkthrough { min-width:0; }
@@ -11,20 +11,20 @@
 .walkthrough-window { background:color-mix(in oklab,var(--ink) 5%,var(--surface)); padding:var(--space-4); border-radius:var(--r-md); }
 .walkthrough-toolbar { display:flex; align-items:center; gap:var(--space-2); padding-bottom:var(--space-4); }
 .walkthrough-diagram { display:grid; gap:var(--space-2); }
-.walkthrough-node { display:flex; align-items:center; gap:var(--space-3); min-height:calc(var(--space-6) * 2); padding:var(--space-3); border-radius:var(--r-sm); transition:background var(--motion-base) var(--ease-out-soft); }
+.walkthrough-node { display:flex; align-items:center; gap:var(--space-3); min-height:calc(var(--space-6) * 2); padding:var(--space-3); border-radius:var(--r-sm); transition:background-color var(--motion-fast) var(--ease-standard); }
 .walkthrough-node > span { display:grid; place-items:center; flex-shrink:0; width:var(--space-6); height:var(--space-6); border-radius:var(--r-pill); background:var(--surface); font-variant-numeric:tabular-nums; }
 .walkthrough-node[data-active=true] { background:var(--active); outline:2px solid var(--ink); outline-offset:-2px; }
 .walkthrough-node[data-done=true] { color:var(--muted); }
-.walkthrough-track { height:var(--space-1); background:var(--surface); margin-top:var(--space-4); overflow:hidden; border-radius:var(--r-pill); }
-.walkthrough-track span { display:block; width:100%; height:100%; background:var(--ink); transform:scaleX(0); transform-origin:left; }
-.walkthrough[data-playing=true] .walkthrough-track span { animation:learning-time 5s linear forwards; }
-.walkthrough[data-playing=false] .walkthrough-track span { animation-play-state:paused; }
-@keyframes learning-time { to { transform:scaleX(1); } }
+.walkthrough-track { display:block; width:100%; margin-top:var(--space-4); }
+
+
+
+
 .walkthrough-caption { min-height:4em; margin-block:var(--space-4); }
 .walkthrough-transcript { margin-top:var(--space-4); }
 .walkthrough-transcript summary { cursor:pointer; font-weight:500; }
 .walkthrough-transcript ol { padding-inline-start:var(--space-6); display:grid; gap:var(--space-3); }
-.context-coach { display:flex; justify-content:space-between; align-items:flex-start; gap:var(--space-4); padding:var(--space-3) var(--space-6); margin:var(--space-3) var(--space-6) 0; background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); border-radius:var(--r-md); }
+.context-coach { display:flex; justify-content:space-between; align-items:flex-start; gap:var(--space-4); padding:var(--space-3) var(--space-6); margin:var(--space-3) var(--space-6) 0; background:var(--w-tone,color-mix(in oklab,var(--ink) 4%,var(--surface))); border:1px solid var(--line); border-radius:var(--r-md); }
 .context-coach > div { min-width:0; }
 .context-coach summary { cursor:pointer; }
 .context-coach summary:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }

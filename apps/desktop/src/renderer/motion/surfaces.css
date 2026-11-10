@@ -1,9 +1,9 @@
 /* Application overrides follow the registry and theme styles. */
 [data-slot=sheet-content], [data-slot=sheet-overlay], [data-slot=dialog-content], [data-slot=dialog-overlay] {
   animation-duration:var(--motion-base);
-  animation-timing-function:var(--ease-out-soft);
+  animation-timing-function:var(--ease-entrance);
   transition-duration:var(--motion-base);
-  transition-timing-function:var(--ease-out-soft);
+  transition-timing-function:var(--ease-entrance);
 }
 :is([data-slot=sheet-content],[data-slot=sheet-overlay],[data-slot=dialog-content],[data-slot=dialog-overlay])[data-state=closed] {
   animation-duration:var(--motion-fast);
@@ -25,50 +25,10 @@ html[data-theme-transition=view]::view-transition-new(root) {
   html[data-theme-transition=view]::view-transition-new(root) { animation:none; }
 }
 
-.moodle-assistant-panel, .moodle-assistant-panel:not([hidden]) {
-  animation:none;
-  opacity:1;
-  transform:none;
-  transition:opacity var(--motion-base) var(--ease-out-soft), transform var(--motion-base) var(--ease-out-soft), display var(--motion-base) allow-discrete;
-}
-.moodle-assistant-panel[hidden] {
-  opacity:0;
-  transform:translateY(var(--space-2));
-  pointer-events:none; interactivity:inert;
-  transition-timing-function:var(--ease-exit);
-}
-/* Keep absolute positioning during exit so the reader never resizes mid-fade. */
-.app-shell[data-sidebar-overlay=true] .shell-sidebar {
-  position:absolute; inset:var(--topbar-height) auto 0 0; z-index:50;
-  width:min(85vw,var(--sidebar-width)); background:var(--surface); box-shadow:var(--elevation-floating);
-  opacity:1; transform:none;
-  transition:opacity var(--motion-base) var(--ease-out-soft), transform var(--motion-base) var(--ease-out-soft), display var(--motion-base) allow-discrete;
-}
-.app-shell[data-sidebar-overlay=true] .shell-sidebar[hidden] {
-  opacity:0; transform:translateX(calc(-1 * var(--space-2)));
-  pointer-events:none; interactivity:inert;
-  transition-timing-function:var(--ease-exit);
-}
-@media(max-width:999px) {
-  .app-shell[data-view=workspace] .shell-sidebar {
-    position:absolute; z-index:40; inset:0 auto 0 0; width:var(--sidebar-width);
-    background:var(--surface); box-shadow:var(--elevation-floating);
-    opacity:1; transform:none;
-    transition:opacity var(--motion-base) var(--ease-out-soft), transform var(--motion-base) var(--ease-out-soft), display var(--motion-base) allow-discrete;
-  }
-  .app-shell[data-view=workspace] .shell-sidebar[hidden] {
-    opacity:0; transform:translateX(calc(-1 * var(--space-2)));
-    pointer-events:none; interactivity:inert;
-  }
-  @starting-style { .app-shell[data-view=workspace] .shell-sidebar:not([hidden]) { opacity:0; transform:translateX(calc(-1 * var(--space-2))); } }
-}
-@starting-style {
-  .moodle-assistant-panel:not([hidden]) { opacity:0; transform:translateY(var(--space-2)); }
-  .app-shell[data-sidebar-overlay=true] .shell-sidebar:not([hidden]) { opacity:0; transform:translateX(calc(-1 * var(--space-2))); }
-}
-@media(prefers-reduced-motion:reduce) {
-  .moodle-assistant-panel, .app-shell[data-sidebar-overlay=true] .shell-sidebar, .app-shell[data-view=workspace] .shell-sidebar { transition:none; }
-}
+.moodle-assistant-panel, .moodle-assistant-panel:not([hidden]) { animation:none; opacity:1; transform:none; transition:opacity var(--motion-base) var(--ease-entrance), transform var(--motion-base) var(--ease-entrance), display var(--motion-base) allow-discrete; }
+.moodle-assistant-panel[hidden] { opacity:0; transform:translateY(var(--space-2)); pointer-events:none; interactivity:inert; transition-timing-function:var(--ease-exit); }
+@starting-style { .moodle-assistant-panel:not([hidden]) { opacity:0; transform:translateY(var(--space-2)); } }
+@media(prefers-reduced-motion:reduce) { .moodle-assistant-panel { transition:none; } }
 
 .chat-motion { display:contents; }
 .chat-pane > .chat-motion > .aui-thread-root { flex:1; height:auto; min-height:0; }
