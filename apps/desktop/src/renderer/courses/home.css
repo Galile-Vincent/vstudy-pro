@@ -41,3 +41,33 @@
     outline-offset: -2px;
   }
 }
+
+/* Catalog: courses on the left, what is due soon on the right. */
+.courses-home-layout { display:grid; grid-template-columns:minmax(0,1fr) 20rem; gap:var(--space-8); align-items:start; min-width:0; }
+.courses-catalog { min-width:0; }
+.courses-due { position:sticky; top:var(--space-4); min-width:0; padding:var(--space-5); border-radius:var(--r-lg); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
+.courses-due .moodle-due-list { margin:0; padding:0; list-style:none; }
+.courses-due [data-slot=list-row] { min-height:0; }
+.courses-due .moodle-due-link { font-weight:500; }
+@media(max-width:1199px) { .courses-home-layout { grid-template-columns:minmax(0,1fr); gap:var(--space-6); } .courses-due { position:static; } }
+
+/* Each course is a card with visible depth. */
+.courses-catalog .moodle-grid { gap:var(--space-2); margin:0; }
+.courses-catalog .moodle-grid[data-view=cards] { gap:var(--space-3); }
+.moodle-course-card > [data-slot=card] { transition:background-color var(--motion-fast) var(--ease-standard),box-shadow var(--motion-fast) var(--ease-standard); }
+.moodle-course-card > [data-slot=card]:is(:hover,:focus-within) { background:var(--glass-fill-hover); box-shadow:var(--glass-shadow-hover); }
+.moodle-course-card[data-group-start=true] { margin-top:var(--space-3); }
+.moodle-course-card [data-slot=list-row] { padding-inline:var(--space-2); }
+.moodle-course-card .course-title { font-weight:600; font-size:var(--type-md); }
+.course-open::after { content:''; position:absolute; inset:0; border-radius:var(--r-lg); }
+.moodle-course-card > [data-slot=card] { position:relative; }
+.moodle-course-card .course-meta time[data-urgent=true] { color:var(--ink); font-weight:600; }
+.courses-page .moodle-course-card > [data-slot=card] { border-radius:var(--r-lg); }
+.courses-due h2 { font-size:var(--type-lg); }
+.courses-due h3 { margin:0; font-size:var(--type-xs); font-weight:600; letter-spacing:.02em; text-transform:none; color:var(--muted); }
+.courses-due section { gap:var(--space-1); }
+.courses-due section + section { margin-top:var(--space-3); padding-top:var(--space-3); border-top:1px solid var(--hairline); }
+.courses-due [data-slot=list-row] { gap:var(--space-1); }
+.courses-due .ui-row-target { padding:var(--space-2); }
+.courses-due [data-slot=list-row] > .ui-row-target > .min-w-0 > .block:last-child { font-size:var(--type-xs); }
+.courses-due .moodle-due-link { font-size:var(--type-base); line-height:1.35; }

@@ -7,11 +7,18 @@
     "surface-class": 2
   },
   "courses/courses.css": {
+    "shadow": 2,
+    "radius": 0,
+    "color": 0,
+    "backdrop": 0,
+    "surface-class": 26
+  },
+  "courses/home.css": {
     "shadow": 0,
     "radius": 0,
     "color": 0,
     "backdrop": 0,
-    "surface-class": 25
+    "surface-class": 8
   },
   "courses/updates.css": {
     "shadow": 0,

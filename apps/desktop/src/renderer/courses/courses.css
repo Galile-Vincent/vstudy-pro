@@ -718,3 +718,21 @@
 .moodle-agent-body > .conversation-list { flex:none; }
 .moodle-course-chat .aui-thread-viewport { min-height:0; }
 .moodle-study-tools { flex:none; font-size:var(--type-sm); color:var(--muted); }
+
+/* Course detail: clear panels, week cards and underlined tabs. */
+.moodle-page [data-slot=page-header]:not(.moodle-webview-header) > div h1 { font-weight:600; }
+.moodle-page .moodle-panel { padding:var(--space-5); border-radius:var(--r-lg); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); }
+.moodle-page .moodle-week { border-radius:var(--r-lg); background:var(--glass-fill); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden; scroll-margin-top:var(--space-4); }
+.moodle-page .moodle-week-heading { background:transparent; padding:var(--space-4) var(--space-5); border-radius:0; }
+.moodle-page .moodle-week-heading:not(:disabled):hover { background:var(--glass-tone); }
+.moodle-page .moodle-week > div { padding-bottom:var(--space-2); }
+.moodle-page .moodle-module { border-radius:var(--r-sm); }
+.moodle-page .moodle-module:hover { background:var(--glass-tone); }
+.moodle-page .moodle-weeks { gap:var(--space-3); }
+.moodle-page .moodle-tabs [role=tablist] { background:transparent; gap:var(--space-1); padding:0; border-radius:0; border-bottom:1px solid var(--hairline); margin-bottom:var(--space-5); }
+.moodle-page .moodle-tabs [role=tab] { border-radius:0; padding:var(--space-3) var(--space-3); color:var(--muted); }
+.moodle-page .moodle-tabs [role=tab][data-state=active] { background:transparent; color:var(--ink); font-weight:600; box-shadow:inset 0 -2px 0 var(--ink); }
+.moodle-page .moodle-tabs [role=tab]:hover:not([data-state=active]) { color:var(--ink); }
+@media(forced-colors:active),(prefers-contrast:more) { .moodle-page .moodle-tabs [role=tab][data-state=active] { outline:none; box-shadow:inset 0 -3px 0 CanvasText; } }
+.moodle-page .moodle-week .moodle-safe-html { padding:0 var(--space-5) var(--space-3); background:transparent; }
+.moodle-page .moodle-week-heading { text-align:start; }

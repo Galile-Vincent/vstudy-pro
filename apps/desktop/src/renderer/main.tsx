@@ -10,6 +10,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./app";
 import "./style.css";
 import "./tokens.css";
+import "./page-depth.css";
 import "./settings/themes.css";
 import "./settings/theme-transition.css";
 import "./motion/surfaces.css";

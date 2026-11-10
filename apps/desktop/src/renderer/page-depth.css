@@ -1,0 +1,20 @@
+/* Depth for the pages where cards must read clearly: the course catalog, course detail and library.
+   Lifted surfaces carry a faint edge and a layered shadow, so cards never melt into the page. */
+:is(.courses-page,.moodle-page,.library-view) {
+ --glass-edge:0 0 0 1px color-mix(in srgb,var(--ink) 7%,transparent);
+ --glass-depth:0 1px 2px color-mix(in srgb,var(--shadow-color) 6%,transparent),0 8px 24px -10px color-mix(in srgb,var(--shadow-color) 18%,transparent);
+ --glass-depth-hover:0 2px 4px color-mix(in srgb,var(--shadow-color) 8%,transparent),0 14px 30px -12px color-mix(in srgb,var(--shadow-color) 26%,transparent);
+ --glass-depth-float:0 4px 12px color-mix(in srgb,var(--shadow-color) 10%,transparent),0 24px 56px -16px color-mix(in srgb,var(--shadow-color) 30%,transparent);
+ --glass-shadow:var(--glass-edge),var(--glass-depth);
+ --glass-shadow-hover:var(--glass-edge),var(--glass-depth-hover);
+ --glass-shadow-float:var(--glass-edge),var(--glass-depth-float);
+ --glass-fill-hover:color-mix(in oklab,var(--glass-base) min(100%,calc(var(--glass-alpha) + 14%)),transparent);
+ --elevation-raised:var(--glass-shadow);
+ --elevation-floating:var(--glass-shadow-float);
+}
+:root.dark :is(.courses-page,.moodle-page,.library-view) {
+ --glass-edge:0 0 0 1px color-mix(in srgb,var(--ink) 10%,transparent);
+ --glass-depth:0 1px 2px color-mix(in srgb,var(--shadow-color) 45%,transparent),0 10px 28px -10px color-mix(in srgb,var(--shadow-color) 70%,transparent);
+ --glass-depth-hover:0 2px 4px color-mix(in srgb,var(--shadow-color) 50%,transparent),0 18px 36px -12px color-mix(in srgb,var(--shadow-color) 80%,transparent);
+ --glass-depth-float:0 4px 14px color-mix(in srgb,var(--shadow-color) 55%,transparent),0 28px 60px -16px color-mix(in srgb,var(--shadow-color) 85%,transparent);
+}

@@ -542,7 +542,7 @@ function CoursesBody({
       </div>} />
   );
   return (
-    <div ref={pageRef} className={courseId ? "moodle-page" : "h-full overflow-auto text-[var(--ink)] [&_svg]:size-4 [&_button]:cursor-pointer [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-[var(--focus)]"} data-course={Boolean(detail)}>
+    <div ref={pageRef} className={courseId ? "moodle-page" : "courses-page h-full overflow-auto text-[var(--ink)] [&_svg]:size-4 [&_button]:cursor-pointer [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-[var(--focus)]"} data-course={Boolean(detail)}>
       <PageContainer as="main" className={courseId ? "pt-0" : undefined}>
         {!detail && !showUpdates && header}
         {(notice || courseId) && <div role="status" aria-live="polite">
@@ -669,7 +669,7 @@ function CoursesBody({
                   </SegmentedTabsList>
                   <TabsContent value="content">
                     <div className="grid items-start gap-6 mb-6 min-[1280px]:grid-cols-2">
-                      <Section title={tr("moodle:up_next")} actions={
+                      <Section className="moodle-panel" title={tr("moodle:up_next")} actions={
                           <Button
                             variant="ghost"
                             onClick={() => setTab("deadlines")}
@@ -689,7 +689,7 @@ function CoursesBody({
                             .slice(0, 1),
                         )}
                       </Section>
-                      <Section title={tr("moodle:latest_updates")}>
+                      <Section className="moodle-panel" title={tr("moodle:latest_updates")}>
                         {notifications(3)}
                       </Section>
                     </div>
@@ -845,8 +845,8 @@ function CoursesBody({
             </div>
           )
         ) : overview && (overview.courses.length > 0 || overview.accounts.some(account => account.syncedAt)) ? (
-          <div className="flex min-w-0 flex-col gap-6">
-    <Section title={tr("moodle:your_courses")} count={overview.courses.length}>
+          <div className="courses-home-layout">
+    <Section className="courses-catalog" title={tr("moodle:your_courses")} count={overview.courses.length}>
       <Tabs
         value={selectedTerm}
         onValueChange={(value) => {
@@ -933,7 +933,7 @@ function CoursesBody({
                   ]
                     .filter(Boolean)
                     .join("\n");
-                  const Surface = view === "cards" ? Card : "div";
+                  const Surface = Card;
                   const urgent =
                     !!attention.next && Date.parse(attention.next.dueAt) - Date.now() < 86400000;
                   return (
@@ -948,7 +948,7 @@ function CoursesBody({
                       }
                     >
                       <Surface
-                        {...(view === "cards" ? { variant: "flat" as const } : {})}
+                        variant="raised"
                         className="py-0"
                       >
                         <ListRow
@@ -1110,7 +1110,7 @@ function CoursesBody({
         ))}
       </Tabs>
     </Section>
-    <Section title={tr("moodle:due_soon")} count={overdue.length + dueSoon.length + undated.length}>
+    <Section className="courses-due" title={tr("moodle:due_soon")} count={overdue.length + dueSoon.length + undated.length}>
       {([overdue, dueSoon, undated] as const).map(
         (items, group) =>
           items.length > 0 && (

@@ -992,7 +992,7 @@ it("retains a one-column grid fallback and separate course actions", async () =>
   await act(async () => getByRole(host, "button", { name: "Cards" }).click());
   expect(grid.className).toContain("min(100%,22rem)");
   const card = grid.querySelector('[data-slot=card]')!;
-  expect(card.getAttribute("data-variant")).toBe("flat");
+  expect(card.getAttribute("data-variant")).toBe("raised");
   expect(card.tagName).toBe("DIV");
   expect(card.querySelector("button button")).toBeNull();
   expect(host.querySelector('[data-slot=page-header] h1')?.className).not.toContain("break-all");
