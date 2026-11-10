@@ -165,15 +165,14 @@ export function ProviderSettings({
                   <>
                     <AiCliInventory settings />
                     <div className="settings-intro">
+                      <p className="settings-intro-lead">{tr('novice:privacy_lead')}</p>
                       <p>{tr('novice:privacy')}</p>
-                      <ol>
-                        <li>{tr('novice:step_access')}</li>
-                        <li>{tr('novice:step_key')}</li>
-                      </ol>
                     </div>
                     <details className="settings-disclosure">
                       <summary>{tr('novice:setup_title')}</summary>
-                      <div className="settings-disclosure-body"><AiSetupGuide onClose={requestClose} /></div>
+                      <div className="settings-disclosure-body">
+                        <AiSetupGuide onClose={requestClose} leadingSteps={[tr('novice:step_access'), tr('novice:step_key')]} />
+                      </div>
                     </details>
                     <Section level={3} title={tr('settings:api_keys')}><Card padding={4} className="settings-stack">
                       {providers.filter(provider => provider.config.kind === 'api').map(provider => (

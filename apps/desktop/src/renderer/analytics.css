@@ -15,3 +15,6 @@
 .analytics-disclosure summary { width:fit-content; cursor:pointer; color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
 .analytics-disclosure details[open] summary { color:var(--ink); }
 .analytics-disclosure details > p { color:var(--muted); font-size:var(--type-sm); }
+.analytics-delete { justify-self:start; }
+.analytics-deletion { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-3); }
+.analytics-deletion > p { flex-basis:100%; }

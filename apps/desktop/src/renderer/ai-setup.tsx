@@ -15,12 +15,13 @@ export function AiSetupNotice({ onSettings }: { onSettings: () => void }) {
 }
 
 /** Give first-time students a complete setup sequence and a useful no-account fallback. */
-export function AiSetupGuide({ onClose }: { onClose: () => void }) {
+export function AiSetupGuide({ onClose, leadingSteps = [] }: { onClose: () => void; leadingSteps?: readonly string[] }) {
   useTranslation();
   return <section className="ai-setup-guide" aria-label={tr('novice:setup_title')}>
     <h3>{tr('novice:setup_title')}</h3>
     <p>{tr('novice:without_ai')}</p>
     <ol>
+      {leadingSteps.map(step => <li key={step}>{step}</li>)}
       <li>{tr('novice:step_answer')}</li>
     </ol>
     <h4>{tr('novice:no_account')}</h4>
