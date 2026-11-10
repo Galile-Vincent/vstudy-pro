@@ -48,7 +48,7 @@ export function ShellChrome({ route, status, sidebarVisible, setSidebarVisible }
   const { toggle, expanded } = useSidebarToggle(sidebarVisible, setSidebarVisible);
   const workspace = route.view === 'workspace';
   return (
-    <div className="shell-chrome">
+    <header className="shell-chrome">
       <TabStrip />
       {workspace ? (
         <div className="shell-workspace-status">{status}</div>
@@ -79,6 +79,6 @@ export function ShellChrome({ route, status, sidebarVisible, setSidebarVisible }
           </Button>
         </div>
       )}
-    </div>
+    </header>
   );
 }

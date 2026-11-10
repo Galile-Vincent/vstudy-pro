@@ -52,7 +52,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   db=new DatabaseSync(join(directory,'vstudy.sqlite')); db.exec('PRAGMA busy_timeout=5000; DELETE FROM activity_events; DELETE FROM activity_days; UPDATE documents SET lastOpenedAt=NULL;');
   const refresh=async()=>{
    const expected=await page.evaluate(async()=>{window.dispatchEvent(new window.Event('activity-updated'));const data=await window.desktop.invoke('dashboard:get',{});return {pins:[...data.pinnedFolders.map(f=>f.name),...data.pinnedDocuments.slice(0,5).map(d=>d.document.title)].sort(),continueTitle:data.recentDocuments[0]?.document.title??null};});
-   await page.waitForFunction(expected=>{const actual=[...window.document.querySelectorAll('.home-card .home-row')].map(row=>row.querySelector('strong')?.textContent??row.textContent).sort();const title=window.document.querySelector('.home-continue h3')?.textContent??null;return JSON.stringify(actual)===JSON.stringify(expected.pins)&&title===expected.continueTitle&&window.document.querySelectorAll('.home-continue h3').length===(expected.continueTitle?1:0);},expected);
+   await page.waitForFunction(expected=>{const actual=[...window.document.querySelectorAll('.home-pins [data-slot=list-row]')].map(row=>row.querySelector('.font-medium')?.textContent??row.textContent).sort();const title=window.document.querySelector('.home-continue h3')?.textContent??null;return JSON.stringify(actual)===JSON.stringify(expected.pins)&&title===expected.continueTitle&&window.document.querySelectorAll('.home-continue h3').length===(expected.continueTitle?1:0);},expected);
   };
   await refresh(); await audit('home-empty'); await capture('home-empty');
   // Metadata insert shapes follow the benchmark seeder at a three-document scale.
@@ -62,7 +62,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   for(const [i,id] of ids.entries()) db.prepare("INSERT INTO documents(id,title,sourceName,sourceHash,sourcePath,mime,status,markdownPath,createdAt,position,lastOpenedAt,pinned,pinnedAt) VALUES(?,?,?,?,?,'text/markdown','ready',?,?,?,?,1,?)").run(id,`Study ${i}`,'sample.md',id.replaceAll('-','').padEnd(64,'0'),source.sourcePath,source.markdownPath,now,i,now,new Date(Date.now()-i*1000).toISOString());
   await refresh(); await page.getByRole('button',{name:'Study 0',exact:true}).first().waitFor(); await audit('home-populated'); await capture('home-populated');
   await page.getByRole('button',{name:home.move_up.replace('{{title}}','Study 1'),exact:true}).press('Enter');
-  await page.getByRole('region',{name:home.pinned_documents,exact:true}).locator('.home-row').first().filter({hasText:'Study 1'}).waitFor();
+  await page.getByRole('region',{name:home.pinned_documents,exact:true}).locator('[data-slot=list-row]').first().filter({hasText:'Study 1'}).waitFor();
   db.prepare('UPDATE documents SET title=? WHERE id=?').run('非常に長い名前・很長的文件名稱・A long research title '.repeat(5),ids[0]);
   await refresh(); await capture('home-long-names');
   db.prepare('UPDATE documents SET title=? WHERE id=?').run('Study 0',ids[0]);
@@ -73,7 +73,8 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   await refresh(); await capture('home-streak-40');
   await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},resolve('e2e/fixtures/reading.md'));
   await page.getByRole('button',{name:home.choose_file,exact:true}).click();
-  await page.locator('.home-upload [role=status]').waitFor();
+  await page.locator('.home-upload .upload-status').waitFor();
+  await page.locator('.home-upload progress').waitFor({state:'detached'});
   await page.evaluate(()=>{const input=window.document.createElement('input');input.type='file';input.id='home-drop-file';input.hidden=true;window.document.body.append(input);});
   await page.locator('#home-drop-file').setInputFiles(resolve('e2e/fixtures/reading.md'));
   await page.evaluate(()=>{const input=window.document.querySelector('#home-drop-file');const dataTransfer=new window.DataTransfer();for(const file of input.files)dataTransfer.items.add(file);window.document.querySelector('.home-upload').dispatchEvent(new window.DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer}));input.remove();});
@@ -83,7 +84,7 @@ for(const language of full?['en','zh-Hant','ja']:['en']) {
   await page.locator('.blank-chat').waitFor(); await capture('chat-document');
   await page.getByTestId('document-markdown').locator('p').first().evaluate(element=>{const walker=window.document.createTreeWalker(element,window.NodeFilter.SHOW_TEXT);let node;while((node=walker.nextNode())){if(node.textContent.trim().length>3){const range=window.document.createRange();range.setStart(node,0);range.setEnd(node,Math.min(25,node.textContent.length));const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);window.document.dispatchEvent(new window.Event('mouseup'));return;}}});
   await page.keyboard.press('Control+Shift+k');
-  await page.locator('.aui-composer-input').waitFor();await page.locator('.blank-chat').waitFor();await capture('chat-selection');
+  await page.locator('.blank-chat').waitFor();await page.locator('.blank-chat').waitFor();await capture('chat-selection');
   const settings=await page.evaluate(()=>window.desktop.invoke('settings:get',{}));
   await page.evaluate(s=>window.desktop.invoke('settings:set',{...s,replyLanguage:'ja'}),settings);await page.reload();
   await page.locator('.blank-chat').waitFor();await capture('chat-language');
