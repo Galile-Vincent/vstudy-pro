@@ -45,8 +45,8 @@ it('offers open, download and save in the course dialog, with a switchable metho
     const method = getByRole(host,'combobox');
     expect(method.textContent).toContain('Original file in system app');
     expect(host.textContent).toContain('Open as');
-    expect(getByRole(host,'button',{name:'Open'}).getAttribute('data-variant')).toBe('default');
-    expect(getByRole(host,'button',{name:'Download a copy…'}).getAttribute('data-variant')).toBe('outline');
+    expect(getByRole(host,'button',{name:'Open'}).hasAttribute('disabled')).toBe(false);
+    expect(getByRole(host,'button',{name:'Download a copy…'}).hasAttribute('disabled')).toBe(false);
     await act(async () => fireEvent.click(getByRole(host,'button',{name:'Open'})));
     expect(action).toHaveBeenLastCalledWith({kind:'open',method:'original'});
     await chooseMethod(method, 'VStudy reader');
@@ -57,7 +57,7 @@ it('offers open, download and save in the course dialog, with a switchable metho
     expect(action).toHaveBeenLastCalledWith({kind:'download'});
     await act(async () => fireEvent.click(getByRole(host,'button',{name:'Save to document library'})));
     expect(action).toHaveBeenLastCalledWith({kind:'save'});
-    expect(getByRole(host,'status').textContent).toBe('Saved to document library');
+    expect(Array.from(host.querySelectorAll('[role=status]')).some(node=>node.textContent==='Saved to document library')).toBe(true);
     expect(desktop.invoke).not.toHaveBeenCalledWith('settings:set',expect.anything());
   } finally {await act(async () => root.unmount()); host.remove();}
 });

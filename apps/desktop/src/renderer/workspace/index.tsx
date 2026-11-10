@@ -1,3 +1,4 @@
+import { LayoutHeader } from "@astryxdesign/core";
 import { setDocumentUndo, useDocumentUndo } from './document-undo';
 import { captureReaderPosition, restoreReaderPosition } from './reader-position';
 import { useTabPresentation } from '../tab-presentation';
@@ -10,9 +11,9 @@ import { PaneTabs } from './pane-tabs';
 import { ContextCoach, HelpMenu } from "../onboarding/help";
 import { ReaderOfflineNotice } from './offline-notice';
 import { ReaderWelcome } from './reader-welcome';
-import { Textarea } from '../components/ui/textarea';
+import { TextArea as Textarea } from "@astryxdesign/core";
 import { AiParseControls } from '../ai-parse/ai-parse-controls';
-import { Button } from '../components/ui/button';
+import { Button } from "@astryxdesign/core";
 import { useReadingActivity } from '../home/use-reading-activity';
 import { useNavigate } from '../shell';
 import { Settings as SettingsIcon, ArrowLeftRight, Plus, Trash2, X, FileText, PanelLeft, Sparkles, ChevronRight } from "lucide-react";
@@ -419,8 +420,8 @@ export function Workspace() {
   const [chatSource, setChatSource] = useState<(typeof chatSources)[number]>('companion');
   const chat = (
     <section className="pane chat-pane" aria-label={tr('common:chat')}>
-      <header className="art-reader-chat-header"><div className="chat-source" role="group" aria-label={tr('web-chat:choose')}>{chatSources.map(source => <button key={source} type="button" aria-pressed={chatSource === source} onClick={() => setChatSource(source)}>{source === 'companion' ? <><Sparkles size={16} aria-hidden="true"/>{tr('art-reader:companion')}</> : tr(`web-chat:${source}`)}</button>)}</div>{chatSource === 'companion' && chatControls}</header>
-      {chatSource !== 'companion' && documentContext && <div><DocumentContextChip context={documentContext} onRemove={()=>setDocumentContext(null)}/><Button onClick={()=>void desktop.invoke('documents:copyContext',documentContext).then(()=>setNotice(tr('library:original.copied'))).catch(report)}>{tr('library:original.copy')}</Button><p>{tr('library:original.paste')}</p></div>}
+      <LayoutHeader height="auto" padding={0}><div className="art-reader-chat-header"><div className="chat-source" role="group" aria-label={tr('web-chat:choose')}>{chatSources.map(source => <button key={source} type="button" aria-pressed={chatSource === source} onClick={() => setChatSource(source)}>{source === 'companion' ? <><Sparkles size={16} aria-hidden="true"/>{tr('art-reader:companion')}</> : tr(`web-chat:${source}`)}</button>)}</div>{chatSource === 'companion' && chatControls}</div></LayoutHeader>
+      {chatSource !== 'companion' && documentContext && <div><DocumentContextChip context={documentContext} onRemove={()=>setDocumentContext(null)}/><Button label={tr('library:original.copy')} onClick={()=>void desktop.invoke('documents:copyContext',documentContext).then(()=>setNotice(tr('library:original.copied'))).catch(report)}>{tr('library:original.copy')}</Button><p>{tr('library:original.paste')}</p></div>}
       {chatSource !== 'companion' && <Suspense fallback={<p role="status">{tr('common:loading')}</p>}><HostedChat key={chatSource} provider={chatSource} compact/></Suspense>}
       <div className="chat-source-body" hidden={chatSource !== 'companion'}>
       {conversationError || historyError ? <LoadError message={conversationError || historyError} retry={() => conversationError ? setConversationRevision(value => value + 1) : setHistoryRevision(value => value + 1)}/> : conversation && history ? (
@@ -464,7 +465,7 @@ export function Workspace() {
             </div>
           )}
           <div className="new-chat-composer">
-          <Textarea disabled rows={2} aria-label={tr('common:ask_about_your_document')} placeholder={tr('common:ask_document_placeholder')}/>
+          <Textarea isDisabled value="" rows={2} isLabelHidden label={tr('common:ask_about_your_document')} placeholder={tr('common:ask_document_placeholder')}/>
           <ModelControls onOpenChange={setNewModelPickerOpen}
             providers={providers}
             model={model}
@@ -480,17 +481,17 @@ export function Workspace() {
   );
   const reading = (
     <section id="reading-content" tabIndex={-1} className="pane reading-pane" aria-label={tr('common:document')}>
-      {practice === doc?.id && <aside><strong>{tr('welcome:try_title')}</strong><p>{tr('welcome:try_steps')}</p><Button variant="ghost" onClick={() => { setPractice(null); try { sessionStorage.removeItem('vstudy:practice'); } catch { return; } }}>{tr('welcome:try_hide')}</Button></aside>}
-      <div className="pane-toolbar">
+      {practice === doc?.id && <aside><strong>{tr('welcome:try_title')}</strong><p>{tr('welcome:try_steps')}</p><Button label={tr('welcome:try_hide')} variant="ghost" onClick={() => { setPractice(null); try { sessionStorage.removeItem('vstudy:practice'); } catch { return; } }}>{tr('welcome:try_hide')}</Button></aside>}
+      <LayoutHeader height="auto" padding={0}><div className="pane-toolbar">
         <ContextCoach inline/>
         <span className="eyebrow">{doc?.sourceName ?? tr('common:reading_space')}</span>
         {doc && <button className="icon-button" title={tr('common:delete_document')} aria-label={tr('common:delete_document')} onClick={() => void removeDocument(doc.id)}><Trash2 size={16} /></button>}
-        {doc?.status==='ready' && <div role="group" aria-label={tr('library:original.view')}><Button variant="ghost" aria-pressed={readerDisplay==='markdown'} onClick={()=>setReaderDisplay('markdown')}>{tr('library:original.markdown')}</Button><Button variant="ghost" aria-pressed={readerDisplay==='file'} onClick={()=>setReaderDisplay('file')}>{tr('library:original.file')}</Button></div>}
+        {doc?.status==='ready' && <div role="group" aria-label={tr('library:original.view')}><Button label={tr('library:original.markdown')} variant="ghost" aria-pressed={readerDisplay==='markdown'} onClick={()=>setReaderDisplay('markdown')}>{tr('library:original.markdown')}</Button><Button label={tr('library:original.file')} variant="ghost" aria-pressed={readerDisplay==='file'} onClick={()=>setReaderDisplay('file')}>{tr('library:original.file')}</Button></div>}
         {doc && readerDisplay==='markdown' && <AiParseControls key={doc.id} document={doc} providers={providers} onProvidersChanged={refreshProviders} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{selectedVersion.current=version;setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
         <span className="muted">
           {doc?.status === "ready" ? tr('novice:ready_to_read') : ""}
         </span>
-      </div>
+      </div></LayoutHeader>
       {!doc ? (
         <div className="empty">
           <div className="empty-symbol"><FileText size={28}/></div>
@@ -567,7 +568,7 @@ export function Workspace() {
     >
       <h1 className="sr-only">{tr("common:document_library")}</h1><header className="app-header">
         <div className="row">
-          <Button variant="ghost" size="icon" aria-label={tr('common:toggle_document_library')} onClick={() => window.dispatchEvent(new Event('vstudy:toggle-sidebar'))}><PanelLeft size={18}/></Button>
+          <Button label={tr('common:toggle_document_library')} variant="ghost" size="md" aria-label={tr('common:toggle_document_library')} onClick={() => window.dispatchEvent(new Event('vstudy:toggle-sidebar'))} icon={<PanelLeft size={18}/>} isIconOnly></Button>
           <button className="ghost" onClick={() => navigate("library")}>{tr("common:library")}</button>
           <button data-testid="import-document" aria-label={tr('common:import_document')} disabled={busy||!connected} onClick={()=>void importDocument()}><Plus size={16}/></button>
           <ChevronRight size={14} className="art-reader-breadcrumb-separator" aria-hidden="true"/>
@@ -607,7 +608,7 @@ export function Workspace() {
       {(notice || undo) && (
         <div className="notice" role="status">
           <span>{notice || undo?.message}</span>
-          {undo && <Button ref={undoButton} variant="outline" size="sm" onClick={() => void restoreDocument().catch(report)}>{tr('library:undo')}</Button>}
+          {undo && <Button label={tr('library:undo')} ref={undoButton} variant="secondary" size="sm" onClick={() => void restoreDocument().catch(report)}>{tr('library:undo')}</Button>}
           <button
             aria-label={tr('common:dismiss_notification')}
             onClick={() => { setNotice(""); setDocumentUndo(null); }}

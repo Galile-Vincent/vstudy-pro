@@ -3,7 +3,7 @@ import type { Document, DocumentContextAttachment } from '../shared/domain';
 import { tr } from '../shared/i18n';
 import { desktop } from './bridge';
 import { captureRect, type Point } from './document-context';
-import { Button } from './components/ui/button';
+import { Button } from "@astryxdesign/core";
 import './document-original.css';
 export function DocumentOriginal({document:doc,pageCount,onAttach,initialPage=1,onPage}:{document:Document;pageCount:number;initialPage?:number;onPage?:(page:number)=>void;onAttach:(context:DocumentContextAttachment)=>void}) {
   const [page,setPage]=useState(initialPage),[image,setImage]=useState(''),[error,setError]=useState(''),[revision,setRevision]=useState(0);
@@ -41,14 +41,14 @@ export function DocumentOriginal({document:doc,pageCount,onAttach,initialPage=1,
     if(event.target===event.currentTarget && event.key==='ArrowLeft')setPage(p=>Math.max(1,p-1));
   }}>
     <div className="original-toolbar" role="toolbar" aria-label={tr('library:original.tools')}>
-      <Button variant="ghost" disabled={page<=1} aria-label={tr('library:original.previous')} onClick={()=>setPage(p=>p-1)}>‹</Button>
+      <Button label={tr('library:original.previous')} variant="ghost" isDisabled={page<=1} aria-label={tr('library:original.previous')} onClick={()=>setPage(p=>p-1)}>‹</Button>
       <label>{tr('library:original.page')} <input type="number" min={1} max={total} aria-label={tr('library:original.page')} value={page} onChange={e=>{const n=Number(e.target.value);if(Number.isInteger(n)&&n>=1&&n<=total)setPage(n);}}/> / {total}</label>
-      <Button variant="ghost" disabled={page>=total} aria-label={tr('library:original.next')} onClick={()=>setPage(p=>p+1)}>›</Button>
-      <Button variant="outline" disabled={!image} aria-pressed={capturing} title={tr('library:original.shortcuts')} onClick={()=>setCapturing(value=>!value)}>{tr('library:original.capture')}</Button>
-      <Button disabled={!image} title={tr('library:original.shortcuts')} onClick={()=>attach()}>{tr('library:original.sendPage')}</Button>
+      <Button label={tr('library:original.next')} variant="ghost" isDisabled={page>=total} aria-label={tr('library:original.next')} onClick={()=>setPage(p=>p+1)}>›</Button>
+      <Button label={tr('library:original.capture')} variant="secondary" isDisabled={!image} aria-pressed={capturing} tooltip={tr('library:original.shortcuts')} onClick={()=>setCapturing(value=>!value)}>{tr('library:original.capture')}</Button>
+      <Button label={tr('library:original.sendPage')} isDisabled={!image} tooltip={tr('library:original.shortcuts')} onClick={()=>attach()}>{tr('library:original.sendPage')}</Button>
     </div>
     <p className="original-hint" role="status">{capturing?tr('library:original.drag'):previewOnly?tr('library:original.previewOnly'):tr('library:original.shortcuts')}</p>
-    {error?<div role="alert">{error}<Button onClick={()=>setRevision(n=>n+1)}>{tr('common:retry')}</Button></div>:!image?<p role="status">{tr('common:loading_document')}</p>:<div className="original-page" data-capturing={capturing}>
+    {error?<div role="alert">{error}<Button label={tr('common:retry')} onClick={()=>setRevision(n=>n+1)}>{tr('common:retry')}</Button></div>:!image?<p role="status">{tr('common:loading_document')}</p>:<div className="original-page" data-capturing={capturing}>
       <img ref={img} src={image} alt={tr('library:original.pageAlt',{name:doc.title,page})} draggable={false}/>
       {capturing&&<div className="original-capture" onPointerDown={event=>{if(event.button!==0)return;event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);const b=event.currentTarget.getBoundingClientRect();const start={x:event.clientX-b.left,y:event.clientY-b.top};setDrag({start,end:start});}} onPointerMove={event=>{if(!drag || !event.currentTarget.hasPointerCapture(event.pointerId))return;const b=event.currentTarget.getBoundingClientRect();setDrag({...drag,end:{x:event.clientX-b.left,y:event.clientY-b.top}});}} onPointerUp={event=>{if(!drag)return;const b=event.currentTarget.getBoundingClientRect();const region=captureRect(drag.start,{x:event.clientX-b.left,y:event.clientY-b.top},b);setDrag(null);if(region)attach(region);}} onPointerCancel={()=>setDrag(null)}>
         {rect&&<div className="original-capture-rect" style={{left:rect.x,top:rect.y,width:rect.width,height:rect.height}}/>}

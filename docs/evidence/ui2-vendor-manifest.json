@@ -14,9 +14,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/attachment.aui.tsx",
       "registrySha256": "ec4275215b826173f428ec95b94e150b4ca21124f9094eec8a28dbd87033710d",
-      "patchedSha256": "7909377c582b63af8b119284a2da63481491c49aa676242466c32121f81a9eb6",
+      "patchedSha256": "fe70b63fe53d3383492ca386d552e4da291bddb64f9fe9d690808bbba2290f88",
       "patch": "docs/vendor-patches/assistant-ui--elements--attachment.aui.tsx.patch",
-      "reason": "Use semantic theme colors for attachment controls while preserving localized labels and attachment policy."
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/collapsible-root.tsx",
@@ -53,9 +53,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/image.tsx",
       "registrySha256": "916b2ca0f1097a2eb22e6e5c3ffd39a918dec71abff424b6b8795939733d53fb",
-      "patchedSha256": "cb6247a212e4dd100ad15e7be84cbe160dec75e7dcf16eb16dbd913900addf02",
+      "patchedSha256": "a7e96217a6b3a1f945064e8ab7a3c5309189ea471bec1bbb7a8d47aacf06a5c6",
       "patch": "docs/vendor-patches/assistant-ui--elements--image.tsx.patch",
-      "reason": "Preserve reviewed URL/blob allowlist and inert media policy; translate labels."
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/inline-citation.tsx",
@@ -71,9 +71,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/markdown-text.tsx",
       "registrySha256": "7d20bd8fe709a1a6aeee24ba82531309e374740ba6181e092592275ffd6ff8ac",
-      "patchedSha256": "a245ac5cc8b80b60c543d4c358f3c741c32103da5920f9273a40d57ebf0efe93",
+      "patchedSha256": "5beed0563e1a038f35394866789efddf356ea9543e479f74c5f1c195586990e2",
       "patch": "docs/vendor-patches/assistant-ui--elements--markdown-text.tsx.patch",
-      "reason": "Expose Markdown primitive pass-through props for the app sanitizer adapter; translate code-copy label."
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/media-player.tsx",
@@ -84,14 +84,16 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/model-selector.aui.tsx",
-      "registrySha256": "fa58d6cb2392e7d57d58d7d560008953f95025b1bd0a58b7539a61f7283557c1"
+      "registrySha256": "fa58d6cb2392e7d57d58d7d560008953f95025b1bd0a58b7539a61f7283557c1",
+      "patchedSha256": "94ff5d0e7c069f81008d62a61f0c84426b27b31906a4649e7dcc86e6f61bc2f0",
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/model-selector.tsx",
       "registrySha256": "eeee32542590ef726200994a681e704b4903e22c06ebf5d0fb8959e5ef8514c7",
-      "patchedSha256": "54ed57ff69d5761a202fcbba6414adc8d56d03d27ce55eb3527c47765dc32e89",
+      "patchedSha256": "8507bd4c7460d2564d56ac2f442dfd51ae592b27221ae07ab59c7cb1dd7d6e76",
       "patch": "docs/vendor-patches/assistant-ui--elements--model-selector.tsx.patch",
-      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/reasoning.aui.tsx",
@@ -103,9 +105,9 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/reasoning.tsx",
       "registrySha256": "02c42a1cad5fd56f4479fe65c779e9f9934c03a6e935ac92ebf98cbb46ef3cc7",
-      "patchedSha256": "73d1bc537da871e31b882f830cf6b62cf6f58c1768eeb1b7763274e2f7dbea56",
+      "patchedSha256": "9c9a0fe1e28eff4ee16bf0b69b5eedbb3800289340ef05a418a30be7c71ceb73",
       "patch": "docs/vendor-patches/assistant-ui--elements--reasoning.tsx.patch",
-      "reason": "Use tonal reasoning rows and semantic theme colors while preserving translated state labels."
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/sources.aui.tsx",
@@ -123,43 +125,49 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/surfaces.tsx",
-      "registrySha256": "5d81fbb669e67ae20026cd30ed57efc51a5e3ee0f4f5d265e1723de75359b8fa"
+      "registrySha256": "5d81fbb669e67ae20026cd30ed57efc51a5e3ee0f4f5d265e1723de75359b8fa",
+      "patchedSha256": "8e82bc01db8989387191b11e378912a680383c1552e86784a934591a82b1e242",
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thinking-indicator.tsx",
-      "registrySha256": "dc85ba3e84c99deb63ec7285dbd12d05f4c28e168ed4ae034a22a662f53eb71b"
+      "registrySha256": "dc85ba3e84c99deb63ec7285dbd12d05f4c28e168ed4ae034a22a662f53eb71b",
+      "patchedSha256": "70d512da0703a31811bfde51948e999bd7fd4e36a5b7719bb1a457f17f092047",
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread-list.aui.tsx",
       "registrySha256": "56af673ffdff7365cb07d94dda204c606d39991dcc54a89092bddf76e2e624d0",
-      "patchedSha256": "255ada82189410317ccb186df993b042eb03b3181871dbe0da0c4087dc3eb6e6",
+      "patchedSha256": "25ce693f173b82f662354e224e77fb48e62b3c81bf26af35604eb8eaf8ae224f",
       "patch": "docs/vendor-patches/assistant-ui--elements--thread-list.aui.tsx.patch",
-      "reason": "Translate labels; expose application-supported list actions without unsupported archive/rename actions."
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/thread.aui.tsx",
       "registrySha256": "a3bffd8e670e51a48eedb6cf0a5ea884ffc1d212cc28e2a8bf31f7a7961399da",
-      "patchedSha256": "36bdfb83d8d26aa4fd5eff40acaf19f31fd80f1331da092e5f64bd250fb530ef",
+      "patchedSha256": "6346f1fa58303d1d049d6ad17eeabe94ef28756cf195dcb3c647ac6c96f5fca0",
       "patch": "docs/vendor-patches/assistant-ui--elements--thread.aui.tsx.patch",
-      "reason": "Retain localized slots, grouping and history IDs. Dock ViewportFooter outside the scrolling viewport and add a ThreadNotice slot for inline provider setup."
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-fallback.aui.tsx",
       "registrySha256": "31720ad79fe332a5999cc1873108da740e63c05f4b8f322bde75f8d495cbf853",
-      "patchedSha256": "7a9f600e17c1598a972afe5715f994c76822697afaf49789c5acbcac641d7230",
+      "patchedSha256": "479b536d015ed2adf88bed990c847f703fdfbff1e177f51319e3d03556185b1e",
       "patch": "docs/vendor-patches/assistant-ui--elements--tool-fallback.aui.tsx.patch",
-      "reason": "Translate vendor labels through the existing locale catalogs; no change to vendor interaction or layout."
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tool-group.aui.tsx",
       "registrySha256": "757caf28ee232d4f500c8af7d6837fe7d6d2b144774a6a0bcdaff8c0c517bd9e",
-      "patchedSha256": "e817fa2741b7e75e6343b92e2baafa7ed06f64a5f27b2af72a59209b7090f84d",
+      "patchedSha256": "3536ac74a80ef007758dd4df07af151bcbc6b39c0d3ea8f5ad842ab236731f8f",
       "patch": "docs/vendor-patches/assistant-ui--elements--tool-group.aui.tsx.patch",
-      "reason": "Use tonal tool groups and semantic theme colors, and translate the tool-call count, while retaining existing interactions."
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/tooltip-icon-button.tsx",
-      "registrySha256": "1ec2af97d22c34c955588c866aba5ddbfc579b1fd9218f68f75010b10e5a7868"
+      "registrySha256": "1ec2af97d22c34c955588c866aba5ddbfc579b1fd9218f68f75010b10e5a7868",
+      "patchedSha256": "3967ee29d69d8e3d960c6124056cd7d2c74db01d2d893d8f9645568b141a58f0",
+      "reason": "Adopt Astryx controls and flat semantic surfaces; remove decorative and layout animations while retaining assistant-ui runtime behavior."
     },
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/generative-ui.css",

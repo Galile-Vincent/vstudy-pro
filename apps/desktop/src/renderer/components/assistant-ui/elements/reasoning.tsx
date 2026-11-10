@@ -147,7 +147,6 @@ function ReasoningFade({
           "aui-reasoning-fade pointer-events-none absolute inset-x-0 top-0 z-10 h-8",
           "bg-[linear-gradient(to_bottom,var(--color-background),transparent)]",
           "group-data-[variant=muted]/reasoning-root:bg-[linear-gradient(to_bottom,color-mix(in_oklab,var(--color-muted)_50%,var(--color-background)),transparent)]",
-          "fade-in-0 animate-in",
           "animation-duration-(--animation-duration)",
           className,
         )}
@@ -163,7 +162,6 @@ function ReasoningFade({
         "aui-reasoning-fade pointer-events-none absolute inset-x-0 bottom-0 z-10 h-8",
         "bg-[linear-gradient(to_top,var(--color-background),transparent)]",
         "group-data-[variant=muted]/reasoning-root:bg-[linear-gradient(to_top,color-mix(in_oklab,var(--color-muted)_50%,var(--color-background)),transparent)]",
-        "fade-in-0 animate-in",
         "animation-duration-(--animation-duration)",
         className,
       )}
@@ -201,7 +199,7 @@ function ReasoningTrigger({
         data-slot="reasoning-trigger-label"
         className={cn(
           "aui-reasoning-trigger-label-wrapper inline-block leading-none tabular-nums",
-          active && "shimmer motion-reduce:animate-none",
+          active && "motion-reduce:animate-none",
         )}
       >
         {tr('common:reasoning')}{durationText}
@@ -234,8 +232,6 @@ function ReasoningContent({
       className={cn(
         "aui-reasoning-content text-muted-foreground relative overflow-hidden text-sm outline-none",
         "group/collapsible-content ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:animate-none",
-        "data-closed:animate-collapsible-up",
-        "data-open:animate-collapsible-down",
         "data-closed:fill-mode-forwards",
         "data-closed:pointer-events-none",
         "[--tw-duration:var(--animation-duration)]",
@@ -312,14 +308,10 @@ function ReasoningText({
         "aui-reasoning-text relative z-0 max-h-64 overflow-y-auto ps-6 pt-2 pb-2 leading-relaxed text-pretty",
         "transform-gpu transition-[transform,opacity] ease-[cubic-bezier(0.32,0.72,0,1)]",
         "motion-reduce:animate-none",
-        "group-data-open/collapsible-content:animate-in",
-        "group-data-closed/collapsible-content:animate-out",
         "group-data-open/collapsible-content:fade-in-0",
         "group-data-closed/collapsible-content:fade-out-0",
         "group-data-open/collapsible-content:slide-in-from-top-4",
         "group-data-closed/collapsible-content:slide-out-to-top-4",
-        "group-data-open/collapsible-content:blur-in-[2px]",
-        "group-data-closed/collapsible-content:blur-out-[2px]",
         "group-data-open/collapsible-content:animation-duration-(--animation-duration)",
         "group-data-closed/collapsible-content:animation-duration-(--animation-duration)",
         className,

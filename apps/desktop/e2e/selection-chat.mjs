@@ -151,14 +151,14 @@ try {
   if (!mock) {
     await page.getByRole('tab',{name:'Usage',exact:true}).click();
     const dashboard = page.getByRole('region',{name:'Overall token dashboard',exact:true});
-    await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
+    await page.locator('.usage-token-total').filter({hasText:'1,540'}).waitFor();
     assert.equal(await page.getByRole('combobox',{name:'Usage period',exact:true}).getAttribute('data-value'),'all');
     await page.getByRole('combobox',{name:'Group usage by',exact:true}).click();await page.getByRole('option',{name:'Model',exact:true}).click();
     await page.locator('.usage-dashboard table').filter({hasText:'anthropic-api/fake'}).waitFor();
     await page.getByRole('combobox',{name:'Usage period',exact:true}).click();await page.getByRole('option',{name:'Today',exact:true}).click();
-    await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
+    await page.locator('.usage-token-total').filter({hasText:'1,540'}).waitFor();
     await page.getByRole('combobox',{name:'Usage period',exact:true}).click();await page.getByRole('option',{name:'All time',exact:true}).click();
-    await page.locator('.usage-token-total strong').filter({hasText:'1,540'}).waitFor();
+    await page.locator('.usage-token-total').filter({hasText:'1,540'}).waitFor();
     await dashboard.screenshot({path:screenshot.replace(/\.png$/, '-token-dashboard.png'),animations:'disabled'});
 
     await page.getByRole('spinbutton',{name:'Monthly budget (USD)',exact:true}).fill('0.01');

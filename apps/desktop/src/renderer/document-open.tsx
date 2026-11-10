@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { documentOpenMethodSchema, type DocumentOpenMethod, type Document } from '../shared/domain';
 import { tr } from '../shared/i18n';
 import { desktop } from './bridge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
-import { Button } from './components/ui/button';
+import { Selector } from '@astryxdesign/core';
+import { Button } from "@astryxdesign/core";
 import './document-open.css';
 
 export type DocumentAction = {kind: 'open'; method: DocumentOpenMethod} | {kind: 'download'} | {kind: 'save'};
@@ -27,14 +27,10 @@ export async function performDocumentAction(documentId: Document['id'], read: ()
 export type DocumentOutcome = Awaited<ReturnType<typeof performDocumentAction>>;
 
 export function OpenMethodSelect({value, onChange, disabled = false}: {value: DocumentOpenMethod; onChange: (value: DocumentOpenMethod) => void; disabled?: boolean}) {
-  const label = value === 'original' ? tr('library:openOriginal') : tr('library:openReader');
-  return <Select value={value} disabled={disabled} onValueChange={next => onChange(documentOpenMethodSchema.parse(next))}>
-    <SelectTrigger aria-label={tr('library:openMethod')}><SelectValue>{label}</SelectValue></SelectTrigger>
-    <SelectContent>
-      <SelectItem value="original">{tr('library:openOriginal')}</SelectItem>
-      <SelectItem value="reader">{tr('library:openReader')}</SelectItem>
-    </SelectContent>
-  </Select>;
+  return <Selector label={tr('library:openMethod')} isLabelHidden value={value} isDisabled={disabled} onChange={next => onChange(documentOpenMethodSchema.parse(next))} options={[
+    {value:'original',label:tr('library:openOriginal')},
+    {value:'reader',label:tr('library:openReader')},
+  ]}/>;
 }
 
 export function CourseFileActions({name, disabled, onAction}: {name: string; disabled: boolean; onAction: (action: DocumentAction) => Promise<DocumentOutcome | undefined>}) {
@@ -57,9 +53,9 @@ export function CourseFileActions({name, disabled, onAction}: {name: string; dis
   return <div className="course-file-actions" role="group" aria-label={name}>
     <p>{name}</p>
     <div className="course-file-open-method"><span>{tr('library:openAs')}</span><OpenMethodSelect value={method} onChange={setMethod} disabled={disabled || !ready}/></div>
-    <Button disabled={disabled || !ready} onClick={() => void run({kind:'open', method})}>{tr('library:open')}</Button>
-    <Button variant="outline" disabled={disabled} onClick={() => void run({kind:'download'})}>{tr('library:downloadCopy')}</Button>
-    <Button variant="outline" disabled={disabled} onClick={() => void run({kind:'save'})}>{tr('library:saveToLibrary')}</Button>
+    <Button label={tr('library:open')} isDisabled={disabled || !ready} onClick={() => void run({kind:'open', method})}>{tr('library:open')}</Button>
+    <Button label={tr('library:downloadCopy')} variant="secondary" isDisabled={disabled} onClick={() => void run({kind:'download'})}>{tr('library:downloadCopy')}</Button>
+    <Button label={tr('library:saveToLibrary')} variant="secondary" isDisabled={disabled} onClick={() => void run({kind:'save'})}>{tr('library:saveToLibrary')}</Button>
     {error && <p role="alert">{error}</p>}
     {notice && <p role="status">{notice}</p>}
   </div>;

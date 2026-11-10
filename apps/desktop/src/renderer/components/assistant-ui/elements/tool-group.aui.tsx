@@ -131,7 +131,7 @@ function ToolGroupTrigger({
           "group-data-[variant=ghost]/tool-group-root:font-normal",
           "group-data-[variant=outline]/tool-group-root:grow",
           "group-data-[variant=muted]/tool-group-root:grow",
-          active && "shimmer motion-reduce:animate-none",
+          active && "motion-reduce:animate-none",
         )}
       >
         {label}
@@ -161,8 +161,6 @@ function ToolGroupContent({
       className={cn(
         "aui-tool-group-content relative overflow-hidden text-sm outline-none",
         "group/collapsible-content ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:animate-none",
-        "data-closed:animate-collapsible-up",
-        "data-open:animate-collapsible-down",
         "data-closed:fill-mode-forwards",
         "data-closed:pointer-events-none",
         "[--tw-duration:var(--animation-duration)]",
@@ -176,7 +174,7 @@ function ToolGroupContent({
           "group-data-[variant=ghost]/tool-group-root:mt-1 group-data-[variant=ghost]/tool-group-root:gap-1",
           "group-data-[variant=outline]/tool-group-root:mt-3 group-data-[variant=outline]/tool-group-root:border-t group-data-[variant=outline]/tool-group-root:px-4 group-data-[variant=outline]/tool-group-root:pt-3",
           "group-data-[variant=muted]/tool-group-root:mt-3 group-data-[variant=muted]/tool-group-root:border-t group-data-[variant=muted]/tool-group-root:px-4 group-data-[variant=muted]/tool-group-root:pt-3",
-          "[&>*]:animate-in [&>*]:fade-in-0 [&>*]:blur-in-[2px] [&>*]:slide-in-from-top-1 [&>*]:animation-duration-(--animation-duration) [&>*]:ease-[cubic-bezier(0.32,0.72,0,1)]",
+          "[&>*]:animation-duration-(--animation-duration) [&>*]:ease-[cubic-bezier(0.32,0.72,0,1)]",
           "[&>*]:motion-reduce:animate-none",
           "[&>*:nth-child(2)]:[animation-delay:40ms]",
           "[&>*:nth-child(3)]:[animation-delay:80ms]",

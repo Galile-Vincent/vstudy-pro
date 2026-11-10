@@ -6,7 +6,7 @@ import { tr } from '../shared/i18n';
 import { assistantContent } from './chat-content';
 import { errorText } from './status';
 import { desktop } from './bridge';
-import { Button } from './components/ui/button';
+import { Button } from "@astryxdesign/core";
 import { LoadError } from './components/load-error';
 
 export type MessageCursor = {createdAt:string;id:string};
@@ -82,5 +82,5 @@ export function EarlierMessages({runtime,conversationId,cursor:initialCursor,jum
   const missingTarget = jumpMessageId && !targetFound && !loading && !error && (!cursor || (jump.id === jumpMessageId && jump.pages >= 5));
 
   if (!cursor) return missingTarget ? <p role="status">{tr('history:message_not_found')}</p> : null;
-  return <div ref={container} tabIndex={-1} role="group" aria-label={tr('common:load_earlier_messages')}>{missingTarget && <p role="status">{tr('history:message_not_found')}</p>}{cursor && (error ? <LoadError message={error} retry={() => void load()}/> : <Button ref={control} variant="ghost" disabled={loading || running} onClick={() => void load()}>{tr(loading ? 'common:loading_earlier_messages' : 'common:load_earlier_messages')}</Button>)}</div>;
+  return <div ref={container} tabIndex={-1} role="group" aria-label={tr('common:load_earlier_messages')}>{missingTarget && <p role="status">{tr('history:message_not_found')}</p>}{cursor && (error ? <LoadError message={error} retry={() => void load()}/> : <Button label={tr(loading ? 'common:loading_earlier_messages' : 'common:load_earlier_messages')} ref={control} variant="ghost" isDisabled={loading || running} onClick={() => void load()}>{tr(loading ? 'common:loading_earlier_messages' : 'common:load_earlier_messages')}</Button>)}</div>;
 }
