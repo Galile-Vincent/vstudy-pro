@@ -2,14 +2,13 @@
 .app-shell { color:var(--ink); background:var(--background); min-width:0; }
 .app-shell .shell-sidebar { background:var(--sidebar-surface); }
 .shell-brand { display:flex; align-items:center; gap:var(--space-3); font-size:var(--type-md); font-weight:600; letter-spacing:-.02em; }
-.art-reader-brand-mark { width:32px; height:32px; display:grid; place-items:center; flex:none; border-radius:var(--r-sm); color:var(--accent-foreground); background:var(--accent-color); }
+.art-reader-brand-mark { width:32px; height:32px; display:grid; place-items:center; flex:none; border-radius:var(--radius-element); color:var(--accent-foreground); background:var(--accent-color); }
 .app-shell[data-sidebar=collapsed] .shell-sidebar .shell-brand > span:last-child { display:none; }
 /* One compact density for the whole rail: 32px rows, 16px icons, small text. The selected row takes --active because Astryx paints it with --color-neutral, which equals the rail surface. */
 .shell-sidebar { --color-neutral:var(--active); --color-overlay-hover:color-mix(in oklab,var(--ink) 5%,transparent); }
 .shell-sidebar .astryx-side-nav-item { min-height:32px; font-size:var(--type-sm); }
 .shell-sidebar .astryx-side-nav-item svg { width:16px; height:16px; }
 .shell-sidebar .library-smart button { min-height:32px; font-size:var(--type-sm); }
-.shell-sidebar [data-slot=sidebar-group] { padding-inline:0; }
 .shell-footer { display:flex; flex-direction:column; gap:var(--space-2); min-width:0; }
 .shell-footer[data-collapsed] { align-items:center; }
 .shell-footer[data-collapsed] .update-row > button > span:not(.sr-only) { display:none; }
@@ -30,7 +29,7 @@
 @media(max-width:800px) { .shell-topbar { padding-inline:var(--space-4); } }
 
 .art-reader-profile { display:flex; align-items:center; min-width:0; gap:var(--space-3); padding:var(--space-2); }
-.art-reader-avatar { display:grid; place-items:center; flex:none; width:32px; height:32px; border-radius:var(--r-pill); background:var(--active); color:var(--accent-color); }
+.art-reader-avatar { display:grid; place-items:center; flex:none; width:32px; height:32px; border-radius:var(--radius-full); background:var(--active); color:var(--accent-color); }
 .art-reader-profile > span:nth-child(2) { flex:1; min-width:0; display:grid; gap:var(--space-1); overflow:hidden; }
 .art-reader-profile strong { font-size:var(--type-xs); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .art-reader-profile small { color:var(--muted); font-size:var(--type-xs); line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }

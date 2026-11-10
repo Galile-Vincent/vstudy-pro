@@ -119,7 +119,7 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/elements/suggestions.tsx",
       "registrySha256": "6cc8d4e06028e9c3f3c233d57efc4f4960b473d3c8fa2930ace56d6e7835c99c",
-      "patchedSha256": "3f620b723c3f3107bbb4d914ee9ae4917ca1fac302ba0f5ad5b1a9331534d38e",
+      "patchedSha256": "6f1f044f2853fb12988b648579d573a451b228660341a4823a8ea8119002456d",
       "patch": "docs/vendor-patches/assistant-ui--elements--suggestions.tsx.patch",
       "reason": "Wrap suggestion labels for long translations and use semantic theme colors."
     },
@@ -172,7 +172,7 @@
     {
       "path": "apps/desktop/src/renderer/components/assistant-ui/generative-ui.css",
       "registrySha256": "f9408bde84aea14f9b27a9d36abf24b81109a869304af08b93219177ae878ba2",
-      "patchedSha256": "87e84a7a03136fb00e9929f30c895fe59be84c8cfd722789cfecad3cb67a66c8",
+      "patchedSha256": "1560cbc1b1e02d0a7e4824739206444f3ba00b6688de530662d688c1072a129f",
       "patch": "docs/vendor-patches/assistant-ui--generative-ui.css.patch",
       "reason": "Apply semantic theme tokens and tonal styling to optional generated presentation elements."
     },
@@ -202,10 +202,6 @@
     {
       "path": "apps/desktop/src/renderer/hooks/use-copy-to-clipboard.ts",
       "registrySha256": "1f3b8a1bab79cef961f62eb25d6b58a0d16c957d63ba1faf086ad09c99712c0a"
-    },
-    {
-      "path": "apps/desktop/src/renderer/hooks/use-mobile.ts",
-      "registrySha256": "ad0936f84f1df79d3697bfbff9c18f8ad58431c1cbaf2359c6a853b0fcc9f28b"
     }
   ],
   "applicationFiles": [
@@ -236,7 +232,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/list-row.tsx",
-      "sha256": "f976bcf4312361146fcfe6148b026930ba56a2013a086f78a488cd5c9afcef03",
+      "sha256": "deb3a992e05b3405beebcfe9c286364e5e0656799402adabeaadc14c545e5e1d",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {
@@ -256,7 +252,7 @@
     },
     {
       "path": "apps/desktop/src/renderer/components/ui/ui.css",
-      "sha256": "fcb014524cc1621ceef9e2c3bd0b52638290d34c7ecd6c54b8a1d056a90c2a3b",
+      "sha256": "0a0540159dad159f902e32fced45d2472c1d99b38547942889690ce81a136b7d",
       "reason": "Shared application UI foundation and behavior tests."
     },
     {

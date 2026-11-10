@@ -15,7 +15,6 @@ html[data-input-modality=keyboard] .library-results[data-view=list] .library-doc
 .document-size,.document-added { text-align:end; font-variant-numeric:tabular-nums; }
 .document-added progress { width:100%; max-width:calc(var(--space-8) * 2); }
 .document-tags { display:flex; gap:var(--space-1); overflow:hidden; white-space:nowrap; }
-.document-tags [data-slot=badge],.document-type [data-slot=badge] { font-size:var(--type-xs); height:1.25rem; min-width:0; }
 .document-type { display:flex; justify-content:center; }
 .library-results[data-view=list] .document-actions { opacity:0; padding:0; width:2.25rem; height:2rem; }
 .library-document:is(:hover,:focus-within,[data-selected=true]) .document-actions { opacity:1; }
@@ -31,7 +30,6 @@ html[data-input-modality=keyboard] .library-results[data-view=list] .library-doc
 html[data-input-modality=pointer] .library-results .document-title:focus { outline:none; box-shadow:none; }
 .library-results.library-results[data-view=list] { box-shadow:none; }
 .document-gutter svg { width:var(--space-4); height:var(--space-4); }
-.document-type [data-slot=badge] { border-radius:var(--radius-element); }
 .library-view .bulk-bar { width:100%; flex-wrap:wrap; overflow:visible; }
 .library-view .bulk-bar > * { flex-shrink:0; white-space:nowrap; }
 .library-view .bulk-bar button { height:var(--space-8); }

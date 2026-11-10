@@ -1,5 +1,5 @@
 /* Application overrides follow the registry and theme styles. */
-[data-slot=sheet-content], [data-slot=sheet-overlay], [data-slot=dialog-content], [data-slot=dialog-overlay] {
+[data-slot=sheet-content] {
   animation-duration:var(--motion-base);
   animation-timing-function:var(--ease-entrance);
   transition-duration:var(--motion-base);
@@ -11,14 +11,14 @@
 }
 html[data-theme-transition=tokens] {
   transition-duration:var(--motion-base);
-  transition-timing-function:var(--ease-out-soft);
+  transition-timing-function:var(--ease-entrance);
 }
 html[data-theme-transition=view]::view-transition-new(root) {
   animation-duration:var(--motion-base);
-  animation-timing-function:var(--ease-out-soft);
+  animation-timing-function:var(--ease-entrance);
 }
 @media(prefers-reduced-motion:reduce) {
-  [data-slot=sheet-content], [data-slot=sheet-overlay], [data-slot=dialog-content], [data-slot=dialog-overlay], html[data-theme-transition] {
+  [data-slot=sheet-content], html[data-theme-transition] {
     animation:none;
     transition:none;
   }
@@ -34,12 +34,12 @@ html[data-theme-transition=view]::view-transition-new(root) {
 .chat-pane > .chat-motion > .aui-thread-root { flex:1; height:auto; min-height:0; }
 .chat-motion [data-message-id] {
   animation-duration:var(--motion-fast);
-  animation-timing-function:var(--ease-out-soft);
+  animation-timing-function:var(--ease-entrance);
 }
 .chat-motion .chat-restored-message { animation:none; }
 .chat-motion .aui-tool-fallback-content { animation:none; transition:none; }
 .chat-motion .aui-tool-fallback-content > div {
-  animation:surface-tool-reveal var(--motion-fast) var(--ease-out-soft);
+  animation:surface-tool-reveal var(--motion-fast) var(--ease-entrance);
   filter:none;
 }
 @keyframes surface-tool-reveal { from { opacity:0; } to { opacity:1; } }

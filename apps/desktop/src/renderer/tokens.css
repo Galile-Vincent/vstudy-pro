@@ -1,8 +1,7 @@
 /* Global tokens. In-flow surfaces are flat: tone plus a 1px hairline, no shadow, no blur.
    Only floating overlays (menus, popovers, dialogs, toasts) use Astryx --shadow-low/med/high. */
 :root {
- --r-xs:var(--radius-inner); --r-sm:var(--radius-element); --r-md:var(--radius-container); --r-lg:var(--radius-container); --r-xl:var(--radius-container); --r-pill:var(--radius-full);
- --r-outer:var(--r-md); --inset:var(--spacing-1); --r-inner:max(0px,calc(var(--r-outer) - var(--inset)));
+ --r-outer:var(--radius-container); --inset:var(--spacing-1); --r-inner:max(0px,calc(var(--r-outer) - var(--inset)));
  --space-1:calc(var(--spacing-1) * var(--density)); --space-2:calc(var(--spacing-2) * var(--density)); --space-3:calc(var(--spacing-3) * var(--density)); --space-4:calc(var(--spacing-4) * var(--density)); --space-5:calc(var(--spacing-5) * var(--density)); --space-6:calc(var(--spacing-6) * var(--density)); --space-8:calc(var(--spacing-8) * var(--density));
  --type-xs:0.75rem; --type-sm:0.75rem; --type-base:0.8125rem; --type-md:0.9375rem; --type-lg:1.0625rem; --type-xl:1.375rem; --type-display:1.75rem;
  --motion-fast:125ms; --motion-base:175ms; --motion-slow:300ms;
@@ -16,18 +15,6 @@
 /* Two border strengths. --line is a quiet ink mix for dividers, card edges and chrome in every theme and mode.
    --line-strong is the theme's 3:1 boundary token (check-contrast.mjs) and stays on form controls, switch tracks and the high-contrast setting. */
 html[data-contrast=more] { --line:var(--line-strong); }
-
-/* Legacy aliases. Flat values for in-flow surfaces; delete once no page references them. */
-:root {
- --elevation-flat:none; --elevation-raised:none; --elevation-floating:var(--shadow-med);
- --glass-shadow:none; --glass-shadow-hover:none; --glass-shadow-float:var(--shadow-med); --glass-depth:none; --glass-depth-float:var(--shadow-med); --glass-edge:none; --primary-shadow:none;
- --glass-blur:none; --material-filter:none;
- --glass-fill:var(--surface); --glass-fill-hover:color-mix(in oklab,var(--ink) 4%,var(--surface));
- --glass-tone:color-mix(in oklab,var(--ink) 5%,transparent); --glass-tone-strong:color-mix(in oklab,var(--ink) 8%,transparent);
- --material-card:var(--surface); --material-sheet:var(--surface);
- --surface-card:var(--surface); --surface-card-strong:var(--surface);
- --composer-focus-ring:color-mix(in oklab,var(--accent-color) 52%,transparent);
-}
 
 html { font-family:var(--font-ui); font-synthesis:none; }
 body { font-family:inherit; }
@@ -59,14 +46,9 @@ button.secondary,.filter-popover summary { border:0; box-shadow:none; background
 button.ghost { border:0; background:transparent; }
 button.primary { min-height:36px; background:var(--accent-color); color:var(--accent-foreground); }
 button.ghost:hover { background:var(--active); }
-.app-select { display:inline-flex; align-items:center; justify-content:space-between; gap:var(--space-2); min-height:32px; border:1px solid var(--line-strong); border-radius:var(--r-sm); background:var(--surface); color:var(--ink); padding:var(--space-1) var(--space-2); font:inherit; }
-.select-positioner { z-index:150; }
-.select-popup { background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:var(--r-md); padding:var(--space-1); box-shadow:var(--shadow-med); max-height:50vh; overflow:auto; min-width:var(--anchor-width); }
-.select-item { display:flex; justify-content:space-between; gap:var(--space-4); padding:var(--space-2); border-radius:var(--r-sm); font-size:var(--type-base); cursor:default; }
-.select-item[data-highlighted] { background:var(--active); }
-progress { appearance:none; height:6px; border:0; border-radius:var(--r-pill); overflow:hidden; }
+progress { appearance:none; height:6px; border:0; border-radius:var(--radius-full); overflow:hidden; }
 progress::-webkit-progress-bar { background:var(--active); }
-progress::-webkit-progress-value { background:var(--ink); border-radius:var(--r-pill); }
+progress::-webkit-progress-value { background:var(--ink); border-radius:var(--radius-full); }
 :lang(ja),:lang(zh-Hant) { line-break:strict; word-break:normal; }
 :lang(ja) { word-break:auto-phrase; }
 p { text-wrap:pretty; }
@@ -75,14 +57,8 @@ h1:lang(ja),h2:lang(ja),h3:lang(ja),h1:lang(zh-Hant),h2:lang(zh-Hant),h3:lang(zh
 button:lang(ja),button:lang(zh-Hant) { line-height:1.2; }
 html:lang(ja),html:lang(zh-Hant) { --type-xs:0.8125rem; --type-sm:0.8125rem; }
 
-/* Motion. Easing comes from Astryx (--ease-entrance, --ease-exit); the legacy names alias to it. */
-:root {
- --motion-story:var(--motion-slow); --motion-hero:var(--motion-slow);
- --ease-out-soft:var(--ease-entrance); --ease-in-out-soft:var(--ease-move);
- --type-hero:clamp(1.75rem,2.2rem + 1.2cqi,2.5rem); --type-hero-compact:clamp(1.75rem,6cqi,2.5rem);
- --spotlight-size:260px; --spotlight-tint:color-mix(in oklab,var(--ink) 5%,transparent);
- --edge-lit:color-mix(in oklab,var(--ink) 32%,transparent);
-}
+/* Motion. Easing comes from Astryx (--ease-entrance, --ease-exit, --ease-move). */
+:root { --type-hero-compact:clamp(1.75rem,6cqi,2.5rem); }
 /* Routes and tabs swap without motion; only a document opening morphs from its row. */
 ::view-transition-old(root),::view-transition-new(root) { animation:none; }
 ::view-transition-group(vt-document) { animation-duration:var(--motion-slow); animation-timing-function:var(--ease-move); }
@@ -138,36 +114,27 @@ html:lang(ja) { --font-ui:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",syst
 ::selection { background:var(--selection-color); color:var(--ink); }
 
 /* Tonal controls retain explicit boundaries in accessibility contrast modes. */
-[data-slot=checkbox] { width:var(--space-5); height:var(--space-5); min-width:var(--space-5); min-height:var(--space-5); min-inline-size:var(--space-5); min-block-size:var(--space-5); padding:0; }
 @media(prefers-contrast:more), (forced-colors:active) {
- [data-slot=button],button.secondary,.filter-popover summary,[data-slot=checkbox],.provider-row,.folder-node { border:1px solid var(--ink); }
-}
-
-@media(prefers-contrast:more), (forced-colors:active) {
- :root [data-slot=select-content],:root [data-slot=select-trigger] { border:1px solid var(--ink); }
+ button.secondary,.filter-popover summary,.provider-row,.folder-node { border:1px solid var(--ink); }
 }
 
 /* Surfaces. Resting containers are flat: surface tone, 1px hairline, container radius, no shadow, no blur. */
 :root { --page-field:var(--background); }
-.glass,.glass-pill,.glass-lift,[data-slot=card] { border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); box-shadow:none; }
-.glass-pill { border-radius:var(--r-pill); }
-.glass-lift { transition:background-color var(--motion-fast) var(--ease-standard); }
-.glass-lift:hover { background:var(--glass-fill-hover); }
 
 /* Buttons: secondary is a flat tone, primary a solid fill. Press feedback is a 150ms scale, never on disabled. */
-:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary) {
- border:0; background:var(--glass-tone); box-shadow:none; color:var(--ink);
+button.secondary:not(.ghost,.primary) {
+ border:0; background:var(--subtle); box-shadow:none; color:var(--ink);
  transition:background-color var(--motion-fast) var(--ease-standard),transform 150ms ease-out;
 }
-:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary):is(:hover,[aria-expanded=true],[aria-pressed=true]) { background:var(--glass-tone-strong); color:var(--ink); }
-:is([data-slot=button][data-variant=default],button.primary) { box-shadow:none; transition:background-color var(--motion-fast) var(--ease-standard),transform 150ms ease-out; }
-:is([data-slot=button],button.secondary,button.primary):not(:disabled,[aria-disabled=true]):active { transform:scale(.97); }
-@media(prefers-reduced-motion:reduce) { :is([data-slot=button],button.secondary,button.primary):not(:disabled):active { transform:none; } }
+button.secondary:not(.ghost,.primary):is(:hover,[aria-expanded=true],[aria-pressed=true]) { background:var(--active); color:var(--ink); }
+:is(button.primary) { box-shadow:none; transition:background-color var(--motion-fast) var(--ease-standard),transform 150ms ease-out; }
+:is(button.secondary,button.primary):not(:disabled,[aria-disabled=true]):active { transform:scale(.97); }
+@media(prefers-reduced-motion:reduce) { :is(button.secondary,button.primary):not(:disabled):active { transform:none; } }
 
 /* Floating overlays are the only shadowed surfaces: menus and popovers use --shadow-med, dialogs --shadow-high. */
-:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=tooltip-content]:not(.bg-foreground),.select-popup) { border:1px solid var(--line); }
-:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],.select-popup,.model-popover,.conversation-list-popover) { background:var(--surface); box-shadow:var(--shadow-med); border-radius:var(--r-md); }
-:is([data-slot=dialog-content],.settings-dialog) { background:var(--surface); box-shadow:var(--shadow-high); border-radius:var(--r-md); }
+:is([data-slot=popover-content]) { border:1px solid var(--line); }
+:is([data-slot=popover-content],.model-popover,.conversation-list-popover) { background:var(--surface); box-shadow:var(--shadow-med); border-radius:var(--radius-container); }
+:is(.settings-dialog) { background:var(--surface); box-shadow:var(--shadow-high); border-radius:var(--radius-container); }
 .model-popover,.conversation-list-popover { border:1px solid var(--line); }
 
 /* Chrome: a flat header row with a hairline below it. No blur, no scroll mask. */
@@ -175,18 +142,18 @@ html:lang(ja) { --font-ui:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",syst
 .app-shell .shell-topbar { background:var(--surface); box-shadow:none; }
 
 @media(prefers-contrast:more) {
- .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup) { border:1px solid var(--ink); }
+ button.secondary:not(.ghost,.primary),:is([data-slot=popover-content]) { border:1px solid var(--ink); }
 }
 @media(forced-colors:active) {
- .glass,.glass-pill,[data-slot=card],:is([data-slot=button][data-variant=outline],[data-slot=button][data-variant=secondary],button.secondary):not(.ghost,.primary),:is([data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],.select-popup) { border:1px solid CanvasText; }
+ button.secondary:not(.ghost,.primary),:is([data-slot=popover-content]) { border:1px solid CanvasText; }
 }
 
-html[data-theme=contrast] :is([data-slot=card],[data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=input],[data-slot=textarea],[data-slot=select-trigger],[data-slot=button],[data-slot=aui_composer-shell]) { border:1px solid var(--ink); box-shadow:none; }
+html[data-theme=contrast] :is([data-slot=popover-content],[data-slot=aui_composer-shell]) { border:1px solid var(--ink); box-shadow:none; }
 @media(prefers-contrast:more) {
- :root :is([data-slot=card],[data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=input],[data-slot=textarea],[data-slot=select-trigger],[data-slot=button],[data-slot=aui_composer-shell]) { border:1px solid var(--ink); box-shadow:none; }
+ :root :is([data-slot=popover-content],[data-slot=aui_composer-shell]) { border:1px solid var(--ink); box-shadow:none; }
 }
 @media(forced-colors:active) {
- :root :is([data-slot=card],[data-slot=popover-content],[data-slot=dropdown-menu-content],[data-slot=select-content],[data-slot=dialog-content],[data-slot=input],[data-slot=textarea],[data-slot=select-trigger],[data-slot=button],[data-slot=aui_composer-shell]) { border:1px solid CanvasText; box-shadow:none; }
+ :root :is([data-slot=popover-content],[data-slot=aui_composer-shell]) { border:1px solid CanvasText; box-shadow:none; }
 }
 
 /* Unlayered aliases beat the shipped theme on both the provider and portal root.

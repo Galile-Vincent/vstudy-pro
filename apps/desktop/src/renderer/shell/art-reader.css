@@ -1,7 +1,7 @@
 /* Reader art direction. All color roles derive from the selected theme pack. */
 :root {
-  --art-reader-radius:var(--r-md);
-  --art-reader-control:var(--r-sm);
+  --art-reader-radius:var(--radius-container);
+  --art-reader-control:var(--radius-element);
   --art-reader-ring:transparent;
   --art-reader-glass:var(--surface);
   --art-reader-mesh:radial-gradient(ellipse at 95% 0%,color-mix(in oklch,var(--accent-color) 10%,transparent),transparent 60%),radial-gradient(ellipse at 10% 90%,color-mix(in oklch,var(--chart-2) 5%,transparent),transparent 65%);
@@ -31,7 +31,7 @@
 .workspace .reading-pane .pane-toolbar button { min-height:40px; border-radius:var(--art-reader-control); }
 .workspace .reading-pane .markdown { max-width:72ch; padding:var(--space-8) clamp(24px,4vw,64px) 96px; margin-inline:auto; }
 .workspace .reading-pane .markdown h1 { font-size:2rem; line-height:1.15; letter-spacing:-.02em; font-weight:600; margin-bottom:var(--space-6); }
-.workspace .reading-pane .markdown h1::before { content:""; display:block; width:40px; height:3px; border-radius:var(--r-pill); background:var(--accent-color); margin-bottom:var(--space-6); }
+.workspace .reading-pane .markdown h1::before { content:""; display:block; width:40px; height:3px; border-radius:var(--radius-full); background:var(--accent-color); margin-bottom:var(--space-6); }
 .workspace .reading-pane .markdown h2 { margin-top:var(--space-8); }
 .workspace .reading-pane .markdown p { line-height:1.85; }
 .app-shell .workspace .chat-pane { padding:0; background:transparent; min-width:0; display:flex; flex-direction:column; }
@@ -58,14 +58,14 @@
 .art-reader-start-content { flex:1 1 0; min-height:0; overflow:auto; padding:var(--space-1) var(--space-1) var(--space-4); }
 .app-shell .workspace .new-chat-composer { margin:0; padding:var(--space-4); flex:none; }
 .art-reader-welcome { padding:var(--space-5) var(--space-2) var(--space-6); text-align:start; }
-.art-reader-assistant-mark { display:grid; place-items:center; width:52px; height:52px; border-radius:var(--r-lg); margin-bottom:var(--space-6); color:var(--accent-color); background:linear-gradient(140deg,var(--surface),var(--active)); box-shadow:inset 0 0 0 1px var(--art-reader-ring); }
+.art-reader-assistant-mark { display:grid; place-items:center; width:52px; height:52px; border-radius:var(--radius-container); margin-bottom:var(--space-6); color:var(--accent-color); background:linear-gradient(140deg,var(--surface),var(--active)); box-shadow:inset 0 0 0 1px var(--art-reader-ring); }
 .art-reader-welcome .art-reader-kicker { color:var(--accent-color); margin-bottom:var(--space-2); }
 .art-reader-kicker { font-size:var(--type-xs); font-weight:500; }
 .art-reader-welcome h2 { font-size:1.5rem; line-height:1.35; letter-spacing:-.02em; font-weight:600; max-width:22ch; margin:0 0 var(--space-3); text-wrap:balance; }
 .art-reader-welcome > p:last-of-type { color:var(--muted); line-height:1.7; font-size:var(--type-base); overflow-wrap:anywhere; }
 .art-reader-welcome [data-slot=suggestions] { margin-top:var(--space-6); gap:var(--space-2); justify-content:flex-start; }
 .app-shell .workspace [data-slot=suggestions] button { min-height:44px; padding:var(--space-2) var(--space-3); background:var(--surface); font-size:var(--type-xs); }
-.app-shell .workspace .ai-setup-notice.art-reader-offline { display:grid; grid-template-columns:20px minmax(0,1fr); align-items:start; gap:var(--space-2) var(--space-3); margin:var(--space-2) 0; padding:var(--space-4); border:0; border-radius:var(--art-reader-radius); background:var(--glass-fill);  box-shadow:none; }
+.app-shell .workspace .ai-setup-notice.art-reader-offline { display:grid; grid-template-columns:20px minmax(0,1fr); align-items:start; gap:var(--space-2) var(--space-3); margin:var(--space-2) 0; padding:var(--space-4); border:0; border-radius:var(--art-reader-radius); background:var(--surface);  box-shadow:none; }
 .art-reader-offline > svg { color:var(--accent-color); margin-top:2px; }
 .art-reader-offline > p,.art-reader-offline-actions { grid-column:2; }
 .art-reader-offline strong { font-size:var(--type-base); line-height:1.5; font-weight:600; }
@@ -78,14 +78,14 @@
 .app-shell .workspace .aui-user-message-content { background:var(--active); border-radius:var(--art-reader-radius); padding:var(--space-3) var(--space-4); }
 .workspace .document-message-footer { font-size:var(--type-xs); }
 .workspace .art-reader-coach-trigger { color:var(--muted); font-size:var(--type-xs); }
-.art-reader-coach { max-width:min(360px,calc(100vw - 32px)); padding:var(--space-5); color:var(--ink); background:var(--material-sheet); border:0; border-radius:var(--art-reader-radius); box-shadow:none; }
+.art-reader-coach { max-width:min(360px,calc(100vw - 32px)); padding:var(--space-5); color:var(--ink); background:var(--surface); border:0; border-radius:var(--art-reader-radius); box-shadow:none; }
 .art-reader-coach p { line-height:1.7; margin-top:var(--space-3); color:var(--muted); }
 .art-reader-coach > button:last-of-type { position:absolute; right:var(--space-1); top:var(--space-1); }
 .art-reader-coach > strong { display:block; padding-inline-end:var(--space-5); }
 .art-reader-coach button { min-height:44px; }
 .art-reader-cover { position:relative; isolation:isolate; overflow:hidden; min-height:112px; }
 .art-reader-cover::after { content:""; position:absolute; inset:0; background:linear-gradient(0deg,var(--surface),transparent 80%); opacity:.7; pointer-events:none; }
-.art-reader-cover-type { position:absolute; bottom:var(--space-4); left:var(--space-5); z-index:1; background:var(--surface); color:var(--ink); padding:var(--space-1) var(--space-2); font-size:var(--type-xs); font-weight:500; border-radius:var(--r-pill); }
+.art-reader-cover-type { position:absolute; bottom:var(--space-4); left:var(--space-5); z-index:1; background:var(--surface); color:var(--ink); padding:var(--space-1) var(--space-2); font-size:var(--type-xs); font-weight:500; border-radius:var(--radius-full); }
 .art-reader-reading-info { display:flex; flex-direction:column; align-items:flex-start; gap:var(--space-3); padding:var(--space-5); width:100%; flex:1; }
 .art-reader-reading-info > .art-reader-kicker { color:var(--muted); }
 @media(max-width:1100px) {
@@ -128,13 +128,13 @@ html[data-theme=contrast] .art-reader-cover::after { display:none; }
   .art-reader-welcome [data-slot=suggestions] { margin-top:var(--space-3); }
   .app-shell .workspace .aui-composer-input { min-height:48px; }
 }
-.art-reader-avatar { display:grid; place-items:center; flex:none; width:32px; height:32px; border-radius:var(--r-pill); background:var(--active); color:var(--accent-color); }
+.art-reader-avatar { display:grid; place-items:center; flex:none; width:32px; height:32px; border-radius:var(--radius-full); background:var(--active); color:var(--accent-color); }
 
 @media(forced-colors:active) { .workspace .reading-pane,.workspace [data-slot=aui_composer-shell] { outline:1px solid CanvasText; } }
 
 
 .chat-source { display:flex; align-items:center; gap:var(--space-1); flex-wrap:wrap; }
-.art-reader-chat-header .chat-source button { display:inline-flex; align-items:center; gap:var(--space-2); padding:0 var(--space-3); border-radius:var(--r-pill); font-size:var(--type-xs); color:var(--muted); }
+.art-reader-chat-header .chat-source button { display:inline-flex; align-items:center; gap:var(--space-2); padding:0 var(--space-3); border-radius:var(--radius-full); font-size:var(--type-xs); color:var(--muted); }
 .art-reader-chat-header .chat-source button[aria-pressed=true] { color:var(--ink); background:color-mix(in oklab,var(--ink) 8%,transparent); }
 .chat-source-body { display:contents; }
 .chat-source-body[hidden] { display:none; }

@@ -428,9 +428,6 @@
   color: var(--ink);
   overflow-y: auto;
 }
-.moodle-detail-sheet [data-slot="sheet-header"] {
-  padding: var(--space-8) calc(var(--space-8) + var(--space-2)) var(--space-4) var(--space-6);
-}
 .moodle-sheet-body {
   padding: 0 var(--space-6) var(--space-8);
   display: grid;
@@ -523,7 +520,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
 .moodle-detail-sheet,
-[data-slot="sheet-overlay"],
 .moodle-assistant * {
     animation: none !important;
     transition: none !important;

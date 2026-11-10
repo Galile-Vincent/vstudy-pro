@@ -4,13 +4,10 @@
   --sidebar-surface:var(--subtle);
   --folder-blue:var(--info); --folder-sage:var(--success); --folder-amber:var(--warning);
   --link-color:var(--accent-color);
-  --shadow-faint:color-mix(in srgb,var(--shadow-color) 4%,transparent);
   --shadow-soft:color-mix(in srgb,var(--shadow-color) 13%,transparent);
-  --shadow-medium:color-mix(in srgb,var(--shadow-color) 20%,transparent);
   --overlay:color-mix(in srgb,var(--shadow-color) 45%,transparent);
   --scrollbar:color-mix(in srgb,var(--muted) 55%,transparent);
   --scrollbar-track:color-mix(in srgb,var(--muted) 12%,transparent);
-  --composer-focus-ring:var(--focus);
 }
 html:not([data-appearance-ready]) body { visibility:hidden; }
 html:not([data-appearance-ready]) { background:transparent; }
@@ -24,14 +21,8 @@ html,body,.app-shell { background:var(--background); color:var(--ink); }
 .hljs-number { color:var(--syntax-number); }
 ::selection { background:var(--selection-color); color:var(--ink); }
 * { scrollbar-color:var(--scrollbar) var(--scrollbar-track); }
-.new-chat-composer { background:var(--material-card); backdrop-filter:var(--material-filter); }
+.new-chat-composer { background:var(--surface); }
 input[type=range] { accent-color:var(--accent-color); }
-html[data-reduced-transparency=true] {
-  --material-card:var(--surface); --material-sheet:var(--surface);
-}
-@media(prefers-reduced-transparency:reduce) {
-  :root { --material-card:var(--surface); --material-sheet:var(--surface); }
-}
 @media(prefers-contrast:more) {
   :root { --muted:var(--ink)!important; --line:var(--ink)!important; --hairline:var(--ink); }
 }

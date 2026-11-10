@@ -20,7 +20,7 @@
   align-items: center;
   gap: var(--space-2);
   border: 0;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-full);
   background: color-mix(in oklab, var(--ink) 5%, var(--surface));
   color: var(--muted);
   padding: 4px 10px;
@@ -56,19 +56,19 @@
   height: var(--space-2);
   border: 0;
   background: color-mix(in oklab, var(--ink) 8%, var(--surface));
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .usage-meter progress::-webkit-progress-bar {
   background: color-mix(in oklab, var(--ink) 8%, var(--surface));
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-full);
 }
 
 .usage-meter progress::-webkit-progress-value {
   background: var(--folder-sage);
-  border-radius: var(--r-pill);
-  transition: width var(--motion-base) var(--ease-out-soft);
+  border-radius: var(--radius-full);
+  transition: width var(--motion-base) var(--ease-entrance);
 }
 
 .usage-meter.amber progress::-webkit-progress-value {
@@ -86,7 +86,7 @@
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-element);
   background: color-mix(in oklab, var(--warning) 12%, var(--surface));
   font-size: var(--type-sm);
   border: 0;
@@ -107,7 +107,7 @@
   height: 28px;
   padding-inline: var(--space-2);
   font-size: var(--type-xs);
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-inner);
 }
 
 /* Usage dashboard: unboxed summary, chart and table; sections breathe with --space-6 */
@@ -206,7 +206,7 @@
   display: inline-block;
   width: 0.75rem;
   height: 0.75rem;
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-inner);
   margin: 0 var(--space-1) 0 var(--space-2);
 }
 
@@ -300,7 +300,7 @@
 
 .usage-breakdown td {
   padding: var(--space-2) var(--space-3);
-  border-bottom: thin solid var(--glass-tone);
+  border-bottom: thin solid var(--line);
   color: var(--ink);
 }
 

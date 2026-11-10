@@ -51,6 +51,4 @@
   .library-view .library-toolbar .library-search { grid-column:1 / -1; width:100%; min-width:0; }
 }
 
-.library-toolbar [data-slot=button] { min-height:40px; border-radius:var(--radius-element); }
-
 .library-results[data-view=grid] .document-forms { flex-wrap:wrap; white-space:normal; overflow-wrap:anywhere; }

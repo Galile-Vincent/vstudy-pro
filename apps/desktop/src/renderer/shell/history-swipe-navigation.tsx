@@ -9,7 +9,7 @@ import './history-navigation.css';
 const editableSelector = 'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]';
 export function hasNavigationOverlay(): boolean {
   return [...document.querySelectorAll('.app-shell[data-view="welcome"]')].some(element=>!element.closest('[hidden], [aria-hidden="true"]')) ||
-    [...document.querySelectorAll('[role="dialog"], [role="alertdialog"], [aria-modal="true"], dialog[open], [role="menu"], [role="listbox"], [data-slot="popover-content"], [data-slot="dropdown-menu-content"], .app-tabs-menu')]
+    [...document.querySelectorAll('[role="dialog"], [role="alertdialog"], [aria-modal="true"], dialog[open], [role="menu"], [role="listbox"], [data-slot="popover-content"], .app-tabs-menu')]
       .some(element => [...element.getClientRects()].some(rect=>rect.width>0 && rect.height>0) && !element.closest('[hidden], [aria-hidden="true"], [data-state="closed"]'));
 }
 

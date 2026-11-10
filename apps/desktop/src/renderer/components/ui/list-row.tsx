@@ -41,14 +41,14 @@ export function ListRow({
     </>
   );
   const classes =
-    'ui-row-target flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--r-sm)] p-[var(--space-3)] text-start';
+    'ui-row-target flex min-w-0 flex-1 items-center gap-[var(--space-3)] rounded-[var(--radius-element)] p-[var(--space-3)] text-start';
   return (
     <div
       {...props}
       data-slot="list-row"
       data-selected={selected}
       data-divider={divider}
-      className={cn('flex items-center gap-[var(--space-2)] rounded-[var(--r-sm)]', className)}
+      className={cn('flex items-center gap-[var(--space-2)] rounded-[var(--radius-element)]', className)}
     >
       {href ? (
         <a

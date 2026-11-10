@@ -2,14 +2,11 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const css = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
-const rule = (selector: string) => css.split('\n').find(line => line.startsWith(selector));
 
 describe('elevation policy', () => {
-  it('keeps every legacy shadow alias flat or on an Astryx overlay shadow', () => {
-    const names = ['elevation-flat', 'elevation-raised', 'glass-shadow', 'glass-shadow-hover', 'primary-shadow', 'glass-edge', 'glass-depth'];
-    for (const name of names) expect(css, name).toMatch(new RegExp(`--${name}:none;`));
-    for (const name of ['elevation-floating', 'glass-shadow-float', 'glass-depth-float'])
-      expect(css, name).toMatch(new RegExp(`--${name}:var\\(--shadow-med\\);`));
+  it('defines no legacy elevation, glass or material alias', () => {
+    expect(css).not.toMatch(/--(?:elevation|glass|material|surface-card|primary-shadow)[\w-]*:/);
+    expect(css).not.toMatch(/\.glass/);
   });
 
   it('does not override the Astryx overlay shadows', () => {
@@ -18,19 +15,16 @@ describe('elevation policy', () => {
 
   it('uses no blur or glass fill on any surface', () => {
     expect(css).not.toMatch(/backdrop-filter:\s*(?!none)/);
-    expect(css).toContain('--glass-blur:none;');
-    expect(css).toContain('--material-card:var(--surface);');
   });
 
   it('shadows only floating overlays: menus and popovers medium, dialogs high', () => {
     expect(css).toMatch(/\[data-slot=popover-content\][^{]*\.conversation-list-popover\) \{[^}]*box-shadow:var\(--shadow-med\)/);
-    expect(css).toMatch(/\[data-slot=dialog-content\],\.settings-dialog\) \{[^}]*box-shadow:var\(--shadow-high\)/);
-    expect(rule('.glass,.glass-pill')).toContain('box-shadow:none');
+    expect(css).toMatch(/\.settings-dialog\) \{[^}]*box-shadow:var\(--shadow-high\)/);
   });
 
   it('keeps every radius on the Astryx scale', () => {
-    for (const name of ['r-xs', 'r-sm', 'r-md', 'r-lg', 'r-xl', 'r-pill'])
-      expect(css, name).toMatch(new RegExp(`--${name}:var\\(--radius-(inner|element|container|full)\\)`));
+    expect(css).not.toMatch(/--r-(?:xs|sm|md|lg|xl|pill):/);
+    expect(css).toContain('--r-outer:var(--radius-container);');
   });
 });
 

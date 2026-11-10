@@ -3,4 +3,3 @@
 
 .course-file-open-method { display:grid; gap:var(--space-1); }
 .course-file-open-method > span { color:var(--muted); font-size:var(--text-sm); }
-.course-file-open-method [data-slot="select-trigger"] { width:100%; }

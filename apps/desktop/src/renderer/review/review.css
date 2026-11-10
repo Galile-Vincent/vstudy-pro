@@ -35,7 +35,7 @@
 .review-page select,
 .review-page input {
   border: 0;
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-element);
   padding: var(--space-2) var(--space-3);
   background: var(--subtle);
   color: var(--ink);
@@ -70,7 +70,7 @@
   display: inline-block;
   background: var(--subtle);
   padding: var(--space-1) var(--space-2);
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-full);
 }
 .review-page .review-question {
   display: block;

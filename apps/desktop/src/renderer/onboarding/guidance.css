@@ -8,11 +8,11 @@
 .learning-actions { display:flex; gap:var(--space-2); flex-wrap:wrap; }
 .walkthrough { min-width:0; }
 .walkthrough-example { color:var(--muted); font-size:var(--type-sm); margin-block:0 var(--space-2); }
-.walkthrough-window { background:color-mix(in oklab,var(--ink) 5%,var(--surface)); padding:var(--space-4); border-radius:var(--r-md); }
+.walkthrough-window { background:color-mix(in oklab,var(--ink) 5%,var(--surface)); padding:var(--space-4); border-radius:var(--radius-container); }
 .walkthrough-toolbar { display:flex; align-items:center; gap:var(--space-2); padding-bottom:var(--space-4); }
 .walkthrough-diagram { display:grid; gap:var(--space-2); }
-.walkthrough-node { display:flex; align-items:center; gap:var(--space-3); min-height:calc(var(--space-6) * 2); padding:var(--space-3); border-radius:var(--r-sm); transition:background-color var(--motion-fast) var(--ease-standard); }
-.walkthrough-node > span { display:grid; place-items:center; flex-shrink:0; width:var(--space-6); height:var(--space-6); border-radius:var(--r-pill); background:var(--surface); font-variant-numeric:tabular-nums; }
+.walkthrough-node { display:flex; align-items:center; gap:var(--space-3); min-height:calc(var(--space-6) * 2); padding:var(--space-3); border-radius:var(--radius-element); transition:background-color var(--motion-fast) var(--ease-standard); }
+.walkthrough-node > span { display:grid; place-items:center; flex-shrink:0; width:var(--space-6); height:var(--space-6); border-radius:var(--radius-full); background:var(--surface); font-variant-numeric:tabular-nums; }
 .walkthrough-node[data-active=true] { background:var(--active); outline:2px solid var(--ink); outline-offset:-2px; }
 .walkthrough-node[data-done=true] { color:var(--muted); }
 .walkthrough-track { display:block; width:100%; margin-top:var(--space-4); }
@@ -24,7 +24,7 @@
 .walkthrough-transcript { margin-top:var(--space-4); }
 .walkthrough-transcript summary { cursor:pointer; font-weight:500; }
 .walkthrough-transcript ol { padding-inline-start:var(--space-6); display:grid; gap:var(--space-3); }
-.context-coach { display:flex; justify-content:space-between; align-items:flex-start; gap:var(--space-4); padding:var(--space-3) var(--space-6); margin:var(--space-3) var(--space-6) 0; background:var(--w-tone,color-mix(in oklab,var(--ink) 4%,var(--surface))); border:1px solid var(--line); border-radius:var(--r-md); }
+.context-coach { display:flex; justify-content:space-between; align-items:flex-start; gap:var(--space-4); padding:var(--space-3) var(--space-6); margin:var(--space-3) var(--space-6) 0; background:var(--w-tone,color-mix(in oklab,var(--ink) 4%,var(--surface))); border:1px solid var(--line); border-radius:var(--radius-container); }
 .context-coach > div { min-width:0; }
 .context-coach summary { cursor:pointer; }
 .context-coach summary:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
@@ -38,10 +38,10 @@
 .shell-content:has(> .context-coach) { display:flex; flex-direction:column; }
 .shell-content > .context-coach { flex-shrink:0; }
 .shell-content:has(> .context-coach) > .workspace,.shell-content:has(> .context-coach) > .moodle-page { flex:1; min-height:0; height:auto; }
-.walkthrough-scene { display:grid; grid-template-columns:calc(var(--space-5) * 2) minmax(0,1fr); min-height:160px; background:var(--surface); border-radius:var(--r-sm); overflow:hidden; margin-bottom:var(--space-3); }
+.walkthrough-scene { display:grid; grid-template-columns:calc(var(--space-5) * 2) minmax(0,1fr); min-height:160px; background:var(--surface); border-radius:var(--radius-element); overflow:hidden; margin-bottom:var(--space-3); }
 .walkthrough-rail { display:flex; flex-direction:column; align-items:center; gap:var(--space-5); padding-top:var(--space-4); background:color-mix(in oklab,var(--ink) 6%,var(--surface)); }
 .walkthrough-scene-body { padding:var(--space-4); display:grid; align-content:start; gap:var(--space-3); min-width:0; }
-.walkthrough-field,.walkthrough-control,.walkthrough-bubble { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-3); background:color-mix(in oklab,var(--ink) 5%,var(--surface)); border-radius:var(--r-sm); font-size:var(--type-sm); }
+.walkthrough-field,.walkthrough-control,.walkthrough-bubble { display:flex; align-items:center; gap:var(--space-2); padding:var(--space-3); background:color-mix(in oklab,var(--ink) 5%,var(--surface)); border-radius:var(--radius-element); font-size:var(--type-sm); }
 .walkthrough-bubble { margin-inline-start:var(--space-6); }
 .walkthrough-tabs { display:flex; gap:var(--space-3); font-size:var(--type-sm); flex-wrap:wrap; }
 .walkthrough-passage { margin:0; line-height:1.7; }
@@ -50,4 +50,4 @@
 .walkthrough-node { min-height:var(--space-8); padding:var(--space-2); font-size:var(--type-sm); }
 .recorded-example { margin-top:var(--space-4); }
 .recorded-example summary { cursor:pointer; font-weight:500; }
-.recorded-example video { display:block; width:100%; max-height:65dvh; margin-top:var(--space-3); border-radius:var(--r-sm); background:var(--surface); }
+.recorded-example video { display:block; width:100%; max-height:65dvh; margin-top:var(--space-3); border-radius:var(--radius-element); background:var(--surface); }

@@ -20,9 +20,9 @@
 .streak-days li { display:grid; justify-items:center; font-size:var(--type-sm); }
 .streak-days [data-studied=true] { color:var(--ink); }
 .streak-days li > span:first-child { display:grid; place-items:center; width:var(--space-4); height:var(--space-4); line-height:1; }
-.streak-days [data-today=true] > span:first-child { outline:1px solid var(--ink); outline-offset:1px; border-radius:var(--r-pill); }
+.streak-days [data-today=true] > span:first-child { outline:1px solid var(--ink); outline-offset:1px; border-radius:var(--radius-full); }
 .home-pins .home-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-2) var(--space-4); }
-.home-activity summary { cursor:pointer; font-size:var(--type-base); font-weight:600; color:var(--muted); border-radius:var(--r-sm); }
+.home-activity summary { cursor:pointer; font-size:var(--type-base); font-weight:600; color:var(--muted); border-radius:var(--radius-element); }
 .home-activity .home-list { margin-top:var(--space-4); }
 
 .art-reader-launchpad {

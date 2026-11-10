@@ -4,14 +4,14 @@
 }
 .exam-documents { display:grid; gap:var(--space-2); }
 .exam-fields { display:grid; grid-template-columns:repeat(auto-fit,minmax(9rem,1fr)); gap:var(--space-4); }
-.exam-choice,.exam-breakdown details { border-radius:var(--r-sm); background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
+.exam-choice,.exam-breakdown details { border-radius:var(--radius-element); background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
 .exam-choice { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3); cursor:pointer; overflow-wrap:anywhere; }
 .exam-choice:hover,.exam-breakdown details:has(> summary:hover) { background:color-mix(in oklab,var(--ink) 7%,var(--surface)); }
 .exam-choice:has(:checked) { background:var(--active); }
 fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default; }
 .exam-footer {
   position:sticky; inset-block-end:0; z-index:1; display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end;
-  gap:var(--space-3); padding:var(--space-4); border-radius:var(--r-md); background:color-mix(in oklab,var(--ink) 4%,var(--surface));
+  gap:var(--space-3); padding:var(--space-4); border-radius:var(--radius-container); background:color-mix(in oklab,var(--ink) 4%,var(--surface));
 }
 @media (prefers-contrast:more),(forced-colors:active) { .exam-choice:has(:checked) { outline:thin solid var(--ink); } }
 .exam-history > li { container-type:inline-size; }
@@ -30,7 +30,7 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
 .exam-built-in { max-inline-size:72ch; }
 .exam-built-in :is(h4,h5) { color:var(--muted); font-weight:500; }
 .exam-built-in p { line-height:1.7; white-space:pre-wrap; }
-.exam-explanation { max-inline-size:72ch; padding:var(--space-3); border-radius:var(--r-sm); background:var(--subtle); line-height:1.7; white-space:pre-wrap; }
+.exam-explanation { max-inline-size:72ch; padding:var(--space-3); border-radius:var(--radius-element); background:var(--subtle); line-height:1.7; white-space:pre-wrap; }
 .exam-item-feedback { display:grid; gap:var(--space-4); }
 .exam-item-feedback > :is(button,[data-slot=badge]) { justify-self:start; }
 .exam-item-feedback:focus-visible { outline:2px solid var(--focus); outline-offset:4px; }

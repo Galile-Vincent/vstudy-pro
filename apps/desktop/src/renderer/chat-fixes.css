@@ -53,7 +53,6 @@
 [data-slot=suggestions] button[aria-pressed=true] { background:var(--ink); color:var(--surface); }
 
 .new-chat-composer { flex:none; margin-top:auto; border:1px solid var(--hairline); border-radius:var(--radius-element); background:var(--surface); padding:var(--space-3); }
-.new-chat-composer [data-slot=textarea] { border:0; box-shadow:none; background:transparent; padding:0; resize:none; }
 .new-chat-composer .model-controls { flex-wrap:wrap; }
 .chat-pane > .aui-thread-root { flex:1; height:auto; min-height:0; }
 .chat-pane .aui-thread-viewport-footer { position:sticky; bottom:0; flex-shrink:0; z-index:1; }
@@ -175,7 +174,7 @@
  color:var(--ink);
  box-shadow:none;
  font-size:var(--type-base);
- transition:transform var(--motion-fast) var(--ease-out-soft);
+ transition:transform var(--motion-fast) var(--ease-entrance);
  animation:none;
 }
 .workspace :is([data-slot=suggestions] button,.aui-thread-followup-suggestion):hover {

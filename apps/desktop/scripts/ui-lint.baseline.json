@@ -27,19 +27,12 @@
     "backdrop": 0,
     "surface-class": 0
   },
-  "exams/exams.css": {
-    "shadow": 1,
-    "radius": 0,
-    "color": 0,
-    "backdrop": 0,
-    "surface-class": 0
-  },
   "library/library.css": {
     "shadow": 0,
     "radius": 0,
     "color": 0,
     "backdrop": 0,
-    "surface-class": 15
+    "surface-class": 14
   },
   "motion/surfaces.css": {
     "shadow": 0,
