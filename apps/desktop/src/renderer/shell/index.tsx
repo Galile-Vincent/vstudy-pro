@@ -287,7 +287,6 @@ export function AppShell({
       <ShellChrome route={route} status={status} sidebarVisible={sidebarVisible} setSidebarVisible={setSidebarVisible} />
       <div
         id="shell-content"
-        role={route.view === 'library' ? 'main' : undefined}
         className="shell-content"
         tabIndex={-1}
         onKeyDown={forwardScrollKeys}

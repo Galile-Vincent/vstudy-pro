@@ -62,6 +62,7 @@ try {
   console.log(JSON.stringify(results, null, 2));
   await installSchoolFixture(app);
   await page.evaluate(() => window.localStorage.setItem('vstudy-route', JSON.stringify({ view: 'courses', courseId: '10000000-0000-4000-8000-000000000010' })));
+  await page.addInitScript(() => { if (localStorage.getItem('vstudy-route')) localStorage.removeItem('vstudy-tabs-v1'); });
   await page.reload();
   await page.locator('.moodle-module').first().waitFor();
   await page.locator('.moodle-chat-button').click();
@@ -78,16 +79,16 @@ try {
   await page.evaluate(() => window.localStorage.setItem('vstudy-route', JSON.stringify({ view: 'courses' })));
   await page.reload();
   await page.locator('.moodle-course-card').first().waitFor();
-  await page.getByRole('button', { name: 'Refresh courses', exact: true }).click();
+  await page.getByRole('button', { name: 'Refresh all schools', exact: true }).click();
   await page.getByRole('alert').getByText('Could not refresh. Showing your last synced courses.', { exact: true }).waitFor();
   assert.equal(await page.locator('.moodle-course-card').count(), 1);
   await page.screenshot({ path: join(evidence, 'after-offline-stale.png') });
   await page.evaluate(() => window.dispatchEvent(new window.CustomEvent('vstudy:open-settings', { detail: { tab: 'privacy' } })));
   const privacy = page.getByTestId('privacy-settings');
-  await privacy.getByRole('button', { name: 'Offline mode', exact: true }).click();
+  await privacy.getByRole('radio', { name: 'Offline mode', exact: true }).click();
   await privacy.getByText('Current mode: offline. Only Markdown and text files work.', { exact: true }).waitFor();
   assert.equal((await page.evaluate(() => window.desktop.invoke('settings:get', {}))).converterOffline, true);
-  await privacy.getByRole('button', { name: 'Offline mode', exact: true }).scrollIntoViewIfNeeded();
+  await privacy.getByRole('radio', { name: 'Offline mode', exact: true }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: join(evidence, 'after-offline-mode.png') });
   await page.keyboard.press('Escape');
   console.log('PASS. Failed sync preserves cached courses. Offline conversion mode persists and explains supported files.');

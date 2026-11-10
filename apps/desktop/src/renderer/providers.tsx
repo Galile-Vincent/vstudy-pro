@@ -1,5 +1,6 @@
 import { Button, Card, Dialog, DialogHeader, IconButton, Switch, Tab, TabList } from '@astryxdesign/core';
 import { Section, SettingRow } from './components/ui';
+import { useOverlayFocusReturn } from './components/use-overlay-focus-return';
 import { UpdateSettings } from './settings/updates';
 import { AppVersion } from './components/app-version';
 import { aiCliSetupEvent } from './ai-cli/entry';
@@ -41,6 +42,7 @@ export function ProviderSettings({
   useTranslation();
   const navigation = useOptionalNavigation();
   const [open, setOpen] = useState(true);
+  useOverlayFocusReturn(open);
   const completed = useRef(false);
   const requestClose = useCallback(() => setOpen(false), []);
   const closeOwner = useRef(onClose);
@@ -71,16 +73,10 @@ export function ProviderSettings({
   useEffect(() => { track('screen_viewed', {screen_name:'settings'}); }, []);
 
   useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null;
-
     void desktop
       .invoke('settings:get', {})
       .then((s) => setStructuredTables(s.enableGenerativeUI))
       .catch(() => {});
-    return () => {
-      if (previous?.isConnected) previous.focus();
-      else document.getElementById('shell-content')?.focus();
-    };
   }, []);
 
   useEffect(() => {

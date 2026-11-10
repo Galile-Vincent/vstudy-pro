@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { useOverlayFocusReturn } from "../components/use-overlay-focus-return";
 import { Layout, LayoutPanel, LayoutContent, Dialog, DialogHeader } from "@astryxdesign/core";
 import type { IpcResponse } from '../../shared/ipc';
 import { LoadError } from '../components/load-error';
@@ -21,7 +22,7 @@ export function HistoryFinder() {
   useTranslation();
   const dialogDescriptionId = useId();
   const { navigate } = useNavigate(), [open, setOpen] = useState(false);
-  const trigger = useRef<HTMLElement | null>(null);
+  const captureOpener = useOverlayFocusReturn(open);
   useEffect(() => {
     let titles: Record<string, string> = {};
     try {
@@ -48,14 +49,14 @@ export function HistoryFinder() {
   useEffect(() => {
     const key = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k' && !e.isComposing) {
       e.preventDefault();
-      if (!open) trigger.current = document.activeElement as HTMLElement;
+      if (!open) captureOpener();
       setOpen(o => !o);
     } };
-    const show = () => { trigger.current = document.activeElement as HTMLElement; setOpen(true); };
+    const show = () => { if (!open) captureOpener(); setOpen(true); };
     window.addEventListener('keydown', key);
     window.addEventListener('vstudy:find-history', show);
     return () => { window.removeEventListener('keydown', key); window.removeEventListener('vstudy:find-history', show); };
-  }, [open]);
+  }, [open, captureOpener]);
   return <>{open && <Dialog aria-describedby={dialogDescriptionId} role="dialog" isOpen={open} onOpenChange={setOpen} className="history-dialog"><DialogHeader title={<>{tr('history:title')}</>} /><div id={dialogDescriptionId} className="dialog-description">{tr('history:subtitle')}</div><HistorySearch compact onOpen={(hit, messageId) => { setOpen(false); navigate({ view: 'history', conversationId: hit.id, messageId }); }}/><button onClick={() => { setOpen(false); navigate('history'); }}>{tr('history:full_history')}</button></Dialog>}</>;
 }
 export function HistoryView() {

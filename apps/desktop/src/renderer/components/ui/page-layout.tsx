@@ -14,9 +14,9 @@ export function PageHeader({
   meta,
   className,
   ...props
-}: Omit<ComponentProps<'header'>, 'title'> & Slots & { leading?: ReactNode; meta?: ReactNode }) {
+}: Omit<ComponentProps<'div'>, 'title'> & Slots & { leading?: ReactNode; meta?: ReactNode }) {
   return (
-    <header
+    <div
       {...props}
       data-slot="page-header"
       className={cn('flex flex-col gap-[var(--space-4)]', className)}
@@ -30,7 +30,7 @@ export function PageHeader({
         {actions && <div className="flex min-w-0 max-w-full flex-wrap items-center gap-[var(--space-2)]">{actions}</div>}
       </div>
       {meta && <div>{meta}</div>}
-    </header>
+    </div>
   );
 }
 

@@ -53,3 +53,5 @@
 .shell-content:focus:not(:focus-visible) { outline:none; }
 html:not([data-input-modality=keyboard]) .shell-content:focus { outline:none; }
 @media(prefers-contrast:more) { .app-shell .shell-sidebar { border-inline-end:1px solid var(--ink); } }
+
+.app-shell [data-testid=skip-to-content] { background:var(--surface); color:var(--ink); border:1px solid var(--line-strong); border-radius:var(--radius-element); font-size:var(--type-base); }

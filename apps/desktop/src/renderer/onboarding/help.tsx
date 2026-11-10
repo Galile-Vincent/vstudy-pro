@@ -36,7 +36,7 @@ export function LearningHelp() {
   const opener = useRef<Element | null>(null);
   const restoreFocus = returnFocusTo(() => opener.current);
   const focusDestination = () => {
-    document.querySelector<HTMLElement>('#shell-content[role=main]')?.focus();
+    document.querySelector<HTMLElement>('#shell-content')?.focus();
   };
   useEffect(() => {
     if (navigating.current && route?.view === 'library' && !view) focusDestination();
