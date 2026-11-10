@@ -105,6 +105,7 @@ let store: Store | undefined;
 let disposeIpc: ((deleting?: boolean) => Promise<void>) | undefined;
 let window: BrowserWindow | null = null;
 let deletingData = false;
+let shuttingDown = false;
 let stopWindowState: (() => void) | undefined;
 const developmentUrl = !app.isPackaged
   ? process.env.ELECTRON_RENDERER_URL
@@ -313,13 +314,14 @@ if (ownsApplication) void app.whenReady().then(async () => {
       event.senderFrame === window.webContents.mainFrame &&
       isAppUrl(event.senderFrame.url, entryUrl),
     restoreMainWindow,
-    { updates, canInstallUpdate: () => !deleteRequested && !deletingData && deletionFinished && cleanupFinished && !quitting, ...(process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {}) },
+    { updates, canInstallUpdate: () => !deleteRequested && !shuttingDown && deletionFinished && cleanupFinished, ...(process.platform === "win32" ? {mcpPersistence: createWindowsStatePersistence()} : {}) },
   );
   const deletion = createIpcRegistrar(ipcMain, event => !!window && event.sender === window.webContents && event.senderFrame === window.webContents.mainFrame && isAppUrl(event.senderFrame.url, entryUrl));
   ipcMain.removeHandler('settings:deletionStatus');
   deletion.handle('settings:deletionStatus', () => ({pending:!deletionFinished || !cleanupFinished}));
   ipcMain.removeHandler('settings:deleteAllData');
   const deleteData = createDataDeletion(userData, async () => {
+    shuttingDown = true;
     deletingData = true;
     quitting = true;
     stopWindowState?.();
@@ -343,13 +345,16 @@ if (ownsApplication) void app.whenReady().then(async () => {
       ? 'settings:delete_failed_permission' : code === 'EBUSY'
         ? 'settings:delete_failed_busy' : 'settings:delete_failed_files');
     logDeletionFailure(error);
-    void dialog.showMessageBox({type:'warning',title:tr('settings:delete_failure_title'),
+    let noticeTimeout: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([dialog.showMessageBox({type:'warning',title:tr('settings:delete_failure_title'),
       message:tr(scheduled ? 'settings:delete_failed' : 'settings:delete_not_scheduled',{reason}),
       buttons:[tr('common:close')],
-    });
+      }), new Promise<void>(resolve => { noticeTimeout = setTimeout(resolve, 30_000); })]);
+    } finally { clearTimeout(noticeTimeout); }
   }, () => { restartOwnedApp(app); });
   deletion.handle('settings:deleteAllData', async (_request, event) => {
-    if (deleteRequested || updates.snapshot().installing || quitting) throw Error('VSTUDY_STATUS:' + JSON.stringify({
+    if (deleteRequested || updates.snapshot().installing || shuttingDown) throw Error('VSTUDY_STATUS:' + JSON.stringify({
       code:'settings.delete_in_progress', params:{},
     }));
     deleteRequested = true;
@@ -358,8 +363,8 @@ if (ownsApplication) void app.whenReady().then(async () => {
       const result = await showAttachedMessage({ type: 'warning', message: tr('settings:delete_title'), detail: tr('settings:delete_copy'), buttons: [tr('common:cancel'), tr('settings:delete')], defaultId: 0, cancelId: 0 }, event.sender);
       if (result.response !== 1) { deleteRequested = false; return {ok:true}; }
     } catch (error) { deleteRequested = false; throw error; }
-    await deleteData();
-    if (!deletingData) deleteRequested = false;
+    try { await deleteData(); }
+    finally { if (!deletingData) deleteRequested = false; }
     return { ok: true };
   });
   nativeTheme.on("updated", () => { if (store) applyNativeTheme(store.settings.get()); });
@@ -418,6 +423,7 @@ const shutdown = coordinateShutdown({
 });
 app.on("before-quit", (event) => {
   if (quitting || !ownsApplication) return;
+  shuttingDown = true;
   event.preventDefault();
   void shutdown();
 });
