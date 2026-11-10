@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { tr } from '../../shared/i18n';
 import { CourseChip } from './course-chip';
 const invoke = vi.fn();
+vi.mock('../components/select', () => import('../../test/native-select'));
 vi.mock('../bridge', () => ({ desktop: { invoke: (...args: unknown[]) => invoke(...args) } }));
 afterEach(() => { cleanup(); vi.resetAllMocks(); });
 const link = (courseId: string | null, excludeFromMemory = false) => ({ conversationId: 'chat', courseId, method: 'manual', confidence: 1, confirmed: true, excludeFromMemory, revision: 1, updatedAt: '2026-11-06T00:00:00.000Z' });

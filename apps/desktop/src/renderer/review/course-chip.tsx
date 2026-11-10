@@ -4,6 +4,7 @@ import type { IpcResponse } from '../../shared';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import { Button, Popover } from '@astryxdesign/core';
+import { Select } from '../components/select';
 
 type Course = IpcResponse<'review:courses:list'>['items'][number];
 type Cursor = NonNullable<IpcResponse<'review:courses:list'>['nextCursor']>;
@@ -58,20 +59,17 @@ export function CourseChip({ conversationId }: { conversationId: string }) {
       alignment="start"
       content={
         <div className="flex flex-col gap-[var(--space-2)] p-[var(--space-3)]">
-          <label>
-            {tr('review:course_picker')}
-            <select
-              aria-label={tr('review:course_picker')}
-              value={courseId ?? ''}
-              disabled={busy}
-              onChange={event => void assign(event.target.value)}
-            >
-              <option value="">{tr('review:unsorted')}</option>
-              {courses.filter(course => !course.archivedAt || course.id === courseId).map(course => (
-                <option key={course.id} value={course.id}>{course.title}</option>
-              ))}
-            </select>
-          </label>
+          <Select
+            aria-label={tr('review:course_picker')}
+            value={courseId ?? ''}
+            disabled={busy}
+            onChange={event => void assign(event.target.value)}
+          >
+            <option value="">{tr('review:unsorted')}</option>
+            {courses.filter(course => !course.archivedAt || course.id === courseId).map(course => (
+              <option key={course.id} value={course.id}>{course.title}</option>
+            ))}
+          </Select>
           <Button
             type="button"
             variant="ghost"

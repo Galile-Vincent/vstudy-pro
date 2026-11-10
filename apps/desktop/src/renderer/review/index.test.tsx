@@ -5,6 +5,7 @@ import { i18n } from '../../shared/i18n';
 import en from '../../shared/locales/en/review.json';
 import { ReviewView } from './index';
 const { invoke, navigate, nav, moodleListeners, realPlayer } = vi.hoisted(() => ({ invoke: vi.fn(), navigate: vi.fn(), realPlayer: { enabled: false }, nav: { route: { view: 'review' } as { view: string; courseId?: string } }, moodleListeners: [] as Array<(event: { state: string }) => void> }));
+vi.mock('../components/select', () => import('../../test/native-select'));
 vi.mock('../bridge', () => ({ desktop: { invoke, onMoodleProgress: (listener: (event: { state: string }) => void) => { moodleListeners.push(listener); return () => { moodleListeners.splice(moodleListeners.indexOf(listener), 1); }; } } }));
 vi.mock('../shell', () => ({ useNavigate: () => ({ navigate, route: nav.route }) }));
 vi.mock('./test-player', async importOriginal => {
@@ -97,6 +98,7 @@ it('remembers the course across a visit to History and honours a course in the r
 it('lets students mark understanding, preselect a concept for notes and keeps focus in the list', async () => {
   fixture({ masteryPages: [[concept(2, 'needs_review'), concept(1, 'needs_review')]] });
   render(<ReviewView />);
+  await screen.findByText('Concept 1');
   const rows = await screen.findAllByRole('heading', { level: 3 });
   expect(rows.map(row => row.textContent)).toEqual(['Concept 1', 'Concept 2']);
   fireEvent.keyDown(within(rows[0]!.closest('li')!).getByRole('button', { name: 'Actions for Concept 1' }), { key: 'Enter' });

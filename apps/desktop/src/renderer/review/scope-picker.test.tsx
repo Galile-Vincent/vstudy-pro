@@ -3,6 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ScopePicker } from './scope-picker';
 const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
+vi.mock('../components/select', () => import('../../test/native-select'));
 vi.mock('../bridge', () => ({ desktop: { invoke } }));
 vi.mock('../../shared/i18n', () => ({ tr: (key: string) => key }));
 const unitId = '00000000-0000-4000-8000-000000000001';

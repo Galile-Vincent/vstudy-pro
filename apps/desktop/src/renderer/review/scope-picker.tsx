@@ -8,6 +8,7 @@ import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
 import { desktop } from "../bridge";
 import { Button } from "@astryxdesign/core";
+import { Select } from "../components/select";
 import { useReviewPage, type Cursor } from "./paging";
 
 export type ReviewScope = z.infer<typeof studyScopeSchema>;
@@ -194,23 +195,21 @@ export function ScopePicker({
           {tr("review:scope_limit", { count: MAX_REVIEW_CONCEPTS })}
         </p>
       )}
-      <label>
-        {tr("review:scope_kind")}
-        <select
-          value={kind}
-          onChange={(event) =>
-            setKind(event.target.value as ReviewScope["kind"])
-          }
-        >
-          {(["units", "documents", "dates", "concepts", "weak"] as const).map(
-            (value) => (
-              <option key={value} value={value}>
-                {tr(`review:scope_${value}`)}
-              </option>
-            ),
-          )}
-        </select>
-      </label>
+      <Select
+        aria-label={tr("review:scope_kind")}
+        value={kind}
+        onChange={(event) =>
+          setKind(event.target.value as ReviewScope["kind"])
+        }
+      >
+        {(["units", "documents", "dates", "concepts", "weak"] as const).map(
+          (value) => (
+            <option key={value} value={value}>
+              {tr(`review:scope_${value}`)}
+            </option>
+          ),
+        )}
+      </Select>
       {kind === "dates" ? (
         <div className="review-actions">
           <label>
@@ -284,21 +283,19 @@ export function ScopePicker({
           )}
         </>
       )}
-      <label>
-        {tr("review:scope_size")}
-        <select
-          value={size}
-          onChange={(event) =>
-            onSizeChange?.(event.target.value as "short" | "standard" | "long")
-          }
-        >
-          {(["short", "standard", "long"] as const).map((value) => (
-            <option key={value} value={value}>
-              {tr(`review:scope_${value}`)}
-            </option>
-          ))}
-        </select>
-      </label>
+      <Select
+        aria-label={tr("review:scope_size")}
+        value={size}
+        onChange={(event) =>
+          onSizeChange?.(event.target.value as "short" | "standard" | "long")
+        }
+      >
+        {(["short", "standard", "long"] as const).map((value) => (
+          <option key={value} value={value}>
+            {tr(`review:scope_${value}`)}
+          </option>
+        ))}
+      </Select>
     </fieldset>
   );
 }

@@ -133,12 +133,3 @@
 .review-evidence[open] {
   flex-basis: 100%;
 }
-
-.review-page, .review-consent {
-  --color-overlay-hover: color-mix(in srgb, var(--ink) 6%, transparent);
-  --color-overlay-pressed: color-mix(in srgb, var(--ink) 10%, transparent);
-}
-:is(.review-page, .review-consent) .astryx-button[data-variant="primary"] {
-  --color-overlay-hover: color-mix(in srgb, var(--accent-foreground) 8%, transparent);
-  --color-overlay-pressed: color-mix(in srgb, var(--accent-foreground) 12%, transparent);
-}

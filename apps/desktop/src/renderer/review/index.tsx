@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { BookOpen, MoreHorizontal, RefreshCw } from "lucide-react";
 import type { Conversation } from "../../shared/domain";
@@ -24,6 +24,7 @@ import {
   Tab,
   TabList,
 } from "@astryxdesign/core";
+import { Select } from "../components/select";
 import { useReviewPage, type Cursor } from "./paging";
 import type { ReviewSelection } from "./review-selection";
 import { ArtifactPanel } from "./artifacts";
@@ -44,7 +45,7 @@ function PageState({
     retry: () => void;
     more: () => void;
   };
-  empty?: string;
+  empty?: { title: string; hint?: string; action?: ReactNode };
 }) {
   return (
     <>
@@ -57,10 +58,11 @@ function PageState({
       {page.loading && <p role="status">{tr("review:loading")}</p>}
       {!page.loading && !page.error && !page.items.length && empty && (
         <EmptyState
-          headingLevel={2}
+          headingLevel={3}
           icon={<BookOpen aria-hidden="true" />}
-          title={tr(`review:${empty}`)}
-          action={<Button variant="secondary" label={tr("review:retry")} onClick={page.retry} />}
+          title={tr(`review:${empty.title}`)}
+          {...(empty.hint ? { description: tr(`review:${empty.hint}`) } : {})}
+          {...(empty.action ? { action: empty.action } : {})}
         />
       )}
       {page.cursor && (
@@ -229,21 +231,18 @@ export function ReviewView() {
       {!online && <p role="status">{tr("review:offline")}</p>}
       <Toolbar
         left={
-          <label>
-            {tr("review:course_picker")}
-            <select
-              aria-label={tr("review:course_picker")}
-              value={courseId}
-              onChange={(e) => selectCourse(e.target.value)}
-            >
-              <option value="">{tr("review:unsorted")}</option>
-              {courses.items.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            aria-label={tr("review:course_picker")}
+            value={courseId}
+            onChange={(e) => selectCourse(e.target.value)}
+          >
+            <option value="">{tr("review:unsorted")}</option>
+            {courses.items.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.title}
+              </option>
+            ))}
+          </Select>
         }
       />
       <PageState page={courses} />
@@ -323,6 +322,7 @@ export function ReviewView() {
                 mutate={mutate}
                 busy={busy}
                 artifacts={artifacts}
+                showRecent={() => setUserTab("recent")}
               />
             )}
           </div>
@@ -448,28 +448,26 @@ function CourseTools({
             }
           />
           {moodle && (
-            <label>
-              {tr("review:link_moodle")}
-              <select
-                value={course.moodleCourseId ?? ""}
-                disabled={busy}
-                onChange={(e) =>
-                  void run(() =>
-                    desktop.invoke("review:courses:link-moodle", {
-                      courseId: course.id,
-                      moodleCourseId: e.target.value || null,
-                    }),
-                  )
-                }
-              >
-                <option value="">{tr("review:unlinked")}</option>
-                {moodle.courses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.fullName}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Select
+              aria-label={tr("review:link_moodle")}
+              value={course.moodleCourseId ?? ""}
+              disabled={busy}
+              onChange={(e) =>
+                void run(() =>
+                  desktop.invoke("review:courses:link-moodle", {
+                    courseId: course.id,
+                    moodleCourseId: e.target.value || null,
+                  }),
+                )
+              }
+            >
+              <option value="">{tr("review:unlinked")}</option>
+              {moodle.courses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.fullName}
+                </option>
+              ))}
+            </Select>
           )}
         </>
       )}
@@ -495,6 +493,7 @@ function Inbox({
   courses: Course[];
   open: (id: string) => void;
 }) {
+  const { navigate } = useNavigate();
   const page = useReviewPage(
     useCallback(
       (cursor?: Cursor) =>
@@ -543,29 +542,26 @@ function Inbox({
               label={tr("review:chat_number", { number: i + 1 })}
               onClick={() => open(link.conversationId)}
             />
-            <label>
-              {tr("review:move")}
-              <select
-                aria-label={tr("review:move")}
-                value=""
-                disabled={busy}
-                onChange={(e) =>
-                  void run(() =>
-                    desktop.invoke("review:chat:assign", {
-                      conversationId: link.conversationId,
-                      courseId: e.target.value,
-                    }),
-                  )
-                }
-              >
-                <option value="">{tr("review:course_picker")}</option>
-                {courses.map((c) => (
-                  <option value={c.id} key={c.id}>
-                    {c.title}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Select
+              aria-label={tr("review:move")}
+              value=""
+              disabled={busy}
+              onChange={(e) =>
+                void run(() =>
+                  desktop.invoke("review:chat:assign", {
+                    conversationId: link.conversationId,
+                    courseId: e.target.value,
+                  }),
+                )
+              }
+            >
+              <option value="">{tr("review:move")}</option>
+              {courses.map((c) => (
+                <option value={c.id} key={c.id}>
+                  {c.title}
+                </option>
+              ))}
+            </Select>
             <Button
               variant="secondary"
               isDisabled={busy}
@@ -586,7 +582,14 @@ function Inbox({
           </li>
         ))}
       </ul>
-      <PageState page={page} empty="inbox_empty" />
+      <PageState
+        page={page}
+        empty={{
+          title: "inbox_empty",
+          hint: "inbox_empty_hint",
+          action: <Button variant="secondary" label={tr("review:ask_question")} onClick={() => navigate("home")} />,
+        }}
+      />
     </section>
   );
 }
@@ -607,6 +610,7 @@ function Recent({
   mutate: Mutate;
   busy: boolean;
 }) {
+  const { navigate } = useNavigate();
   const page = useReviewPage(
     useCallback(
       (cursor?: Cursor) =>
@@ -770,7 +774,14 @@ function Recent({
           </li>
         ))}
       </ol>
-      <PageState page={page} empty="recent_empty" />
+      <PageState
+        page={page}
+        empty={{
+          title: "recent_empty",
+          hint: "recent_empty_hint",
+          action: <Button variant="secondary" label={tr("review:ask_question")} onClick={() => navigate("home")} />,
+        }}
+      />
       <details>
         <summary>{tr("review:related_units")}</summary>
         <PageState page={units} />
@@ -785,7 +796,9 @@ function Weak({
   mutate,
   busy,
   artifacts,
+  showRecent,
 }: {
+  showRecent: () => void;
   weak: {
     items: WeakConcept[];
     loading: boolean;
@@ -953,9 +966,11 @@ function Weak({
       )}
       {!weak.loading && !weak.error && !items.length && (
         <EmptyState
-          headingLevel={2}
+          headingLevel={3}
           icon={<BookOpen aria-hidden="true" />}
           title={tr("review:weak_empty")}
+          description={tr("review:weak_empty_hint")}
+          action={<Button variant="secondary" label={tr("review:show_recent")} onClick={showRecent} />}
         />
       )}
     </Section>
@@ -1013,7 +1028,8 @@ function EvidencePage({
             </li>
           ))}
       </ul>
-      <PageState page={page} empty="evidence_empty" />
+      {!page.loading && !page.error && !page.items.length && <p>{tr("review:evidence_empty")}</p>}
+      <PageState page={page} />
     </>
   );
 }

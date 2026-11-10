@@ -11,6 +11,7 @@ import { useFormat } from "../i18n";
 import { desktop } from "../bridge";
 import { DocumentMarkdown } from "../lazy-reader";
 import { Button } from "@astryxdesign/core";
+import { Select } from "../components/select";
 import { useReviewPage, type Cursor } from "./paging";
 import { ScopePicker } from "./scope-picker";
 import { TestPlayer } from "./test-player";
@@ -266,16 +267,17 @@ export function ArtifactPanel({
         }
       />
       <div className="review-actions">
-        <label>
-          {tr("review:generation_model")}
-          <select value={model} onChange={(e) => setModel(e.target.value)}>
-            {choices.map((m, index) => (
-              <option key={m.key} value={index}>
-                {m.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Select
+          aria-label={tr("review:generation_model")}
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+        >
+          {choices.map((m, index) => (
+            <option key={m.key} value={index}>
+              {m.label}
+            </option>
+          ))}
+        </Select>
         <Button
           variant="primary"
           isDisabled={

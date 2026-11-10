@@ -3,6 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ArtifactPanel } from './artifacts';
 const {invoke,subscribe}=vi.hoisted(()=>({invoke:vi.fn(),subscribe:vi.fn()}));
+vi.mock('../components/select', () => import('../../test/native-select'));
 vi.mock('../bridge',()=>({desktop:{invoke,onReviewProgress:subscribe}}));
 vi.mock('../../shared/i18n',()=>({tr:(key:string)=>key}));
 vi.mock('react-i18next',()=>({useTranslation:()=>({i18n:{language:'en'}})}));
