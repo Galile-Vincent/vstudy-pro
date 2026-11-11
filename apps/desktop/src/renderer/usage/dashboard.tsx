@@ -238,6 +238,7 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
           left={
             <>
               <Select
+                size="sm"
                 aria-label={tr('common:usage_period')}
                 value={period}
                 onChange={(event) => setPeriod(event.target.value as typeof period)}
@@ -289,6 +290,7 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
               left={<strong>{tr('common:breakdown')}</strong>}
               right={
                 <Select
+                size="sm"
                   aria-label={tr('common:group_usage_by')}
                   value={by}
                   onChange={(event) => setBy(event.target.value as typeof by)}

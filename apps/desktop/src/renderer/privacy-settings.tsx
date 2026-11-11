@@ -1,10 +1,11 @@
-import { Section, SettingRow, SegmentedControl, SegmentedControlItem } from './components/ui';
+import { Panel } from './components/panel';
+import { SettingRow, SegmentedControl, SegmentedControlItem } from './components/ui';
 import { useTrailingCommit } from './settings/use-trailing-commit';
 import { MemorySettings } from './review/memory-settings';
 import { AnalyticsSettings } from './analytics-ui';
 import { CliPrivacyPreferences } from './ai-cli/preferences';
 
-import { Button, Card, TextInput } from '@astryxdesign/core';
+import { Button, TextInput } from '@astryxdesign/core';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormat } from './i18n';
@@ -57,7 +58,7 @@ export function PrivacySettings() {
   return (
     <div data-testid="privacy-settings">
       <AnalyticsSettings/>
-      <Section level={3} title={tr('settings:network')}><Card padding={4} className="settings-stack">
+      <Panel title={tr('settings:network')}><div className="settings-stack settings-general-rows">
         <SettingRow label={tr('settings:network_copy')}>
           <Button label={tr('settings:refresh')} variant="secondary" size="sm" onClick={() => void refresh()} />
         </SettingRow>
@@ -75,10 +76,10 @@ export function PrivacySettings() {
         ) : (
           <div className="network-event empty">{tr('settings:empty_network')}</div>
         )}
-      </Card></Section>
+      </div></Panel>
       <CliPrivacyPreferences />
       <MemorySettings />
-      <Section level={3} title={tr('settings:converter')}><Card padding={4} className="settings-stack">
+      <Panel title={tr('settings:converter')}><div className="settings-stack settings-general-rows">
         {!loaded && <Button label={tr('settings:retry')} variant="primary" onClick={() => void load()} />}
         {offline !== undefined && <p role="status">{tr(offline ? 'settings:mode_offline' : 'settings:mode_online')}</p>}
         {modeStatus && <p role="status">{modeStatus}</p>}
@@ -109,9 +110,9 @@ export function PrivacySettings() {
             <SegmentedControlItem value="offline">{tr('settings:offline')}</SegmentedControlItem>
           </SegmentedControl>
         </SettingRow>
-      </Card></Section>
-      <Section level={3} title={tr('settings:delete')}>
-        <Card padding={4} data-danger="true" className="settings-stack">
+      </div></Panel>
+      <Panel title={tr('settings:delete')}>
+        <div data-danger="true" className="settings-stack settings-general-rows">
           <p>{tr('settings:delete_copy')}</p>
           <SettingRow label={tr('settings:confirm')}>
             <TextInput label={tr('settings:confirm')} isLabelHidden width={192}
@@ -120,8 +121,8 @@ export function PrivacySettings() {
             <Button label={tr('settings:delete')} variant="destructive" size="sm" isDisabled={confirmation !== 'DELETE'} onClick={() => void desktop.invoke('settings:deleteAllData', { confirmation: 'DELETE' })
                 .catch(e => setError(errorText(e)))} />
           </SettingRow>
-        </Card>
-      </Section>
+        </div>
+      </Panel>
       {error && <p role="alert">{error}</p>}
     </div>
   );
