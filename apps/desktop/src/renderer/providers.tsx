@@ -1,4 +1,5 @@
 import { Button, Card, Dialog, DialogHeader, IconButton, Switch, Tab, TabList } from '@astryxdesign/core';
+import { Panel } from './components/panel';
 import { Section, SettingRow } from './components/ui';
 import { useOverlayFocusReturn } from './components/use-overlay-focus-return';
 import { UpdateSettings } from './settings/updates';
@@ -121,11 +122,11 @@ export function ProviderSettings({
               {tab === id &&
                 (id === 'general' ? (
                   <>
-                    <Section level={3} title={tr('settings:languages')}><Card padding={4} className="settings-stack">
+                    <Panel title={tr('settings:languages')}><div className="settings-stack settings-general-rows">
                       <LanguageSettings />
-                    </Card></Section>
+                    </div></Panel>
                     <UpdateSettings />
-                    <Section level={3} title={tr('settings:welcome')}><Card padding={4} className="settings-stack">
+                    <Panel title={tr('settings:welcome')}><div className="settings-stack settings-general-rows">
                       <SettingRow label={tr('settings:welcomeGuide')} description={tr('settings:welcome_guide_hint')}>
                         <Button size="sm" variant="secondary" label={tr('settings:show')} onClick={() => setGuide(true)} />
                       </SettingRow>
@@ -141,10 +142,10 @@ export function ProviderSettings({
                           }}
                         />
                       </SettingRow>
-                    </Card></Section>
-                    <Section level={3} title={tr('library:documents')}><Card padding={4} className="settings-stack">
+                    </div></Panel>
+                    <Panel title={tr('library:documents')}><div className="settings-stack settings-general-rows">
                       <DocumentSettings />
-                    </Card></Section>
+                    </div></Panel>
                     <AppVersion/>
                   </>
                 ) : id === 'appearance' ? (

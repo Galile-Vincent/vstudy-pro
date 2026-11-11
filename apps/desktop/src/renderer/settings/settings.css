@@ -371,3 +371,8 @@
 }
 
 html:is([data-theme=contrast],[data-contrast=more]) .settings-disclosure { outline:1px solid var(--hairline); outline-offset:0; }
+
+.settings-general-rows { gap: 0; }
+.settings-general-rows > [data-slot=setting-row] { padding-block: var(--space-3); }
+.settings-general-rows > [data-slot=setting-row] + [data-slot=setting-row] { border-top: 1px solid var(--line); }
+.settings-general-rows > [role=status]:empty { display: none; }
