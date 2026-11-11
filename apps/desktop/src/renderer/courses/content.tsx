@@ -1,4 +1,4 @@
-import { DetailPanel } from "./detail-panel";
+import { Panel } from "../components/panel";
 import { Divider } from "@astryxdesign/core";
 import { Drawer, DialogHeader } from "@astryxdesign/core";
 import { Button } from "@astryxdesign/core";
@@ -244,7 +244,7 @@ export function CourseContent({
   const [opening, setOpening] = useState(false);
   return (
     <>
-      <DetailPanel title={tr("moodle:content")} actions={
+      <Panel title={tr("moodle:content")} actions={
         detail.sections.some(section => section.current) && <Toolbar right={
           <Button label={(tr("moodle:jump_current_week"))} variant="ghost" onClick={() => {
             const current = detail.sections.find(section => section.current);
@@ -276,7 +276,7 @@ export function CourseContent({
           <EmptyState title={tr((detail.panels?.contents ?? detail.fetchState) === "loading" ? "moodle:loading" : (detail.panels?.contents ?? detail.fetchState) === "error" ? `moodle:panel_error_${detail.panelErrors?.contents ?? "service"}` : "moodle:no_sections")} />
         )}
       </div>
-      </DetailPanel>
+      </Panel>
       <Drawer data-slot="sheet-content" role="dialog" label={tr("moodle:course_sections")} className="moodle-detail-sheet" isOpen={!!selected}
         onOpenChange={(open) => {
           if (!open) setSelected(undefined);

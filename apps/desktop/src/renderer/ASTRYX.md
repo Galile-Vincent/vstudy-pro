@@ -35,6 +35,7 @@ Rules that hold across the app:
 - Astryx components take required string labels, including icon-only buttons (`label`), and use `isDisabled`, `isSelected` and similar names. Add i18n keys instead of literal JSX strings.
 - `components/select.tsx` adapts a `<Select><option/></Select>` children API onto Astryx `Selector`. Use it for simple pickers.
 - `components/ui/` keeps only shared layout pieces: `PageContainer`, `PageHeader`, `Section`, `Toolbar`, `ListRow`, `EmptyState`, `Stat`, `FormField`, `SettingRow` and `SegmentedControl`. `EmptyState` follows the three-part contract: a short title, one hint sentence, and a verb-first next-step button that is not a retry on a non-error state.
+- `components/panel.tsx` is the app's grouped section: an Astryx `Card` with a header row (heading, optional count `Badge`, actions on the right), a `Divider`, then rows on one inner edge. Rows inside a panel are separated by a straight `--line` border between siblings, never by a border on a rounded row. Pages group related content in panels with `--space-6` between them.
 - Sidebar sections use `SideNavSection` and `SideNavItem`, so every group shares one heading style, 16px icons and 32px rows.
 
 ## Tests

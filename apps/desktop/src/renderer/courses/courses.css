@@ -703,16 +703,9 @@
 .moodle-course-chat .tutor-mode-toggle input[type=checkbox] { box-sizing:border-box; min-height:0; width:16px; height:16px; padding:0; border:1px solid var(--muted); background:var(--surface); }
 .moodle-course-chat .tutor-mode-toggle input[type=checkbox]:checked { background:var(--ink); border-color:var(--ink); }
 
-/* Shared panel anatomy for the courses list and course detail: header row, divider, divided rows on one inner edge. */
-.course-panel-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--space-3); box-sizing:border-box; min-height:calc(var(--space-8) * 2); padding:var(--space-3) var(--space-4); }
-.course-panel-heading > :first-child { display:flex; align-items:center; gap:var(--space-2); }
-.course-panel-body { padding:var(--space-1) var(--space-4); }
-.course-panel-body [data-slot=list-row] > .ui-row-target { padding-inline:0; }
-.course-panel-body [data-slot=list-row] > .shrink-0 { padding-inline-end:0; }
-.course-panel-body :is(.moodle-grid[data-view=list], .moodle-due-list) > li + li,
-.course-panel-body .moodle-week + .moodle-week { border-block-start:1px solid var(--line); }
-.course-panel-body .moodle-term-tabs > :first-child { margin-inline-start:calc(var(--space-3) * -1); padding-block:var(--space-2); }
-.course-panel-body > p { padding-block:var(--space-3); }
+.ui-panel-body :is(.moodle-grid[data-view=list], .moodle-due-list) > li + li,
+.ui-panel-body .moodle-week + .moodle-week { border-block-start:1px solid var(--line); }
+.ui-panel-body .moodle-term-tabs > :first-child { margin-inline-start:calc(var(--space-3) * -1); padding-block:var(--space-2); }
 
 .courses-list-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:var(--space-6); align-items:start; }
 @media (max-width:1150px) { .courses-list-layout { grid-template-columns:minmax(0,1fr); } }
@@ -734,7 +727,6 @@
 .moodle-week > :not(h3) { padding-inline-start:calc(var(--space-4) + var(--space-3)); padding-block-end:var(--space-2); }
 .course-activity-row { padding:0; }
 .moodle-tabs > [role=tablist] { margin-inline-start:calc(var(--space-3) * -1); }
-.course-panel-heading h2 { margin:0; font-size:var(--type-lg); line-height:1.3; font-weight:600; }
 .moodle-assistant[data-open=false] { display:none; }
 .moodle-chat-button { margin-inline-start:0; }
 [data-course] .moodle-term-tabs [class*=astryx-selector] :is(button,input,select):not([role=switch]):not([type=checkbox]) { min-height:0; }

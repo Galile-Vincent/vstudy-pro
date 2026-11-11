@@ -1,4 +1,4 @@
-import { DetailPanel } from "./detail-panel";
+import { Panel } from "../components/panel";
 import { useId } from "react";
 import { Badge, IconButton } from "@astryxdesign/core";
 import { Layout, LayoutContent, Divider, TabList, Tab } from "@astryxdesign/core";
@@ -652,7 +652,7 @@ function CoursesBody({
                 <div className="moodle-tabs"><TabList role="tablist" value={tab} onChange={(v) => setTab(v as Tab)} aria-label={tr("moodle:course_sections")}>{tabs.map((key) => (
                       <Tab key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => { setTab(key); event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"}); }} label={tr(`moodle:${key}`)} id={`tab-tab-${key}`} panelId={`panel-tab-${key}`} />
                     ))}</TabList><Divider /><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <><div className="course-overview grid items-stretch gap-6 mb-6">
-                      <DetailPanel title={tr("moodle:up_next")} actions={
+                      <Panel title={tr("moodle:up_next")} actions={
                           <Button endContent={<ChevronRight />} label={(tr("moodle:view_all"))}
                             variant="ghost"
                             onClick={() => setTab("deadlines")}
@@ -671,10 +671,10 @@ function CoursesBody({
                             .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
                             .slice(0, 1),
                         )}
-                      </DetailPanel>
-                      <DetailPanel title={tr("moodle:latest_updates")}>
+                      </Panel>
+                      <Panel title={tr("moodle:latest_updates")}>
                         {notifications(3)}
-                      </DetailPanel>
+                      </Panel>
                     </div>{panelStatus('contents','completion','teachers')}{detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}<CourseContent
                       detail={detail}
                       openWeeks={weekState.open}
@@ -806,7 +806,7 @@ function CoursesBody({
           )
         ) : overview && (overview.courses.length > 0 || overview.accounts.some(account => account.syncedAt)) ? (
           <div className="courses-list-layout">
-    <DetailPanel title={<>{tr("moodle:your_courses")} <Badge label={String(overview.courses.length)} /></>}>
+    <Panel title={<>{tr("moodle:your_courses")} <Badge label={String(overview.courses.length)} /></>}>
       <div className="moodle-term-tabs"><Toolbar
           left={
             <TabList role="tablist" value={selectedTerm} onChange={(value) => {
@@ -1036,8 +1036,8 @@ function CoursesBody({
                 })}
             </ul></>}</section>
         ))}</div>
-    </DetailPanel>
-    <DetailPanel title={<>{tr("moodle:due_soon")} <Badge label={String(overdue.length + dueSoon.length + undated.length)} /></>}>
+    </Panel>
+    <Panel title={<>{tr("moodle:due_soon")} <Badge label={String(overdue.length + dueSoon.length + undated.length)} /></>}>
       {([overdue, dueSoon, undated] as const).map(
         (items, group) =>
           items.length > 0 && (
@@ -1080,7 +1080,7 @@ function CoursesBody({
           {tr(allDue ? "moodle:show_less" : "moodle:show_all")}
         </Button>
       )}
-    </DetailPanel>
+    </Panel>
   </div>
         ) : (
           !error && (
