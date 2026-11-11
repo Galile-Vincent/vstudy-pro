@@ -1,3 +1,5 @@
+import { DetailPanel } from "./detail-panel";
+import { Divider } from "@astryxdesign/core";
 import { Drawer, DialogHeader } from "@astryxdesign/core";
 import { Button } from "@astryxdesign/core";
 import { CourseFileActions, type DocumentAction, type DocumentOutcome } from '../document-open';
@@ -155,7 +157,7 @@ function WeeklySection({
     <section className="moodle-week" data-current={section.current}>
       <h3 id={`week-heading-${section.id}`} tabIndex={-1}>
       <button
-        className="moodle-week-heading flex min-h-14 w-full items-center gap-3 rounded-[var(--radius-element)] bg-[var(--subtle)] px-3 py-2 text-start"
+        className="moodle-week-heading flex min-h-14 w-full items-center gap-3 px-4 py-3 text-start"
         aria-expanded={section.accessible ? open : false}
         aria-controls={`week-${section.id}`}
         onClick={() => section.accessible && setOpen(!open)}
@@ -183,12 +185,12 @@ function WeeklySection({
         aria-labelledby={`week-heading-${section.id}`} hidden={!open || !section.accessible}>
       {open && section.accessible && (
         <>
+          <Divider />
           {section.summaryHtml && <SafeCourseHtml html={section.summaryHtml} />}
           {section.modules.map((module) => {
             const Icon = icons[module.kind] ?? BookOpen;
             return (
-              <ListRow
-                key={module.id}
+              <div key={module.id}>{section.modules.indexOf(module) > 0 && <Divider />}<div className="course-activity-row"><ListRow
                 className="moodle-module"
                 title={module.name}
                 leading={<Icon />}
@@ -215,7 +217,7 @@ function WeeklySection({
                   ))
                 )}
                 </>}
-              />
+              /></div></div>
             );
           })}
         </>
@@ -243,7 +245,7 @@ export function CourseContent({
   const [opening, setOpening] = useState(false);
   return (
     <>
-      <Section title={tr("moodle:content")} actions={
+      <DetailPanel title={tr("moodle:content")} actions={
         detail.sections.some(section => section.current) && <Toolbar right={
           <Button label={(tr("moodle:jump_current_week"))} variant="ghost" onClick={() => {
             const current = detail.sections.find(section => section.current);
@@ -275,7 +277,7 @@ export function CourseContent({
           <EmptyState title={tr((detail.panels?.contents ?? detail.fetchState) === "loading" ? "moodle:loading" : (detail.panels?.contents ?? detail.fetchState) === "error" ? `moodle:panel_error_${detail.panelErrors?.contents ?? "service"}` : "moodle:no_sections")} />
         )}
       </div>
-      </Section>
+      </DetailPanel>
       <Drawer data-slot="sheet-content" role="dialog" label={tr("moodle:course_sections")} className="moodle-detail-sheet" isOpen={!!selected}
         onOpenChange={(open) => {
           if (!open) setSelected(undefined);

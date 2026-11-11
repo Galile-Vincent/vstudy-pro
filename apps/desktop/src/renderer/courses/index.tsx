@@ -1,3 +1,4 @@
+import { DetailPanel } from "./detail-panel";
 import { useId } from "react";
 import { IconButton } from "@astryxdesign/core";
 import { Layout, LayoutContent, TabList, Tab } from "@astryxdesign/core";
@@ -630,6 +631,15 @@ function CoursesBody({
           detail ? (
             <>
               <CourseHead
+                assistant={<CourseAssistant
+                  key={detail.course.id}
+                  detail={detail}
+                  api={api}
+                  requested={agentRequest}
+                  onChange={async () => { await refresh(); }}
+                  onError={failure}
+                />
+}
                 title={displayTitle(detail.course.identity, lang, detail.course.fullName)}
                 chip={[detail.course.identity.term, detail.course.identity.code].filter(Boolean).join(" · ")}
                 people={[displayTeachers(detail.course.identity, lang), displayClass(detail.course.identity, lang)].filter(Boolean)}
@@ -645,11 +655,11 @@ function CoursesBody({
                 onRefresh={() => void sync()}
                 onDisconnect={() => { disconnectSchool.current = overview?.accounts.find(account => account.id === detail.course.accountId)?.siteName; setConfirmDisconnect(detail.course.accountId); }}
               />
-              <Layout className="moodle-course-layout" content={<LayoutContent className="course-detail-content">
+              <Layout className="moodle-course-layout" content={<LayoutContent padding={0} className="course-detail-content">
                 <div className="moodle-tabs"><TabList role="tablist" value={tab} onChange={(v) => setTab(v as Tab)} aria-label={tr("moodle:course_sections")}>{tabs.map((key) => (
                       <Tab key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => { setTab(key); event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"}); }} label={tr(`moodle:${key}`)} id={`tab-tab-${key}`} panelId={`panel-tab-${key}`} />
                     ))}</TabList><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <><div className="course-overview grid items-start gap-6 mb-6">
-                      <Section title={tr("moodle:up_next")} actions={
+                      <DetailPanel title={tr("moodle:up_next")} actions={
                           <Button endContent={<ChevronRight />} label={(tr("moodle:view_all"))}
                             variant="ghost"
                             onClick={() => setTab("deadlines")}
@@ -668,10 +678,10 @@ function CoursesBody({
                             .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
                             .slice(0, 1),
                         )}
-                      </Section>
-                      <Section title={tr("moodle:latest_updates")}>
+                      </DetailPanel>
+                      <DetailPanel title={tr("moodle:latest_updates")}>
                         {notifications(3)}
-                      </Section>
+                      </DetailPanel>
                     </div>{panelStatus('contents','completion','teachers')}{detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}<CourseContent
                       detail={detail}
                       openWeeks={weekState.open}
@@ -782,15 +792,7 @@ function CoursesBody({
                       </p>
                       {files()}
                     </section></>}</section></div>
-</LayoutContent>} end={                <CourseAssistant
-                  key={detail.course.id}
-                  detail={detail}
-                  api={api}
-                  requested={agentRequest}
-                  onChange={async () => { await refresh(); }}
-                  onError={failure}
-                />
-} />
+</LayoutContent>} />
             </>
           ) : (
             <div>
