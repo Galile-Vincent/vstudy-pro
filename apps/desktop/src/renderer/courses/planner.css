@@ -38,3 +38,9 @@
 .planner-task-list [data-slot="list-row"] { width:100%; }
 
 .planner-task-meta { display:flex; flex-wrap:wrap; column-gap:var(--space-3); row-gap:var(--space-1); }
+
+.planner-view-tabs > [role="tabpanel"] { padding-top: var(--space-6); }
+.planner-task-list li + li, .planner-week li + li { border-top: 1px solid var(--line); }
+.planner-week li { padding-block: var(--space-3); }
+.planner-exam + .planner-exam { margin-top: 0; border-top: 1px solid var(--line); }
+.planner-exam { padding-block: var(--space-3); }
