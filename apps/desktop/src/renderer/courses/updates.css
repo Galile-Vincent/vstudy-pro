@@ -3,8 +3,6 @@
 .updates-heading h1 { font-size:var(--type-display); font-weight:600; margin:0; }
 .updates-heading h1:focus { outline:none; }
 .updates-toolbar { display:flex; gap:var(--space-2); padding-bottom:var(--space-4); border-bottom:1px solid var(--hairline); }
-.updates-toolbar [aria-pressed="true"] { background:var(--active); color:var(--ink); }
-.updates-toolbar button span { color:var(--muted); font-variant-numeric:tabular-nums; }
 .updates-layout { display:grid; grid-template-columns:minmax(0,1fr); }
 .updates-layout[data-reading="true"] { grid-template-columns:minmax(280px, .85fr) minmax(0,1fr); }
 .updates-list { min-width:0; max-height:calc(100dvh - 300px); overflow-y:auto; }
@@ -21,11 +19,9 @@
 .update-dot { width:6px; height:6px; margin-top:7px; border-radius:50%; flex:none; background:transparent; }
 [data-unread="true"] .update-dot { background:var(--ink); }
 .update-open time { flex:none; padding-top:2px; font-size:var(--type-xs); white-space:nowrap; }
-.update-toggle { align-self:center; margin-right:var(--space-2); flex:none; color:var(--muted); }
 .update-open:hover { background:var(--subtle); }
 .update-open:focus-visible { outline:2px solid var(--ink); outline-offset:-3px; border-radius:var(--radius-element); }
 .update-reader { min-width:0; padding:var(--space-6); border-left:1px solid var(--hairline); background:var(--surface); overflow-y:auto; max-height:calc(100dvh - 300px); }
-.update-reader > button:first-child { margin:0 0 var(--space-6); padding-inline:0; }
 .update-reader-sender { font-size:var(--type-sm); color:var(--muted); margin-bottom:var(--space-3); }
 .moodle-page .update-reader h2 { font-size:var(--type-lg); line-height:1.5; margin:0 0 var(--space-3); }
 .update-reader time { font-size:var(--type-xs); color:var(--muted); }
@@ -39,3 +35,19 @@
   .update-reader { border-left:0; padding-inline:var(--space-3); }
 }
 @media(forced-colors:active) { [data-unread="true"] .update-dot { background:CanvasText; } .update-open:focus-visible { outline-color:Highlight; } }
+
+/* The title, filters and panel borders share the inbox outer edge. */
+.updates-inbox { display:flex; flex-direction:column; gap:var(--space-4); }
+.updates-heading { margin:0; flex-wrap:wrap; }
+.updates-toolbar { padding:0; border:0; }
+.updates-layout { gap:var(--space-6); align-items:start; }
+.updates-list { display:flex; flex-direction:column; gap:var(--space-6); }
+.updates-group li { align-items:center; border:0; }
+.updates-group li + li { border-top:1px solid var(--line); }
+.update-open { padding:var(--space-3) 0; border:0; border-radius:0; }
+.update-dot { width:var(--space-2); height:var(--space-2); margin-top:var(--space-2); }
+.update-reader { padding:var(--space-4) 0; border:0; background:transparent; }
+.update-reader-sender { margin-top:var(--space-4); }
+.update-reading { min-width:0; }
+.updates-shortcuts { margin:0; padding:0; }
+@media(max-width:900px) { .update-reader { padding-inline:0; } }

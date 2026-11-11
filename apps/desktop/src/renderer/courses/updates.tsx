@@ -1,4 +1,4 @@
-import { IconButton } from "@astryxdesign/core";
+import { Badge, Tooltip, IconButton } from "@astryxdesign/core";
 import { Button } from "@astryxdesign/core";
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowUpRight, CheckCheck, Mail, MailOpen } from 'lucide-react';
@@ -6,6 +6,7 @@ import type { MoodleCourse, MoodleNotification } from '../../shared/moodle';
 import { i18n, tr } from '../../shared/i18n';
 import { displayTitle } from '../../shared/moodle-course-display';
 import { plainText } from '../../shared/plain-text';
+import { Panel } from '../components/panel';
 import './updates.css';
 
 function dayGroup(value: string) {
@@ -61,13 +62,13 @@ export function UpdatesInbox({ items, courses, onRead, onClose, onOpen }: {
     if (!item.read) void changeRead([item], true, false);
   };
   return <section className="updates-inbox" aria-labelledby="updates-title" aria-busy={busy}>
-    <Button icon={<ArrowLeft />} label={(tr('moodle:courses'))} variant="ghost" className="moodle-back" onClick={onClose}>{tr('moodle:courses')}</Button>
+    <Button icon={<ArrowLeft />} label={(tr('moodle:courses'))} variant="ghost" onClick={onClose}>{tr('moodle:courses')}</Button>
     <header className="updates-heading">
       <h1 id="updates-title" tabIndex={-1} ref={heading}>{tr('moodle:updates')}</h1>
       <Button icon={<CheckCheck />} label={(tr('moodle:mark_all_read'))} variant="ghost"  isDisabled={busy || !unread.length} onClick={() => void changeRead(unread, true)}>{tr('moodle:mark_all_read')}</Button>
     </header>
     <div className="updates-toolbar" role="group" aria-label={tr('moodle:updates_filter')}>
-      {(['all','unread'] as const).map(value => <Button label={(tr(`moodle:updates_${value}`))} key={value} variant="ghost" aria-pressed={filter === value} onClick={() => {setFilter(value);setSelectedId(undefined);}}>{tr(`moodle:updates_${value}`)}{value === 'unread' && unread.length > 0 && <span>{unread.length}</span>}</Button>)}
+      {(['all','unread'] as const).map(value => <Button label={(tr(`moodle:updates_${value}`))} key={value} variant={filter === value ? "secondary" : "ghost"} aria-pressed={filter === value} onClick={() => {setFilter(value);setSelectedId(undefined);}}>{tr(`moodle:updates_${value}`)}{value === 'unread' && unread.length > 0 && <Badge label={String(unread.length)} />}</Button>)}
     </div>
     <div className="updates-layout" data-reading={!!selected}>
       <div className="updates-list" ref={list} onKeyDown={event => {
@@ -85,28 +86,27 @@ export function UpdatesInbox({ items, courses, onRead, onClose, onOpen }: {
       }}>
         {(['today','yesterday','earlier'] as const).map(group => {
           const rows = visible.filter(item => dayGroup(item.createdAt) === group);
-          return rows.length > 0 && <section className="updates-group" key={group} aria-labelledby={`updates-${group}`}>
-            <h2 id={`updates-${group}`}>{tr(`moodle:updates_${group}`)}</h2>
+          return rows.length > 0 && <div className="updates-group" key={group}><Panel title={<>{tr(`moodle:updates_${group}`)}<Badge label={String(rows.length)} /></>}>
             <ul>{rows.map(item => <li key={item.id} data-update-id={item.id} data-unread={!item.read} data-selected={item.id === selectedId}>
               <button className="update-open" aria-disabled={busy} onClick={() => {if (!busy) open(item);}} aria-current={item.id === selectedId ? 'true' : undefined}>
                 <span className="update-dot" role="img" aria-label={tr(item.read ? 'moodle:read' : 'moodle:unread')} />
                 <span className="update-copy"><span className="update-sender">{sender(item)}</span><span className="update-subject">{item.subject || tr('moodle:updates')}</span><span className="update-preview">{plainText(item.body).replace(/\s+/g,' ')}</span></span>
                 <time dateTime={item.createdAt} title={new Date(item.createdAt).toLocaleString(i18n.resolvedLanguage)}>{relativeTime(item.createdAt)}</time>
               </button>
-              <IconButton label={tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')} className="update-toggle" variant="ghost"  size="md"  isDisabled={busy} {...{title:tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')}} aria-label={tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')} onClick={() => void changeRead([item], !item.read)} icon={item.read ? <Mail /> : <MailOpen />} />
+              <Tooltip content={tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')}><IconButton label={tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')} variant="ghost"  size="md"  isDisabled={busy} {...{title:tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')}} aria-label={tr(item.read ? 'moodle:mark_unread' : 'moodle:mark_read')} onClick={() => void changeRead([item], !item.read)} icon={item.read ? <Mail /> : <MailOpen />} /></Tooltip>
             </li>)}</ul>
-          </section>;
+          </Panel></div>;
         })}
         {!visible.length && <div className="updates-empty" role="status"><CheckCheck /><h2>{tr('moodle:updates_empty')}</h2></div>}
       </div>
-      {selected && <article className="update-reader" aria-labelledby="update-subject">
+      {selected && <div className="update-reading"><Panel title={tr('moodle:updates')}><article className="update-reader" aria-labelledby="update-subject">
         <Button icon={<ArrowLeft />} label={(tr('moodle:updates'))} variant="ghost" onClick={() => {setSelectedId(undefined);list.current?.querySelector<HTMLButtonElement>(`[data-update-id="${selected.id}"] .update-open`)?.focus();}}>{tr('moodle:updates')}</Button>
         <p className="update-reader-sender">{sender(selected)}</p>
         <h2 id="update-subject" ref={readerHeading} tabIndex={-1}>{selected.subject || tr('moodle:updates')}</h2>
         <time dateTime={selected.createdAt}>{new Date(selected.createdAt).toLocaleString(i18n.resolvedLanguage)}</time>
         <p className="update-body">{plainText(selected.body)}</p>
         {selected.url && <Button endContent={<ArrowUpRight />} label={(tr('moodle:open_moodle'))} variant="secondary" onClick={() => onOpen(selected)}>{tr('moodle:open_moodle')}</Button>}
-      </article>}
+      </article></Panel></div>}
     </div>
     <p className="updates-shortcuts">{tr('moodle:updates_shortcuts')}</p>
   </section>;
