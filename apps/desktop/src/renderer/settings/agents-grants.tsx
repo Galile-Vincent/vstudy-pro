@@ -3,7 +3,7 @@ import { Panel } from '../components/panel';
 import { useState } from 'react';
 import { scopeSchema, type Grant } from '../../shared/mcp';
 import { tr } from '../../shared/i18n';
-import { ListRow, EmptyState } from '../components/ui';
+import { ListRow } from '../components/ui';
 import { Button, Card, Dialog, DialogHeader } from '@astryxdesign/core';
 import { AgentAccount, AgentDate, AgentSelection } from './agents-fields';
 import { useAgents } from './agents-state';
@@ -48,7 +48,7 @@ export function AgentGrants() {
   const grants = agents.state?.grants ?? [];
   const grant = grants.find(grant => grant.id === editing);
   return <div className="agents-section"><Panel title={<span id="agents-grants-title">{tr('agents:grants')}</span>}>
-    {!grants.length && <EmptyState headingLevel={4} title={tr('agents:no_grants')} />}
+    {!grants.length && <p className="agents-empty agents-muted">{tr('agents:no_grants')}</p>}
     {grants.map(grant => <Card padding={3} className="settings-stack" data-grant-id={grant.id} key={grant.id}>
       <ListRow className="flex-wrap" title={<h4>{grant.clientName}</h4>} subtitle={<><span className="agents-badge">{tr(`agents:${grant.revokedAt ? 'revoked' : Date.parse(grant.expiresAt) <= Date.now() ? 'expired' : 'active'}`)}</span>{messages[grant.id] && <span role="status">{messages[grant.id]}</span>}</>} actions={!grant.revokedAt && <div className="agents-actions">
         <Button label={tr('agents:client_action',{action:tr('agents:edit'),name:grant.clientName})} variant="secondary" size="sm" isDisabled={agents.pending || agents.connection !== 'ready'} onClick={() => setEditing(grant.id)}>{tr('agents:edit')}</Button>

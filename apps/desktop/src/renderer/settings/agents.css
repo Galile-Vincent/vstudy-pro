@@ -97,3 +97,5 @@
 .agents-scopes .agents-scope { display: inline-flex; padding: var(--space-1) var(--space-2); background: var(--surface); border-radius: var(--radius-element); font-size: var(--type-sm); }
 .agents-details dd.agents-scopes > span + span { margin-top: 0; }
 .agents-card-header .agents-actions { margin-top: 0; }
+
+.agents-empty { margin: 0; font-size: var(--type-base); text-align: left; }
