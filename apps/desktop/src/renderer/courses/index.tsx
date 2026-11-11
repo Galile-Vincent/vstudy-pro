@@ -1,13 +1,13 @@
 import { DetailPanel } from "./detail-panel";
 import { useId } from "react";
-import { IconButton } from "@astryxdesign/core";
-import { Layout, LayoutContent, TabList, Tab } from "@astryxdesign/core";
+import { Badge, IconButton } from "@astryxdesign/core";
+import { Layout, LayoutContent, Divider, TabList, Tab } from "@astryxdesign/core";
 import { Dialog, DialogHeader, LayoutFooter, Card, Button } from "@astryxdesign/core";
 import { flushSync } from 'react-dom';
 import { catalogDeadlines } from './deadline-groups';
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
-import { PageContainer, PageHeader, Section, ListRow, Toolbar, EmptyState } from "../components/ui";
+import { PageContainer, PageHeader,  ListRow, Toolbar, EmptyState } from "../components/ui";
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
   useCallback,
@@ -529,7 +529,7 @@ function CoursesBody({
       actions={<div className="flex flex-wrap gap-2 [&_button]:min-h-9 [&_button]:h-auto">
         {!courseId && <Button icon={<Inbox />} label={(tr("moodle:updates"))} ref={updatesTrigger} variant="secondary" className="updates-entry"
           onClick={() => setShowUpdates(true)}>
-          {tr("moodle:updates")}{unreadUpdates > 0 && <span>{unreadUpdates}</span>}
+          {tr("moodle:updates")}{unreadUpdates > 0 && <Badge label={String(unreadUpdates)} />}
         </Button>}
         <Button icon={<CalendarDays />} label={(tr("planner:title"))} ref={plannerTrigger} variant="secondary" className="planner-entry"
           onClick={() => setShowPlanner(true)}>{tr("planner:title")}</Button>
@@ -658,7 +658,7 @@ function CoursesBody({
               <Layout className="moodle-course-layout" content={<LayoutContent padding={0} className="course-detail-content">
                 <div className="moodle-tabs"><TabList role="tablist" value={tab} onChange={(v) => setTab(v as Tab)} aria-label={tr("moodle:course_sections")}>{tabs.map((key) => (
                       <Tab key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => { setTab(key); event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"}); }} label={tr(`moodle:${key}`)} id={`tab-tab-${key}`} panelId={`panel-tab-${key}`} />
-                    ))}</TabList><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <><div className="course-overview grid items-start gap-6 mb-6">
+                    ))}</TabList><Divider /><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <><div className="course-overview grid items-stretch gap-6 mb-6">
                       <DetailPanel title={tr("moodle:up_next")} actions={
                           <Button endContent={<ChevronRight />} label={(tr("moodle:view_all"))}
                             variant="ghost"
@@ -804,8 +804,8 @@ function CoursesBody({
             </div>
           )
         ) : overview && (overview.courses.length > 0 || overview.accounts.some(account => account.syncedAt)) ? (
-          <div className="flex min-w-0 flex-col gap-6">
-    <Section title={tr("moodle:your_courses")} count={overview.courses.length}>
+          <div className="courses-list-layout">
+    <DetailPanel title={<>{tr("moodle:your_courses")} <Badge label={String(overview.courses.length)} /></>}>
       <div className="moodle-term-tabs"><Toolbar
           left={
             <TabList role="tablist" value={selectedTerm} onChange={(value) => {
@@ -818,7 +818,7 @@ function CoursesBody({
           }
           right={
             <>
-              <Selector controlClassName="course-sort" label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} />
+              <Selector size="sm" label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} />
               <CourseViewSwitch value={view} onChange={changeView} />
             </>
           }
@@ -1035,15 +1035,13 @@ function CoursesBody({
                 })}
             </ul></>}</section>
         ))}</div>
-    </Section>
-    <Section title={tr("moodle:due_soon")} count={overdue.length + dueSoon.length + undated.length}>
+    </DetailPanel>
+    <DetailPanel title={<>{tr("moodle:due_soon")} <Badge label={String(overdue.length + dueSoon.length + undated.length)} /></>}>
       {([overdue, dueSoon, undated] as const).map(
         (items, group) =>
           items.length > 0 && (
             <section key={group} className="flex flex-col gap-4">
-              <h3 className="font-medium">
-                {tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:next_seven_days" : "moodle:no_due_date")}
-              </h3>
+
               <ul className="moodle-due-list list-none p-0">
                 {items.slice(0, allDue ? undefined : 5).map((d) => {
                   const course = overview.courses.find((c) => c.id === d.courseId);
@@ -1084,7 +1082,7 @@ function CoursesBody({
           {tr(allDue ? "moodle:show_less" : "moodle:show_all")}
         </Button>
       )}
-    </Section>
+    </DetailPanel>
   </div>
         ) : (
           !error && (

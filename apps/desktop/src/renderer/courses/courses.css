@@ -707,3 +707,10 @@
 .course-panel-body { padding:16px; }
 .course-activity-row { padding:12px 16px; }
 .moodle-weeks { gap:24px; padding-bottom:0; }
+
+.courses-list-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:var(--space-6); align-items:start; }
+.course-panel-heading { min-height:calc(var(--space-8) * 2); box-sizing:border-box; gap:var(--space-3); padding:var(--space-4); }
+.course-panel-body { padding:var(--space-4); }
+.course-activity-row { padding:var(--space-3) var(--space-4); }
+.moodle-weeks { gap:var(--space-3); }
+@media (max-width:1150px) { .courses-list-layout { grid-template-columns:minmax(0,1fr); } }
