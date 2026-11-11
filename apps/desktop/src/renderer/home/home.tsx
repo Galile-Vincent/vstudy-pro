@@ -3,7 +3,7 @@ import { Brand } from '../components/brand';
 import { contentLanguage } from '../../shared/content-language';
 import { DocumentArt } from '../shell/document-art';
 import { ArrowDown, ArrowUp, ArrowUpRight, BookOpen, Info } from 'lucide-react';
-import { Button, Card as AstryxCard, IconButton, ProgressBar, Skeleton, Tooltip } from '@astryxdesign/core';
+import { Button, IconButton, ProgressBar, Skeleton, Tooltip } from '@astryxdesign/core';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
@@ -14,15 +14,16 @@ import { desktop } from '../bridge';
 import { useFormat } from '../i18n';
 import { UploadCard } from './upload-card';
 import './home.css';
-import { PageContainer, PageHeader, Section, Stat, ListRow } from '../components/ui';
+import { PageContainer, PageHeader, Stat, ListRow } from '../components/ui';
+import { Panel } from '../components/panel';
 import { plainText } from '../../shared/plain-text';
 export type HomeNavigate = (view: 'home' | 'library' | 'workspace' | 'welcome', documentId?: Document['id']) => void;
 export type Dashboard = z.infer<typeof dashboardSchema>;
-export function Card({ title, children, className = '' }: { title: string; children: ReactNode; className?: string }) {
+export function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <AstryxCard padding={6} className={`home-tone min-w-0 ${className}`}>
-      <Section title={title}>{children}</Section>
-    </AstryxCard>
+    <Panel title={title}>
+      <div className="home-panel-body">{children}</div>
+    </Panel>
   );
 }
 export function sparklinePoints(values: number[]) {
@@ -259,9 +260,10 @@ export function Home({
           )
         ) : (
           <div className="home-grid">
+            <div className="home-main">
             {!!data.recentDocuments.length && (
-              <Section title={tr('home:continue')}>
-                <div className="flex flex-col gap-[var(--space-2)]">
+              <Panel title={tr('home:continue')}>
+                <div className="home-recent">
                   {data.recentDocuments.slice(0, 6).map((recent, index) => {
                     const title = recent.document.title;
                     const thumbnail = (
@@ -276,13 +278,13 @@ export function Home({
                       <span className="line-clamp-2">{plainText(recent.lastChat)}</span>
                     );
                     return index === 0 ? (
-                      <AstryxCard key={recent.document.id} padding={3} className="home-tone home-continue">
+                      <div key={recent.document.id} className="home-continue">
                         {thumbnail}
                         <div className="min-w-0 flex-1">
                           <h3 className="font-medium break-words" lang={contentLanguage(title) ?? 'en'}>
                             {title}
                           </h3>
-                          <p className="text-[var(--muted)]">{snippet}</p>
+                          {snippet && <p className="text-[var(--muted)]">{snippet}</p>}
                         </div>
                         <Button
                           variant="primary"
@@ -292,7 +294,7 @@ export function Home({
                         >
                           {tr('home:resume')}
                         </Button>
-                      </AstryxCard>
+                      </div>
                     ) : (
                       <ListRow
                         key={recent.document.id}
@@ -308,7 +310,7 @@ export function Home({
                     );
                   })}
                 </div>
-              </Section>
+              </Panel>
             )}
             <div className="art-reader-launchpad">
               <UploadCard
@@ -321,8 +323,8 @@ export function Home({
                 }
               />
             </div>
+            </div>
             <div className="home-secondary">
-              {guidance}
               {!!data.month.calls && (
                 <Card title={tr('home:usage')}>
                   <Stat
@@ -353,6 +355,7 @@ export function Home({
                   <Streak streak={data.streak} />
                 </Card>
               )}
+              {guidance}
             </div>
             {!!data.pinnedFolders.length && (
               <div className="home-pins">

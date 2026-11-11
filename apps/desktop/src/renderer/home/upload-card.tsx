@@ -1,11 +1,11 @@
-import { Button, Card } from '@astryxdesign/core';
-import { Section, Toolbar } from '../components/ui';
+import { Button } from '@astryxdesign/core';
+import { Toolbar } from '../components/ui';
+import { Panel } from '../components/panel';
 import type { ReactNode } from 'react';
 import { FormField } from '../components/ui/form-field';
 import { Select } from '../components/select';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Upload } from 'lucide-react';
 import type { Document } from '../../shared';
 import type { z } from 'zod';
 import type { folderSchema } from '../../shared/library';
@@ -117,9 +117,8 @@ export function UploadCard({
     }
   };
   return (
-    <Card
-      padding={6}
-      className="home-tone home-upload"
+    <div
+      className="home-upload"
       data-dragging={dragging}
       onDragEnter={(e) => {
         clearDropError();
@@ -152,7 +151,7 @@ export function UploadCard({
         else { setError(tr('home:drop_error')); setDropError(true); }
       }}
     >
-      <Section title={
+      <Panel title={
         <span className="grid">
           <span className={dragging ? 'invisible [grid-area:1/1]' : '[grid-area:1/1]'}>{title ?? tr('home:upload')}</span>
           <span className={dragging ? '[grid-area:1/1]' : 'invisible [grid-area:1/1]'} aria-hidden={!dragging}>
@@ -160,7 +159,7 @@ export function UploadCard({
           </span>
         </span>
       }>
-        <Upload aria-hidden="true" />
+        <div className="home-panel-body">
         <p>{tr('home:upload_hint')}</p>
         <p>{tr('onboarding:file_help')}</p>
         {!!folders.length && (
@@ -207,7 +206,8 @@ export function UploadCard({
           <Button variant="secondary" label={tr('home:open_imported', { title: imported.title })} onClick={() => navigation.navigate({ view: 'workspace', documentId: imported.id })} />
         )}
         {footer}
-      </Section>
-    </Card>
+        </div>
+      </Panel>
+    </div>
   );
 }
