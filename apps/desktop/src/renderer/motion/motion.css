@@ -1,1 +1,25 @@
 .motion-sr { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+
+@keyframes panel-enter {
+ from { opacity:0; transform:translateY(8px); }
+ to { opacity:1; transform:translateY(0); }
+}
+@keyframes tab-enter {
+ from { opacity:0; }
+ to { opacity:1; }
+}
+@media(prefers-reduced-motion:no-preference) {
+ .ui-panel { animation:panel-enter 240ms var(--ease-entrance) both; }
+ .ui-panel:nth-child(2) { animation-delay:35ms; }
+ .ui-panel:nth-child(3) { animation-delay:70ms; }
+ .ui-panel:nth-child(4) { animation-delay:105ms; }
+ .ui-panel:nth-child(n+5) { animation-delay:140ms; }
+ [data-slot=list-row],.ui-row-target { transition:background-color 120ms var(--ease-standard); }
+ button:not([class*="astryx-"]) { transition:background-color 120ms var(--ease-standard),transform 120ms var(--ease-entrance); }
+ button:not([class*="astryx-"]):not(:disabled,[aria-disabled=true]):active { transform:scale(.98); }
+ [role=tabpanel]:not([hidden]),#active-tab-panel > * { animation:tab-enter 160ms var(--ease-entrance); }
+}
+@media(prefers-reduced-motion:reduce) {
+ .ui-panel,[role=tabpanel],#active-tab-panel > * { animation:none; }
+ button:not([class*="astryx-"]):active { transform:none; }
+}
