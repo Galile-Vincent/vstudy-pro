@@ -165,7 +165,7 @@
   "dates_unavailable": "日期未提供",
   "original_name": "原始課程名稱",
   "no_term_courses": "此期間沒有課程。",
-  "module_count": "{{count}} 個活動",
+  "module_count_other": "{{count}} 個活動",
   "attachment_count": "{{count}} 個附件",
   "section_locked": "尚未開放",
   "complete": "已完成",
