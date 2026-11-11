@@ -1,4 +1,4 @@
-import { Drawer, DialogHeader } from "@astryxdesign/core";
+import { Card, Collapsible, Drawer, DialogHeader } from "@astryxdesign/core";
 import { Button } from "@astryxdesign/core";
 import { CourseFileActions, type DocumentAction, type DocumentOutcome } from '../document-open';
 import { flushSync } from "react-dom";
@@ -153,32 +153,7 @@ function WeeklySection({
 }) {
   return (
     <section className="moodle-week" data-current={section.current}>
-      <h3 id={`week-heading-${section.id}`} tabIndex={-1}>
-      <button
-        className="moodle-week-heading flex min-h-14 w-full items-center gap-3 rounded-[var(--radius-element)] bg-[var(--subtle)] px-3 py-2 text-start"
-        aria-expanded={section.accessible ? open : false}
-        aria-controls={`week-${section.id}`}
-        onClick={() => section.accessible && setOpen(!open)}
-        disabled={!section.accessible}
-      >
-        {section.accessible ? (
-          <ChevronRight className={open ? "moodle-rotate" : ""} />
-        ) : (
-          <LockKeyhole />
-        )}
-        <span>
-          <span className="block font-medium">{section.name}</span>
-          <small className="block text-[var(--muted)]">
-            {section.accessible
-              ? tr("moodle:module_count", { count: section.modules.length })
-              : tr("moodle:section_locked")}
-          </small>
-        </span>
-        {section.current && (
-          <span className="moodle-chip">{tr("moodle:this_week")}</span>
-        )}
-      </button>
-      </h3>
+      <Card elevation="none"><Collapsible trigger={section.name} isOpen={open && section.accessible} isDisabled={!section.accessible} onOpenChange={setOpen}>
       <div id={`week-${section.id}`} role="region"
         aria-labelledby={`week-heading-${section.id}`} hidden={!open || !section.accessible}>
       {open && section.accessible && (
@@ -221,6 +196,7 @@ function WeeklySection({
         </>
       )}
       </div>
+      </Collapsible></Card>
     </section>
   );
 }

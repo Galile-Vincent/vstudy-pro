@@ -41,3 +41,12 @@
     outline-offset: -2px;
   }
 }
+
+.variant-b-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr)); gap:24px; padding:0; list-style:none; }
+.course-detail-content { padding-top:24px; }
+
+.variant-b-card-content { display:flex; flex-direction:column; align-items:flex-start; gap:16px; min-height:160px; }
+.variant-b-card-actions { display:flex; align-items:center; gap:12px; margin-top:auto; }
+.variant-b-rail { display:grid; gap:24px; }
+
+.variant-b-header { display:grid; gap:24px; }

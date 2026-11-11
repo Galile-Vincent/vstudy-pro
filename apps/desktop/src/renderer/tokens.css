@@ -161,7 +161,7 @@ html[data-theme=contrast] :is([data-slot=popover-content],[data-slot=aui_compose
 [data-astryx-theme="neutral"] {
  --color-background-body:var(--background);
  --color-background-surface:var(--surface);
- --color-background-card:var(--surface);
+ --color-background-card:color-mix(in srgb,var(--surface) 94%,var(--ink));
  --color-background-popover:var(--surface);
  --color-background-muted:var(--subtle);
  --color-text-primary:var(--ink);
@@ -175,7 +175,7 @@ html[data-theme=contrast] :is([data-slot=popover-content],[data-slot=aui_compose
  --color-icon-accent:var(--accent-color);
  --color-on-accent:var(--accent-foreground);
  --color-accent-muted:var(--active);
- --color-border:var(--line);
+ --color-border:var(--line-strong);
  --color-border-emphasized:var(--line-strong);
  --color-track:var(--line-strong);
  --color-neutral:var(--subtle);

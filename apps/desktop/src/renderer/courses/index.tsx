@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { IconButton } from "@astryxdesign/core";
+import { Badge, IconButton } from "@astryxdesign/core";
 import { Layout, LayoutContent, TabList, Tab } from "@astryxdesign/core";
 import { Dialog, DialogHeader, LayoutFooter, Card, Button } from "@astryxdesign/core";
 import { flushSync } from 'react-dom';
@@ -22,12 +22,9 @@ import {
   CalendarDays,
   Check,
   ChevronRight,
-  Clock3,
   FileText,
   GraduationCap,
   Inbox,
-  AlarmClock,
-  Mail,
   Pin,
   RefreshCw,
   Unplug,
@@ -629,7 +626,7 @@ function CoursesBody({
         ) : courseId ? (
           detail ? (
             <>
-              <CourseHead
+              <Card elevation="none"><CourseHead
                 title={displayTitle(detail.course.identity, lang, detail.course.fullName)}
                 chip={[detail.course.identity.term, detail.course.identity.code].filter(Boolean).join(" · ")}
                 people={[displayTeachers(detail.course.identity, lang), displayClass(detail.course.identity, lang)].filter(Boolean)}
@@ -645,34 +642,10 @@ function CoursesBody({
                 onRefresh={() => void sync()}
                 onDisconnect={() => { disconnectSchool.current = overview?.accounts.find(account => account.id === detail.course.accountId)?.siteName; setConfirmDisconnect(detail.course.accountId); }}
               />
-              <Layout className="moodle-course-layout" content={<LayoutContent className="course-detail-content">
+              </Card><Layout className="moodle-course-layout" content={<LayoutContent className="course-detail-content">
                 <div className="moodle-tabs"><TabList role="tablist" value={tab} onChange={(v) => setTab(v as Tab)} aria-label={tr("moodle:course_sections")}>{tabs.map((key) => (
                       <Tab key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => { setTab(key); event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"}); }} label={tr(`moodle:${key}`)} id={`tab-tab-${key}`} panelId={`panel-tab-${key}`} />
-                    ))}</TabList><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <><div className="course-overview grid items-start gap-6 mb-6">
-                      <Section title={tr("moodle:up_next")} actions={
-                          <Button endContent={<ChevronRight />} label={(tr("moodle:view_all"))}
-                            variant="ghost"
-                            onClick={() => setTab("deadlines")}
-                          >
-                            {tr("moodle:view_all")}
-
-                          </Button>
-                        }>
-                        {deadlines(
-                          detail.deadlines
-                            .filter(
-                              (d) =>
-                                !d.submitted &&
-                                Date.parse(d.dueAt) >= Date.now(),
-                            )
-                            .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
-                            .slice(0, 1),
-                        )}
-                      </Section>
-                      <Section title={tr("moodle:latest_updates")}>
-                        {notifications(3)}
-                      </Section>
-                    </div>{panelStatus('contents','completion','teachers')}{detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}<CourseContent
+                    ))}</TabList><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <>{panelStatus('contents','completion','teachers')}{detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}<CourseContent
                       detail={detail}
                       openWeeks={weekState.open}
                       setWeekOpen={setWeekOpen}
@@ -782,7 +755,31 @@ function CoursesBody({
                       </p>
                       {files()}
                     </section></>}</section></div>
-</LayoutContent>} end={                <CourseAssistant
+</LayoutContent>} end={ <div className="variant-b-rail"><div className="course-overview grid items-start gap-6 mb-6">
+                      <Card elevation="none"><Section title={tr("moodle:up_next")} actions={
+                          <Button endContent={<ChevronRight />} label={(tr("moodle:view_all"))}
+                            variant="ghost"
+                            onClick={() => setTab("deadlines")}
+                          >
+                            {tr("moodle:view_all")}
+
+                          </Button>
+                        }>
+                        {deadlines(
+                          detail.deadlines
+                            .filter(
+                              (d) =>
+                                !d.submitted &&
+                                Date.parse(d.dueAt) >= Date.now(),
+                            )
+                            .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
+                            .slice(0, 1),
+                        )}
+                      </Section></Card>
+                      <Card elevation="none"><Section title={tr("moodle:latest_updates")}>
+                        {notifications(3)}
+                      </Section></Card>
+                    </div><CourseAssistant
                   key={detail.course.id}
                   detail={detail}
                   api={api}
@@ -790,7 +787,7 @@ function CoursesBody({
                   onChange={async () => { await refresh(); }}
                   onError={failure}
                 />
-} />
+</div>} />
             </>
           ) : (
             <div>
@@ -816,7 +813,7 @@ function CoursesBody({
           }
           right={
             <>
-              <Selector controlClassName="course-sort" label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} />
+              <Selector label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} />
               <CourseViewSwitch value={view} onChange={changeView} />
             </>
           }
@@ -829,12 +826,8 @@ function CoursesBody({
                   <h3>{tr("moodle:pinned_courses")}</h3>
                 </div>
               )}<ul
-              className={
-                view === "cards"
-                  ? "moodle-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,22rem),1fr))] gap-3 p-0 list-none"
-                  : "moodle-grid flex flex-col p-0 list-none"
-              }
-              data-view={view}
+              className="variant-b-grid"
+              data-view="cards"
               role="list"
             >
               {orderedCourses
@@ -843,28 +836,6 @@ function CoursesBody({
                   const attention = courseAttention(course.id, overview.upcoming, updates);
                   const name = displayTitle(course.identity, lang, course.fullName);
                   const teacher = displayTeachers(course.identity, lang);
-                  const prefix = `course-${course.id}`;
-                  const labels = [
-                    `${prefix}-title`,
-                    ...(teacher ? [`${prefix}-teacher`] : []),
-                    ...(attention.overdue ? [`${prefix}-overdue`] : []),
-                    ...(attention.unread ? [`${prefix}-unread`] : []),
-                    ...(attention.next ? [`${prefix}-deadline`] : []),
-                  ];
-                  const tooltip = [
-                    course.fullName,
-                    attention.overdue
-                      ? tr("moodle:course_overdue_tooltip", { count: attention.overdue })
-                      : "",
-                    attention.unread
-                      ? tr("moodle:course_unread_tooltip", { count: attention.unread })
-                      : "",
-                  ]
-                    .filter(Boolean)
-                    .join("\n");
-                  const Surface = view === "cards" ? Card : "div";
-                  const urgent =
-                    !!attention.next && Date.parse(attention.next.dueAt) - Date.now() < 86400000;
                   return (
                     <li
                       key={course.id}
@@ -876,170 +847,30 @@ function CoursesBody({
                         pinsVisible && !pinned && index > 0 && items[index - 1]!.pinned
                       }
                     >
-                      <Surface
-                        {...(view === "cards" ? { elevation:"none" as const } : {})}
-                        className="py-0"
-                      >
-                        <ListRow
-                          className="w-full min-h-14 flex-wrap gap-3 [&>.ui-row-target]:min-w-[min(100%,14rem)]"
-                          title={
-                            <button
-                              className="course-open block w-full text-start whitespace-normal break-words"
-                              type="button"
-                              title={tooltip}
-                              aria-labelledby={labels.join(" ")}
-                              aria-describedby={`${prefix}-raw`}
-                              onAuxClick={(event) => {
-                                if (event.button === 1) {
-                                  event.preventDefault();
-                                  navigation?.openTab({
-                                    view: "courses",
-                                    courseId: course.id,
-                                    title: name,
-                                  });
-                                }
-                              }}
-                              onClick={(event) =>
-                                event.metaKey || event.ctrlKey
-                                  ? navigation?.openTab({
-                                      view: "courses",
-                                      courseId: course.id,
-                                      title: name,
-                                    })
-                                  : onCourse(course.id)
-                              }
-                            >
-                              <span className="course-title" id={`${prefix}-title`}>
-                                {name}
-                              </span>
-                            </button>
-                          }
-                          subtitle={
-                            (teacher || attention.next) && (
-                              <span className="course-meta flex flex-wrap items-baseline gap-x-2 text-sm">
-                                {teacher && <span id={`${prefix}-teacher`}>{teacher}</span>}
-                                {teacher && attention.next && (
-                                  <span className="course-meta-separator" aria-hidden="true">
-                                    ·
-                                  </span>
-                                )}
-                                {attention.next && (
-                                  <time
-                                    id={`${prefix}-deadline`}
-                                    dateTime={attention.next.dueAt}
-                                    title={attention.next.title}
-                                    data-urgent={urgent}
-                                  >
-                                    {urgent && <Clock3 aria-hidden="true" className="me-1 inline align-middle" />}
-                                    {deadlinePhrase(attention.next.dueAt)}
-                                  </time>
-                                )}
-                              </span>
-                            )
-                          }
-                          actions={
-                            <div className="flex items-center gap-1">
-                              {navigation?.openTab && <IconButton label={tr("moodle:open_course_tab", { course: name })}
-                                variant="ghost"
-                                 size="md"
-                                className="relative z-1"
-                                aria-label={tr("moodle:open_course_tab", { course: name })}
-                                {...{title:tr("moodle:open_course_tab", { course: name })}}
-                                onClick={() =>
-                                  navigation?.openTab({
-                                    view: "courses",
-                                    courseId: course.id,
-                                    title: name,
-                                  })
-                                } icon={<ArrowUpRight aria-hidden="true" />} />}
-                              <div
-                                className="course-counts flex items-center gap-2"
-                                aria-hidden="true"
-                              >
-                                <span
-                                  className="course-count course-overdue w-[calc(var(--space-4)*3.5)] shrink-0 inline-flex items-center gap-1 text-[var(--danger)]"
-                                  data-count={attention.overdue}
-                                  title={
-                                    attention.overdue
-                                      ? tr("moodle:course_overdue_tooltip", {
-                                          count: attention.overdue,
-                                        })
-                                      : undefined
-                                  }
-                                >
-                                  {attention.overdue > 0 && (
-                                    <>
-                                      <AlarmClock />
-                                      {attention.overdue > 99 ? "99+" : attention.overdue}
-                                    </>
-                                  )}
-                                </span>
-                                <span
-                                  className="course-count course-unread-count w-[calc(var(--space-4)*3.5)] shrink-0 inline-flex items-center gap-1 text-[var(--muted)]"
-                                  data-count={attention.unread}
-                                  title={
-                                    attention.unread
-                                      ? tr("moodle:course_unread_tooltip", {
-                                          count: attention.unread,
-                                        })
-                                      : undefined
-                                  }
-                                >
-                                  {attention.unread > 0 && (
-                                    <>
-                                      <Mail />
-                                      {attention.unread > 99 ? "99+" : attention.unread}
-                                    </>
-                                  )}
-                                </span>
-                              </div>
-                              <button
-                                type="button"
-                                className="course-pin grid size-[calc(var(--space-3)*3)] shrink-0 place-items-center rounded-[var(--radius-element)] aria-pressed:bg-[var(--active)]"
-                                aria-pressed={pinned}
-                                aria-label={tr(
-                                  pinned ? "moodle:unpin_course_named" : "moodle:pin_course_named",
-                                  { course: name },
-                                )}
-                                aria-disabled={pinBusy === course.id}
-                                onClick={() => {
-                                  if (!pinBusy)
-                                    void pinCourse(course.accountId, course.id, !pinned);
-                                }}
-                              >
-                                <Pin aria-hidden="true" fill={pinned ? "currentColor" : "none"} />
-                              </button>
-                              {attention.overdue > 0 && (
-                                <span id={`${prefix}-overdue`} className="sr-only">
-                                  {tr("moodle:course_overdue", { count: attention.overdue })}
-                                </span>
-                              )}
-                              {attention.unread > 0 && (
-                                <span id={`${prefix}-unread`} className="sr-only">
-                                  {tr("moodle:course_unread", { count: attention.unread })}
-                                </span>
-                              )}
-                              <span id={`${prefix}-raw`} className="sr-only">
-                                {course.fullName}
-                                {course.identity.lifecycle === "unknown" &&
-                                  ` · ${tr("moodle:dates_unavailable")}`}
-                              </span>
-                            </div>
-                          }
-                        />
-                      </Surface>
+                      <Card elevation="none">
+                        <div className="variant-b-card-content">
+                          <Button variant="ghost" label={name} onClick={() => onCourse(course.id)} />
+                          <p>{teacher}</p>
+                          {attention.next && <Badge label={deadlinePhrase(attention.next.dueAt)} />}
+                          <div className="variant-b-card-actions">
+                            {attention.unread > 0 && <Badge label={`${attention.unread} ${tr("moodle:unread")}`} />}
+                            <IconButton label={tr("moodle:open_course_tab", {course:name})} variant="secondary" icon={<ArrowUpRight />} onClick={() => navigation?.openTab({view:"courses",courseId:course.id,title:name})} />
+                            <IconButton label={tr(pinned ? "moodle:unpin_course_named" : "moodle:pin_course_named", {course:name})} variant="secondary" isDisabled={pinBusy === course.id} icon={<Pin fill={pinned ? "currentColor" : "none"} />} onClick={() => void pinCourse(course.accountId,course.id,!pinned)} />
+                          </div>
+                        </div>
+                      </Card>
                     </li>
                   );
                 })}
             </ul></>}</section>
         ))}</div>
     </Section>
-    <Section title={tr("moodle:due_soon")} count={overdue.length + dueSoon.length + undated.length}>
+    <Card elevation="none"><Section title={tr("moodle:due_soon")} count={overdue.length + dueSoon.length + undated.length}>
       {([overdue, dueSoon, undated] as const).map(
         (items, group) =>
           items.length > 0 && (
             <section key={group} className="flex flex-col gap-4">
-              <h3 className="font-medium">
+              <h3 className="sr-only">
                 {tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:next_seven_days" : "moodle:no_due_date")}
               </h3>
               <ul className="moodle-due-list list-none p-0">
@@ -1082,7 +913,7 @@ function CoursesBody({
           {tr(allDue ? "moodle:show_less" : "moodle:show_all")}
         </Button>
       )}
-    </Section>
+    </Section></Card>
   </div>
         ) : (
           !error && (
