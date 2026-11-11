@@ -11,3 +11,8 @@
 .moodle-site-list button > .moodle-school-monogram { flex: 0 0 36px; }
 .moodle-school-monogram { display: grid; place-items: center; font-weight: 600; font-size: 13px; }
 .moodle-site-result > .moodle-school-logo, .moodle-site-result > .moodle-school-monogram { width: 44px; height: 44px; }
+
+.moodle-site-list { display:flex; flex-direction:column; gap:var(--space-3); padding-block:var(--space-4); }
+.moodle-site-list + .moodle-site-list { border-top:1px solid var(--line); }
+.moodle-site-list h3 { margin:0; font-size:var(--type-lg); font-weight:600; }
+.moodle-connect-form { display:flex; flex-direction:column; gap:var(--space-4); }
