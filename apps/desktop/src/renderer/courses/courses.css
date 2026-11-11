@@ -731,3 +731,7 @@
 .moodle-chat-button { margin-inline-start:0; }
 [data-course] .moodle-term-tabs [class*=astryx-selector] :is(button,input,select):not([role=switch]):not([type=checkbox]) { min-height:0; }
 .moodle-week h3 { font-size:var(--type-md); }
+
+/* Detail tab rows share the panel's inner edge and straight separators. */
+.moodle-tabs > [role=tabpanel]:not(#panel-tab-content) .ui-panel-body [data-slot=list-row] { border-radius:0; }
+.moodle-tabs > [role=tabpanel]:not(#panel-tab-content) .ui-panel-body [data-slot=list-row] + [data-slot=list-row] { border-block-start:1px solid var(--line); }
