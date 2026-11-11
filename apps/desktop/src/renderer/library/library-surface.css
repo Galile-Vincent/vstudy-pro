@@ -55,7 +55,7 @@
 .library-view [data-slot=page-header] { padding-block-end:var(--space-6); }
 .library-section { display:flex; flex:0 1 auto; flex-direction:column; min-height:0; }
 .library-section > * { display:flex; flex:0 1 auto; flex-direction:column; min-height:0; }
-.library-section section { display:flex; flex:0 1 auto; flex-direction:column; min-height:0; }
+.library-section > * > section { display:flex; flex:0 1 auto; flex-direction:column; min-height:0; }
 .library-section .ui-panel-body { display:flex; flex:0 1 auto; flex-direction:column; gap:var(--space-3); min-height:0; padding-block:var(--space-3) 0; }
 .library-section :is(.library-results,.library-folders) { flex:0 1 auto; }
 .library-section .library-results,.library-section .library-folders { margin-inline:calc(var(--space-4) * -1); padding-inline:var(--space-4); }
@@ -73,3 +73,4 @@
 .folder-grid .folder-row:hover { background:var(--color-overlay-hover); }
 .folder-grid .folder-row-icon { width:var(--space-5); height:var(--space-5); color:var(--muted); }
 .course-folder-meta > span::before { content:"·"; margin-inline-end:var(--space-2); }
+.library-section :is(.library-toolbar,#library-filter-panel,.filter-chips) { flex:none; }
