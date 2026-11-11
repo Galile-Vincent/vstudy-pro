@@ -42,7 +42,7 @@ export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
       onExam({ type: "create-exam", exam });
     } catch { onError(); }
   };
-  const courseField = (value: string, onChange: (value: string) => void) => <Selector label={tr("planner:course")} htmlName="courseId" value={value} onChange={onChange} options={[{value:"none",label:tr("planner:no_course")},...courses.map(c=>({value:c.id,label:displayTitle(c.identity,i18n.resolvedLanguage||"en",c.fullName)}))]} />;
+  const courseField = (value: string, onChange: (value: string) => void) => <div className="planner-course-field"><Selector label={tr("planner:course")} htmlName="courseId" value={value} onChange={onChange} options={[{value:"none",label:tr("planner:no_course")},...courses.map(c=>({value:c.id,label:displayTitle(c.identity,i18n.resolvedLanguage||"en",c.fullName)}))]} /></div>;
   return <div className="planner-forms">
     <Card elevation="none" className="p-6"><details open>
       <summary>{tr("planner:quick_add")}</summary>
@@ -58,7 +58,7 @@ export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
         {courseField(taskCourse, setTaskCourse)}
         <FormField error={errors.dueAt || undefined} label={tr("planner:due")}  children={field => <input {...field} type="datetime-local" name="dueAt" />} />
         <FormField error={errors.estimateMinutes || undefined} label={tr("planner:estimate")}  children={field => <input {...field} type="number" name="estimate" min={5} max={2880} step={5} defaultValue={30} required />} />
-        <Button label={(tr("planner:quick_add"))} type="submit"  isDisabled={busy}>{tr("planner:quick_add")}</Button>
+        <Button variant="secondary" label={(tr("planner:quick_add"))} type="submit"  isDisabled={busy}>{tr("planner:quick_add")}</Button>
       </form>
     </details></Card>
     <Card elevation="none" className="p-6"><details>
@@ -68,7 +68,7 @@ export function PlannerForms({ courses, api, onSaved, onExam, onError }: {
         {courseField(examCourse, setExamCourse)}
         <FormField label={tr("planner:exam_date")} children={field => <input {...field} type="datetime-local" name="date" required />} />
         <FormField className="planner-wide" label={tr("planner:topics")} children={field => <textarea {...field} name="topics" rows={3} {...{maxLength: 8000}} />} />
-        <Button label={(tr("planner:confirm"))} type="submit">{tr("planner:confirm")}</Button>
+        <Button variant="secondary" label={(tr("planner:confirm"))} type="submit">{tr("planner:confirm")}</Button>
       </form>
     </details></Card>
   </div>;
