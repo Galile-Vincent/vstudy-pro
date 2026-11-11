@@ -99,15 +99,13 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
       {unallocated.length > 0 && <Panel title={tr("planner:unallocated")}><ul>{unallocated.map((item, index) => <li key={index}>{tr(`planner:unallocated_${item.reason}`, { title: item.title, minutes: item.minutes })}</li>)}</ul></Panel>}
       {pending && <PlannerProposal headingLevel={2} action={pending.action} courses={courses} deadlines={deadlines} snapshot={snapshot} busy={busy} onApprove={() => void approve()} onDismiss={() => setPending(undefined)} />}
       <div className="planner-view-tabs"><TabList role="tablist" value={view} onChange={setView} aria-label={tr("planner:title")}><Tab value="today" onFocus={() => setView("today")} label={tr("planner:today")} id={`tab-view-${"today"}`} panelId={`panel-view-${"today"}`} /><Tab value="week" onFocus={() => setView("week")} label={tr("planner:week")} id={`tab-view-${"week"}`} panelId={`panel-view-${"week"}`} /></TabList>{['today','week'].map(panel => <section role="tabpanel" id={`panel-view-${panel}`} aria-labelledby={`tab-view-${panel}`} hidden={view !== panel}>{view === panel && <>{view === panel && <div className="planner-columns"><div>
-        <Panel title={tr(view === "today" ? "planner:today" : "planner:week")}>
+        <Panel title={tr("planner:tasks")}>
           {!tasks.length && <p className="planner-muted">{tr("planner:empty_today")}</p>}
           <ul className="planner-task-list">{tasks.map(task => <li key={task.id}><ListRow title={task.title} actions={
             <IconButton label={tr("planner:complete", { title: task.title })}  size="md" variant="ghost"  isDisabled={busy} aria-label={tr("planner:complete", { title: task.title })} onClick={() => {
               setBusy(true); void api.approve(crypto.randomUUID(), { type: "update-task", taskId: task.id, changes: { status: "done" } }).then(saved).catch(fail).finally(() => setBusy(false));
             }} icon={<Check />} />} subtitle={<span className="planner-task-meta"><span>{courseTitle(task.courseId)} · {tr("planner:minutes", { minutes: task.estimateMinutes })}</span>
-              <span>{tr(`planner:source_${task.source}`)} · {tr(`planner:status_${task.status}`)}</span>
-              {task.dueAt && <time dateTime={task.dueAt} data-overdue={Date.parse(task.dueAt) < now}>{plannerDate(task.dueAt)}</time>}
-            </span>} />
+            </span>} meta={task.dueAt && <time dateTime={task.dueAt} data-overdue={Date.parse(task.dueAt) < now}>{plannerDate(task.dueAt)}</time>} />
           </li>)}</ul>
         </Panel>
         {snapshot.tasks.some(t => plannerTaskDone(t, deadlines)) && <div data-completed-tasks><Panel title={tr("planner:status_done")}><ul className="planner-task-list">{snapshot.tasks.filter(t => plannerTaskDone(t, deadlines)).map(t => <li key={t.id}><ListRow title={t.title} /></li>)}</ul></Panel></div>}
@@ -118,7 +116,7 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
           {exams.map(exam => <article className="planner-exam" key={exam.id}><strong>{tr("planner:countdown", { title: exam.title, days: Math.max(0, Math.round((Date.parse(localDay(exam.date, zone)) - Date.parse(today)) / 86400000)) })}</strong>
             <p>{courseTitle(exam.courseId)} · {plannerDate(exam.date)}</p><p>{exam.scopeTopics.join(" · ") || tr("planner:scope_unknown")}</p></article>)}
         </Panel>
-      </div><section className=" planner-week" aria-label={tr("planner:week")}><Panel title={tr("planner:week")}>{!snapshot.blocks.some(b => (view === "today" ? [today] : dayKeys).includes(localDay(b.startsAt, zone))) && <p className="planner-muted">{tr("planner:empty_week")}</p>}
+      </div><section className=" planner-week" aria-label={tr("planner:week")}><Panel title={tr("planner:schedule")}>{!snapshot.blocks.some(b => (view === "today" ? [today] : dayKeys).includes(localDay(b.startsAt, zone))) && <p className="planner-muted">{tr("planner:empty_week")}</p>}
         {(view === "today" ? [today] : dayKeys).map(day => {
           const blocks = snapshot.blocks.filter(b => localDay(b.startsAt, zone) === day);
           return <section className="planner-day" key={day}><h3>{new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(day + "T12:00:00Z"))}</h3>
