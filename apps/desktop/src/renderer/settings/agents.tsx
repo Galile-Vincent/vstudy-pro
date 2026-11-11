@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { i18n, tr } from '../../shared/i18n';
 import { Button, Card, Switch } from '@astryxdesign/core';
-import { SettingRow, ListRow, EmptyState } from '../components/ui';
+import { SettingRow, ListRow } from '../components/ui';
 import { AgentAccount, AgentDate } from './agents-fields';
 import { AgentGrants } from './agents-grants';
 import { AgentConnect } from './agents-connect';
@@ -48,7 +48,7 @@ export function AgentsSettings() {
       </section>}
       <AgentGrants />
       <div className="agents-section"><Panel title={<span id="agents-activity-title">{tr('agents:activity')}</span>}><p className="agents-muted">{tr('agents:activity_help')}</p>
-        {!activity.length && <EmptyState headingLevel={4} title={tr('agents:no_activity')} />}
+        {!activity.length && <p className="agents-empty agents-muted">{tr('agents:no_activity')}</p>}
         {agents.state.activity.length > ACTIVITY_LIMIT && <p className="agents-muted">{tr('agents:latest_activity',{count:ACTIVITY_LIMIT})}</p>}
         <ol className="agents-activity">{activity.map(item => <li key={item.id}><Card padding={3} className="settings-stack">
           <ListRow className="flex-wrap" title={item.clientName} meta={<AgentDate value={item.at} />} />
