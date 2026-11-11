@@ -193,13 +193,13 @@ function WeeklySection({
                 className="moodle-module"
                 title={module.name}
                 leading={<Icon />}
-                subtitle={<>
-                  {tr(`moodle:kind_${module.kind}`)}
+                subtitle={<span className="flex flex-wrap gap-x-2">
+                  <span>{tr(`moodle:kind_${module.kind}`)}</span>
                   {module.dueAt && <time dateTime={module.dueAt}>{date(module.dueAt)}</time>}
                   {module.fileIds.length > 0 && <span>
                     {tr("moodle:attachment_count", { count: module.fileIds.length })}
                   </span>}
-                </>}
+                </span>}
                 onClick={() => onModule(module)}
                 disabled={!module.accessible}
                 meta={<>

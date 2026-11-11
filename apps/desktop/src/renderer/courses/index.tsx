@@ -439,7 +439,7 @@ function CoursesBody({
       <div className="moodle-notifications">
         {items.map((n) => (
           <ListRow key={n.id} data-unread={!n.read}
-            className="course-notification-row"
+            className="course-notification-row flex-col items-stretch [&>.ui-row-target]:w-full"
             title={<span className="flex items-center gap-2">
               {!n.read && <span className="moodle-unread" role="img" aria-label={tr("moodle:unread")} />}
               {n.subject}

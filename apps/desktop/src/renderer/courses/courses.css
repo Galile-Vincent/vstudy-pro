@@ -356,17 +356,6 @@
   color: var(--muted);
   margin: var(--space-2) 0;
 }
-.moodle-site-list button {
-  justify-content: flex-start;
-  height: auto;
-  padding: var(--space-3);
-  text-align: left;
-}
-.moodle-site-list button > span {
-  flex: 1;
-  min-width: 0;
-  white-space: normal;
-}
 .moodle-site-list small {
   display: block;
   font-weight: 400;
