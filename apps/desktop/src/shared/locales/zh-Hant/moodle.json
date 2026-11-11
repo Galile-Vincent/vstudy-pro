@@ -221,6 +221,7 @@
   "updates_today": "今天",
   "updates_yesterday": "昨天",
   "updates_earlier": "更早",
+  "updates_empty_hint": "課程同步後，學校通知會顯示在這裡。",
   "updates_empty": "所有消息都看完了",
   "updates_shortcuts": "↑ ↓ 移動 · Enter 開啟 · M 切換已讀或未讀",
   "mark_unread": "標為未讀",
