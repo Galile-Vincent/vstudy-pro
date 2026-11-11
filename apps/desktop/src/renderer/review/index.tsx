@@ -13,7 +13,6 @@ import {
   PageHeader,
   Toolbar,
   ListRow,
-  Section,
   EmptyState,
 } from "../components/ui";
 import {
@@ -24,6 +23,7 @@ import {
   Tab,
   TabList,
 } from "@astryxdesign/core";
+import { Panel } from "../components/panel";
 import { Select } from "../components/select";
 import { useReviewPage, type Cursor } from "./paging";
 import type { ReviewSelection } from "./review-selection";
@@ -830,7 +830,7 @@ function Weak({
   const remove = (index: number, action: () => Promise<unknown>) =>
     void mutate(action, neighbour(index));
   return (
-    <Section title={<span id="review-weak-heading" tabIndex={-1}>{tr("review:needs_review")}</span>}
+    <Panel title={<span id="review-weak-heading" tabIndex={-1}>{tr("review:needs_review")}</span>}
       actions={
         <Button
           variant="primary"
@@ -973,7 +973,7 @@ function Weak({
           action={<Button variant="secondary" label={tr("review:show_recent")} onClick={showRecent} />}
         />
       )}
-    </Section>
+    </Panel>
   );
 }
 function Evidence({
