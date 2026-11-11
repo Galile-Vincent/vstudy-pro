@@ -1,13 +1,14 @@
 .review-page {
   height: 100%;
-  gap: var(--space-4);
+  gap: var(--space-6);
   overflow: auto;
   background: transparent;
   color: var(--ink);
   scrollbar-color: var(--active) transparent;
 }
 .review-page h2 {
-  font-size: var(--type-xl);
+  font-size: var(--type-lg);
+  font-weight: 600;
   margin: var(--space-6) 0 var(--space-3);
 }
 .review-page h3 {
@@ -32,8 +33,7 @@
   align-items: center;
   flex-wrap: wrap;
 }
-.review-page select,
-.review-page input {
+.review-page input:not([type="radio"]):not([type="checkbox"]) {
   border: 0;
   border-radius: var(--radius-element);
   padding: var(--space-2) var(--space-3);
@@ -55,10 +55,11 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--space-3);
+  gap: 0;
 }
 .review-list > li {
   overflow-wrap: anywhere;
+  padding-block: var(--space-3);
 }
 .review-list time,
 .review-chip {
@@ -81,7 +82,7 @@
   padding: var(--space-3) 0;
 }
 .review-help {
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-4);
 }
 .review-actions {
   margin-block: var(--space-3);
@@ -132,4 +133,33 @@
 }
 .review-evidence[open] {
   flex-basis: 100%;
+}
+
+.review-list > li + li {
+  border-block-start: 1px solid var(--line);
+}
+.review-test-player {
+  display: grid;
+  gap: var(--space-4);
+  margin-inline: 0;
+}
+.review-test-player form,
+.review-test-player [aria-label][role="status"] {
+  display: grid;
+  gap: var(--space-4);
+}
+.review-test-player fieldset label {
+  display: flex;
+  padding-block: var(--space-3);
+  gap: var(--space-3);
+  color: var(--ink);
+}
+.review-test-player fieldset label + label {
+  border-block-start: 1px solid var(--line);
+}
+.review-test-player p {
+  margin: 0;
+}
+.review-test-player h3 {
+  line-height: 1.5;
 }
