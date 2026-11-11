@@ -7,7 +7,7 @@
  --motion-fast:125ms; --motion-base:175ms; --motion-slow:300ms;
  --opacity-hover:.04; --opacity-pressed:.08; --opacity-disabled:.4;
  --sidebar-width:232px; --topbar-height:52px; --filter-width:300px; --library-row-height:2.75rem; --library-card-height:148px;
- --line-strong:var(--muted); --line:color-mix(in oklab,var(--ink) 18%,transparent);
+ --line-strong:var(--muted); --line:color-mix(in oklab,var(--ink) 10%,transparent);
  --hairline:var(--line);
  --focus-ring:var(--focus-outline-width,2px) var(--focus-outline-style,solid) var(--focus);
 }
@@ -138,7 +138,7 @@ html:lang(ja) { --font-ui:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",syst
  --glass-highlight:color-mix(in oklab,var(--surface) 90%,transparent);
  --glass-lift:0 18px 40px -22px color-mix(in oklab,var(--shadow-color) 24%,transparent);
  --glass-lift-raised:0 22px 48px -20px color-mix(in oklab,var(--shadow-color) 32%,transparent);
- --glass-shadow:inset 1px 1px 0 var(--glass-highlight),var(--glass-lift);
+ --glass-shadow:inset 1px 1px 0 var(--glass-highlight);
  --glass-shadow-raised:inset 1px 1px 0 var(--glass-highlight),var(--glass-lift-raised);
 }
 html.dark { --wash-l:.4; --wash-c:clamp(.08,c,.13); --wash-accent:45%; --wash-complement:35%; --glass-highlight:color-mix(in oklab,var(--ink) 12%,transparent); --glass-lift:0 18px 40px -22px color-mix(in oklab,var(--shadow-color) 60%,transparent); --glass-lift-raised:0 22px 48px -20px color-mix(in oklab,var(--shadow-color) 75%,transparent); }
