@@ -105,7 +105,7 @@ export function ConnectDialog({open,onOpenChange,api,onConnected,accounts = []}:
   const siteError = error === "moodle:site_check_error" || error.startsWith("schools:") ? tr(error) : undefined;
   const step = flow.step === 'find' ? 0 : flow.step === 'result' ? 1 : 2;
   const plan = flow.step === 'find' ? undefined : flow.site.authPlan;
-  return <>{open && <Dialog aria-describedby={dialogDescriptionId} role="dialog" isOpen={open} onOpenChange={onOpenChange} className="moodle-connect"><GraduationCap aria-hidden="true" /><DialogHeader title={<>{tr('moodle:connect_title')}</>} /><div id={dialogDescriptionId} className="dialog-description">{tr('moodle:connect_description')}</div><ol className="moodle-connect-steps" aria-label={tr('moodle:connect_steps')}>
+  return <>{open && <Dialog aria-describedby={dialogDescriptionId} role="dialog" isOpen={open} onOpenChange={onOpenChange} className="moodle-connect"><DialogHeader title={<span className="moodle-connect-title"><GraduationCap aria-hidden="true" />{tr('moodle:connect_title')}</span>} /><div id={dialogDescriptionId} className="dialog-description">{tr('moodle:connect_description')}</div><ol className="moodle-connect-steps" aria-label={tr('moodle:connect_steps')}>
         {['find_school','check_school','sign_in_step'].map((label,index) => <li key={label} aria-current={step === index ? 'step' : undefined} data-complete={step > index}><span>{step > index ? '✓' : index+1}</span>{tr(`moodle:${label}`)}</li>)}
       </ol>{unsaved ? <div role="status"><p>{tr('moodle:keychain_unsaved')}</p>
         <Button label={(tr('moodle:keychain_retry'))}  isDisabled={!!busy} onClick={() => {

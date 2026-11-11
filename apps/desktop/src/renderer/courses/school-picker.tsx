@@ -4,7 +4,7 @@ import { ArrowRight, LoaderCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { MoodleAccount, MoodleSchool, MoodleSiteCheck } from '../../shared/moodle';
 import { tr } from '../../shared/i18n';
-import { FormField } from "../components/ui";
+import { FormField, ListRow } from "../components/ui";
 import { countryNames, fuzzySiteMatch, schoolMonogram, schoolSearchText, sortedSchools } from './school-search';
 import './schools.css';
 
@@ -57,15 +57,12 @@ export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind,
     <div id="moodle-school-results" className="moodle-school-results" role="listbox" aria-label={tr('schools:results')}>
       {(['connected','recent','directory'] as const).map(group => results.some(choice => choice.group === group) && <div key={group} role="group" aria-label={tr(`schools:${group}`)} className="moodle-site-list">
         <h3 aria-hidden="true">{tr(`schools:${group}`)}</h3>
-        {results.map((choice,index) => choice.group === group && <Button endContent={<ArrowRight aria-hidden="true" />} icon={<SchoolLogo name={choice.name} icon={choice.icon} />} label={`${choice.name} ${new URL(choice.url).host}${new URL(choice.url).pathname.replace(/\/$/,'')}${choice.country ? ' · ' + (new Intl.DisplayNames([language],{type:'region'}).of(choice.country) ?? choice.country) : ''}`} key={choice.url} id={`moodle-school-${index}`} role="option" aria-selected={active === index} tabIndex={-1} variant="ghost"  isDisabled={busy} onClick={() => onFind(choice.url)}>
-
-          <span>{choice.name}<small>{new URL(choice.url).host}{new URL(choice.url).pathname.replace(/\/$/,'')}{choice.country ? ` · ${new Intl.DisplayNames([language],{type:'region'}).of(choice.country)}` : ''}</small></span>
-        </Button>)}
+        {results.map((choice,index) => choice.group === group && <ListRow className="moodle-school-row" aria-label={`${choice.name} ${new URL(choice.url).host}`} leading={<SchoolLogo name={choice.name} icon={choice.icon} />} title={choice.name} subtitle={<span>{new URL(choice.url).host}{new URL(choice.url).pathname.replace(/\/$/,'')}{choice.country ? ' · ' + (new Intl.DisplayNames([language],{type:'region'}).of(choice.country) ?? choice.country) : ''}</span>} meta={<ArrowRight aria-hidden="true" />} key={choice.url} id={`moodle-school-${index}`} role="option" aria-selected={active === index} disabled={busy} onClick={() => onFind(choice.url)} />)}
       </div>)}
     </div>
     {!results.length && <p>{tr('schools:no_results')}</p>}
-    <Button label={(tr('schools:add_url'))} variant="ghost"  isDisabled={busy} onClick={() => {if (urlLike) onFind(input);else {onInput('');setActive(-1);inputRef.current?.focus();}}}>{tr('schools:add_url')}</Button>
-    <small>{tr('schools:multiple_accounts')}</small>
+    <div className="moodle-school-footer"><Button label={(tr('schools:add_url'))} variant="ghost"  isDisabled={busy} onClick={() => {if (urlLike) onFind(input);else {onInput('');setActive(-1);inputRef.current?.focus();}}}>{tr('schools:add_url')}</Button>
+    <small>{tr('schools:multiple_accounts')}</small></div>
   </>;
 }
 

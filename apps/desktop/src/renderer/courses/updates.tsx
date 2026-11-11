@@ -97,7 +97,7 @@ export function UpdatesInbox({ items, courses, onRead, onClose, onOpen }: {
             </li>)}</ul>
           </Panel></div>;
         })}
-        {!visible.length && <div className="updates-empty" role="status"><CheckCheck /><h2>{tr('moodle:updates_empty')}</h2></div>}
+        {!visible.length && <div className="updates-empty" role="status"><CheckCheck /><h2>{tr('moodle:updates_empty')}</h2><p>{tr('moodle:updates_empty_hint')}</p><Button label={tr('moodle:courses')} variant="secondary" onClick={onClose} /></div>}
       </div>
       {selected && <div className="update-reading"><Panel title={tr('moodle:updates')}><article className="update-reader" aria-labelledby="update-subject">
         <Button icon={<ArrowLeft />} label={(tr('moodle:updates'))} variant="ghost" onClick={() => {setSelectedId(undefined);list.current?.querySelector<HTMLButtonElement>(`[data-update-id="${selected.id}"] .update-open`)?.focus();}}>{tr('moodle:updates')}</Button>

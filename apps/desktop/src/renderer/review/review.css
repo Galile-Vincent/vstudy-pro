@@ -163,3 +163,5 @@
 .review-test-player h3 {
   line-height: 1.5;
 }
+
+.review-page [role="tablist"] { margin-inline-start: calc(-1 * var(--space-3)); }

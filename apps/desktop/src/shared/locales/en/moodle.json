@@ -222,6 +222,7 @@
   "updates_today": "Today",
   "updates_yesterday": "Yesterday",
   "updates_earlier": "Earlier",
+  "updates_empty_hint": "School updates appear here after your courses sync.",
   "updates_empty": "You are all caught up",
   "updates_shortcuts": "↑ ↓ Move · Enter Open · M Mark read or unread",
   "mark_unread": "Mark as unread",
