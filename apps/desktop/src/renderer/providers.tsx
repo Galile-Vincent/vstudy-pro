@@ -1,6 +1,6 @@
 import { Button, Card, Dialog, DialogHeader, IconButton, Switch, Tab, TabList } from '@astryxdesign/core';
 import { Panel } from './components/panel';
-import { Section, SettingRow } from './components/ui';
+import { SettingRow } from './components/ui';
 import { useOverlayFocusReturn } from './components/use-overlay-focus-return';
 import { UpdateSettings } from './settings/updates';
 import { AppVersion } from './components/app-version';
@@ -171,11 +171,11 @@ export function ProviderSettings({
                         <AiSetupGuide onClose={requestClose} leadingSteps={[tr('novice:step_access'), tr('novice:step_key')]} />
                       </div>
                     </details>
-                    <Section level={3} title={tr('settings:api_keys')}><Card padding={4} className="settings-stack">
+                    <Panel title={tr('settings:api_keys')}><div className="settings-stack settings-provider-rows">
                       {providers.filter(provider => provider.config.kind === 'api').map(provider => (
                         <ProviderRow settingsView key={provider.config.id} provider={provider} onRefresh={onRefresh} />
                       ))}
-                    </Card></Section>
+                    </div></Panel>
 
                     <Card padding={4} className="settings-stack">
                       <SettingRow
@@ -200,7 +200,7 @@ export function ProviderSettings({
                       </SettingRow>
                       {featureError && <p role="alert">{featureError}</p>}
                     </Card>
-                    <Section level={3} title={tr('common:providers')}><Card padding={4} className="settings-stack">
+                    <Panel title={tr('common:providers')}><div className="settings-stack settings-provider-rows">
                       {providers.filter(provider => provider.config.kind !== 'api').map((provider) => (
                         <ProviderRow
                           settingsView
@@ -209,7 +209,7 @@ export function ProviderSettings({
                           onRefresh={onRefresh}
                         />
                       ))}
-                    </Card></Section>
+                    </div></Panel>
                   </>
                 ))}
             </div>

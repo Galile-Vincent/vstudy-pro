@@ -92,7 +92,7 @@ export function ProviderRow({
             </>
           ) : (
             <>
-              <Button label={tr('settings:provider_action',{action:tr('settings:get_key'),name:providerName[provider.config.id]})} variant="ghost" onClick={() => void perform(() => desktop.invoke('shell:openExternal', { url: provider.config.id === 'anthropic-api' ? 'https://platform.claude.com/settings/keys' : provider.config.id === 'openai-api' ? 'https://platform.openai.com/api-keys' : new URL(baseUrl).origin }))}>{tr('settings:get_key')}</Button>
+              <Button label={tr('settings:provider_action',{action:tr('settings:get_key'),name:providerName[provider.config.id]})} variant="ghost" size="sm" isDisabled={busy} onClick={() => void perform(() => desktop.invoke('shell:openExternal', { url: provider.config.id === 'anthropic-api' ? 'https://platform.claude.com/settings/keys' : provider.config.id === 'openai-api' ? 'https://platform.openai.com/api-keys' : new URL(baseUrl).origin }))}>{tr('settings:get_key')}</Button>
               <Button label={tr('settings:provider_action',{action:tr('settings:test_connection'),name:providerName[provider.config.id]})} variant="secondary" size="sm" isDisabled={busy} onClick={() => void perform(async () => {
                 const id = provider.config.id;
                 if (id !== 'anthropic-api' && id !== 'openai-api' && id !== 'openai-compatible') return;
