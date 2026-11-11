@@ -1,4 +1,4 @@
-.app-tabs { position:relative; display:flex; align-items:center; gap:var(--space-1); padding:var(--space-1) var(--space-3); min-width:0; flex-shrink:0; background:var(--surface); }
+.app-tabs { position:relative; display:flex; align-items:center; gap:var(--space-1); padding:var(--space-1) var(--space-3); min-width:0; flex-shrink:0; background:transparent; }
 .app-tabs-scroll { display:flex; flex:1; min-width:0; overflow-x:auto; gap:var(--space-1); padding-inline:var(--space-2); }
 .app-tab { flex:1 0 120px; max-width:220px; display:flex; align-items:center; min-width:120px; border-radius:var(--radius-element); color:var(--muted); transition:background-color var(--motion-fast) var(--ease-standard); }
 .app-tab[data-active=true] { flex-basis:200px; min-width:200px; background:var(--active); color:var(--ink); font-weight:500; }

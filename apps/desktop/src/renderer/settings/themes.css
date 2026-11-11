@@ -11,7 +11,8 @@
 }
 html:not([data-appearance-ready]) body { visibility:hidden; }
 html:not([data-appearance-ready]) { background:transparent; }
-html,body,.app-shell { background:var(--background); color:var(--ink); }
+html,body { background:var(--background); color:var(--ink); }
+.app-shell { background:var(--page-field); color:var(--ink); }
 .shell-sidebar { background:var(--sidebar-surface); }
 .chat-pane { background:var(--background); }
 .markdown { background:var(--reader-background); color:var(--reader-ink); }

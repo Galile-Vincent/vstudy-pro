@@ -10,9 +10,9 @@ export { captureTime };
 export const viewport = {width:1440,height:900};
 export const aliases = {'document-figures':'figures','original-page':'original','capture-to-chat':'capture','usage-settings':'usage','connect-ai':'connect-ai',school:'school','courses-home':'courses','course-page':'course','planner-today':'planner','reader-chat-with-answer':'reader','history-search':'history',library:'library',home:'home','themes-settings':'themes','moodle-webview':'webview','storage-settings':'storage','onboarding-welcome':'onboarding'};
 
-export async function launchMarketing({desktop,directory,scale=2}) {
+export async function launchMarketing({desktop,directory,scale=2,launch={}}) {
   const errors = [];
-  const app = await electron.launch({args:[desktop,`--user-data-dir=${directory}`,`--force-device-scale-factor=${scale}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',HOME:directory,XDG_CONFIG_HOME:directory,VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'}});
+  const app = await electron.launch({args:[desktop,`--user-data-dir=${directory}`,`--force-device-scale-factor=${scale}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',HOME:directory,XDG_CONFIG_HOME:directory,VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'},...launch});
   let moodle;
   try {
     const page = await app.firstWindow();

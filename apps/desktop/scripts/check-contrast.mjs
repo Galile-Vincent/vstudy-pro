@@ -36,26 +36,59 @@ for (const theme of builtinThemes) for (const scheme of ['light','dark']) {
   }
 }
 console.log(`Translucent surfaces: minimum text contrast ${surfaceMinimum.toFixed(2)}:1`);
-/* Quiet glass (tokens.css): Solid 100%, Soft 68%, Glass 50% of --glass-base over the page field, whose
-   busiest points are the accent haze (9%) and the muted haze (8%) over --background. Dark glass lifts the
-   base 7% toward ink. Tonal chips, selected rows and settings groups add ink at up to 9% on top and carry ink or muted text only. */
+/* Frosted glass (tokens.css). The page field is --background under two static washes: the accent hue at a fixed
+   pastel lightness, and a cool counter hue 100deg below it. An achromatic accent borrows the brand hue (265deg). The
+   worst point is where both washes peak. Panels are 68% of the card surface over the field, chrome 72% of --surface or
+   --sidebar-surface, overlays 92% of --surface over the field and over the 45% modal scrim. Text is checked on the field, on every glass, and on glass under
+   the 6% and 10% ink hover overlays (5% in the sidebar, shell.css), at contrast settings 100% to 150%. Keep these numbers in step with tokens.css. */
+const glassModel={
+  light:{ l:.9, c:[.1,.16], accent:.5, complement:.35 },
+  dark:{ l:.4, c:[.08,.13], accent:.45, complement:.35 },
+  panel:.68, chrome:.72, float:.92, scrim:.45, hover:[.06,.1],
+};
+function toOklch(hex) {
+  const [r,g,b]=[1,3,5].map(i => { const c=parseInt(hex.slice(i,i+2),16)/255; return c<=.04045?c/12.92:((c+.055)/1.055)**2.4; });
+  const l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b), m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b), s=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);
+  const A=1.9779984951*l-2.428592205*m+.4505937099*s, B=.0259040371*l+.7827717662*m-.808675766*s, C=Math.hypot(A,B);
+  return [.2104542553*l+.793617785*m-.0040720468*s,C,C<1e-4?0:Math.atan2(B,A)*180/Math.PI];
+}
+function fromOklch([L,C,H]) {
+  const A=C*Math.cos(H*Math.PI/180), B=C*Math.sin(H*Math.PI/180);
+  const l=(L+.3963377774*A+.2158037573*B)**3, m=(L-.1055613458*A-.0638541728*B)**3, s=(L-.0894841775*A-1.291485548*B)**3;
+  return '#'+[4.0767416621*l-3.3077115913*m+.2309699292*s,-1.2684380046*l+2.6097574011*m-.3413193965*s,-.0041960863*l-.7034186147*m+1.707614701*s]
+    .map(c => { c=Math.min(1,Math.max(0,c)); c=c<=.0031308?12.92*c:1.055*c**(1/2.4)-.055; return Math.round(c*255).toString(16).padStart(2,'0'); }).join('');
+}
+function washes(accent, scheme) {
+  const { l, c:[low,high] }=glassModel[scheme];
+  const [,C,H]=toOklch(accent);
+  const hue=H+(1-Math.min(C*50,1))*265, chroma=Math.min(Math.max(C,low),high);
+  return [fromOklch([l,chroma,hue]),fromOklch([l,chroma,hue+260])];
+}
+const allText=['ink','muted','accent-color','danger','success','warning','info'];
 let glassMinimum=Infinity, glassWorst='';
 for (const theme of builtinThemes) for (const scheme of ['light','dark']) for (let contrast=100;contrast<=150;contrast+=25) {
   const tokens=adjustedTokens(theme[scheme],scheme,contrast);
-  const base=scheme==='dark' ? composite(tokens.surface,tokens.ink,.93) : tokens.surface;
-  const fields=[tokens.background,composite(tokens['accent-color'],tokens.background,.09),composite(tokens.muted,tokens.background,.08)];
-  const surfaces=fields.map(surface => [surface,['ink','muted','accent-color','danger']]);
-  for (const field of fields) for (const opacity of [1,.68,.5]) {
-    const glass=composite(base,field,opacity);
-    surfaces.push([glass,['ink','muted','accent-color','danger']],[composite(tokens.ink,glass,scheme==='dark'?.09:.08),['ink','muted']]);
+  const [accentWash,complementWash]=washes(tokens['accent-color'],scheme), { accent, complement }=glassModel[scheme];
+  const peak=composite(accentWash,tokens.background,accent);
+  const fields=[tokens.background,peak,composite(complementWash,tokens.background,complement),composite(complementWash,peak,complement)];
+  const card=scheme==='dark' ? composite(tokens.surface,tokens.ink,.94) : tokens.surface;
+  const checks=[];
+  for (const field of fields) {
+    checks.push(['field',field,allText]);
+    for (const [name,base,opacity] of [['panel',card,glassModel.panel],['topbar',tokens.surface,glassModel.chrome],['sidebar',tokens.sidebar,glassModel.chrome],['overlay',tokens.surface,glassModel.float]]) {
+      if (name==='overlay') checks.push(['modal',composite(tokens.surface,composite(tokens['shadow-color'],field,glassModel.scrim),glassModel.float),allText]);
+      const glass=composite(base,field,opacity);
+      checks.push([name,glass,allText]);
+      for (const hover of name==='sidebar'?[.05]:glassModel.hover) checks.push([`${name} hover ${hover}`,composite(tokens.ink,glass,hover),['ink','muted']]);
+    }
   }
-  for (const [surface,foregrounds] of surfaces) for (const foreground of foregrounds) {
+  for (const [name,surface,foregrounds] of checks) for (const foreground of foregrounds) {
     const ratio=contrastRatio(tokens[foreground],surface);
-    if (ratio<glassMinimum) { glassMinimum=ratio; glassWorst=`${theme.id} ${scheme} ${contrast}% ${foreground} on ${surface}`; }
-    assert.ok(ratio>=4.5,`${theme.id} ${scheme} ${contrast}% quiet glass: ${foreground} on ${surface} ${ratio}`);
+    if (ratio<glassMinimum) { glassMinimum=ratio; glassWorst=`${theme.id} ${scheme} ${contrast}% ${foreground} on ${name} ${surface}`; }
+    assert.ok(ratio>=4.5,`${theme.id} ${scheme} ${contrast}% frosted ${name}: ${foreground} on ${surface} ${ratio.toFixed(2)}`);
   }
 }
-console.log(`Quiet glass over the page field: minimum text contrast ${glassMinimum.toFixed(2)}:1 (${glassWorst})`);
+console.log(`Frosted glass over the ambient field: minimum text contrast ${glassMinimum.toFixed(2)}:1 (${glassWorst})`);
 let count=0;
 async function audit(url) {
   for (const entry of await readdir(url,{withFileTypes:true})) {

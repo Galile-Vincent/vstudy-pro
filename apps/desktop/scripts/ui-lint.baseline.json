@@ -39,7 +39,7 @@
     "radius": 0,
     "color": 0,
     "backdrop": 0,
-    "surface-class": 5
+    "surface-class": 10
   },
   "settings/agents.css": {
     "shadow": 0,

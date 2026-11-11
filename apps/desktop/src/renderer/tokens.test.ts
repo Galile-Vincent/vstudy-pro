@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest';
 const css = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
 
 describe('elevation policy', () => {
-  it('defines no legacy elevation, glass or material alias', () => {
-    expect(css).not.toMatch(/--(?:elevation|glass|material|surface-card|primary-shadow)[\w-]*:/);
+  it('defines no legacy elevation or material alias', () => {
+    expect(css).not.toMatch(/--(?:elevation|material|surface-card|primary-shadow)[\w-]*:/);
     expect(css).not.toMatch(/\.glass/);
   });
 
@@ -13,11 +13,19 @@ describe('elevation policy', () => {
     expect(css).not.toMatch(/--shadow-(low|med|high):/);
   });
 
-  it('uses no blur or glass fill on any surface', () => {
-    expect(css).not.toMatch(/backdrop-filter:\s*(?!none)/);
+  it('blurs and lifts surfaces only through the glass tokens', () => {
+    for (const match of css.matchAll(/[{;] ?backdrop-filter:([^;}]+)/g)) expect(match[1]).toBe('var(--glass-blur)');
+    expect(css).toContain(':where(.astryx-card[data-variant=default]) { background-color:var(--glass-panel); }');
+    expect(css).toContain('.astryx-card[data-variant=default] { box-shadow:var(--glass-shadow); }');
   });
 
-  it('shadows only floating overlays: menus and popovers medium, dialogs high', () => {
+  it('falls back to solid surfaces without blur in more contrast', () => {
+    const solid = css.match(/^html\[data-contrast=more\] \{ --page-field[^}]*\}/m)?.[0] ?? '';
+    for (const token of ['--glass-blur:none', '--glass-shadow:none', '--glass-panel:var(--card-surface,var(--surface))', '--page-field:var(--background)'])
+      expect(solid).toContain(token);
+  });
+
+  it('lifts floating overlays: menus and popovers medium, dialogs high', () => {
     expect(css).toMatch(/\[data-slot=popover-content\][^{]*\.conversation-list-popover\) \{[^}]*box-shadow:var\(--shadow-med\)/);
     expect(css).toMatch(/\.settings-dialog\) \{[^}]*box-shadow:var\(--shadow-high\)/);
   });

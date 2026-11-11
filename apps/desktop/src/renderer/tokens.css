@@ -1,5 +1,5 @@
-/* Global tokens. In-flow surfaces are flat: tone plus a 1px hairline, no shadow, no blur.
-   Only floating overlays (menus, popovers, dialogs, toasts) use Astryx --shadow-low/med/high. */
+/* Global tokens. In-flow cards and chrome are frosted glass over the page field (see "Frosted glass" below).
+   Floating overlays (menus, popovers, dialogs, toasts) use a more opaque glass and Astryx --shadow-med/high. */
 :root {
  --r-outer:var(--radius-container); --inset:var(--spacing-1); --r-inner:max(0px,calc(var(--r-outer) - var(--inset)));
  --space-1:calc(var(--spacing-1) * var(--density)); --space-2:calc(var(--spacing-2) * var(--density)); --space-3:calc(var(--spacing-3) * var(--density)); --space-4:calc(var(--spacing-4) * var(--density)); --space-5:calc(var(--spacing-5) * var(--density)); --space-6:calc(var(--spacing-6) * var(--density)); --space-8:calc(var(--spacing-8) * var(--density));
@@ -118,28 +118,62 @@ html:lang(ja) { --font-ui:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",syst
  button.secondary,.filter-popover summary,.provider-row,.folder-node { border:1px solid var(--ink); }
 }
 
-/* Surfaces. Resting containers are flat: surface tone, 1px hairline, container radius, no shadow, no blur. */
-:root { --page-field:var(--background); }
+/* Frosted glass. The page field is --background under two static washes: the accent hue at a fixed pastel lightness
+   (top right) and a cool counter hue 100deg below it (bottom). An achromatic accent, such as the default pack's, borrows the brand
+   hue 265deg. Panels, chrome and overlays are translucent surface over that field with one blur, one inner highlight
+   and one soft lift shadow. scripts/check-contrast.mjs models these exact numbers; change both together. */
+:root {
+ --wash-l:.9; --wash-c:clamp(.1,c,.16); --wash-h:calc(h + (1 - min(c * 50,1)) * 265); --wash-accent:50%; --wash-complement:35%;
+ --wash-1:oklch(from var(--accent-color) var(--wash-l) var(--wash-c) var(--wash-h));
+ --wash-2:oklch(from var(--accent-color) var(--wash-l) var(--wash-c) calc(var(--wash-h) + 260));
+ --page-field:
+  radial-gradient(60vmax 50vmax at 88% 0%,color-mix(in oklab,var(--wash-1) var(--wash-accent),transparent),transparent) fixed,
+  radial-gradient(55vmax 45vmax at 38% 104%,color-mix(in oklab,var(--wash-2) var(--wash-complement),transparent),transparent) fixed,
+  var(--background);
+ --glass-panel:color-mix(in oklab,var(--card-surface,var(--surface)) 68%,transparent);
+ --glass-chrome:color-mix(in oklab,var(--surface) 72%,transparent);
+ --glass-sidebar:color-mix(in oklab,var(--sidebar-surface) 72%,transparent);
+ --glass-float:color-mix(in oklab,var(--surface) 92%,transparent);
+ --glass-blur:blur(24px) saturate(1.5);
+ --glass-highlight:color-mix(in oklab,var(--surface) 90%,transparent);
+ --glass-lift:0 18px 40px -22px color-mix(in oklab,var(--shadow-color) 24%,transparent);
+ --glass-lift-raised:0 22px 48px -20px color-mix(in oklab,var(--shadow-color) 32%,transparent);
+ --glass-shadow:inset 1px 1px 0 var(--glass-highlight),var(--glass-lift);
+ --glass-shadow-raised:inset 1px 1px 0 var(--glass-highlight),var(--glass-lift-raised);
+}
+html.dark { --wash-l:.4; --wash-c:clamp(.08,c,.13); --wash-accent:45%; --wash-complement:35%; --glass-highlight:color-mix(in oklab,var(--ink) 12%,transparent); --glass-lift:0 18px 40px -22px color-mix(in oklab,var(--shadow-color) 60%,transparent); --glass-lift-raised:0 22px 48px -20px color-mix(in oklab,var(--shadow-color) 75%,transparent); }
+/* More contrast, forced colors and engines without backdrop-filter get solid surfaces, plain borders and no field. */
+html[data-contrast=more] { --page-field:var(--background); --glass-panel:var(--card-surface,var(--surface)); --glass-chrome:var(--surface); --glass-sidebar:var(--sidebar-surface); --glass-float:var(--surface); --glass-blur:none; --glass-shadow:none; --glass-shadow-raised:none; }
+@media(prefers-contrast:more),(forced-colors:active) { :root { --page-field:var(--background); --glass-panel:var(--card-surface,var(--surface)); --glass-chrome:var(--surface); --glass-sidebar:var(--sidebar-surface); --glass-float:var(--surface); --glass-blur:none; --glass-shadow:none; --glass-shadow-raised:none; } }
+@supports not (backdrop-filter:blur(1px)) { :root { --glass-panel:var(--card-surface,var(--surface)); --glass-chrome:var(--surface); --glass-sidebar:var(--sidebar-surface); --glass-float:var(--surface); --glass-blur:none; } }
 
-/* Buttons: secondary is a flat tone, primary a solid fill. Press feedback is a 150ms scale, never on disabled. */
+/* In-flow cards (Panel and every default Astryx Card) are frosted glass. Only cards outside overlays and outside
+   another card blur, so backdrop-filter never nests and stays on a handful of large surfaces per page. The fill has
+   zero specificity so a card a page paints solid on purpose, such as the sticky exam footer, stays solid. */
+:where(.astryx-card[data-variant=default]) { background-color:var(--glass-panel); }
+.astryx-card[data-variant=default] { box-shadow:var(--glass-shadow); }
+.astryx-card[data-variant=default]:not(:is(dialog,[popover],[role=dialog],.astryx-card) .astryx-card) { backdrop-filter:var(--glass-blur); }
+
+/* Buttons: secondary is a flat tone, primary a solid fill. Press feedback is a 150ms 0.98 scale, never on disabled. */
 button.secondary:not(.ghost,.primary) {
  border:0; background:var(--subtle); box-shadow:none; color:var(--ink);
  transition:background-color var(--motion-fast) var(--ease-standard),transform 150ms ease-out;
 }
 button.secondary:not(.ghost,.primary):is(:hover,[aria-expanded=true],[aria-pressed=true]) { background:var(--active); color:var(--ink); }
 :is(button.primary) { box-shadow:none; transition:background-color var(--motion-fast) var(--ease-standard),transform 150ms ease-out; }
-:is(button.secondary,button.primary):not(:disabled,[aria-disabled=true]):active { transform:scale(.97); }
+:is(button.secondary,button.primary):not(:disabled,[aria-disabled=true]):active { transform:scale(.98); }
 @media(prefers-reduced-motion:reduce) { :is(button.secondary,button.primary):not(:disabled):active { transform:none; } }
 
-/* Floating overlays are the only shadowed surfaces: menus and popovers use --shadow-med, dialogs --shadow-high. */
+/* Floating overlays are a more opaque glass: menus and popovers lift with --shadow-med, dialogs --shadow-high. */
 :is([data-slot=popover-content]) { border:1px solid var(--line); }
-:is([data-slot=popover-content],.model-popover,.conversation-list-popover) { background:var(--surface); box-shadow:var(--shadow-med); border-radius:var(--radius-container); }
-:is(.settings-dialog) { background:var(--surface); box-shadow:var(--shadow-high); border-radius:var(--radius-container); }
+:is([data-slot=popover-content],.model-popover,.conversation-list-popover) { background:var(--glass-float); backdrop-filter:var(--glass-blur); box-shadow:var(--shadow-med); border-radius:var(--radius-container); }
+:is(.settings-dialog) { background:var(--glass-float); backdrop-filter:var(--glass-blur); box-shadow:var(--shadow-high); border-radius:var(--radius-container); }
+:is(.astryx-dialog,.astryx-alert-dialog,.astryx-popover,.astryx-dropdown-menu,.astryx-context-menu,.astryx-hover-card) { background-color:var(--glass-float); backdrop-filter:var(--glass-blur); }
 .model-popover,.conversation-list-popover { border:1px solid var(--line); }
 
-/* Chrome: a flat header row with a hairline below it. No blur, no scroll mask. */
-.app-shell .shell-main { background:var(--background); }
-.app-shell .shell-topbar { background:var(--surface); box-shadow:none; }
+/* Chrome: the field shows through the main column; the header row is chrome glass with a hairline below it. */
+.app-shell .shell-main { background:transparent; }
+.app-shell .shell-topbar { background:transparent; box-shadow:none; }
 
 @media(prefers-contrast:more) {
  button.secondary:not(.ghost,.primary),:is([data-slot=popover-content]) { border:1px solid var(--ink); }

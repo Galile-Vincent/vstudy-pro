@@ -1,6 +1,6 @@
 /* App frame: Astryx AppShell. The SideNav rail runs the full window height; tabs and the page header stack over the content column only. */
-.app-shell { color:var(--ink); background:var(--background); min-width:0; }
-.app-shell .shell-sidebar { background:var(--sidebar-surface); }
+.app-shell { min-width:0; }
+.app-shell .shell-sidebar { background:var(--glass-sidebar); backdrop-filter:var(--glass-blur); }
 .shell-brand { display:flex; align-items:center; gap:var(--space-3); font-size:var(--type-md); font-weight:600; letter-spacing:-.02em; }
 .art-reader-brand-mark { width:32px; height:32px; display:grid; place-items:center; flex:none; border-radius:var(--radius-element); color:var(--accent-foreground); background:var(--accent-color); }
 .app-shell[data-sidebar=collapsed] .shell-sidebar .shell-brand > span:last-child { display:none; }
@@ -22,8 +22,8 @@
 .shell-footer[data-collapsed] { align-items:center; }
 .shell-footer[data-collapsed] .update-row > button > span:not(.sr-only) { display:none; }
 
-.shell-column { display:flex; flex-direction:column; height:100%; min-height:0; min-width:0; background:var(--surface); }
-.shell-chrome { position:relative; flex:none; background:var(--surface); border-bottom:1px solid var(--line); }
+.shell-column { display:flex; flex-direction:column; height:100%; min-height:0; min-width:0; background:transparent; }
+.shell-chrome { position:relative; z-index:1; flex:none; background:var(--glass-chrome); backdrop-filter:var(--glass-blur); border-bottom:1px solid var(--line); }
 .shell-topbar { display:flex; align-items:center; gap:var(--space-3); min-height:var(--topbar-height); padding-inline:var(--space-6); color:var(--muted); }
 .shell-chrome:has(.app-tabs-single) .shell-topbar { padding-inline-end:calc(var(--space-8) + var(--space-6)); }
 .shell-title { flex:1; font-size:var(--type-base); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
