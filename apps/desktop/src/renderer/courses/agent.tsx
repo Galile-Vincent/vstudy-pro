@@ -1,4 +1,4 @@
-import { Card, Button } from "@astryxdesign/core";
+import { Card, Button, Divider } from "@astryxdesign/core";
 import type { IpcResponse } from '../../shared/ipc';
 /** Course chat keeps model output as proposals. Only confirmation cards invoke planner writes or approve material access. */
 import { emptyPlanner, type MaterialRequest } from "../../shared/planner";
@@ -219,6 +219,7 @@ export function CourseAgentPanel({
         <Sparkles />
         <h2>{tr("moodle:course_assistant")}</h2>
       </>} />
+      <Divider />
       <div className="moodle-agent-body">
         <span className="moodle-agent-symbol">
           <Sparkles />

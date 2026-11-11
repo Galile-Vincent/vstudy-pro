@@ -23,11 +23,11 @@
 .moodle-file-actions > .moodle-file-row { flex:1; min-width:0; }
 @media (max-width:760px) { .moodle-webview-pane,.moodle-webview-pane[data-full=true] { inset:0; width:100%!important; max-width:none; border-radius:0; } .moodle-webview-footer > div > span { display:none; } .moodle-webview-header p { font-size:11px; } }
 .moodle-webview-pane { border-radius:var(--radius-container); box-shadow:none; }
-.moodle-webview-header { min-height:56px; padding:16px 24px; background:var(--surface); border-bottom:1px solid var(--border); }
-.moodle-webview-header h1 { font-size:17px; line-height:22px; letter-spacing:-.015em; }
+.moodle-webview-header { min-height:56px; padding:var(--space-4); background:var(--surface); border-bottom:1px solid var(--line); }
+.moodle-webview-header h1 { font-size:var(--type-lg); line-height:1.4; letter-spacing:-.015em; }
 .moodle-webview-toolbar { padding:8px 16px; gap:4px; background:var(--surface);  }
 .moodle-webview-location { min-height:36px; border-radius:var(--radius-full); background:var(--subtle); margin-inline:8px; }
-.moodle-webview-pane button { min-width:44px; min-height:44px; }
+
 .moodle-webview-footer { padding:8px 16px; background:var(--subtle); }
 .moodle-webview-chrome { position:relative; flex:none; }
 @media(max-width:760px) { .moodle-webview-pane { border-radius:0; } .moodle-webview-header { padding:12px 16px; } .moodle-webview-toolbar { flex-wrap:wrap; } .moodle-webview-location { order:-1; flex-basis:100%; margin:0; } }
