@@ -1,3 +1,4 @@
+import { Panel } from '../components/panel';
 import { SubscriptionMeters } from './subscriptions';
 import { Button } from '@astryxdesign/core';
 import { Select } from '../components/select';
@@ -225,18 +226,7 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
 
   return (
     <section className="usage-dashboard" aria-label={tr('common:overall_token_dashboard')}>
-      <div className="usage-block">
-        <div>
-          <h3 className="text-[length:var(--type-md)] font-semibold leading-snug">
-            {tr('common:overall_usage')}
-          </h3>
-          <p className="muted">
-            {tr('common:all_providers_and_documents_recorded_by_vstudy_on_this_device')}
-          </p>
-        </div>
-        <Toolbar
-          left={
-            <>
+      <Panel title={tr('common:overall_usage')} actions={<div className="usage-panel-actions">
               <Select
                 size="sm"
                 aria-label={tr('common:usage_period')}
@@ -254,10 +244,8 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
                 label={tr('common:refresh_usage')}
                 onClick={() => setRevision((r) => r + 1)}
               />
-            </>
-          }
-        />
-      </div>
+      </div>}>
+      <p className="muted">{tr('common:all_providers_and_documents_recorded_by_vstudy_on_this_device')}</p>
       {error ? (
         <p role="alert">{error}</p>
       ) : !data ? (
@@ -277,6 +265,10 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
               )}
             </p>
           </div>
+        </>
+      )}
+      </Panel>
+      {data && <>
           <div className="usage-block">
             <UsageTrend days={data.days} />
             {period === 'all' && (
@@ -285,7 +277,7 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
               </p>
             )}
           </div>
-          <div className="usage-block">
+          <Panel title={tr('common:breakdown')}>
             <Toolbar
               left={<strong>{tr('common:breakdown')}</strong>}
               right={
@@ -332,9 +324,8 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
                 </tbody>
               </table>
             </div>
-          </div>
-        </>
-      )}
+          </Panel>
+        </>}
       <SubscriptionMeters />
     </section>
   );

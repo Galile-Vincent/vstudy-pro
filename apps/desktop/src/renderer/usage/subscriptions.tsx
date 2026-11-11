@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+import { Panel } from '../components/panel';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
@@ -12,6 +14,10 @@ const providerName = (provider: SubscriptionUsage['provider']) => provider === '
 
 const expandedKey = 'vstudy-subscription-meters-expanded';
 let keychainAllowed = false;
+
+function MeterGroup({ compact, actions, children }: { compact: boolean; actions: ReactNode; children: ReactNode }) {
+  return compact ? <><header><strong>{tr('usage:subscription_limits')}</strong>{actions}</header>{children}</> : <Panel title={tr('usage:subscription_limits')} actions={actions}>{children}</Panel>;
+}
 
 export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
   const { i18n } = useTranslation();
@@ -73,7 +79,7 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
   const summaryValue = highest ? tr('usage:quota_window_used', {
     label: summaryLabel, percent: Math.round(highest.usedPercent),
   }) : tr('usage:quota_unknown');
-  return <section className="subscription-meters" data-compact={compact} aria-label={tr('usage:subscription_limits')} aria-busy={loading}>
+  return <section className="subscription-meters" data-compact={compact} aria-label={compact ? tr('usage:subscription_limits') : undefined} aria-busy={loading}>
     {compact && <div className="subscription-summary">
       <span className="subscription-summary-label" title={summaryLabel}>{summaryLabel}</span>
       <span className="subscription-summary-percent">{highest ? `${Math.round(highest.usedPercent)}%` : '—'}</span>
@@ -105,7 +111,7 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
       className={compact ? 'subscription-details' : undefined}
       tabIndex={compact && expanded && overflowing ? 0 : undefined}
     >
-    <header><strong>{tr('usage:subscription_limits')}</strong><Button variant="ghost" size="sm" isIconOnly isDisabled={loading} label={tr('common:refresh_usage')} icon={<RefreshCw size={14} aria-hidden="true"/>} onClick={() => window.dispatchEvent(new Event('subscription-refresh'))} /></header>
+    <MeterGroup compact={compact} actions={<Button variant="ghost" size="sm" isIconOnly isDisabled={loading} label={tr('common:refresh_usage')} icon={<RefreshCw size={14} aria-hidden="true"/>} onClick={() => window.dispatchEvent(new Event('subscription-refresh'))} />}>
     {error ? <small role="status">{tr('usage:quota_unavailable')}</small> : !rows ? <small role="status">{tr('usage:usage_loading')}</small> : rows.map(row => <div key={row.provider} className="subscription-provider">
       <div className="subscription-provider-name">{providerName(row.provider)}{row.status !== 'ready' && <small>{tr(`usage:quota_${row.status}`)}</small>}</div>
       <div className="subscription-windows">{(['5h', 'weekly'] as const).map(label => {
@@ -122,6 +128,7 @@ export function SubscriptionMeters({ compact = false }: { compact?: boolean }) {
       setLoading(true);
       void desktop.invoke('usage:subscriptions', { allowClaudeKeychain, refresh: true }).then(value => { setRows(value); setError(false); }).catch(() => setError(true)).finally(() => setLoading(false));
     }}/>{tr('usage:quota_keychain')}</label>}
+    </MeterGroup>
     </div>
   </section>;
 }

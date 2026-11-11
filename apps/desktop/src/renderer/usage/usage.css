@@ -400,3 +400,34 @@
 .usage-dashboard .subscription-provider { margin-top: var(--space-4); }
 .usage-dashboard .subscription-window > span { font-size: var(--type-sm); gap: var(--space-2); }
 .usage-dashboard .subscription-meters small { font-size: var(--type-xs); }
+
+.usage-panel-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.usage-settings .settings-intro { color: var(--muted); }
+.usage-settings .usage-token-details > div {
+  padding-block: var(--space-3);
+  border: 0;
+}
+.usage-settings .usage-token-details > div + div {
+  border-top: 1px solid var(--line);
+}
+.usage-settings .subscription-meters { padding: 0; }
+.usage-settings .subscription-provider {
+  margin: 0;
+  padding-block: var(--space-3);
+}
+.usage-settings .subscription-provider + .subscription-provider,
+.usage-settings .subscription-consent {
+  border-top: 1px solid var(--line);
+}
+.usage-settings .subscription-consent {
+  margin: 0;
+  padding-block: var(--space-3);
+}
+.usage-settings .usage-breakdown :is(th, td) {
+  padding-block: var(--space-3);
+}
