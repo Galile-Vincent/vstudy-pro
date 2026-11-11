@@ -1,4 +1,5 @@
 /** Grant controls keep account selection explicit and never expose local bearer credentials. */
+import { Panel } from '../components/panel';
 import { useState } from 'react';
 import { scopeSchema, type Grant } from '../../shared/mcp';
 import { tr } from '../../shared/i18n';
@@ -46,8 +47,7 @@ export function AgentGrants() {
   const [editing, setEditing] = useState<string | null>(null);
   const grants = agents.state?.grants ?? [];
   const grant = grants.find(grant => grant.id === editing);
-  return <section aria-labelledby="agents-grants-title" className="agents-section">
-    <h3 id="agents-grants-title">{tr('agents:grants')}</h3>
+  return <div className="agents-section"><Panel title={<span id="agents-grants-title">{tr('agents:grants')}</span>}>
     {!grants.length && <EmptyState headingLevel={4} title={tr('agents:no_grants')} />}
     {grants.map(grant => <Card padding={3} className="settings-stack" data-grant-id={grant.id} key={grant.id}>
       <ListRow className="flex-wrap" title={<h4>{grant.clientName}</h4>} subtitle={<><span className="agents-badge">{tr(`agents:${grant.revokedAt ? 'revoked' : Date.parse(grant.expiresAt) <= Date.now() ? 'expired' : 'active'}`)}</span>{messages[grant.id] && <span role="status">{messages[grant.id]}</span>}</>} actions={!grant.revokedAt && <div className="agents-actions">
@@ -64,5 +64,5 @@ export function AgentGrants() {
       </dl>
     </Card>)}
     {grant && <GrantEditor key={grant.id} grant={grant} onClose={() => setEditing(null)} />}
-  </section>;
+  </Panel></div>;
 }
