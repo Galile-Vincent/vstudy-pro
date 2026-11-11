@@ -18,3 +18,9 @@
 .analytics-delete { justify-self:start; }
 .analytics-deletion { display:flex; flex-wrap:wrap; align-items:center; gap:var(--space-3); }
 .analytics-deletion > p { flex-basis:100%; }
+
+.analytics-settings-row { padding-block: var(--space-3); border-bottom: 1px solid var(--line); font-size: var(--type-base); }
+.analytics-settings-row summary { cursor: pointer; }
+.analytics-settings-row .analytics-disclosure { padding-top: var(--space-3); color: var(--muted); }
+.analytics-id { justify-content: space-between; }
+.analytics-id code { font-family: var(--font-mono); font-size: var(--type-sm); }

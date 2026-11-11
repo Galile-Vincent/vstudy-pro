@@ -7,7 +7,7 @@ import type { IpcResponse } from '../shared';
 import { WEBSITE_URL } from '../shared/website';
 import { tr } from '../shared/i18n';
 import { desktop } from './bridge';
-import { Button, Switch } from '@astryxdesign/core';
+import { Button, Collapsible, Switch } from '@astryxdesign/core';
 
 import './analytics.css';
 export function PolicyLinks() {
@@ -74,7 +74,7 @@ export function AnalyticsSettings() {
   const load = () => { setError(false); void Promise.all([desktop.invoke('analytics:getState', {}), desktop.invoke('analytics:getInstallationId', {})]).then(([s,i]) => {setState(s); setId(i.installation_id);}).catch(() => setError(true)); };
   useEffect(load, []);
   return <Panel title={tr('analytics:title')}><div className="settings-stack settings-general-rows">
-    <SettingRow label={tr('analytics:enabled')} description={tr('analytics:off_hint')}><Switch label={tr('analytics:enabled')} isLabelHidden value={state?.enabled ?? false} isDisabled={!state || busy} onChange={enabled => {
+    <SettingRow label={tr('analytics:enabled')} description={`${tr('analytics:intro')} ${tr('analytics:off_hint')}`}><Switch label={tr('analytics:enabled')} isLabelHidden value={state?.enabled ?? false} isDisabled={!state || busy} onChange={enabled => {
       setBusy(true); setError(false);
       void desktop.invoke('analytics:setConsent', {enabled}).then(async next => {
         setState(next);
@@ -84,8 +84,9 @@ export function AnalyticsSettings() {
         window.dispatchEvent(new Event('analytics-consent-changed'));
       }).catch(() => setError(true)).finally(() => setBusy(false));
     }}/></SettingRow>
-    <div className="analytics-details !p-0 text-[length:var(--type-sm)] leading-normal"><AnalyticsDisclosure/><details><summary>{tr('analytics:exact')}</summary><ul>{['device','activity','ai','school'].map(key => <li key={key}>{tr(`analytics:collect_${key}`)}</li>)}</ul></details>
-    <p>{tr('analytics:installation')}</p><div className="analytics-id"><code>{id ?? tr('analytics:unavailable')}</code><Button label={tr('analytics:copy')} size="sm" variant="secondary" isDisabled={!id} onClick={() => { if (id) void navigator.clipboard.writeText(id).then(() => setCopied(true)).catch(() => setError(true)); }} /></div>
+    <div className="analytics-settings-row"><Collapsible defaultIsOpen={false} trigger={tr('analytics:details_toggle')}><div className="analytics-disclosure"><p>{tr('analytics:summary')}</p><ul>{['device','activity','ai','school'].map(key => <li key={key}>{tr(`analytics:collect_${key}`)}</li>)}</ul><p>{tr('analytics:excluded')}</p><p>{tr('analytics:pseudonymous')}</p></div></Collapsible></div>
+    <SettingRow label={tr('analytics:installation')}><div className="analytics-id"><code>{id ?? tr('analytics:unavailable')}</code><Button label={tr('analytics:copy')} size="sm" variant="secondary" isDisabled={!id} onClick={() => { if (id) void navigator.clipboard.writeText(id).then(() => setCopied(true)).catch(() => setError(true)); }} /></div></SettingRow>
+    <SettingRow label={tr('analytics:policies')}><PolicyLinks/></SettingRow>
     {copied && <p role="status">{tr('analytics:copied')}</p>}
     {(state?.deletion_pending || deletion) && <p role="status">{tr('analytics:pending')}</p>}
     <SettingRow label={tr('analytics:delete')} description={tr('analytics:delete_hint')}><Button label={tr('analytics:delete')} variant="destructive" size="sm" isDisabled={!state || busy} onClick={() => setConfirm(true)} /></SettingRow>
@@ -94,6 +95,6 @@ export function AnalyticsSettings() {
       void desktop.invoke('analytics:requestDeletion', {}).then(result => { setDeletion(result); setId(result.installation_id); setState(s => s ? {...s, enabled:false, deletion_pending:true} : s); setConfirm(false); }).catch(() => setError(true)).finally(() => setBusy(false));
     }} /><Button label={tr('analytics:cancel')} variant="ghost" onClick={() => setConfirm(false)} /></div>}
     {deletion && <div role="status"><p>{tr('analytics:contact_instructions')}</p><blockquote lang="en">{deletion.instructions}</blockquote><a href={deletion.contact_url} onClick={e => {e.preventDefault(); void desktop.invoke('shell:openExternal', {url:deletion.contact_url}).catch(() => setError(true));}}>{tr('analytics:publisher')}</a></div>}
-    {error && <p role="alert">{tr('errors:generic')} <Button label={tr('analytics:retry')} variant="ghost" onClick={load} /></p>}</div>
+    {error && <p role="alert">{tr('errors:generic')} <Button label={tr('analytics:retry')} variant="ghost" onClick={load} /></p>}
   </div></Panel>;
 }
