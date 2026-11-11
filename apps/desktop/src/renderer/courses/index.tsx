@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { IconButton } from "@astryxdesign/core";
-import { Layout, LayoutContent, TabList, Tab } from "@astryxdesign/core";
+import { Divider, TabList, Tab } from "@astryxdesign/core";
 import { Dialog, DialogHeader, LayoutFooter, Card, Button } from "@astryxdesign/core";
 import { flushSync } from 'react-dom';
 import { catalogDeadlines } from './deadline-groups';
@@ -630,6 +630,15 @@ function CoursesBody({
           detail ? (
             <>
               <CourseHead
+                assistant={                <CourseAssistant
+                  key={detail.course.id}
+                  detail={detail}
+                  api={api}
+                  requested={agentRequest}
+                  onChange={async () => { await refresh(); }}
+                  onError={failure}
+                />
+}
                 title={displayTitle(detail.course.identity, lang, detail.course.fullName)}
                 chip={[detail.course.identity.term, detail.course.identity.code].filter(Boolean).join(" · ")}
                 people={[displayTeachers(detail.course.identity, lang), displayClass(detail.course.identity, lang)].filter(Boolean)}
@@ -645,10 +654,10 @@ function CoursesBody({
                 onRefresh={() => void sync()}
                 onDisconnect={() => { disconnectSchool.current = overview?.accounts.find(account => account.id === detail.course.accountId)?.siteName; setConfirmDisconnect(detail.course.accountId); }}
               />
-              <Layout className="moodle-course-layout" content={<LayoutContent className="course-detail-content">
+              <div className="course-detail-content">
                 <div className="moodle-tabs"><TabList role="tablist" value={tab} onChange={(v) => setTab(v as Tab)} aria-label={tr("moodle:course_sections")}>{tabs.map((key) => (
                       <Tab key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => { setTab(key); event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"}); }} label={tr(`moodle:${key}`)} id={`tab-tab-${key}`} panelId={`panel-tab-${key}`} />
-                    ))}</TabList><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <><div className="course-overview grid items-start gap-6 mb-6">
+                    ))}</TabList><Divider /><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <><div className="course-overview grid items-start gap-8 mb-8">
                       <Section title={tr("moodle:up_next")} actions={
                           <Button endContent={<ChevronRight />} label={(tr("moodle:view_all"))}
                             variant="ghost"
@@ -668,17 +677,17 @@ function CoursesBody({
                             .sort((a, b) => a.dueAt.localeCompare(b.dueAt))
                             .slice(0, 1),
                         )}
-                      </Section>
+                      </Section><Divider />
                       <Section title={tr("moodle:latest_updates")}>
                         {notifications(3)}
                       </Section>
-                    </div>{panelStatus('contents','completion','teachers')}{detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}<CourseContent
+                    </div><Divider />{panelStatus('contents','completion','teachers')}{detail.contentsPartial && <p role="status">{tr('moodle:contents_partial')}</p>}<div className="course-content-section"><CourseContent
                       detail={detail}
                       openWeeks={weekState.open}
                       setWeekOpen={setWeekOpen}
                       openFile={openFile}
                       onError={failure}
-                    /></>}</section><section role="tabpanel" id={`panel-tab-${"deadlines"}`} aria-labelledby={`tab-tab-${"deadlines"}`} data-state={tab === "deadlines" ? "active" : "inactive"} hidden={tab !== "deadlines"}>{tab === "deadlines" && <>{panelStatus('assignments','quizzes')}<section className="flex min-w-0 flex-col gap-4">
+                    /></div></>}</section><section role="tabpanel" id={`panel-tab-${"deadlines"}`} aria-labelledby={`tab-tab-${"deadlines"}`} data-state={tab === "deadlines" ? "active" : "inactive"} hidden={tab !== "deadlines"}>{tab === "deadlines" && <>{panelStatus('assignments','quizzes')}<section className="flex min-w-0 flex-col gap-4">
                       <div className="moodle-section-heading">
                         <h2>{tr("moodle:deadlines")}</h2>
                         <Button icon={<CalendarDays />} label={(tr("moodle:export_calendar"))}
@@ -782,15 +791,7 @@ function CoursesBody({
                       </p>
                       {files()}
                     </section></>}</section></div>
-</LayoutContent>} end={                <CourseAssistant
-                  key={detail.course.id}
-                  detail={detail}
-                  api={api}
-                  requested={agentRequest}
-                  onChange={async () => { await refresh(); }}
-                  onError={failure}
-                />
-} />
+</div>
             </>
           ) : (
             <div>
@@ -802,7 +803,7 @@ function CoursesBody({
             </div>
           )
         ) : overview && (overview.courses.length > 0 || overview.accounts.some(account => account.syncedAt)) ? (
-          <div className="flex min-w-0 flex-col gap-6">
+          <div className="courses-list-layout">
     <Section title={tr("moodle:your_courses")} count={overview.courses.length}>
       <div className="moodle-term-tabs"><Toolbar
           left={
@@ -816,7 +817,7 @@ function CoursesBody({
           }
           right={
             <>
-              <Selector controlClassName="course-sort" label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} />
+              <Selector size="sm" label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} />
               <CourseViewSwitch value={view} onChange={changeView} />
             </>
           }
@@ -880,7 +881,7 @@ function CoursesBody({
                         {...(view === "cards" ? { elevation:"none" as const } : {})}
                         className="py-0"
                       >
-                        <ListRow
+                        <ListRow divider
                           className="w-full min-h-14 flex-wrap gap-3 [&>.ui-row-target]:min-w-[min(100%,14rem)]"
                           title={
                             <button
@@ -1039,15 +1040,13 @@ function CoursesBody({
         (items, group) =>
           items.length > 0 && (
             <section key={group} className="flex flex-col gap-4">
-              <h3 className="font-medium">
-                {tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:next_seven_days" : "moodle:no_due_date")}
-              </h3>
+
               <ul className="moodle-due-list list-none p-0">
                 {items.slice(0, allDue ? undefined : 5).map((d) => {
                   const course = overview.courses.find((c) => c.id === d.courseId);
                   return (
                     <li key={d.id}>
-                      <ListRow
+                      <ListRow divider
                         className="min-h-16"
                         title={
                           <button

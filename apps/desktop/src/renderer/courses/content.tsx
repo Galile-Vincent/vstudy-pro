@@ -1,4 +1,4 @@
-import { Drawer, DialogHeader } from "@astryxdesign/core";
+import { Divider, Drawer, DialogHeader } from "@astryxdesign/core";
 import { Button } from "@astryxdesign/core";
 import { CourseFileActions, type DocumentAction, type DocumentOutcome } from '../document-open';
 import { flushSync } from "react-dom";
@@ -155,7 +155,7 @@ function WeeklySection({
     <section className="moodle-week" data-current={section.current}>
       <h3 id={`week-heading-${section.id}`} tabIndex={-1}>
       <button
-        className="moodle-week-heading flex min-h-14 w-full items-center gap-3 rounded-[var(--radius-element)] bg-[var(--subtle)] px-3 py-2 text-start"
+        className="moodle-week-heading flex min-h-14 w-full items-center gap-3 px-3 py-2 text-start"
         aria-expanded={section.accessible ? open : false}
         aria-controls={`week-${section.id}`}
         onClick={() => section.accessible && setOpen(!open)}
@@ -178,7 +178,7 @@ function WeeklySection({
           <span className="moodle-chip">{tr("moodle:this_week")}</span>
         )}
       </button>
-      </h3>
+      </h3><Divider />
       <div id={`week-${section.id}`} role="region"
         aria-labelledby={`week-heading-${section.id}`} hidden={!open || !section.accessible}>
       {open && section.accessible && (
@@ -187,7 +187,7 @@ function WeeklySection({
           {section.modules.map((module) => {
             const Icon = icons[module.kind] ?? BookOpen;
             return (
-              <ListRow
+              <ListRow divider
                 key={module.id}
                 className="moodle-module"
                 title={module.name}
@@ -347,7 +347,7 @@ export function Announcements({ items, accountId }: { items: MoodleAnnouncement[
         [...items]
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
           .map((item) => (
-            <ListRow
+            <ListRow divider
               className="moodle-announcement"
               key={item.id}
               title={item.subject}
