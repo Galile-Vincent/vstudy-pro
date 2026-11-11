@@ -25,9 +25,7 @@
 .workspace .workspace-body .resize-handle { flex-basis:var(--space-5); width:var(--space-5); }
 .app-shell .workspace .reading-pane { border-radius:var(--art-reader-radius); background:var(--reader-background); box-shadow:none; overflow:auto; }
 .workspace .reading-pane > .pane-toolbar { position:sticky; top:0; z-index:5; min-height:56px; padding:var(--space-2) var(--space-5); background:var(--art-reader-glass); gap:var(--space-2); }
-.workspace .reading-pane .pane-toolbar > .eyebrow { font-size:var(--type-xs); color:var(--muted); }
-.workspace .reading-pane .pane-toolbar > .muted { display:none; }
-.workspace .reading-pane .pane-toolbar button { min-height:40px; border-radius:var(--art-reader-control); }
+.workspace .reading-pane .pane-toolbar > .eyebrow { font-size:var(--type-sm); font-weight:500; color:var(--ink); }
 .workspace .reading-pane .markdown { max-width:72ch; padding:var(--space-8) clamp(24px,4vw,64px) 96px; margin-inline:auto; }
 .workspace .reading-pane .markdown h1 { font-size:2rem; line-height:1.15; letter-spacing:-.02em; font-weight:600; margin-bottom:var(--space-6); }
 .workspace .reading-pane .markdown h1::before { content:""; display:block; width:40px; height:3px; border-radius:var(--radius-full); background:var(--accent-color); margin-bottom:var(--space-6); }
