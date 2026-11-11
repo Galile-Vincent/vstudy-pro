@@ -9,10 +9,10 @@ import {
   EmptyState,
   PageContainer,
   PageHeader,
-  Section,
   Toolbar,
 } from "../components/ui";
 import { Button, NumberInput, Selector, TextArea } from "@astryxdesign/core";
+import { Panel } from "../components/panel";
 import { ExamHistory } from "./history";
 import { useFooterInset } from "./footer-inset";
 import { TestPlayer } from "../review/test-player";
@@ -165,7 +165,8 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
             aria-label={tr("exams:navigation")}
           >
             <Button
-              variant={!artifact ? mode === "setup" ? "secondary" : "primary" : "ghost"}
+              variant={mode === "setup" && !artifact ? "secondary" : "ghost"}
+              isDisabled={busy}
               aria-pressed={mode === "setup" && !artifact}
               label={tr("exams:new_exam")}
               onClick={() => {
@@ -176,6 +177,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
             />
             <Button
               variant={mode === "history" && !artifact ? "secondary" : "ghost"}
+              isDisabled={busy}
               aria-pressed={mode === "history" && !artifact}
               label={tr("exams:history")}
               onClick={() => {
@@ -188,6 +190,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
         }
       />
       {error && <p role="alert">{error}</p>}
+      {!artifact && mode === "setup" && !documents && !error && <p role="status">{tr("review:loading")}</p>}
       {!artifact && mode === "setup" && documents && !ready.length && (
         <EmptyState
           headingLevel={2}
@@ -206,9 +209,9 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
         >
           <fieldset
             disabled={busy}
-            className="flex min-w-0 flex-col gap-[var(--space-8)]"
+            className="flex min-w-0 flex-col gap-[var(--space-6)]"
           >
-            <Section title={tr("exams:sources")}>
+            <Panel title={tr("exams:sources")}>
               <p className="text-[var(--muted)]">{tr("exams:source_hint")}</p>
               <div className="exam-documents">
                 {ready.map((d) => (
@@ -230,8 +233,8 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
                   </label>
                 ))}
               </div>
-            </Section>
-            <Section title={tr("exams:configuration")}>
+            </Panel>
+            <Panel title={tr("exams:configuration")}>
               <TextArea
                 label={tr("exams:prompt")}
                 maxLength={4000}
@@ -286,7 +289,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
                 />
               </div>
               {!choices.length && <p>{tr("review:choose_provider")}</p>}
-            </Section>
+            </Panel>
             <div className="exam-footer" ref={footerInset}>
               <Button
                 type="submit"
@@ -327,6 +330,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
               <p>{tr("review:stage_generating")}</p>
               <Button
                 variant="secondary"
+                isDisabled={busy}
                 label={tr("review:cancel")}
                 onClick={() =>
                   void run(async () => {
@@ -351,7 +355,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
         </>
       )}
       {!artifact && mode === "history" && (
-        <Section title={tr("exams:history")}>
+        <Panel title={tr("exams:history")}>
           {history.loading && <p role="status">{tr("review:loading")}</p>}
           {history.error && (
             <p role="alert">
@@ -360,7 +364,7 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
             </p>
           )}
           {!history.items.length && !history.loading && !history.error && (
-            <p>{tr("exams:history_empty")}</p>
+            <EmptyState headingLevel={3} title={tr("exams:history_empty")} description={tr("exams:source_hint")} action={<Button variant="primary" label={tr("exams:new_exam")} onClick={() => setMode("setup")} />} />
           )}
           <ExamHistory
             items={history.items}
@@ -396,11 +400,12 @@ export function ExamsView({ onOpenLibrary }: { onOpenLibrary?: () => void }) {
           {history.cursor && (
             <Button variant="secondary" label={tr("review:load_more")} onClick={history.more} />
           )}
-        </Section>
+        </Panel>
       )}
-      <p className="text-[length:var(--type-sm)] text-[var(--muted)]">
-        {tr("review:validation_notice")} · {tr("exams:grading_notice")}
-      </p>
+      <aside className="exam-notices">
+        <p>{tr("review:validation_notice")}</p>
+        <p>{tr("exams:grading_notice")}</p>
+      </aside>
     </PageContainer>
   );
 }

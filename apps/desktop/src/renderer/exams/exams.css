@@ -47,8 +47,16 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
   .exam-breakdown details::details-content { content-visibility:visible; display:block; }
 }
 
-.exams-view :is(.astryx-number-input, .astryx-text-input) input:focus-visible { outline: none; }
-.exams-view :is(.astryx-number-input, .astryx-text-input):has(input:focus-visible) {
-  outline: var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
-  outline-offset: var(--focus-outline-offset);
-}
+.exams-view form .ui-panel-body { display:grid; gap:var(--space-4); padding-block:var(--space-4); }
+.exam-documents { gap:0; }
+.exam-documents .exam-choice { border-radius:0; background:transparent; padding-inline:0; min-block-size:var(--space-12); }
+.exam-documents .exam-choice + .exam-choice { border-block-start:1px solid var(--line); }
+.exam-documents .exam-choice:has(:checked) { background:var(--active); }
+.exam-history { gap:0; }
+.exam-history > li + li { border-block-start:1px solid var(--line); }
+.exam-footer { border:1px solid var(--line); background:var(--card-surface); }
+
+.exam-choice:has(input:disabled) { opacity:var(--opacity-disabled); cursor:default; }
+.exam-choice:has(input:focus-visible) { outline:2px solid var(--focus); outline-offset:2px; }
+.exam-notices { display:grid; gap:var(--space-2); color:var(--muted); font-size:var(--type-sm); line-height:1.6; overflow-wrap:anywhere; }
+.exam-history .ui-row-target { border-radius:0; }
