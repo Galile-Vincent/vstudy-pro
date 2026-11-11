@@ -88,7 +88,7 @@ export function AnalyticsSettings() {
     <p>{tr('analytics:installation')}</p><div className="analytics-id"><code>{id ?? tr('analytics:unavailable')}</code><Button label={tr('analytics:copy')} size="sm" variant="secondary" isDisabled={!id} onClick={() => { if (id) void navigator.clipboard.writeText(id).then(() => setCopied(true)).catch(() => setError(true)); }} /></div>
     {copied && <p role="status">{tr('analytics:copied')}</p>}
     {(state?.deletion_pending || deletion) && <p role="status">{tr('analytics:pending')}</p>}
-    <Button label={tr('analytics:delete')} variant="destructive" size="sm" isDisabled={!state || busy} onClick={() => setConfirm(true)} />
+    <SettingRow label={tr('analytics:delete')} description={tr('analytics:delete_hint')}><Button label={tr('analytics:delete')} variant="destructive" size="sm" isDisabled={!state || busy} onClick={() => setConfirm(true)} /></SettingRow>
     {confirm && <div className="analytics-deletion"><p>{tr('analytics:delete_hint')}</p><Button label={tr('analytics:instructions')} variant="secondary" isDisabled={busy} onClick={() => {
       setBusy(true); setError(false);
       void desktop.invoke('analytics:requestDeletion', {}).then(result => { setDeletion(result); setId(result.installation_id); setState(s => s ? {...s, enabled:false, deletion_pending:true} : s); setConfirm(false); }).catch(() => setError(true)).finally(() => setBusy(false));
