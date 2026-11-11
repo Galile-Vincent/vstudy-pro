@@ -163,7 +163,7 @@ export function ProviderSettings({
                     <Panel title={tr('ai-cli:tools')}><div className="settings-ai-tools">
                       <div className="settings-ai-connect"><span>{tr('ai-cli:summary_unconnected')}</span><Button label={tr('ai-cli:title')} variant="primary" size="sm" onClick={() => openAiCliSetup()} /></div>
                       <div className="settings-ai-note muted"><p>{tr('novice:privacy_lead')}</p><p>{tr('novice:privacy')}</p></div>
-                      <div className="settings-ai-guide"><Collapsible trigger={tr('novice:setup_title')}>
+                      <div className="settings-ai-guide"><Collapsible defaultIsOpen={false} trigger={tr('novice:setup_title')}>
                         <AiSetupGuide onClose={requestClose} leadingSteps={[tr('novice:step_access'), tr('novice:step_key')]} />
                       </Collapsible></div>
                     </div></Panel>

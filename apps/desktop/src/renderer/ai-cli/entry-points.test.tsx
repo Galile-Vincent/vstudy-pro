@@ -18,9 +18,9 @@ it('shows API setup content directly and keeps only the guide in a disclosure', 
   const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
   try {
     await act(async () => root.render(<ProviderSettings initialTab="providers" providers={[]} onRefresh={async () => {}} onClose={() => {}} />));
-    expect(document.querySelector<HTMLDetailsElement>('.settings-pane:not([hidden]) > div > details')?.open).toBe(false);
+    expect(document.querySelector('.settings-pane:not([hidden]) .settings-ai-guide [aria-expanded]')?.getAttribute('aria-expanded')).toBe('false');
     expect(document.querySelector('.settings-intro')?.closest('details')).toBeNull();
-    expect(document.querySelectorAll('.settings-pane:not([hidden]) details')).toHaveLength(1);
+    expect(document.querySelectorAll('.settings-pane:not([hidden]) details')).toHaveLength(0);
     expect(document.querySelector('.settings-tabs [role=tablist]')).not.toBeNull();
     expect([...document.querySelectorAll('[data-slot=setting-row] label')].some(label => label.textContent === i18n.t('ai-cli:tools'))).toBe(false);
     expect(document.querySelector('.settings-pane:not([hidden]) [role=status]')).not.toBeNull();
