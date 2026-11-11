@@ -175,7 +175,7 @@ html[data-theme=contrast] :is([data-slot=popover-content],[data-slot=aui_compose
  --color-icon-accent:var(--accent-color);
  --color-on-accent:var(--accent-foreground);
  --color-accent-muted:var(--active);
- --color-border:var(--line);
+ --color-border:var(--line-strong);
  --color-border-emphasized:var(--line-strong);
  --color-track:var(--line-strong);
  --color-neutral:var(--subtle);
