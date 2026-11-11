@@ -41,3 +41,12 @@
     outline-offset: -2px;
   }
 }
+
+.moodle-page > main { max-width:1120px; margin-inline:auto; width:100%; }
+.moodle-tabs > [role="tabpanel"] { padding-block:24px; }
+.moodle-term-tabs > [role="tabpanel"] { padding-block:16px; }
+
+.stock-section { display:grid; gap:16px; }
+.stock-heading { display:flex; align-items:center; gap:8px; }
+.stock-actions { margin-inline-start:auto; }
+.stock-row-actions { display:flex; align-items:center; gap:8px; }

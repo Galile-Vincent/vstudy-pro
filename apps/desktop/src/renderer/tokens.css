@@ -158,41 +158,5 @@ html[data-theme=contrast] :is([data-slot=popover-content],[data-slot=aui_compose
 
 /* Unlayered aliases beat the shipped theme on both the provider and portal root.
    Shadows are not aliased: Astryx --shadow-low/med/high stay as shipped, for overlays only. */
-[data-astryx-theme="neutral"] {
- --color-background-body:var(--background);
- --color-background-surface:var(--surface);
- --color-background-card:var(--surface);
- --color-background-popover:var(--surface);
- --color-background-muted:var(--subtle);
- --color-text-primary:var(--ink);
- --color-text-secondary:var(--muted);
- --color-text-disabled:var(--muted);
- --color-icon-primary:var(--ink);
- --color-icon-secondary:var(--muted);
- --color-icon-disabled:var(--muted);
- --color-accent:var(--accent-color);
- --color-text-accent:var(--accent-color);
- --color-icon-accent:var(--accent-color);
- --color-on-accent:var(--accent-foreground);
- --color-accent-muted:var(--active);
- --color-border:var(--line);
- --color-border-emphasized:var(--line-strong);
- --color-track:var(--line-strong);
- --color-neutral:var(--subtle);
- --color-overlay:var(--overlay);
- --color-overlay-hover:color-mix(in oklab,var(--ink) 6%,transparent);
- --color-overlay-pressed:color-mix(in oklab,var(--ink) 10%,transparent);
- --color-skeleton:var(--subtle);
- --color-shadow:var(--shadow-soft);
- --color-error:var(--danger);
- --color-text-error:var(--danger);
- --color-success:var(--success);
- --color-text-success:var(--success);
- --color-warning:var(--warning);
- --color-text-warning:var(--warning);
- --color-info:var(--info);
- --color-text-info:var(--info);
- --font-family-body:var(--font-ui);
- --font-family-heading:var(--font-ui);
-}
+
 html > body > #root > [data-astryx-theme] { height:100%; }

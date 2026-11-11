@@ -1,3 +1,4 @@
+import { Section, ListRow } from "./stock-layout";
 import { useId } from "react";
 import { IconButton } from "@astryxdesign/core";
 import { Layout, LayoutContent, TabList, Tab } from "@astryxdesign/core";
@@ -6,7 +7,7 @@ import { flushSync } from 'react-dom';
 import { catalogDeadlines } from './deadline-groups';
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
-import { PageContainer, PageHeader, Section, ListRow, Toolbar, EmptyState } from "../components/ui";
+import { PageContainer, PageHeader, Toolbar, EmptyState } from "../components/ui";
 import { MoodleWebviewProvider, useMoodleWebview } from './webview';
 import {
   useCallback,
@@ -816,7 +817,7 @@ function CoursesBody({
           }
           right={
             <>
-              <Selector controlClassName="course-sort" label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} />
+              <Selector label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} />
               <CourseViewSwitch value={view} onChange={changeView} />
             </>
           }
@@ -832,7 +833,7 @@ function CoursesBody({
               className={
                 view === "cards"
                   ? "moodle-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,22rem),1fr))] gap-3 p-0 list-none"
-                  : "moodle-grid flex flex-col p-0 list-none"
+                  : "moodle-grid flex flex-col gap-2 p-0 list-none"
               }
               data-view={view}
               role="list"
@@ -862,7 +863,7 @@ function CoursesBody({
                   ]
                     .filter(Boolean)
                     .join("\n");
-                  const Surface = view === "cards" ? Card : "div";
+                  const Surface = Card;
                   const urgent =
                     !!attention.next && Date.parse(attention.next.dueAt) - Date.now() < 86400000;
                   return (
@@ -877,8 +878,7 @@ function CoursesBody({
                       }
                     >
                       <Surface
-                        {...(view === "cards" ? { elevation:"none" as const } : {})}
-                        className="py-0"
+                        elevation="none"
                       >
                         <ListRow
                           className="w-full min-h-14 flex-wrap gap-3 [&>.ui-row-target]:min-w-[min(100%,14rem)]"
@@ -1039,7 +1039,7 @@ function CoursesBody({
         (items, group) =>
           items.length > 0 && (
             <section key={group} className="flex flex-col gap-4">
-              <h3 className="font-medium">
+              <h3 className="font-medium" hidden={group === 1}>
                 {tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:next_seven_days" : "moodle:no_due_date")}
               </h3>
               <ul className="moodle-due-list list-none p-0">
