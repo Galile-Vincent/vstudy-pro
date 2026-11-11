@@ -1,6 +1,6 @@
 import { Button, IconButton, useAppShellMobile } from '@astryxdesign/core';
 import { Menu, Search } from 'lucide-react';
-import { useCallback, useEffect, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { tr } from '../../shared/i18n';
 import { HelpMenu } from '../onboarding/help';
 import { TabStrip } from './tab-strip';
@@ -42,13 +42,29 @@ function useSidebarToggle(visible: boolean, setVisible: (visible: boolean) => vo
   return { toggle, expanded: mobile.isMobile ? mobile.isMobileNavOpen : visible };
 }
 
+/** The chrome floats over the content column; publish its height so page scrollers can start their content below it. */
+function useChromeHeight() {
+  const ref = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const chrome = ref.current, column = chrome?.parentElement;
+    if (!chrome || !column) return;
+    const publish = () => column.style.setProperty('--shell-chrome-h', `${chrome.offsetHeight}px`);
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(chrome);
+    return () => observer.disconnect();
+  }, []);
+  return ref;
+}
+
 export function ShellChrome({ route, status, sidebarVisible, setSidebarVisible }: {
   route: Route; status: ReactNode; sidebarVisible: boolean; setSidebarVisible: (visible: boolean) => void;
 }) {
   const { toggle, expanded } = useSidebarToggle(sidebarVisible, setSidebarVisible);
   const workspace = route.view === 'workspace';
+  const ref = useChromeHeight();
   return (
-    <header className="shell-chrome">
+    <header ref={ref} className="shell-chrome">
       <TabStrip />
       {workspace ? (
         <div className="shell-workspace-status">{status}</div>

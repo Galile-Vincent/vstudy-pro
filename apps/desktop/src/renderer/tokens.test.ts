@@ -4,17 +4,21 @@ import { describe, expect, it } from 'vitest';
 const css = readFileSync(new URL('./tokens.css', import.meta.url), 'utf8');
 
 describe('elevation policy', () => {
-  it('defines no legacy elevation, glass or material alias', () => {
-    expect(css).not.toMatch(/--(?:elevation|glass|material|surface-card|primary-shadow)[\w-]*:/);
+  it('defines no legacy elevation or material alias, and glass only as chrome tokens', () => {
+    expect(css).not.toMatch(/--(?:elevation|material|surface-card|primary-shadow)[\w-]*:/);
     expect(css).not.toMatch(/\.glass/);
+    const glass = [...css.matchAll(/(--glass-[\w-]+):/g)].map(match => match[1]);
+    expect(new Set(glass)).toEqual(new Set(['--glass-chrome', '--glass-float', '--glass-blur', '--glass-scrim-blur', '--glass-edge', '--glass-highlight']));
   });
 
   it('does not override the Astryx overlay shadows', () => {
     expect(css).not.toMatch(/--shadow-(low|med|high):/);
   });
 
-  it('uses no blur or glass fill on any surface', () => {
-    expect(css).not.toMatch(/backdrop-filter:\s*(?!none)/);
+  it('blurs only through the glass token, and turns glass solid in contrast modes', () => {
+    for (const match of css.matchAll(/(?<!\()backdrop-filter:\s*([^;})]+)[;}]/g)) expect(match[1]?.trim()).toBe('var(--glass-blur)');
+    expect(css).toMatch(/html\[data-contrast=more\],html\[data-theme=contrast\] \{ --glass-chrome:var\(--surface\); --glass-float:var\(--surface\); --glass-blur:none;/);
+    expect(css).toMatch(/@media\(prefers-contrast:more\),\(forced-colors:active\) \{\n :root,html\.dark \{ --glass-chrome:var\(--surface\); --glass-float:var\(--surface\); --glass-blur:none;/);
   });
 
   it('shadows only floating overlays: menus and popovers medium, dialogs high', () => {

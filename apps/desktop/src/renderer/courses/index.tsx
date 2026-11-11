@@ -540,7 +540,7 @@ function CoursesBody({
       </div>} />
   );
   return (
-    <div ref={pageRef} className={courseId ? "moodle-page" : "h-full overflow-auto text-[var(--ink)] [&_svg]:size-4 [&_button]:cursor-pointer [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-[var(--focus)]"} data-course={Boolean(detail)}>
+    <div ref={pageRef} className={courseId ? "moodle-page" : "courses-home h-full overflow-auto text-[var(--ink)] [&_svg]:size-4 [&_button]:cursor-pointer [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-[var(--focus)]"} data-course={Boolean(detail)}>
       <PageContainer as="main" className={courseId ? "pt-0" : undefined}>
         {!detail && !showUpdates && header}
         {(notice || courseId) && <div role="status" aria-live="polite">

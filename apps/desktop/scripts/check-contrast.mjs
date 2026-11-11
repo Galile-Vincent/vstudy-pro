@@ -56,6 +56,28 @@ for (const theme of builtinThemes) for (const scheme of ['light','dark']) for (l
   }
 }
 console.log(`Quiet glass over the page field: minimum text contrast ${glassMinimum.toFixed(2)}:1 (${glassWorst})`);
+/* Solid content, glass chrome (tokens.css). The page field sits one step off the cards; tonal controls add 6% ink to it.
+   Chrome glass is 78% (dark 76%) surface and floating glass 88% surface (dark: the card surface) over whatever passes
+   beneath: the page field, a card, the dialog scrim, or blurred text, modelled as 25% ink over either. */
+let finishMinimum=Infinity, finishWorst='';
+for (const theme of builtinThemes) for (const scheme of ['light','dark']) for (let contrast=100;contrast<=150;contrast+=25) {
+  const tokens=adjustedTokens(theme[scheme],scheme,contrast), dark=scheme==='dark';
+  const card=dark ? composite(tokens.surface,tokens.ink,.94) : tokens.surface;
+  const field=dark ? composite(tokens.background,tokens.surface,.55) : composite(tokens.subtle,tokens.background,.75);
+  const scrim=composite(tokens['shadow-color'],field,.45);
+  const under=[field,card,scrim,composite(tokens.ink,field,.25),composite(tokens.ink,card,.25)];
+  const surfaces=[[field,['ink','muted','accent-color','danger']],[composite(tokens.ink,field,.06),['ink','muted']]];
+  for (const behind of under) {
+    surfaces.push([composite(tokens.surface,behind,dark?.76:.78),['ink','muted','accent-color']]);
+    surfaces.push([composite(dark?card:tokens.surface,behind,.88),['ink','muted','accent-color','danger']]);
+  }
+  for (const [surface,foregrounds] of surfaces) for (const foreground of foregrounds) {
+    const ratio=contrastRatio(tokens[foreground],surface);
+    if (ratio<finishMinimum) { finishMinimum=ratio; finishWorst=`${theme.id} ${scheme} ${contrast}% ${foreground} on ${surface}`; }
+    assert.ok(ratio>=4.5,`${theme.id} ${scheme} ${contrast}% glass chrome or page field: ${foreground} on ${surface} ${ratio}`);
+  }
+}
+console.log(`Glass chrome and page field: minimum text contrast ${finishMinimum.toFixed(2)}:1 (${finishWorst})`);
 let count=0;
 async function audit(url) {
   for (const entry of await readdir(url,{withFileTypes:true})) {

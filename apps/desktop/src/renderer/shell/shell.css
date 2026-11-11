@@ -1,6 +1,7 @@
 /* App frame: Astryx AppShell. The SideNav rail runs the full window height; tabs and the page header stack over the content column only. */
-.app-shell { color:var(--ink); background:var(--background); min-width:0; }
-.app-shell .shell-sidebar { background:var(--sidebar-surface); }
+.app-shell { color:var(--ink); background:var(--page-field); min-width:0; }
+/* Glass chrome: the rail and the top bar are translucent over the page field with a hairline highlight edge. */
+.app-shell .shell-sidebar { background:var(--glass-chrome); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-highlight); border-inline-end:1px solid var(--glass-edge); }
 .shell-brand { display:flex; align-items:center; gap:var(--space-3); font-size:var(--type-md); font-weight:600; letter-spacing:-.02em; }
 .art-reader-brand-mark { width:32px; height:32px; display:grid; place-items:center; flex:none; border-radius:var(--radius-element); color:var(--accent-foreground); background:var(--accent-color); }
 .app-shell[data-sidebar=collapsed] .shell-sidebar .shell-brand > span:last-child { display:none; }
@@ -22,8 +23,14 @@
 .shell-footer[data-collapsed] { align-items:center; }
 .shell-footer[data-collapsed] .update-row > button > span:not(.sr-only) { display:none; }
 
-.shell-column { display:flex; flex-direction:column; height:100%; min-height:0; min-width:0; background:var(--surface); }
-.shell-chrome { position:relative; flex:none; background:var(--surface); border-bottom:1px solid var(--line); }
+/* The chrome floats over the content column, so page scrollers run under it and their content blurs through the glass.
+   --shell-chrome-h is measured by ShellChrome. Views that do not scroll under it keep the content below the chrome. */
+.shell-column { position:relative; display:flex; flex-direction:column; height:100%; min-height:0; min-width:0; background:var(--page-field); }
+.shell-chrome { position:absolute; inset:0 0 auto; z-index:20; background:var(--glass-chrome); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-highlight); border-bottom:1px solid var(--glass-edge); }
+.shell-content { padding-block-start:var(--shell-chrome-h,var(--topbar-height)); box-sizing:border-box; }
+.shell-content:has(> #active-tab-panel > :is([data-slot=page-container],.moodle-page,.courses-home)) { padding-block-start:0; }
+#active-tab-panel > :is([data-slot=page-container],.moodle-page) { padding-block-start:calc(var(--shell-chrome-h,var(--topbar-height)) + var(--space-8)); scroll-padding-block-start:var(--shell-chrome-h,var(--topbar-height)); }
+#active-tab-panel > .courses-home { padding-block-start:var(--shell-chrome-h,var(--topbar-height)); scroll-padding-block-start:var(--shell-chrome-h,var(--topbar-height)); }
 .shell-topbar { display:flex; align-items:center; gap:var(--space-3); min-height:var(--topbar-height); padding-inline:var(--space-6); color:var(--muted); }
 .shell-chrome:has(.app-tabs-single) .shell-topbar { padding-inline-end:calc(var(--space-8) + var(--space-6)); }
 .shell-title { flex:1; font-size:var(--type-base); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -52,6 +59,6 @@
 /* Navigation moves focus for screen readers without painting a pointer focus ring. */
 .shell-content:focus:not(:focus-visible) { outline:none; }
 html:not([data-input-modality=keyboard]) .shell-content:focus { outline:none; }
-@media(prefers-contrast:more) { .app-shell .shell-sidebar { border-inline-end:1px solid var(--ink); } }
+@media(prefers-contrast:more) { .app-shell .shell-sidebar { border-inline-end:1px solid var(--ink); } .shell-chrome { border-bottom-color:var(--ink); } }
 
 .app-shell [data-testid=skip-to-content] { background:var(--surface); color:var(--ink); border:1px solid var(--line-strong); border-radius:var(--radius-element); font-size:var(--type-base); }

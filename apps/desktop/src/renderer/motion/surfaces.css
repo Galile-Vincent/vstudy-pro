@@ -46,3 +46,47 @@ html[data-theme-transition=view]::view-transition-new(root) {
 @media(prefers-reduced-motion:reduce) {
   .chat-motion [data-message-id], .chat-motion .aui-tool-fallback-content > div { animation:none; }
 }
+
+/* Content cards: solid, a larger radius, and a soft two-layer shadow over the page field. */
+.astryx-card[data-variant=default] { --_card-radius:var(--radius-card); box-shadow:var(--card-shadow); }
+/* Interactive cards lift a little on hover and press in on click. */
+:is(.astryx-clickable-card,.moodle-course-card,[data-slot=card][data-variant=interactive]) {
+  transition:transform var(--motion-base) var(--ease-standard),box-shadow var(--motion-base) var(--ease-standard),background-color var(--motion-fast) var(--ease-standard);
+  &:hover { transform:translateY(-2px); box-shadow:var(--card-shadow-raised); }
+  &:active { transform:scale(.98); }
+  @media(prefers-reduced-motion:reduce) { &:is(:hover,:active) { transform:none; } }
+}
+
+/* Glass on floating and sticky chrome. The top bar and rail are in shell.css; nothing in flow is blurred. */
+:is(.astryx-dialog,.astryx-alert-dialog,.astryx-popover,.astryx-dropdown-menu,.astryx-context-menu,.astryx-toast,.app-tabs-menu) {
+  background:var(--glass-float); backdrop-filter:var(--glass-blur);
+}
+.astryx-dialog::backdrop,.astryx-alert-dialog::backdrop { backdrop-filter:var(--glass-scrim-blur); }
+:is(.exam-footer,.workspace .reading-pane > .pane-toolbar) {
+  background:var(--glass-chrome); backdrop-filter:var(--glass-blur); box-shadow:var(--glass-highlight); border:1px solid var(--glass-edge);
+}
+.workspace .reading-pane > .pane-toolbar { border-width:0 0 1px; }
+
+/* One accent moment: a static glow behind the Home header. It scrolls with the page. */
+#active-tab-panel > .home-page { background:var(--home-glow) no-repeat local; }
+
+/* Motion. Entering is ease-out, leaving ease-in; only opacity and transform move. Enter animations run on mount
+   and navigation only (a tab or route change remounts the view), never on re-render, and keep no fill afterwards. */
+@keyframes finish-rise { from { opacity:0; transform:translateY(var(--motion-rise)); } }
+@keyframes finish-fade { from { opacity:0; } }
+@keyframes finish-fill { from { transform:scaleX(0); } }
+#active-tab-panel :is([data-slot=page-header],.astryx-card[data-variant=default]):not(.astryx-card .astryx-card) {
+  animation:finish-rise var(--motion-enter) var(--ease-entrance) backwards;
+  animation-delay:calc(min(sibling-index() - 1,4) * var(--motion-stagger));
+}
+.ui-panel-body > [data-slot=list-row],.ui-panel-body > ul > li { animation:finish-fade var(--motion-slow) var(--ease-entrance) backwards; animation-delay:calc(min(sibling-index(),5) * var(--motion-stagger)); }
+[aria-valuenow] .astryx-progress-bar-fill { transform-origin:0 50%; animation:finish-fill 600ms var(--ease-entrance) backwards; animation-delay:120ms; }
+[dir=rtl] [aria-valuenow] .astryx-progress-bar-fill { transform-origin:100% 50%; }
+.astryx-tab[data-selected=selected] .astryx-tab-indicator { animation:finish-fill var(--motion-base) var(--ease-move); transform-origin:50% 50%; }
+.ui-row-target { transition:background-color var(--motion-fast) var(--ease-standard); }
+.astryx-button:not(:disabled,[aria-disabled=true]) { transition:background-color var(--motion-fast) var(--ease-standard),transform var(--motion-fast) var(--ease-standard); }
+.astryx-button:not(:disabled,[aria-disabled=true]):active { transform:scale(.98); }
+@media(prefers-reduced-motion:reduce) {
+  #active-tab-panel [data-slot=page-header],#active-tab-panel .astryx-card,.ui-panel-body > *,[aria-valuenow] .astryx-progress-bar-fill,.astryx-tab-indicator { animation:none; }
+  .astryx-button:active { transform:none; }
+}

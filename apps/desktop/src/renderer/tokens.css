@@ -119,7 +119,42 @@ html:lang(ja) { --font-ui:var(--font-cjk,"Hiragino Sans","Noto Sans CJK JP",syst
 }
 
 /* Surfaces. Resting containers are flat: surface tone, 1px hairline, container radius, no shadow, no blur. */
-:root { --page-field:var(--background); }
+/* Finish: solid content, glass chrome.
+   Content cards stay solid and lift off a page field one step below the card colour on a soft two-layer shadow.
+   Glass (translucent surface, blur, a hairline highlight edge) is only on chrome that content scrolls under
+   or that floats: the top bar, the sidebar, sticky toolbars, dialogs, popovers, menus and toasts.
+   check-contrast.mjs covers both glass fills over the page field, the cards and blurred text. */
+:root {
+ --page-field:color-mix(in oklab,var(--subtle) 75%,var(--background));
+ --radius-card:calc(var(--radius-container) + var(--spacing-1));
+ --card-shadow:0 1px 2px color-mix(in oklab,var(--shadow-color) 6%,transparent),0 10px 28px -14px color-mix(in oklab,var(--shadow-color) 16%,transparent);
+ --card-shadow-raised:0 1px 2px color-mix(in oklab,var(--shadow-color) 8%,transparent),0 16px 36px -14px color-mix(in oklab,var(--shadow-color) 22%,transparent);
+ --glass-chrome:color-mix(in oklab,var(--surface) 78%,transparent);
+ --glass-float:color-mix(in oklab,var(--surface) 88%,transparent);
+ --glass-blur:blur(20px) saturate(1.6);
+ --glass-scrim-blur:blur(6px);
+ --glass-edge:color-mix(in oklab,var(--ink) 10%,transparent);
+ --glass-highlight:inset 0 1px 0 color-mix(in oklab,var(--surface) 85%,transparent);
+ --home-glow:radial-gradient(60rem 22rem at 12% -4rem,color-mix(in oklab,var(--accent-color) 14%,transparent),transparent 70%);
+ --motion-enter:280ms; --motion-stagger:35ms; --motion-rise:var(--spacing-2);
+}
+html.dark {
+ --page-field:color-mix(in oklab,var(--background) 55%,var(--surface));
+ --card-shadow:0 1px 2px color-mix(in oklab,var(--shadow-color) 45%,transparent),0 12px 32px -14px color-mix(in oklab,var(--shadow-color) 70%,transparent);
+ --card-shadow-raised:0 1px 2px color-mix(in oklab,var(--shadow-color) 55%,transparent),0 18px 40px -14px color-mix(in oklab,var(--shadow-color) 85%,transparent);
+ --glass-chrome:color-mix(in oklab,var(--surface) 76%,transparent);
+ --glass-float:color-mix(in oklab,var(--card-surface) 88%,transparent);
+ --glass-highlight:inset 0 1px 0 color-mix(in oklab,var(--ink) 7%,transparent);
+ --home-glow:radial-gradient(60rem 22rem at 12% -4rem,color-mix(in oklab,var(--accent-color) 12%,transparent),transparent 70%);
+}
+/* More contrast and forced colours: every glass surface is solid, cards drop the shadow and keep the strong border. */
+html[data-contrast=more],html[data-theme=contrast] { --glass-chrome:var(--surface); --glass-float:var(--surface); --glass-blur:none; --glass-scrim-blur:none; --glass-edge:var(--line-strong); --glass-highlight:0 0 0 0 transparent; --card-shadow:0 0 0 0 transparent; --card-shadow-raised:0 0 0 0 transparent; --home-glow:none; }
+@media(prefers-contrast:more),(forced-colors:active) {
+ :root,html.dark { --glass-chrome:var(--surface); --glass-float:var(--surface); --glass-blur:none; --glass-scrim-blur:none; --glass-edge:var(--line-strong); --glass-highlight:0 0 0 0 transparent; --card-shadow:0 0 0 0 transparent; --card-shadow-raised:0 0 0 0 transparent; --home-glow:none; }
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+ :root,html.dark { --glass-chrome:var(--surface); --glass-float:var(--surface); --glass-blur:none; --glass-scrim-blur:none; }
+}
 
 /* Buttons: secondary is a flat tone, primary a solid fill. Press feedback is a 150ms scale, never on disabled. */
 button.secondary:not(.ghost,.primary) {
@@ -133,13 +168,13 @@ button.secondary:not(.ghost,.primary):is(:hover,[aria-expanded=true],[aria-press
 
 /* Floating overlays are the only shadowed surfaces: menus and popovers use --shadow-med, dialogs --shadow-high. */
 :is([data-slot=popover-content]) { border:1px solid var(--line); }
-:is([data-slot=popover-content],.model-popover,.conversation-list-popover) { background:var(--surface); box-shadow:var(--shadow-med); border-radius:var(--radius-container); }
-:is(.settings-dialog) { background:var(--surface); box-shadow:var(--shadow-high); border-radius:var(--radius-container); }
+:is([data-slot=popover-content],.model-popover,.conversation-list-popover) { background:var(--glass-float); backdrop-filter:var(--glass-blur); box-shadow:var(--shadow-med); border-radius:var(--radius-container); }
+:is(.settings-dialog) { background:var(--glass-float); backdrop-filter:var(--glass-blur); box-shadow:var(--shadow-high); border-radius:var(--radius-container); }
 .model-popover,.conversation-list-popover { border:1px solid var(--line); }
 
 /* Chrome: a flat header row with a hairline below it. No blur, no scroll mask. */
-.app-shell .shell-main { background:var(--background); }
-.app-shell .shell-topbar { background:var(--surface); box-shadow:none; }
+.app-shell .shell-main { background:var(--page-field); }
+.app-shell .shell-topbar { background:transparent; box-shadow:none; }
 
 @media(prefers-contrast:more) {
  button.secondary:not(.ghost,.primary),:is([data-slot=popover-content]) { border:1px solid var(--ink); }
@@ -180,7 +215,7 @@ html.dark { --card-surface:color-mix(in oklab,var(--surface) 94%,var(--ink)); }
  --color-border:var(--line);
  --color-border-emphasized:var(--line-strong);
  --color-track:var(--line-strong);
- --color-neutral:var(--subtle);
+ --color-neutral:color-mix(in oklab,var(--ink) 6%,var(--page-field));
  --color-overlay:var(--overlay);
  --color-overlay-hover:color-mix(in oklab,var(--ink) 6%,transparent);
  --color-overlay-pressed:color-mix(in oklab,var(--ink) 10%,transparent);
