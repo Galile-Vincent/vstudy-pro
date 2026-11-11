@@ -31,12 +31,13 @@ export function StorageSettings(){
   return <div className="settings-stack" data-testid="storage-settings" aria-busy={busy}>
     <p className="settings-intro">{tr('storage:description')}</p>
     <Panel title={tr('storage:usage')}><div className="settings-stack settings-general-rows">
+      {!usage && <SettingRow label={tr('storage:pending')}>{null}</SettingRow>}
       {usage?.categories.map(category=><SettingRow key={category.id} label={tr('storage:'+category.id)}><span className="storage-bytes">{bytes(category.bytes)}</span></SettingRow>)}
       {usage && <p className="muted">{tr('storage:logical_cache',{size:bytes(usage.cacheBytes)})}</p>}
     </div></Panel>
-    <Panel title={tr('storage:clear_cache')}><div className="settings-stack settings-general-rows">
-      <SettingRow label={tr('storage:clear_cache')} description={tr('storage:cache_limit')}><Button size="sm" label={tr('storage:clear_cache')} variant="secondary" isDisabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:clearCache',{});return 'cancelled' in result ? '' : tr('storage:done');})} /></SettingRow>
-      <SettingRow label={tr('storage:clear_converted')} description={tr('storage:clear_converted_copy')}><Button size="sm" label={tr('storage:clear_converted')} variant="secondary" isDisabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:clearConverted',{});return 'cancelled' in result ? '' : tr('storage:done');})} /></SettingRow>
+    <Panel title={tr('storage:maintenance')}><div className="settings-stack settings-general-rows">
+      <SettingRow label={tr('storage:clear_cache')} description={tr('storage:cache_limit')}><Button size="sm" label={tr('storage:clear')} variant="secondary" isDisabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:clearCache',{});return 'cancelled' in result ? '' : tr('storage:done');})} /></SettingRow>
+      <SettingRow label={tr('storage:clear_converted')} description={tr('storage:clear_converted_copy')}><Button size="sm" label={tr('storage:clear')} variant="secondary" isDisabled={disabled} onClick={()=>void run(async()=>{const result=await desktop.invoke('storage:clearConverted',{});return 'cancelled' in result ? '' : tr('storage:done');})} /></SettingRow>
     </div></Panel>
     <Panel title={tr('storage:backup')}><div className="settings-stack settings-general-rows">
       <p className="muted">{tr('storage:backup_copy')}</p>
