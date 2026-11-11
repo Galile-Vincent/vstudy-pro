@@ -1,11 +1,12 @@
 import { IconButton } from "@astryxdesign/core";
 import { DropdownMenu, DropdownMenuItem, Tooltip, Button } from "@astryxdesign/core";
-import type { Ref } from "react";
+import type { Ref, ReactNode } from "react";
 import { ArrowUpRight, ChevronLeft, CloudCheck, MoreHorizontal, RefreshCw, Unplug } from "lucide-react";
 import { tr } from "../../shared/i18n";
 import { PageHeader } from "../components/ui";
 
 export interface CourseHeadProps {
+  assistant: ReactNode;
   title: string;
   chip: string;
   people: string[];
@@ -19,7 +20,7 @@ export interface CourseHeadProps {
   onDisconnect: () => void;
 }
 
-export function CourseHead({ title, chip, people, sync, fullName, syncing, menuTrigger, onBack, onOpen, onRefresh, onDisconnect }: CourseHeadProps) {
+export function CourseHead({ assistant, title, chip, people, sync, fullName, syncing, menuTrigger, onBack, onOpen, onRefresh, onDisconnect }: CourseHeadProps) {
   return (
     <PageHeader
         title={title}
@@ -36,6 +37,7 @@ export function CourseHead({ title, chip, people, sync, fullName, syncing, menuT
               {tr("webview:open")}
 
             </Button>
+            {assistant}
             <Tooltip  content={<>{tr("moodle:refresh")}</>}><IconButton label={tr("moodle:refresh")} variant="secondary"  size="md" aria-label={tr("moodle:refresh")}  isDisabled={syncing} aria-busy={syncing} onClick={onRefresh} icon={<RefreshCw aria-hidden="true" className={syncing ? "moodle-spin" : ""} />} /></Tooltip>
             <DropdownMenu alignment="end" renderTrigger={triggerProps => <><IconButton {...triggerProps} label={tr("moodle:course_more")} ref={node => { triggerProps.ref(node); if (typeof menuTrigger === "function") menuTrigger(node); else if (menuTrigger) menuTrigger.current = node; }} variant="secondary"  size="md" aria-label={tr("moodle:course_more")} {...{title:tr("moodle:course_more")}} data-course-overflow icon={<MoreHorizontal aria-hidden="true" />} /></>}><h3>{tr("moodle:original_name")}</h3><p className="moodle-raw-name max-w-80 break-words px-2 text-sm">{fullName}</p><DropdownMenuItem variant="destructive" onClick={() => queueMicrotask(onDisconnect)} label={<><Unplug aria-hidden="true" />{tr("moodle:disconnect")}</>} /></DropdownMenu>
           </div>

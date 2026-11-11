@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { IconButton } from "@astryxdesign/core";
-import { Layout, LayoutContent, TabList, Tab } from "@astryxdesign/core";
+import { Divider, Layout, LayoutContent, TabList, Tab } from "@astryxdesign/core";
 import { Dialog, DialogHeader, LayoutFooter, Card, Button } from "@astryxdesign/core";
 import { flushSync } from 'react-dom';
 import { catalogDeadlines } from './deadline-groups';
@@ -396,7 +396,7 @@ function CoursesBody({
     items.length ? (
       <div className="moodle-rows">
         {items.map((d) => (
-          <ListRow key={d.id} data-deadline-group={deadlineGroup(d)}
+          <ListRow divider key={d.id} data-deadline-group={deadlineGroup(d)}
             title={d.title}
             leading={d.submitted ? <Check /> : <CalendarDays />}
             subtitle={<>
@@ -436,7 +436,7 @@ function CoursesBody({
     return items.length ? (
       <div className="moodle-notifications">
         {items.map((n) => (
-          <ListRow key={n.id} data-unread={!n.read}
+          <ListRow divider key={n.id} data-unread={!n.read}
             className="flex-col items-stretch [&>.ui-row-target]:w-full"
             title={<span className="flex items-center gap-2">
               {!n.read && <span className="moodle-unread" role="img" aria-label={tr("moodle:unread")} />}
@@ -629,7 +629,16 @@ function CoursesBody({
         ) : courseId ? (
           detail ? (
             <>
+              <div className="course-header-band">
               <CourseHead
+                assistant={<CourseAssistant
+                  key={detail.course.id}
+                  detail={detail}
+                  api={api}
+                  requested={agentRequest}
+                  onChange={async () => { await refresh(); }}
+                  onError={failure}
+                />}
                 title={displayTitle(detail.course.identity, lang, detail.course.fullName)}
                 chip={[detail.course.identity.term, detail.course.identity.code].filter(Boolean).join(" · ")}
                 people={[displayTeachers(detail.course.identity, lang), displayClass(detail.course.identity, lang)].filter(Boolean)}
@@ -645,10 +654,13 @@ function CoursesBody({
                 onRefresh={() => void sync()}
                 onDisconnect={() => { disconnectSchool.current = overview?.accounts.find(account => account.id === detail.course.accountId)?.siteName; setConfirmDisconnect(detail.course.accountId); }}
               />
-              <Layout className="moodle-course-layout" content={<LayoutContent className="course-detail-content">
-                <div className="moodle-tabs"><TabList role="tablist" value={tab} onChange={(v) => setTab(v as Tab)} aria-label={tr("moodle:course_sections")}>{tabs.map((key) => (
+<TabList role="tablist" value={tab} onChange={(v) => setTab(v as Tab)} aria-label={tr("moodle:course_sections")}>{tabs.map((key) => (
                       <Tab key={key} value={key} data-text={tr(`moodle:${key}`)} onFocus={event => { setTab(key); event.currentTarget.scrollIntoView?.({block:"nearest",inline:"nearest"}); }} label={tr(`moodle:${key}`)} id={`tab-tab-${key}`} panelId={`panel-tab-${key}`} />
-                    ))}</TabList><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <><div className="course-overview grid items-start gap-6 mb-6">
+                    ))}</TabList>
+              </div>
+              <Divider />
+              <Layout className="moodle-course-layout" content={<LayoutContent className="course-detail-content">
+                <div className="course-detail-panels"><section role="tabpanel" id={`panel-tab-${"content"}`} aria-labelledby={`tab-tab-${"content"}`} data-state={tab === "content" ? "active" : "inactive"} hidden={tab !== "content"}>{tab === "content" && <><div className="course-overview">
                       <Section title={tr("moodle:up_next")} actions={
                           <Button endContent={<ChevronRight />} label={(tr("moodle:view_all"))}
                             variant="ghost"
@@ -782,15 +794,7 @@ function CoursesBody({
                       </p>
                       {files()}
                     </section></>}</section></div>
-</LayoutContent>} end={                <CourseAssistant
-                  key={detail.course.id}
-                  detail={detail}
-                  api={api}
-                  requested={agentRequest}
-                  onChange={async () => { await refresh(); }}
-                  onError={failure}
-                />
-} />
+</LayoutContent>} />
             </>
           ) : (
             <div>

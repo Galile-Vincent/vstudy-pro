@@ -702,3 +702,10 @@
 .moodle-course-chat .tutor-mode-toggle { min-height:40px; }
 .moodle-course-chat .tutor-mode-toggle input[type=checkbox] { box-sizing:border-box; min-height:0; width:16px; height:16px; padding:0; border:1px solid var(--muted); background:var(--surface); }
 .moodle-course-chat .tutor-mode-toggle input[type=checkbox]:checked { background:var(--ink); border-color:var(--ink); }
+
+.course-header-band { background:var(--course-header-surface); padding:24px 32px 0; display:grid; gap:24px; min-width:0; }
+.course-detail-panels { padding:32px; min-width:0; }
+.course-overview { display:grid; grid-template-columns:minmax(0,1fr); gap:32px; margin-bottom:32px; }
+.course-week-activities { padding-inline-start:32px; }
+.course-detail-content .moodle-weeks { gap:0; }
+@container course-detail (min-width:56rem) { .course-overview { grid-template-columns:repeat(2,minmax(0,1fr)); } }
