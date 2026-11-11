@@ -1,7 +1,7 @@
 import { useId } from "react";
 import { Table, Badge, IconButton } from "@astryxdesign/core";
 import { Layout, LayoutContent, TabList, Tab } from "@astryxdesign/core";
-import { Dialog, DialogHeader, LayoutFooter, Card, Button } from "@astryxdesign/core";
+import { Dialog, DialogHeader, LayoutFooter, Button } from "@astryxdesign/core";
 import { flushSync } from 'react-dom';
 import { catalogDeadlines } from './deadline-groups';
 import { performDocumentAction, type DocumentAction } from '../document-open';
@@ -22,12 +22,9 @@ import {
   CalendarDays,
   Check,
   ChevronRight,
-  Clock3,
   FileText,
   GraduationCap,
   Inbox,
-  AlarmClock,
-  Mail,
   Pin,
   RefreshCw,
   Unplug,
@@ -176,7 +173,7 @@ function CoursesBody({
   const [overview, setOverview] = useState<MoodleOverview>();
   const [orderSnapshot,setOrderSnapshot] = useState<{data:MoodleOverview;now:number}>();
   const [sortPreferences,setSortPreferences] = useState<CourseSortPreferences>({});
-  const [pinBusy,setPinBusy] = useState<string>();
+  const [,setPinBusy] = useState<string>();
   const [view,setView] = useState<CourseViewMode>(loadCourseViewMode);
   const changeView = (mode: CourseViewMode) => {setView(mode);saveCourseViewMode(mode);};
   const prepareMovement = useRef<() => void>(() => {});
@@ -630,6 +627,14 @@ function CoursesBody({
           detail ? (
             <>
               <CourseHead
+                assistant={                <CourseAssistant
+                  key={detail.course.id}
+                  detail={detail}
+                  api={api}
+                  requested={agentRequest}
+                  onChange={async () => { await refresh(); }}
+                  onError={failure}
+                />}
                 title={displayTitle(detail.course.identity, lang, detail.course.fullName)}
                 chip={[detail.course.identity.term, detail.course.identity.code].filter(Boolean).join(" · ")}
                 people={[displayTeachers(detail.course.identity, lang), displayClass(detail.course.identity, lang)].filter(Boolean)}
@@ -782,15 +787,7 @@ function CoursesBody({
                       </p>
                       {files()}
                     </section></>}</section></div>
-</LayoutContent>} end={                <CourseAssistant
-                  key={detail.course.id}
-                  detail={detail}
-                  api={api}
-                  requested={agentRequest}
-                  onChange={async () => { await refresh(); }}
-                  onError={failure}
-                />
-} />
+</LayoutContent>}  />
             </>
           ) : (
             <div>

@@ -1,11 +1,12 @@
 import { IconButton } from "@astryxdesign/core";
 import { DropdownMenu, DropdownMenuItem, Tooltip, Button } from "@astryxdesign/core";
-import type { Ref } from "react";
+import type { ReactNode, Ref } from "react";
 import { ArrowUpRight, ChevronLeft, CloudCheck, MoreHorizontal, RefreshCw, Unplug } from "lucide-react";
 import { tr } from "../../shared/i18n";
 import { PageHeader } from "../components/ui";
 
 export interface CourseHeadProps {
+  assistant: ReactNode;
   title: string;
   chip: string;
   people: string[];
@@ -19,7 +20,7 @@ export interface CourseHeadProps {
   onDisconnect: () => void;
 }
 
-export function CourseHead({ title, chip, people, sync, fullName, syncing, menuTrigger, onBack, onOpen, onRefresh, onDisconnect }: CourseHeadProps) {
+export function CourseHead({ assistant, title, chip, people, sync, fullName, syncing, menuTrigger, onBack, onOpen, onRefresh, onDisconnect }: CourseHeadProps) {
   return (
     <PageHeader
         title={title}
@@ -32,6 +33,7 @@ export function CourseHead({ title, chip, people, sync, fullName, syncing, menuT
         }
         actions={
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label={tr("moodle:course_actions")}>
+            {assistant}
             <Button endContent={<ArrowUpRight aria-hidden="true" />} label={tr("webview:open")} variant="primary" onClick={onOpen}>
               {tr("webview:open")}
 
