@@ -1,3 +1,4 @@
+import { Panel } from "../components/panel";
 import { IconButton } from "@astryxdesign/core";
 import { TabList, Tab } from "@astryxdesign/core";
 import { Card, Button } from "@astryxdesign/core";
@@ -13,7 +14,7 @@ import { displayTitle } from "../../shared/moodle-course-display";
 import { plannerApi, type PlannerApi } from "./planner-api";
 import { PlannerProposal, plannerDate } from "./planner-proposal";
 import { PlannerForms } from "./planner-forms";
-import { FormField, PageHeader, Section, ListRow } from "../components/ui";
+import { FormField, PageHeader, ListRow } from "../components/ui";
 import "./planner.css";
 import { SurfaceErrorBoundary } from "../components/surface-error-boundary";
 type PlannerProps = {
@@ -95,10 +96,10 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
         </div>
         <p className="planner-muted">{tr("planner:approval_notice")}</p>
       </Card></section>
-      {unallocated.length > 0 && <Section aria-label={tr("planner:unallocated")} title={tr("planner:unallocated")}><ul>{unallocated.map((item, index) => <li key={index}>{tr(`planner:unallocated_${item.reason}`, { title: item.title, minutes: item.minutes })}</li>)}</ul></Section>}
+      {unallocated.length > 0 && <Panel title={tr("planner:unallocated")}><ul>{unallocated.map((item, index) => <li key={index}>{tr(`planner:unallocated_${item.reason}`, { title: item.title, minutes: item.minutes })}</li>)}</ul></Panel>}
       {pending && <PlannerProposal headingLevel={2} action={pending.action} courses={courses} deadlines={deadlines} snapshot={snapshot} busy={busy} onApprove={() => void approve()} onDismiss={() => setPending(undefined)} />}
       <div className="planner-view-tabs"><TabList role="tablist" value={view} onChange={setView} aria-label={tr("planner:title")}><Tab value="today" onFocus={() => setView("today")} label={tr("planner:today")} id={`tab-view-${"today"}`} panelId={`panel-view-${"today"}`} /><Tab value="week" onFocus={() => setView("week")} label={tr("planner:week")} id={`tab-view-${"week"}`} panelId={`panel-view-${"week"}`} /></TabList>{['today','week'].map(panel => <section role="tabpanel" id={`panel-view-${panel}`} aria-labelledby={`tab-view-${panel}`} hidden={view !== panel}>{view === panel && <>{view === panel && <div className="planner-columns"><div>
-        <Section title={tr(view === "today" ? "planner:today" : "planner:week")}>
+        <Panel title={tr(view === "today" ? "planner:today" : "planner:week")}>
           {!tasks.length && <p className="planner-muted">{tr("planner:empty_today")}</p>}
           <ul className="planner-task-list">{tasks.map(task => <li key={task.id}><ListRow title={task.title} actions={
             <IconButton label={tr("planner:complete", { title: task.title })}  size="md" variant="ghost"  isDisabled={busy} aria-label={tr("planner:complete", { title: task.title })} onClick={() => {
@@ -108,17 +109,16 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
               {task.dueAt && <time dateTime={task.dueAt} data-overdue={Date.parse(task.dueAt) < now}>{plannerDate(task.dueAt)}</time>}
             </span>} />
           </li>)}</ul>
-        </Section>
-        {snapshot.tasks.some(t => plannerTaskDone(t, deadlines)) && <Section data-completed-tasks title={tr("planner:status_done")}><ul>{snapshot.tasks.filter(t => plannerTaskDone(t, deadlines)).map(t => <li key={t.id}><ListRow title={t.title} /></li>)}</ul></Section>}
-        <Section title={tr("planner:source_deadlines")}><ul className="planner-task-list">{sourceDeadlines.map(d => <li key={d.id}><ListRow title={d.title} subtitle={<><span>{courseTitle(d.courseId)}</span><time dateTime={d.dueAt} data-overdue={Date.parse(d.dueAt) < now}>{plannerDate(d.dueAt)}</time>
+        </Panel>
+        {snapshot.tasks.some(t => plannerTaskDone(t, deadlines)) && <div data-completed-tasks><Panel title={tr("planner:status_done")}><ul>{snapshot.tasks.filter(t => plannerTaskDone(t, deadlines)).map(t => <li key={t.id}><ListRow title={t.title} /></li>)}</ul></Panel></div>}
+        <Panel title={tr("planner:source_deadlines")}><ul className="planner-task-list">{sourceDeadlines.map(d => <li key={d.id}><ListRow title={d.title} subtitle={<><span>{courseTitle(d.courseId)}</span><time dateTime={d.dueAt} data-overdue={Date.parse(d.dueAt) < now}>{plannerDate(d.dueAt)}</time>
           {Date.parse(d.dueAt) < now && <span>{tr("planner:overdue")}</span>}{d.submitted === null && <span>{tr("planner:submitted_unknown")}</span>}
-        </>} /></li>)}</ul></Section>
-        <Section title={tr("planner:exams")}>{!exams.length && <p className="planner-muted">{tr("planner:empty_exams")}</p>}
+        </>} /></li>)}</ul></Panel>
+        <Panel title={tr("planner:exams")}>{!exams.length && <p className="planner-muted">{tr("planner:empty_exams")}</p>}
           {exams.map(exam => <article className="planner-exam" key={exam.id}><strong>{tr("planner:countdown", { title: exam.title, days: Math.max(0, Math.round((Date.parse(localDay(exam.date, zone)) - Date.parse(today)) / 86400000)) })}</strong>
             <p>{courseTitle(exam.courseId)} · {plannerDate(exam.date)}</p><p>{exam.scopeTopics.join(" · ") || tr("planner:scope_unknown")}</p></article>)}
-        </Section>
-      </div><section className=" planner-week" aria-label={tr("planner:week")}><Card elevation="none" className="p-6">
-        <h2>{tr("planner:week")}</h2>{!snapshot.blocks.length && <p className="planner-muted">{tr("planner:empty_week")}</p>}
+        </Panel>
+      </div><section className=" planner-week" aria-label={tr("planner:week")}><Panel title={tr("planner:week")}>{!snapshot.blocks.length && <p className="planner-muted">{tr("planner:empty_week")}</p>}
         {(view === "today" ? [today] : dayKeys).map(day => {
           const blocks = snapshot.blocks.filter(b => localDay(b.startsAt, zone) === day);
           return <section className="planner-day" key={day}><h3>{new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(day + "T12:00:00Z"))}</h3>
@@ -126,7 +126,7 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
             <ol>{blocks.map(b => <li key={b.id}><ListRow title={b.title} subtitle={courseTitle(b.courseId)} meta={<time dateTime={b.startsAt}>{tr("planner:duration_window", { start: new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { hour: "numeric", minute: "2-digit", timeZone: zone }).format(new Date(b.startsAt)), minutes: b.durationMinutes })}</time>} /></li>)}</ol>
           </section>;
         })}
-      </Card></section></div>}</>}</section>)}</div>
+      </Panel></section></div>}</>}</section>)}</div>
     </>}
   </section>;
 }
