@@ -24,7 +24,7 @@ VStudy theme packs own the palette. `tokens.css` aliases Astryx color roles to t
 
 Rules that hold across the app:
 
-- **Two border strengths.** `--line` is a quiet 10% ink mix for dividers, card edges and chrome. `--line-strong` is the pack's 3:1 boundary color (checked by `scripts/check-contrast.mjs`) and belongs on form controls, switch tracks, progress tracks and segmented controls. In high contrast, `--line` becomes `--line-strong`.
+- **Two border strengths.** `--line` is an 18% ink mix for dividers, card edges and chrome. `--line-strong` is the pack's 3:1 boundary color (checked by `scripts/check-contrast.mjs`) and belongs on form controls, switch tracks, progress tracks and segmented controls. In high contrast, `--line` becomes `--line-strong`.
 - **Flat in flow.** Resting containers have a surface tone, a 1px `--line` border and no shadow or blur. Only floating overlays (menus, popovers, dialogs, toasts) use Astryx `--shadow-med` and `--shadow-high`. Do not redefine `--shadow-low/med/high`.
 - **Radius, spacing, easing.** Use the Astryx tokens directly: `--radius-inner`, `--radius-element`, `--radius-container`, `--radius-full`, `--ease-entrance`, `--ease-exit`, `--ease-move`, `--ease-standard`. App spacing is `--space-*` (Astryx spacing times `--density`), type is `--type-*`.
 - **Translucent overlays.** Hover and pressed fills are translucent ink, so labels never disappear. Do not set `--color-overlay-hover` per page.

@@ -29,8 +29,8 @@ describe('elevation policy', () => {
 });
 
 describe('border strength', () => {
-  it('draws dividers and card edges from a quiet ink mix and keeps the 3:1 theme line for controls', () => {
-    expect(css).toMatch(/--line:color-mix\(in oklab,var\(--ink\) 10%,transparent\);/);
+  it('draws dividers and card edges from a visible ink mix and keeps the 3:1 theme line for controls', () => {
+    expect(css).toMatch(/--line:color-mix\(in oklab,var\(--ink\) 18%,transparent\);/);
     expect(css).toContain('html[data-contrast=more] { --line:var(--line-strong); }');
     expect(css).toContain('--color-border:var(--line);');
     expect(css).toContain('--color-border-emphasized:var(--line-strong);');
