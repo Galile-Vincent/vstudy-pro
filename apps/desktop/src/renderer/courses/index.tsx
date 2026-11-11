@@ -1,6 +1,6 @@
 import { Panel } from "../components/panel";
 import { useId } from "react";
-import { Badge, IconButton } from "@astryxdesign/core";
+import { Table, Badge, IconButton } from "@astryxdesign/core";
 import { Layout, LayoutContent, Divider, TabList, Tab } from "@astryxdesign/core";
 import { Dialog, DialogHeader, LayoutFooter, Card, Button } from "@astryxdesign/core";
 import { flushSync } from 'react-dom';
@@ -439,7 +439,7 @@ function CoursesBody({
       <div className="moodle-notifications">
         {items.map((n) => (
           <ListRow key={n.id} data-unread={!n.read}
-            className="flex-col items-stretch [&>.ui-row-target]:w-full"
+            className="course-notification-row"
             title={<span className="flex items-center gap-2">
               {!n.read && <span className="moodle-unread" role="img" aria-label={tr("moodle:unread")} />}
               {n.subject}
@@ -681,10 +681,7 @@ function CoursesBody({
                       setWeekOpen={setWeekOpen}
                       openFile={openFile}
                       onError={failure}
-                    /></>}</section><section role="tabpanel" id={`panel-tab-${"deadlines"}`} aria-labelledby={`tab-tab-${"deadlines"}`} data-state={tab === "deadlines" ? "active" : "inactive"} hidden={tab !== "deadlines"}>{tab === "deadlines" && <>{panelStatus('assignments','quizzes')}<section className="flex min-w-0 flex-col gap-4">
-                      <div className="moodle-section-heading">
-                        <h2>{tr("moodle:deadlines")}</h2>
-                        <Button icon={<CalendarDays />} label={(tr("moodle:export_calendar"))}
+                    /></>}</section><section role="tabpanel" id={`panel-tab-${"deadlines"}`} aria-labelledby={`tab-tab-${"deadlines"}`} data-state={tab === "deadlines" ? "active" : "inactive"} hidden={tab !== "deadlines"}>{tab === "deadlines" && <>{panelStatus('assignments','quizzes')}<Panel title={<>{tr("moodle:deadlines")} <Badge label={String(detail.deadlines.length)} /></>} actions={<Button icon={<CalendarDays />} label={(tr("moodle:export_calendar"))}
                           variant="secondary"
                            isDisabled={!detail.deadlines.length}
                           onClick={() =>
@@ -695,8 +692,7 @@ function CoursesBody({
                         >
 
                           {tr("moodle:export_calendar")}
-                        </Button>
-                      </div>
+                        </Button>}>
                       {(["overdue", "this_week", "later", "done"] as const).map(
                         (group) => (
                           <section
@@ -722,69 +718,27 @@ function CoursesBody({
                           </section>
                         ),
                       )}
-                    </section></>}</section><section role="tabpanel" id={`panel-tab-${"announcements"}`} aria-labelledby={`tab-tab-${"announcements"}`} data-state={tab === "announcements" ? "active" : "inactive"} hidden={tab !== "announcements"}>{tab === "announcements" && <>{panelStatus('announcements')}<Announcements accountId={detail.course.accountId} items={detail.announcements} /></>}</section><section role="tabpanel" id={`panel-tab-${"notifications"}`} aria-labelledby={`tab-tab-${"notifications"}`} data-state={tab === "notifications" ? "active" : "inactive"} hidden={tab !== "notifications"}>{tab === "notifications" && <><section className="flex min-w-0 flex-col gap-4">
-                      <h2>{tr("moodle:notifications")}</h2>
+                    </Panel></>}</section><section role="tabpanel" id={`panel-tab-${"announcements"}`} aria-labelledby={`tab-tab-${"announcements"}`} data-state={tab === "announcements" ? "active" : "inactive"} hidden={tab !== "announcements"}>{tab === "announcements" && <>{panelStatus('announcements')}<Announcements accountId={detail.course.accountId} items={detail.announcements} /></>}</section><section role="tabpanel" id={`panel-tab-${"notifications"}`} aria-labelledby={`tab-tab-${"notifications"}`} data-state={tab === "notifications" ? "active" : "inactive"} hidden={tab !== "notifications"}>{tab === "notifications" && <><Panel title={<>{tr("moodle:notifications")} <Badge label={String(detail.notifications.length)} /></>}>
                       {notifications()}
-                    </section></>}</section><section role="tabpanel" id={`panel-tab-${"grades"}`} aria-labelledby={`tab-tab-${"grades"}`} data-state={tab === "grades" ? "active" : "inactive"} hidden={tab !== "grades"}>{tab === "grades" && <>{panelStatus('grades')}<section className="flex min-w-0 flex-col gap-4">
-                      <h2>{tr("moodle:grades")}</h2>
+                    </Panel></>}</section><section role="tabpanel" id={`panel-tab-${"grades"}`} aria-labelledby={`tab-tab-${"grades"}`} data-state={tab === "grades" ? "active" : "inactive"} hidden={tab !== "grades"}>{tab === "grades" && <>{panelStatus('grades')}<Panel title={<>{tr("moodle:grades")} <Badge label={String(detail.grades.length)} /></>}>
                       {detail.grades.length ? (
                         <div className="moodle-table-scroll">
-                          <table className="moodle-grades">
-                            <thead>
-                              <tr>
-                                {[
-                                  "grade_item",
-                                  "grade",
-                                  "maximum",
-                                  "percentage",
-                                ].map((key) => (
-                                  <th key={key}>{tr(`moodle:${key}`)}</th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {detail.grades.map((g, index) => (
-                                <tr key={index}>
-                                  <th scope="row">{g.name}</th>
-                                  <td>{g.grade ?? tr("moodle:ungraded")}</td>
-                                  <td>{g.max ?? tr("moodle:ungraded")}</td>
-                                  <td>
-                                    {g.percentage === null ? (
-                                      tr("moodle:ungraded")
-                                    ) : (
-                                      <>
-                                        <span>
-                                          {new Intl.NumberFormat(
-                                            i18n.resolvedLanguage,
-                                            {
-                                              style: "percent",
-                                              maximumFractionDigits: 0,
-                                            },
-                                          ).format(g.percentage / 100)}
-                                        </span>
-                                        <progress
-                                          value={g.percentage}
-                                          max={100}
-                                          aria-label={g.name}
-                                        />
-                                      </>
-                                    )}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
+                          <Table data={detail.grades.map(g => ({...g}))} columns={[
+                            {key: 'name', header: tr('moodle:grade_item')},
+                            {key: 'grade', header: tr('moodle:grade'), align: 'end', renderCell: g => g.grade ?? tr('moodle:ungraded')},
+                            {key: 'max', header: tr('moodle:maximum'), align: 'end', renderCell: g => g.max ?? tr('moodle:ungraded')},
+                            {key: 'percentage', header: tr('moodle:percentage'), align: 'end', renderCell: g => g.percentage === null ? tr('moodle:ungraded') : new Intl.NumberFormat(i18n.resolvedLanguage, {style: 'percent', maximumFractionDigits: 0}).format(g.percentage / 100)},
+                          ]} />
                         </div>
                       ) : (
                         <EmptyState title={tr("moodle:no_grades")} />
                       )}
-                    </section></>}</section><section role="tabpanel" id={`panel-tab-${"files"}`} aria-labelledby={`tab-tab-${"files"}`} data-state={tab === "files" ? "active" : "inactive"} hidden={tab !== "files"}>{tab === "files" && <><section className="flex min-w-0 flex-col gap-4">
-                      <h2>{tr("moodle:files")}</h2>
+                    </Panel></>}</section><section role="tabpanel" id={`panel-tab-${"files"}`} aria-labelledby={`tab-tab-${"files"}`} data-state={tab === "files" ? "active" : "inactive"} hidden={tab !== "files"}>{tab === "files" && <><Panel title={<>{tr("moodle:files")} <Badge label={String(detail.files.length)} /></>}>
                       <p className="moodle-panel-description">
                         {tr("moodle:files_hint")}
                       </p>
                       {files()}
-                    </section></>}</section></div>
+                    </Panel></>}</section></div>
 </LayoutContent>} end={<CourseAssistant
                   key={detail.course.id}
                   triggerSlot={assistantSlot}

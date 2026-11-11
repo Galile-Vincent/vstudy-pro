@@ -1,5 +1,5 @@
 import { Panel } from "../components/panel";
-import { Divider } from "@astryxdesign/core";
+import { Badge, Divider } from "@astryxdesign/core";
 import { Drawer, DialogHeader } from "@astryxdesign/core";
 import { Button } from "@astryxdesign/core";
 import { CourseFileActions, type DocumentAction, type DocumentOutcome } from '../document-open';
@@ -33,7 +33,7 @@ import type {
 import { externalUrlSchema } from "../../shared/ipc";
 import { tr, i18n } from "../../shared/i18n";
 import { desktop } from "../bridge";
-import { Section, Toolbar, ListRow, EmptyState } from "../components/ui";
+import { Toolbar, ListRow, EmptyState } from "../components/ui";
 
 export function openCourseUrl(url: string, onError: () => void) {
   const parsed = externalUrlSchema.safeParse(url);
@@ -343,7 +343,7 @@ export function Announcements({ items, accountId }: { items: MoodleAnnouncement[
   const [selected, setSelected] = useState<MoodleAnnouncement>();
   const trigger = useRef<HTMLElement | null>(null);
   return (
-    <Section title={tr("moodle:announcements")}>
+    <Panel title={<>{tr("moodle:announcements")} <Badge label={String(items.length)} /></>}>
       {items.length ? (
         [...items]
           .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -375,6 +375,6 @@ export function Announcements({ items, accountId }: { items: MoodleAnnouncement[
               {accountId && selected.url && <Button icon={<Link />} label={(tr('webview:original'))} variant="secondary" onClick={() => original(selected.url!)}>{tr('webview:original')}</Button>}
             </div>
           )}</Drawer>
-    </Section>
+    </Panel>
   );
 }
