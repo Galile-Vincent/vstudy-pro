@@ -11,7 +11,7 @@ const state=vi.hoisted(()=>({invoke:vi.fn(),cardRender:vi.fn(),open:vi.fn(),rout
 vi.mock('@astryxdesign/core', async importOriginal => {
  const actual = await importOriginal<typeof import('@astryxdesign/core')>();
  return {...actual, Card:(props:ComponentProps<typeof Card>) => {
-   state.cardRender(props.id?.replace('library-document-', ''));
+   if (props.id?.startsWith('library-document-')) state.cardRender(props.id.replace('library-document-', ''));
    return <actual.Card {...props}/>;
  }};
 });

@@ -6,6 +6,7 @@ import { localDate, dayBound, validDay } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
 import { PageContainer, PageHeader, Toolbar, FormField, EmptyState } from "../components/ui";
+import { Panel } from "../components/panel";
 import './ui3.css';
 import { contentLanguage } from "../../shared/content-language";
 import { Select } from "../components/select";
@@ -25,7 +26,7 @@ import {
   MoreHorizontal,
   LayoutGrid,
   List,
-  SlidersHorizontal, AlertTriangle, LoaderCircle, X,
+  SlidersHorizontal, AlertTriangle, LoaderCircle, X, ArrowDownWideNarrow, ArrowUpNarrowWide,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { libraryQuerySchema, type LibraryQuery } from "../../shared/library";
@@ -686,7 +687,7 @@ export function LibraryView() {
   },[selected,rowHeight,columns,shown,layout]);
   const viewControls = (
     <div className="library-view-controls">
-        <Select
+        <Select size="sm"
           className="library-sort"
           aria-label={tr("library:sort")}
           value={query.sort}
@@ -705,19 +706,16 @@ export function LibraryView() {
             ),
           )}
         </Select>
-        <Button label={tr("library:direction")} variant="secondary"
-          className="library-sort"
-          aria-label={tr("library:direction")}
+        <IconButton label={tr("library:direction")} variant="secondary" tooltip={tr("library:direction")}
           onClick={() =>
             setQuery((q) => ({
               ...q,
               direction: q.direction === "asc" ? "desc" : "asc",
             }))
           }
-        >
-          {query.direction === "asc" ? "↑" : "↓"}
-        </Button>
-        <IconButton label={tr("library:viewToggle")} variant="secondary"
+          icon={query.direction === "asc" ? <ArrowUpNarrowWide aria-hidden="true" /> : <ArrowDownWideNarrow aria-hidden="true" />}
+        />
+        <IconButton label={tr("library:viewToggle")} variant="secondary" tooltip={tr("library:viewToggle")}
           aria-label={tr("library:viewToggle")}
           aria-pressed={grid}
           onClick={() =>
@@ -759,10 +757,6 @@ export function LibraryView() {
           heading.current?.setAttribute('tabindex', '-1');
         }}
         title={openGroup ? openGroup.name ?? tr("library:unfiled") : (folderPath(folders, query.folderId) || route.title || tr("common:library"))}
-        description={tr("library:documentCount", {
-          count: items.length,
-          formatted: format.number(items.length) + (cursor ? "+" : ""),
-        })}
         actions={
         <Button label={(tr("common:import_document"))} variant="primary" className="primary"
           hidden={!loading && !items.length && !text && !filters.length}
@@ -773,9 +767,12 @@ export function LibraryView() {
         </Button>
         }
       />
-
+      </LayoutHeader> </>} content={<LayoutContent isScrollable={false} className="library-content">
+      <div className="library-section"><Panel
+        title={<>{tr(showFolders ? "library:viewFolders" : "library:documents")} <Badge label={showFolders ? format.number(groups.length) : format.number(items.length) + (cursor ? "+" : "")} /></>}
+        actions={viewKey === "all" && !query.folderId ? <LibraryModeToggle mode={mode} onChange={chooseMode} /> : undefined}
+      >
       <Toolbar className="library-toolbar" hidden={!loading && !items.length && !text && !filters.length && !query.folderId} left={<>
-        {viewKey === "all" && !query.folderId && <LibraryModeToggle mode={mode} onChange={chooseMode} />}
           <TextInput containerClassName="library-search" width="100%" startIcon={Search} label={tr("library:search")} isLabelHidden
             aria-label={tr("library:search")}
             placeholder={tr("library:search")}
@@ -783,7 +780,7 @@ export function LibraryView() {
             {...{maxLength: 200}}
             onChange={(_value, e) => setText(e.target.value)}
           />
-          <Button icon={<SlidersHorizontal aria-hidden="true" />} label={tr("library:filters") + (filters.length ? ' ' + format.number(filters.length) : '')} variant="secondary" className="secondary" data-testid="library-filters" onClick={() => setFiltersOpen(value => !value)} aria-expanded={filtersOpen} aria-controls="library-filter-panel">{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</Button>
+          <Button icon={<SlidersHorizontal aria-hidden="true" />} label={tr("library:filters") + (filters.length ? ' ' + format.number(filters.length) : '')} variant="secondary" className="secondary" data-testid="library-filters" onClick={() => setFiltersOpen(value => !value)} aria-expanded={filtersOpen} aria-controls="library-filter-panel" endContent={filters.length > 0 ? <Badge label={format.number(filters.length)} /> : undefined}>{tr("library:filters")}</Button>
         {!showFolders && !compactToolbar && viewControls}
       </>} />
       {filtersOpen && <section id="library-filter-panel" aria-label={tr("library:filters")} className="filter-panel" onKeyDown={event => { if(event.key === "Escape") { event.preventDefault(); setFiltersOpen(false); document.querySelector<HTMLButtonElement>('[data-testid="library-filters"]')?.focus(); } }}>            {(
@@ -913,7 +910,6 @@ export function LibraryView() {
           </>
         )}
       </div>
-      </LayoutHeader> </>} content={<LayoutContent isScrollable={false} className="library-content">
       {text.trim().length === 1 ? <p role="status">{tr('errors:search_refine')}</p> : error ? (
         <div className="empty" role="alert">
           <h2>{tr("library:error")}</h2>
@@ -1246,15 +1242,18 @@ export function LibraryView() {
                       aria-label={tr("library:actions", { name: d.title })}
                       tabIndex={-1}
                       onClick={(e) => { menuAnchor.current = e.currentTarget; setMenu(item); }} icon={<MoreHorizontal />} />
-                  </div></> : <>                  <div className="document-gutter" title={d.status!=='ready'?tr(`library:${d.status}`):item.pinned?tr('library:pinned'):undefined}>
-                    {d.status==='failed'?<AlertTriangle className="failed"/>:d.status==='converting'?<LoaderCircle/>:item.pinned?<Pin fill="currentColor"/>:null}
-                    <span className="sr-only">{d.status!=='ready'?tr(`library:${d.status}`):item.pinned?tr('library:pinned'):''}</span>
-                  </div>
+                  </div></> : <>
                   <div className="document-title-cell">
+                    {(d.status!=='ready'||item.pinned)&&<span className="document-gutter" title={d.status!=='ready'?tr(`library:${d.status}`):tr('library:pinned')}>
+                    {d.status==='failed'?<AlertTriangle className="failed"/>:d.status==='converting'?<LoaderCircle/>:<Pin fill="currentColor"/>}
+                    <span className="sr-only">{d.status!=='ready'?tr(`library:${d.status}`):tr('library:pinned')}</span>
+                    </span>}
+                    <div className="document-title-text">
                     <DocumentTitle title={d.title} onOpen={event=>open(item,event.button === 1 || event.metaKey || event.ctrlKey)} details={`${placeOf(item)} · ${d.sourceName.split('.').pop()?.toUpperCase()} · ${item.pageCount!=null?tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)}):''} · ${formatSize(item.sizeBytes,document.documentElement.lang)} · ${format.date(d.createdAt)}`}/>
 
                     <div className="document-course-inline" title={placeOf(item)}>{placeOf(item)}</div>
                     {item.snippet&&<p className="search-snippet"><Snippet text={item.snippet}/></p>}
+                    </div>
                   </div>
                   <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge key={t.id} label={t.name} />)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>
                   <div className="document-folder" title={placeOf(item)}>{placeOf(item)}</div>
@@ -1287,6 +1286,7 @@ export function LibraryView() {
         </div>
         </>
       )}
+      </Panel></div>
       {liveRegion}
       {(notice || recoveryNotice) && (
         <div className="library-toast">

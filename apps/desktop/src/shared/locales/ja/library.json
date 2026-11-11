@@ -126,6 +126,8 @@
   "documentCount_one": "{{formatted}} 件の資料",
   "documentCount_other": "{{formatted}} 件の資料",
   "pages": "{{formatted}} ページ",
+  "pages_one": "{{formatted}} ページ",
+  "pages_other": "{{formatted}} ページ",
   "noFolders": "フォルダはまだありません",
   "customDates": "期間を指定…",
   "unknown_size": "サイズ不明",

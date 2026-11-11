@@ -421,10 +421,11 @@ export function LibrarySidebar() {
             hasAutoFocus
             isRequired
           />
-        <Button type="submit" label={(tr('library:rename'))} variant="ghost">{tr('library:rename')}</Button>
+        <Button type="submit" label={tr('library:rename')} variant="primary" />
       </form>
-      <Button label={(tr('library:pin'))}
-        variant="ghost"
+      <div className="library-dialog-actions">
+      <Button label={tr(menu.pinned ? 'library:unpin' : 'library:pin')}
+        variant="secondary"
         onClick={() =>
           void run(() =>
             desktop.invoke('library:folders:update', {
@@ -433,11 +434,9 @@ export function LibrarySidebar() {
             }),
           )
         }
-      >
-        {tr('library:pin')}
-      </Button>
-      <Button label={(tr('library:newSubfolder'))}
-        variant="ghost"
+      />
+      <Button label={tr('library:newSubfolder')}
+        variant="secondary"
         onClick={async () => {
           const name = await prompt(tr('library:newFolder'));
           if (name)
@@ -448,9 +447,8 @@ export function LibrarySidebar() {
               }),
             );
         }}
-      >
-        {tr('library:newSubfolder')}
-      </Button>
+      />
+      </div>
       <label>
         {tr('library:move')}
         <Select
@@ -527,9 +525,10 @@ export function LibrarySidebar() {
           ))}
         </Select>
       </label>
+      <div className="library-dialog-actions" data-danger="">
       {(['parent', 'unfiled'] as const).map((destination) => (
-        <Button label={(tr(`library:deleteFolder_${destination}`))}
-          variant="ghost"
+        <Button label={tr(`library:deleteFolder_${destination}`)}
+          variant="destructive"
           key={destination}
           onClick={async () => {
             void run(() =>
@@ -540,10 +539,9 @@ export function LibrarySidebar() {
             );
             setMenu(null);
           }}
-        >
-          {tr(`library:deleteFolder_${destination}`)}
-        </Button>
+        />
       ))}
+      </div>
     </LibraryDialog>
   )}
   {undo && (

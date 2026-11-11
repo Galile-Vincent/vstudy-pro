@@ -1,17 +1,8 @@
 import { IconButton } from "@astryxdesign/core";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core";
-import { type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, Files, FolderClosed } from "lucide-react";
 import { tr } from "../../shared/i18n";
 import { uncategorizedKey, type CourseGroup, type LibraryMode } from "./model";
-
-const tones = ["info", "success", "warning", "chart-2", "chart-3", "chart-4"];
-
-function toneFor(key: string) {
-  let hash = 0;
-  for (const char of key) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
-  return tones[hash % tones.length]!;
-}
 
 export function LibraryModeToggle({ mode, onChange }: { mode: LibraryMode; onChange: (mode: LibraryMode) => void }) {
   return (
@@ -34,7 +25,6 @@ export function FolderGrid({ groups, formatNumber, onOpen }: { groups: CourseGro
               id={`library-folder-${encodeURIComponent(group.key)}`}
               className="course-folder folder-row"
               data-uncategorized={group.key === uncategorizedKey}
-              style={group.courseId ? ({ "--folder-tone": `var(--${toneFor(group.key)})` } as CSSProperties) : undefined}
               aria-label={tr("library:openFolder", { name })}
               onClick={() => onOpen(group.key)}
             >
