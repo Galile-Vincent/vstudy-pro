@@ -13,7 +13,7 @@ import { ReaderOfflineNotice } from './offline-notice';
 import { ReaderWelcome } from './reader-welcome';
 import { TextArea as Textarea } from "@astryxdesign/core";
 import { AiParseControls } from '../ai-parse/ai-parse-controls';
-import { Button } from "@astryxdesign/core";
+import { Button, IconButton } from "@astryxdesign/core";
 import { useReadingActivity } from '../home/use-reading-activity';
 import { useNavigate } from '../shell';
 import { Settings as SettingsIcon, ArrowLeftRight, Plus, Trash2, X, FileText, PanelLeft, Sparkles, ChevronRight } from "lucide-react";
@@ -456,12 +456,7 @@ export function Workspace() {
           {selection && (
             <div className="selection-chip">
               <SelectionPreview selection={selection} />
-              <button
-                onClick={() => setSelection(null)}
-                aria-label={tr('common:remove_selection')}
-              >
-                <X size={16} />
-              </button>
+              <IconButton variant="ghost" size="sm" label={tr('common:remove_selection')} tooltip={tr('common:remove_selection')} icon={<X size={16} />} onClick={() => setSelection(null)} />
             </div>
           )}
           <div className="new-chat-composer">
@@ -483,22 +478,18 @@ export function Workspace() {
     <section id="reading-content" tabIndex={-1} className="pane reading-pane" aria-label={tr('common:document')}>
       {practice === doc?.id && <aside><strong>{tr('welcome:try_title')}</strong><p>{tr('welcome:try_steps')}</p><Button label={tr('welcome:try_hide')} variant="ghost" onClick={() => { setPractice(null); try { sessionStorage.removeItem('vstudy:practice'); } catch { return; } }}>{tr('welcome:try_hide')}</Button></aside>}
       <LayoutHeader height="auto" padding={0}><div className="pane-toolbar">
-        <ContextCoach inline/>
-        <span className="eyebrow">{doc?.sourceName ?? tr('common:reading_space')}</span>
-        {doc && <button className="icon-button" title={tr('common:delete_document')} aria-label={tr('common:delete_document')} onClick={() => void removeDocument(doc.id)}><Trash2 size={16} /></button>}
-        {doc?.status==='ready' && <div role="group" aria-label={tr('library:original.view')}><Button label={tr('library:original.markdown')} variant="ghost" aria-pressed={readerDisplay==='markdown'} onClick={()=>setReaderDisplay('markdown')}>{tr('library:original.markdown')}</Button><Button label={tr('library:original.file')} variant="ghost" aria-pressed={readerDisplay==='file'} onClick={()=>setReaderDisplay('file')}>{tr('library:original.file')}</Button></div>}
+        <span className="eyebrow" title={doc?.sourceName}>{doc?.sourceName ?? tr('common:reading_space')}</span>
+        {doc?.status==='ready' && <div role="group" className="reader-display" aria-label={tr('library:original.view')}><Button label={tr('library:original.markdown')} variant={readerDisplay==='markdown'?'secondary':'ghost'} aria-pressed={readerDisplay==='markdown'} onClick={()=>setReaderDisplay('markdown')}>{tr('library:original.markdown')}</Button><Button label={tr('library:original.file')} variant={readerDisplay==='file'?'secondary':'ghost'} aria-pressed={readerDisplay==='file'} onClick={()=>setReaderDisplay('file')}>{tr('library:original.file')}</Button></div>}
         {doc && readerDisplay==='markdown' && <AiParseControls key={doc.id} document={doc} providers={providers} onProvidersChanged={refreshProviders} pageCount={documentPageCount || 1} initiallyOpen={!!route.aiParse} onSettings={()=>{setShowSettings(true);}} onReload={async version=>{selectedVersion.current=version;setSelection(null);window.getSelection()?.removeAllRanges();const [text,updated]=await Promise.all([desktop.invoke('documents:read',{documentId:doc.id,version}),desktop.invoke('documents:get',{documentId:doc.id})]);setSource(text);setReaderVersion(version);if(updated)setDocuments(list=>list.map(d=>d.id===updated.id?updated:d));setReaderRevision(n=>n+1);}}/>}
-        <span className="muted">
-          {doc?.status === "ready" ? tr('novice:ready_to_read') : ""}
-        </span>
+        <ContextCoach inline/>
+        {doc && <IconButton variant="ghost" label={tr('common:delete_document')} tooltip={tr('common:delete_document')} icon={<Trash2 size={16} />} onClick={() => void removeDocument(doc.id)} />}
       </div></LayoutHeader>
       {!doc ? (
         <div className="empty">
           <div className="empty-symbol"><FileText size={28}/></div>
           <h3>{tr('common:your_next_idea_starts_here')}</h3>
           <p>{tr('common:import_a_document_to_read_select_and_ask_questions')}</p>
-          <button onClick={() => void importDocument()} disabled={busy || !connected}>
-            {tr('common:import_document')}</button>
+          <Button variant="primary" label={tr('common:import_document')} isDisabled={busy || !connected} onClick={() => void importDocument()} />
           <small className="muted">
             {tr('common:drop_a_file_anywhere_to_import_it')}</small>
         </div>
@@ -515,8 +506,10 @@ export function Workspace() {
         <div className="empty" role="alert">
           <h3>{tr('common:couldn_t_prepare_this_document')}</h3>
           <p>{errorText(new Error(doc.error))}</p>
-          <button
-            disabled={busy || !connected}
+          <Button
+            variant="primary"
+            label={tr('common:retry_conversion')}
+            isDisabled={busy || !connected}
             onClick={() => {
               setBusy(true);
               void desktop
@@ -529,8 +522,7 @@ export function Workspace() {
                 .catch(report)
                 .finally(() => setBusy(false));
             }}
-          >
-            {tr('common:retry_conversion')}</button><p>{tr('library:retry_hint')}</p>
+          /><p>{tr('library:retry_hint')}</p>
         </div>
       ) : sourceError ? <LoadError message={sourceError} retry={() => setReaderRevision(value => value + 1)}/> : loadingSource ? (
         <div className="empty" role="status">
