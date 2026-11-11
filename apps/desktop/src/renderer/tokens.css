@@ -158,10 +158,12 @@ html[data-theme=contrast] :is([data-slot=popover-content],[data-slot=aui_compose
 
 /* Unlayered aliases beat the shipped theme on both the provider and portal root.
    Shadows are not aliased: Astryx --shadow-low/med/high stay as shipped, for overlays only. */
+/* Cards sit one step above the page in dark schemes; in light they separate by border alone. */
+html.dark { --card-surface:color-mix(in oklab,var(--surface) 94%,var(--ink)); }
 [data-astryx-theme="neutral"] {
  --color-background-body:var(--background);
  --color-background-surface:var(--surface);
- --color-background-card:color-mix(in oklab,var(--surface) 96%,var(--ink));
+ --color-background-card:var(--card-surface,var(--surface));
  --color-background-popover:var(--surface);
  --color-background-muted:var(--subtle);
  --color-text-primary:var(--ink);

@@ -185,7 +185,6 @@ function WeeklySection({
         aria-labelledby={`week-heading-${section.id}`} hidden={!open || !section.accessible}>
       {open && section.accessible && (
         <>
-          <Divider />
           {section.summaryHtml && <SafeCourseHtml html={section.summaryHtml} />}
           {section.modules.map((module) => {
             const Icon = icons[module.kind] ?? BookOpen;

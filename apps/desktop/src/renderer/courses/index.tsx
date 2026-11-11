@@ -227,6 +227,7 @@ function CoursesBody({
   }, [overview, syncing]);
   const lang = i18n.resolvedLanguage || "en";
   const [opening, setOpening] = useState<string>();
+  const [assistantSlot, setAssistantSlot] = useState<HTMLElement | null>(null);
   const [agentRequest, setAgentRequest] = useState(0);
   const refreshSequence = useRef(0);
   const refresh = useCallback(async (reorder = false, immediate = false) => {
@@ -526,7 +527,7 @@ function CoursesBody({
   </PageContainer>;
   const header = (
     <PageHeader title={!courseId ? tr("moodle:courses") : loading ? <span role="status">{tr("moodle:loading")}</span> : undefined}
-      actions={<div className="flex flex-wrap gap-2 [&_button]:min-h-9 [&_button]:h-auto">
+      actions={<div className="flex flex-wrap items-center gap-2">
         {!courseId && <Button icon={<Inbox />} label={(tr("moodle:updates"))} ref={updatesTrigger} variant="secondary" className="updates-entry"
           onClick={() => setShowUpdates(true)}>
           {tr("moodle:updates")}{unreadUpdates > 0 && <Badge label={String(unreadUpdates)} />}
@@ -569,8 +570,8 @@ function CoursesBody({
           </div>
         )}
         {!!overview?.accounts.length && !showUpdates && (!courseId || overview.accounts.some(account => account.status === "expired" || account.signInStorage)) && (
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap gap-2">
+          <Card padding={0}><div className="course-accounts">
+            <div className="course-accounts-actions">
               <Button icon={<GraduationCap />} label={(tr("moodle:connect_another_school"))} variant="ghost" onClick={() => setConnect(true)}>
                 {tr("moodle:connect_another_school")}
               </Button>
@@ -580,7 +581,7 @@ function CoursesBody({
               </Button>
             </div>
             {overview.accounts.map((account) => (
-              <div key={account.id} className="flex flex-wrap items-center gap-2">
+              <div key={account.id} className="course-account flex flex-wrap items-center gap-2">
                 <ListRow className="min-w-0 flex-[1_1_100%] min-[1200px]:flex-[1_1_12rem] [&_.ui-row-target]:break-words" title={account.displayName}
                   subtitle={`${account.siteName} · ${new URL(account.siteUrl).host}`} />
                 <small>
@@ -613,7 +614,7 @@ function CoursesBody({
                 )}
               </div>
             ))}
-          </div>
+          </div></Card>
         )}
         {progress?.state === 'loading' && <p role="status">{tr('moodle:sync_progress',{completed:progress.completed,total:progress.total})}</p>}
         {showUpdates && overview ? <UpdatesInbox
@@ -631,15 +632,7 @@ function CoursesBody({
           detail ? (
             <>
               <CourseHead
-                assistant={<CourseAssistant
-                  key={detail.course.id}
-                  detail={detail}
-                  api={api}
-                  requested={agentRequest}
-                  onChange={async () => { await refresh(); }}
-                  onError={failure}
-                />
-}
+                assistant={<span ref={setAssistantSlot} className="contents" />}
                 title={displayTitle(detail.course.identity, lang, detail.course.fullName)}
                 chip={[detail.course.identity.term, detail.course.identity.code].filter(Boolean).join(" · ")}
                 people={[displayTeachers(detail.course.identity, lang), displayClass(detail.course.identity, lang)].filter(Boolean)}
@@ -792,7 +785,15 @@ function CoursesBody({
                       </p>
                       {files()}
                     </section></>}</section></div>
-</LayoutContent>} />
+</LayoutContent>} end={<CourseAssistant
+                  key={detail.course.id}
+                  triggerSlot={assistantSlot}
+                  detail={detail}
+                  api={api}
+                  requested={agentRequest}
+                  onChange={async () => { await refresh(); }}
+                  onError={failure}
+                />} />
             </>
           ) : (
             <div>
@@ -818,7 +819,7 @@ function CoursesBody({
           }
           right={
             <>
-              <Selector size="sm" label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} />
+              <span className="inline-flex self-center"><Selector size="sm" label={tr("moodle:sort_courses")} isLabelHidden value={sort} onChange={value => void changeSort(value)} options={[{value:"smart",label:tr("moodle:sort_smart")},{value:"name",label:tr("moodle:sort_name")}]} /></span>
               <CourseViewSwitch value={view} onChange={changeView} />
             </>
           }
@@ -941,25 +942,12 @@ function CoursesBody({
                           }
                           actions={
                             <div className="flex items-center gap-1">
-                              {navigation?.openTab && <IconButton label={tr("moodle:open_course_tab", { course: name })}
-                                variant="ghost"
-                                 size="md"
-                                className="relative z-1"
-                                aria-label={tr("moodle:open_course_tab", { course: name })}
-                                {...{title:tr("moodle:open_course_tab", { course: name })}}
-                                onClick={() =>
-                                  navigation?.openTab({
-                                    view: "courses",
-                                    courseId: course.id,
-                                    title: name,
-                                  })
-                                } icon={<ArrowUpRight aria-hidden="true" />} />}
                               <div
-                                className="course-counts flex items-center gap-2"
+                                className="course-counts flex items-center gap-3 pe-2"
                                 aria-hidden="true"
                               >
                                 <span
-                                  className="course-count course-overdue w-[calc(var(--space-4)*3.5)] shrink-0 inline-flex items-center gap-1 text-[var(--danger)]"
+                                  className="course-count course-overdue shrink-0 inline-flex items-center gap-1 text-[var(--danger)]"
                                   data-count={attention.overdue}
                                   title={
                                     attention.overdue
@@ -977,7 +965,7 @@ function CoursesBody({
                                   )}
                                 </span>
                                 <span
-                                  className="course-count course-unread-count w-[calc(var(--space-4)*3.5)] shrink-0 inline-flex items-center gap-1 text-[var(--muted)]"
+                                  className="course-count course-unread-count shrink-0 inline-flex items-center gap-1 text-[var(--muted)]"
                                   data-count={attention.unread}
                                   title={
                                     attention.unread
@@ -995,6 +983,19 @@ function CoursesBody({
                                   )}
                                 </span>
                               </div>
+                              {navigation?.openTab && <IconButton label={tr("moodle:open_course_tab", { course: name })}
+                                variant="ghost"
+                                 size="md"
+                                className="relative z-1"
+                                aria-label={tr("moodle:open_course_tab", { course: name })}
+                                {...{title:tr("moodle:open_course_tab", { course: name })}}
+                                onClick={() =>
+                                  navigation?.openTab({
+                                    view: "courses",
+                                    courseId: course.id,
+                                    title: name,
+                                  })
+                                } icon={<ArrowUpRight aria-hidden="true" />} />}
                               <button
                                 type="button"
                                 className="course-pin grid size-[calc(var(--space-3)*3)] shrink-0 place-items-center rounded-[var(--radius-element)] aria-pressed:bg-[var(--active)]"
@@ -1040,15 +1041,14 @@ function CoursesBody({
       {([overdue, dueSoon, undated] as const).map(
         (items, group) =>
           items.length > 0 && (
-            <section key={group} className="flex flex-col gap-4">
-
+            <section key={group} className="flex flex-col">
+              {group !== 1 && <h3 className="course-due-group">{tr(group === 0 ? "moodle:overdue_column" : "moodle:no_due_date")}</h3>}
               <ul className="moodle-due-list list-none p-0">
                 {items.slice(0, allDue ? undefined : 5).map((d) => {
                   const course = overview.courses.find((c) => c.id === d.courseId);
                   return (
                     <li key={d.id}>
                       <ListRow
-                        className="min-h-16"
                         title={
                           <button
                             className="moodle-due-link text-start"
@@ -1058,14 +1058,12 @@ function CoursesBody({
                           </button>
                         }
                         subtitle={
-                          course
-                            ? displayTitle(course.identity, lang, course.fullName)
-                            : tr("moodle:school")
-                        }
-                        meta={group !== 2 &&
-                          <time dateTime={d.dueAt} title={date(d.dueAt)}>
-                            {relative(d.dueAt)}
-                          </time>
+                          <span className="course-due-meta">
+                            {group !== 2 && <time dateTime={d.dueAt} title={date(d.dueAt)} data-urgent={group === 0 || Date.parse(d.dueAt) - Date.now() < 86400000}>
+                              {relative(d.dueAt)}
+                            </time>}
+                            <span>{course ? displayTitle(course.identity, lang, course.fullName) : tr("moodle:school")}</span>
+                          </span>
                         }
                         actions={group !== 2 && remind(d)}
                       />

@@ -126,7 +126,7 @@ describe("Courses", () => {
     const head = host.querySelector<HTMLElement>(".course-head")!;
     expect(getByRole(head, "button", { name: "All courses" })).not.toBeNull();
     const group = getByRole(head, "group", { name: "Course actions" });
-    expect([...group.querySelectorAll("button")].map(button => button.getAttribute("aria-label") ?? button.textContent)).toEqual(["Open in Moodle", "Refresh courses", "More course actions"]);
+    expect([...group.querySelectorAll("button")].map(button => button.getAttribute("aria-label") ?? button.textContent)).toEqual(["Course assistant", "Open in Moodle", "Refresh courses", "More course actions"]);
     expect(head.textContent).not.toContain("Connect school");
     expect(head.querySelector(".planner-entry")).toBeNull();
     expect(host.querySelector(".moodle-hero-next")).toBeNull();
@@ -806,7 +806,6 @@ it('keeps empty count slots, caps the visible number, and orders the accessible 
   expect(host.querySelector('.course-unread-count')?.textContent).toBe('99+');
   expect(host.querySelector('.course-unread-count')?.getAttribute('title')).toBe('120 unread updates');
   for (const slot of ['.course-overdue', '.course-unread-count']) {
-    expect(host.querySelector(slot)?.classList.contains('w-[calc(var(--space-4)*3.5)]')).toBe(true);
     expect(host.querySelector(slot)?.classList.contains('shrink-0')).toBe(true);
   }
   expect(host.querySelector('.course-pin')?.classList.contains('size-[calc(var(--space-3)*3)]')).toBe(true);

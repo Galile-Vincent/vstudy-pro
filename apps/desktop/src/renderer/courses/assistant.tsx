@@ -1,13 +1,15 @@
 import { IconButton } from "@astryxdesign/core";
 import { LayoutPanel, Button } from "@astryxdesign/core";
 import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { createPortal } from "react-dom";
 import { MessageCircle, X } from "lucide-react";
 import { tr } from "../../shared/i18n";
 
 import { CourseAgentPanel } from "./agent";
 
+/** The panel stays in the page's end column; the trigger renders into `triggerSlot` so it sits with the course header actions. */
 export function CourseAssistant(
-  props: ComponentProps<typeof CourseAgentPanel>,
+  { triggerSlot, ...props }: ComponentProps<typeof CourseAgentPanel> & { triggerSlot: HTMLElement | null },
 ) {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
@@ -77,7 +79,7 @@ export function CourseAssistant(
           aria-label={tr("moodle:close_assistant")} icon={<X />} />
         <CourseAgentPanel {...props} onPendingChange={setPending} />
       </LayoutPanel>
-      <Button icon={<MessageCircle />} label={tr("moodle:course_assistant")}
+      {triggerSlot && createPortal(<Button icon={<MessageCircle />} label={tr("moodle:course_assistant")}
         ref={button}
         className="moodle-chat-button"
         onClick={() => (open ? collapse() : setOpen(true))}
@@ -93,7 +95,7 @@ export function CourseAssistant(
             role="img"
           />
         )}
-      </Button>
+      </Button>, triggerSlot)}
     </div>
   );
 }
