@@ -384,3 +384,10 @@ html:is([data-theme=contrast],[data-contrast=more]) .settings-disclosure { outli
 .provider-actions { margin-left: auto; justify-content: flex-end; }
 
 .settings-general-rows > :first-child:not([data-slot="setting-row"]) { padding-block-start:var(--space-3); }
+
+.settings-ai-tools > * { padding-block: var(--space-3); }
+.settings-ai-tools > * + * { border-top: 1px solid var(--line); }
+.settings-ai-connect, .provider-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+.provider-heading > div { display: grid; gap: var(--space-1); }
+.provider-name { font-weight: 600; }
+.settings-ai-note p { margin: 0; }

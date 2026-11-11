@@ -1,7 +1,6 @@
 import { openAiCliSetup } from './ai-cli/entry';
 import { Check } from 'lucide-react';
 import { Button, Dialog, DialogHeader, Switch, TextInput } from '@astryxdesign/core';
-import { ListRow } from './components/ui';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../shared/i18n';
@@ -78,13 +77,13 @@ export function ProviderRow({
   return (
     <section className="provider-row" aria-busy={busy}>
       {busy && !waitingKeychain && <p role="status">{tr('common:checking_provider')}</p>}
-      <ListRow className="flex-wrap" title={providerName[provider.config.id]} subtitle={<>
+      <div className="provider-heading"><div><span className="provider-name">{providerName[provider.config.id]}</span>
           <span className="muted provider-status">
             <span className={`provider-status-dot ${statusTone}`} aria-hidden="true" />
             {hasKey && !isCli && <Check size={14} aria-hidden="true" />}
             <span>{statusText}</span>
           </span>
-        </>} actions={<span className="provider-actions">
+        </div><span className="provider-actions">
           {isCli ? (
             <>
               <Button label={tr('settings:provider_action',{action:tr('ai-cli:wizard'),name:providerName[provider.config.id]})} variant="secondary" size="sm" isDisabled={busy || unsupportedCli} onClick={() => openAiCliSetup(provider.config.id === 'claude-cli' ? 'claude' : provider.config.id === 'codex-cli' ? 'codex' : 'agy')}>{tr('ai-cli:wizard')}</Button>
@@ -102,7 +101,7 @@ export function ProviderRow({
               })}>{tr('settings:test_connection')}</Button>
             </>
           )}
-        </span>} />
+        </span></div>
       {isCli && (
         <>
           {unsupportedCli && <p role="note">{tr('distribution:codex_unavailable')}</p>}
@@ -164,6 +163,7 @@ export function ProviderRow({
 <TextInput
               label={tr('settings:api_key', { provider: providerName[provider.config.id] })}
               isLabelHidden
+              size="sm"
               width="min(100%, 20rem)"
               type="password"
               autoComplete="off"
@@ -204,7 +204,8 @@ export function ProviderRow({
 <TextInput
                 label={tr('common:openai_compatible_base_url')}
                 isLabelHidden
-                width="min(100%, 20rem)"
+                size="sm"
+              width="min(100%, 20rem)"
                 type="url"
                 isRequired
                 value={baseUrl}

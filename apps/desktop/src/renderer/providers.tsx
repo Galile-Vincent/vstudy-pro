@@ -1,11 +1,11 @@
-import { Button, Card, Dialog, DialogHeader, IconButton, Switch, Tab, TabList } from '@astryxdesign/core';
+import { Button, Collapsible, Card, Dialog, DialogHeader, IconButton, Switch, Tab, TabList } from '@astryxdesign/core';
 import { Panel } from './components/panel';
 import { SettingRow } from './components/ui';
 import { useOverlayFocusReturn } from './components/use-overlay-focus-return';
 import { UpdateSettings } from './settings/updates';
 import { AppVersion } from './components/app-version';
 import { aiCliSetupEvent } from './ai-cli/entry';
-import { AiCliInventory } from './ai-cli/inventory';
+import { openAiCliSetup } from './ai-cli/entry';
 import { DocumentSettings } from './settings/documents';
 import { StorageSettings } from "./settings/storage";
 import { AiSetupGuide } from './ai-setup';
@@ -160,17 +160,13 @@ export function ProviderSettings({
                   <UsageSettings />
                 ) : (
                   <>
-                    <AiCliInventory settings />
-                    <div className="settings-intro">
-                      <p className="settings-intro-lead">{tr('novice:privacy_lead')}</p>
-                      <p>{tr('novice:privacy')}</p>
-                    </div>
-                    <details className="settings-disclosure">
-                      <summary>{tr('novice:setup_title')}</summary>
-                      <div className="settings-disclosure-body">
+                    <Panel title={tr('ai-cli:tools')}><div className="settings-ai-tools">
+                      <div className="settings-ai-connect"><span>{tr('ai-cli:summary_unconnected')}</span><Button label={tr('ai-cli:title')} variant="primary" size="sm" onClick={() => openAiCliSetup()} /></div>
+                      <div className="settings-ai-note muted"><p>{tr('novice:privacy_lead')}</p><p>{tr('novice:privacy')}</p></div>
+                      <div className="settings-ai-guide"><Collapsible trigger={tr('novice:setup_title')}>
                         <AiSetupGuide onClose={requestClose} leadingSteps={[tr('novice:step_access'), tr('novice:step_key')]} />
-                      </div>
-                    </details>
+                      </Collapsible></div>
+                    </div></Panel>
                     <Panel title={tr('settings:api_keys')}><div className="settings-stack settings-provider-rows">
                       {providers.filter(provider => provider.config.kind === 'api').map(provider => (
                         <ProviderRow settingsView key={provider.config.id} provider={provider} onRefresh={onRefresh} />
