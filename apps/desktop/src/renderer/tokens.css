@@ -137,7 +137,7 @@ button.secondary:not(.ghost,.primary) {
 }
 button.secondary:not(.ghost,.primary):is(:hover,[aria-expanded=true],[aria-pressed=true]) { background:var(--active); color:var(--ink); }
 :is(button.primary) { box-shadow:none; transition:background-color var(--motion-fast) var(--ease-standard),transform 150ms ease-out; }
-:is(button.secondary,button.primary):not(:disabled,[aria-disabled=true]):active { transform:scale(.97); }
+:is(button.secondary,button.primary):not(:disabled,[aria-disabled=true]):active { transform:scale(.98); }
 @media(prefers-reduced-motion:reduce) { :is(button.secondary,button.primary):not(:disabled):active { transform:none; } }
 
 /* Floating overlays are the only shadowed surfaces: menus and popovers use --shadow-med, dialogs --shadow-high. */

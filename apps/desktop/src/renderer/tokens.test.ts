@@ -17,7 +17,7 @@ describe('elevation policy', () => {
     expect(css).not.toMatch(/backdrop-filter:\s*(?!none)/);
   });
 
-  it('shadows only floating overlays: menus and popovers medium, dialogs high', () => {
+  it('keeps floating overlay shadows on the Astryx scale', () => {
     expect(css).toMatch(/\[data-slot=popover-content\][^{]*\.conversation-list-popover\) \{[^}]*box-shadow:var\(--shadow-med\)/);
     expect(css).toMatch(/\.settings-dialog\) \{[^}]*box-shadow:var\(--shadow-high\)/);
   });
@@ -26,6 +26,12 @@ describe('elevation policy', () => {
     expect(css).not.toMatch(/--r-(?:xs|sm|md|lg|xl|pill):/);
     expect(css).toContain('--r-outer:var(--radius-container);');
   });
+});
+
+it('defines adaptive app panel depth independently of overlay shadows', () => {
+  expect(css).toContain('--panel-shadow:0 1px 3px color-mix(in oklab,var(--ink) 5%,transparent)');
+  expect(css).toContain('--panel-shadow-hover:0 2px 5px color-mix(in oklab,var(--ink) 6%,transparent)');
+  expect(css).toContain('--page-field:color-mix(in oklab,var(--surface) 97%,var(--ink))');
 });
 
 describe('border strength', () => {
