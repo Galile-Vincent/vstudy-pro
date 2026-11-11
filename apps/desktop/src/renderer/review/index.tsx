@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useId, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { BookOpen, MoreHorizontal, RefreshCw } from "lucide-react";
+import { ChevronRight, BookOpen, MoreHorizontal, RefreshCw } from "lucide-react";
 import type { Conversation } from "../../shared/domain";
 import type { IpcResponse } from "../../shared/ipc";
 import { MAX_REVIEW_CONCEPTS } from "../../shared/review-artifacts";
@@ -92,6 +92,13 @@ function useOnline() {
   }, []);
   return online;
 }
+function ReviewDisclosure({ label, open = false, children, className }: { label: string; open?: boolean; children: ReactNode; className?: string }) {
+  const [expanded, setExpanded] = useState(open);
+  const id = useId();
+  useEffect(() => { setExpanded(open); }, [open]);
+  return <div className={className}><Button variant="ghost" label={label} icon={<ChevronRight aria-hidden="true" style={{ transform: expanded ? "rotate(90deg)" : undefined }} />} aria-expanded={expanded} aria-controls={id} onClick={() => setExpanded(!expanded)} /><div id={id} hidden={!expanded}>{children}</div></div>;
+}
+
 export function ReviewView() {
   useTranslation();
   const { navigate, route } = useNavigate();
@@ -394,8 +401,7 @@ function CourseTools({
     }
   };
   return (
-    <details className="review-tools" open={open || undefined}>
-      <summary>{tr("review:manage_courses")}</summary>
+    <ReviewDisclosure className="review-tools" open={open} label={tr("review:manage_courses")}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -483,7 +489,7 @@ function CourseTools({
           />
         </p>
       )}
-    </details>
+    </ReviewDisclosure>
   );
 }
 function Inbox({
@@ -782,11 +788,10 @@ function Recent({
           action: <Button variant="secondary" label={tr("review:ask_question")} onClick={() => navigate("home")} />,
         }}
       />
-      <details>
-        <summary>{tr("review:related_units")}</summary>
+      <ReviewDisclosure label={tr("review:related_units")}>
         <PageState page={units} />
         <PageState page={observations} />
-      </details>
+      </ReviewDisclosure>
     </section>
   );
 }

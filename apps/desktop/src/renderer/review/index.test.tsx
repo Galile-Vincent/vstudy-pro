@@ -148,7 +148,7 @@ it('opens course management on an empty state and ignores a student without Mood
   fixture({ courses: [], moodle: new Error('no account') });
   render(<ReviewView />);
   const summary = await screen.findByText(en.manage_courses);
-  await waitFor(() => expect(summary.closest('details')!.open).toBe(true));
+  await waitFor(() => expect(summary.closest("button")?.getAttribute("aria-expanded")).toBe("true"));
   expect(screen.queryByText(en.error)).toBeNull();
   expect(invoke).not.toHaveBeenCalledWith('review:courses:materialize', expect.anything());
 });
