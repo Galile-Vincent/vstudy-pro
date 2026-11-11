@@ -54,3 +54,5 @@ html[data-input-modality=keyboard] .appearance-layout :is(.scheme-card,.theme-se
 
 
 .theme-editor .dialog-actions { position:sticky; bottom:0; padding-block:var(--spacing-3); background:var(--color-background-surface); }
+
+.appearance-layout :is(.scheme-grid,.themes-grid) { padding-block-start:var(--space-3); }
