@@ -142,5 +142,6 @@
   "dismiss": "忽略",
   "revoke_done": "已撤銷 {{name}} 的存取權。",
   "client_action": "{{action}} — {{name}}",
-  "deny_help": "「拒絕」會立即拒絕請求。如需先查看內容，請選擇「檢視」。"
+  "deny_help": "「拒絕」會立即拒絕請求。如需先查看內容，請選擇「檢視」。",
+  "connections": "連線"
 }

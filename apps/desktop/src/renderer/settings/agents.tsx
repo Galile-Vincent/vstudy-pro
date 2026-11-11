@@ -28,14 +28,13 @@ export function AgentsSettings() {
     {agents.connection === 'offline' && <div role="alert"><p>{tr('agents:offline')}</p><Button label={tr('agents:retry')} variant="secondary" isDisabled={agents.pending} onClick={() => void agents.refresh()} /></div>}
     {agents.state?.unavailable && <p role="alert">{tr('agents:unavailable')}</p>}
     {agents.failed && <p role="alert">{tr('agents:action_error')}</p>}
-    <Panel title={tr('agents:master')}><div className="settings-stack settings-general-rows">
+    <Panel title={tr('agents:connections')}><div className="settings-stack settings-general-rows">
       <SettingRow label={tr('agents:master')} description={tr('agents:master_help')}>
         <Switch label={tr('agents:master')} isLabelHidden value={agents.state?.enabled ?? false} isDisabled={agents.pending || agents.connection !== 'ready'} onChange={enabled => void agents.act('mcp:enable', { enabled })} />
       </SettingRow>
+      {agents.state && <SettingRow label={tr(agents.state.enabled ? 'agents:master' : 'agents:disabled')}><Button label={tr('agents:connect')} variant="secondary" isDisabled={agents.pending || agents.connection !== 'ready'} onClick={() => setConnecting(true)} /></SettingRow>}
     </div></Panel>
     {agents.state && <>
-      {!agents.state.enabled && <p className="agents-muted">{tr('agents:disabled')}</p>}
-      <div className="agents-connect-entry"><Button label={tr('agents:connect')} variant="secondary" isDisabled={agents.pending || agents.connection !== 'ready'} onClick={() => setConnecting(true)} /></div>
       {agents.state.enabled && <section className="agents-section">
         <h3>{tr('agents:waiting')}</h3>
         <p>{tr('agents:deny_help')}</p>
