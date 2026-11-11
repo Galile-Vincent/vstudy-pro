@@ -1,5 +1,6 @@
-import { Section, SettingRow } from '../components/ui';
-import { Button, Card, NumberInput, TextArea } from '@astryxdesign/core';
+import { Panel } from '../components/panel';
+import { SettingRow } from '../components/ui';
+import { Button, NumberInput, TextArea } from '@astryxdesign/core';
 import { useFormat } from '../i18n';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
@@ -90,9 +91,9 @@ export function UsageSettings() {
         <p>{balanceNote()}</p>
       </div>
       <UsageDashboard documents={documents} />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--space-6)] items-start">
-        <Section level={3} title={tr('common:provider_rate_limits')}>
-          <Card className="flex flex-col gap-[var(--space-4)] p-[var(--space-4)]">
+      <div className="grid grid-cols-1 gap-[var(--space-6)] items-start">
+        <Panel title={tr('common:provider_rate_limits')}>
+          <div className="settings-stack settings-general-rows">
             <div>
               {!limits.length && (
                 <p className="muted">
@@ -127,11 +128,11 @@ export function UsageSettings() {
                 </p>
               ))}
             </div>
-          </Card>
-        </Section>
+          </div>
+        </Panel>
         {settings && (
-          <Section level={3} title={tr('settings:budgets')}>
-            <Card className="flex flex-col gap-[var(--space-4)] p-[var(--space-4)]">
+          <Panel title={tr('settings:budgets')}>
+            <div className="settings-stack settings-general-rows">
               <p>{tr('usage:budget_help')}</p>
               <NumberInput
                 id="usage-monthly_budget_usd"
@@ -211,8 +212,8 @@ export function UsageSettings() {
                 }}
               />
             </div>
-          </Card>
-        </Section>
+          </div>
+        </Panel>
       )}
     </div>
       {status && <p role="status">{status}</p>}

@@ -385,3 +385,18 @@
   .subscription-progress .astryx-progress-bar-track { outline:1px solid CanvasText; background:Canvas; }
   .subscription-progress .astryx-progress-bar-fill { background:Highlight; forced-color-adjust:none; }
 }
+
+/* Settings summaries share a quiet, readable tile surface. */
+.usage-summary [data-slot=stat],
+.usage-dashboard .subscription-window {
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-container);
+  background: var(--card-surface);
+  font-variant-numeric: tabular-nums;
+}
+.usage-summary [data-slot=stat] { text-align: end; }
+.usage-dashboard .subscription-windows { gap: var(--space-4); margin-top: var(--space-3); }
+.usage-dashboard .subscription-provider { margin-top: var(--space-4); }
+.usage-dashboard .subscription-window > span { font-size: var(--type-sm); gap: var(--space-2); }
+.usage-dashboard .subscription-meters small { font-size: var(--type-xs); }
