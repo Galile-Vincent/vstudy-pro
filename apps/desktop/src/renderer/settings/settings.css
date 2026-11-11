@@ -376,3 +376,9 @@ html:is([data-theme=contrast],[data-contrast=more]) .settings-disclosure { outli
 .settings-general-rows > [data-slot=setting-row] { padding-block: var(--space-3); }
 .settings-general-rows > [data-slot=setting-row] + [data-slot=setting-row] { border-top: 1px solid var(--line); }
 .settings-general-rows > [role=status]:empty { display: none; }
+
+/* Provider groups share the General pane row rhythm. */
+.settings-provider-rows { gap: 0; }
+.settings-dialog .settings-provider-rows > .provider-row { padding-block: var(--space-3); }
+.settings-provider-rows > .provider-row + .provider-row { border-top: 1px solid var(--line); }
+.provider-actions { margin-left: auto; justify-content: flex-end; }
