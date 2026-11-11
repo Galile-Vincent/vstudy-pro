@@ -8,12 +8,13 @@ import { type Settings } from '../../shared';
 import { builtinThemes, resolveTheme, type ThemePack } from '../../shared/themes';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
-import { Section, SettingRow, SegmentedControl, SegmentedControlItem } from '../components/ui';
+import { SettingRow, SegmentedControl, SegmentedControlItem } from '../components/ui';
 import { Select } from '../components/select';
-import { Button, Card, Dialog, DialogHeader } from '@astryxdesign/core';
+import { Button, Dialog, DialogHeader } from '@astryxdesign/core';
 import { applyAppearance } from './apply-appearance';
 import { ThemeEditor, ThemeTransfer } from './theme-editor';
 import './appearance.css';
+import { Panel } from '../components/panel';
 import { ThemePreview } from './theme-preview';
 
 export function AppearanceSection() {
@@ -86,7 +87,7 @@ export function AppearanceSection() {
       onPointerUp={e => commitContrast(Number(e.currentTarget.value))} onKeyDown={e => {if (e.key === 'Enter' || e.key === 'Escape') commits.flush('contrast');}} onBlur={e => commitContrast(Number(e.currentTarget.value))}/></label>
   </SettingRow>;
   return <div className="appearance-layout">
-    <Section level={3} title={tr('themes:scheme')}>
+    <Panel title={tr('themes:scheme')}>
       <div className="scheme-grid">
         {(['system','light','dark'] as const).map(scheme => <button type="button" key={scheme} className="scheme-card" ref={scheme === 'system' ? schemeRef : undefined}
           aria-pressed={settings.colorScheme === scheme} onClick={() => void update({colorScheme:scheme})}>
@@ -94,19 +95,17 @@ export function AppearanceSection() {
           <span className="scheme-card-label">{tr(`themes:${scheme}`)}<span className="scheme-card-check" aria-hidden="true">{settings.colorScheme === scheme && <Check/>}</span></span>
         </button>)}
       </div>
-    </Section>
-    <Card padding={4} className="settings-stack">
-      {contrastRow}
-    </Card>
-    <Section level={3} title={tr('settings:text_reading')}><Card padding={4} className="settings-stack">
+      <div className="settings-stack settings-general-rows">{contrastRow}</div>
+    </Panel>
+    <Panel title={tr('settings:text_reading')}><div className="settings-stack settings-general-rows">
       {(['uiScale','density','readerFont','readerSize'] as const).map(field => <SettingRow key={field} label={tr(`settings:${field}`)}>
         {field === 'readerFont' ? <Select id="appearance-reader-font" aria-label={tr('settings:readerFont')} width={192} value={settings.readerFont} onChange={e => void update({readerFont:e.target.value as Settings['readerFont']})}>
           {['system','serif','mono'].map(v => <option key={v} value={v}>{tr(`settings:${v}`)}</option>)}
         </Select> : field === 'uiScale' ? toggles(field,[100,125,150,200]) : field === 'density' ? toggles(field,['comfortable','compact']) : toggles(field,['s','m','l','xl'])}
       </SettingRow>)}
       <div className="appearance-preview"><h3>{tr('settings:sampleTitle')}</h3><p className="preview-reader">{tr('settings:sampleReader')}<br/>{tr('settings:sampleCjk')}</p><p className="preview-chat">{tr('settings:sampleChat')}</p><span className="preview-selected">{tr('themes:selection')}</span></div>
-    </Card></Section>
-    <Section level={3} title={tr('themes:themes')}>
+    </div></Panel>
+    <Panel title={tr('themes:themes')}>
       <div className="themes-grid">
         {packs.map(pack => <div className="theme-card" key={pack.id} data-selected={settings.themeId === pack.id}>
           <button type="button" className="theme-select" aria-pressed={settings.themeId === pack.id} onClick={() => void update({themeId:pack.id})}>
@@ -115,22 +114,22 @@ export function AppearanceSection() {
             {settings.themeId === pack.id && <Check className="theme-check" aria-hidden="true"/>}
           </button>
           <div className="theme-card-tools">
-            {settings.customThemes.some(t => t.id === pack.id) && <button type="button" aria-label={tr('themes:delete_named',{name:pack.name})} onClick={() => {setError('');setMessage('');setDeleting(pack);}}><Trash2/></button>}
-            {settings.customThemes.some(t => t.id === pack.id) && <button type="button" aria-label={tr('themes:edit_named',{name:pack.name})} onClick={() => setEditor(pack)}><Pencil/></button>}
-            <button type="button" aria-label={tr('themes:export_named',{name:pack.name})} onClick={() => setTransfer({...pack,id:`custom-${crypto.randomUUID()}`})}><Copy/></button>
+            {settings.customThemes.some(t => t.id === pack.id) && <button type="button" title={tr('themes:delete_named',{name:pack.name})} aria-label={tr('themes:delete_named',{name:pack.name})} onClick={() => {setError('');setMessage('');setDeleting(pack);}}><Trash2/></button>}
+            {settings.customThemes.some(t => t.id === pack.id) && <button type="button" title={tr('themes:edit_named',{name:pack.name})} aria-label={tr('themes:edit_named',{name:pack.name})} onClick={() => setEditor(pack)}><Pencil/></button>}
+            <button type="button" title={tr('themes:export_named',{name:pack.name})} aria-label={tr('themes:export_named',{name:pack.name})} onClick={() => setTransfer({...pack,id:`custom-${crypto.randomUUID()}`})}><Copy/></button>
           </div>
         </div>)}
       </div>
-    </Section>
+    </Panel>
     <details className="settings-disclosure">
       <summary>{tr('settings:advanced')}</summary>
       <div className="settings-disclosure-body">
-        <Card padding={4} className="settings-stack">
+        <div className="settings-stack settings-general-rows">
           <SettingRow label={tr('themes:custom')} description={tr('themes:custom_hint')}>
             <Button size="sm" variant="secondary" label={tr('themes:create')} icon={<Pencil />} isDisabled={settings.customThemes.length >= 30} onClick={() => setEditor({...theme, id:`custom-${crypto.randomUUID()}`,name:tr('themes:untitled')})} />
             <Button size="sm" variant="secondary" label={tr('themes:add')} icon={<Plus />} isDisabled={settings.customThemes.length >= 30} onClick={() => setTransfer('import')} />
           </SettingRow>
-        </Card>
+        </div>
       </div>
     </details>
     {settings.customThemes.length >= 30 && <p role="status">{tr('themes:limit')}</p>}
