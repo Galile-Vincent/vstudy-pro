@@ -52,3 +52,5 @@
 .planner summary { padding-block: var(--space-2); }
 .planner summary:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 4px; }
 .planner-task-list [data-slot="list-row"] { min-width: 0; }
+.planner-exam strong { display:block; font-weight:500; }
+.planner-exam p { margin:0; color:var(--muted); font-size:var(--type-base); }

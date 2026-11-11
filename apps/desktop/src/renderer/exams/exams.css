@@ -54,7 +54,7 @@ fieldset:disabled .exam-choice { opacity:var(--opacity-disabled); cursor:default
 .exam-documents .exam-choice:has(:checked) { background:var(--active); }
 .exam-history { gap:0; }
 .exam-history > li + li { border-block-start:1px solid var(--line); }
-.exam-footer { border:1px solid var(--line); background:var(--card-surface); }
+.exam-footer { border:1px solid var(--line); background:var(--card-surface,var(--surface)); }
 
 .exam-choice:has(input:disabled) { opacity:var(--opacity-disabled); cursor:default; }
 .exam-choice:has(input:focus-visible) { outline:2px solid var(--focus); outline-offset:2px; }

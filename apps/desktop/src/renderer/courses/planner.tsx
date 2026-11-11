@@ -111,9 +111,9 @@ function PlannerContent({ courses, deadlines, api = plannerApi, clock = Date.now
           </li>)}</ul>
         </Panel>
         {snapshot.tasks.some(t => plannerTaskDone(t, deadlines)) && <div data-completed-tasks><Panel title={tr("planner:status_done")}><ul className="planner-task-list">{snapshot.tasks.filter(t => plannerTaskDone(t, deadlines)).map(t => <li key={t.id}><ListRow title={t.title} /></li>)}</ul></Panel></div>}
-        <Panel title={tr("planner:source_deadlines")}><ul className="planner-task-list">{sourceDeadlines.map(d => <li key={d.id}><ListRow title={d.title} subtitle={<><span>{courseTitle(d.courseId)}</span><time dateTime={d.dueAt} data-overdue={Date.parse(d.dueAt) < now}>{plannerDate(d.dueAt)}</time>
+        {sourceDeadlines.length > 0 && <Panel title={tr("planner:source_deadlines")}><ul className="planner-task-list">{sourceDeadlines.map(d => <li key={d.id}><ListRow title={d.title} subtitle={<><span>{courseTitle(d.courseId)}</span><time dateTime={d.dueAt} data-overdue={Date.parse(d.dueAt) < now}>{plannerDate(d.dueAt)}</time>
           {Date.parse(d.dueAt) < now && <span>{tr("planner:overdue")}</span>}{d.submitted === null && <span>{tr("planner:submitted_unknown")}</span>}
-        </>} /></li>)}</ul></Panel>
+        </>} /></li>)}</ul></Panel>}
         <Panel title={tr("planner:exams")}>{!exams.length && <p className="planner-muted">{tr("planner:empty_exams")}</p>}
           {exams.map(exam => <article className="planner-exam" key={exam.id}><strong>{tr("planner:countdown", { title: exam.title, days: Math.max(0, Math.round((Date.parse(localDay(exam.date, zone)) - Date.parse(today)) / 86400000)) })}</strong>
             <p>{courseTitle(exam.courseId)} · {plannerDate(exam.date)}</p><p>{exam.scopeTopics.join(" · ") || tr("planner:scope_unknown")}</p></article>)}
