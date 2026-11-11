@@ -74,7 +74,8 @@
  border:0;
 }
 .workspace .reading-pane .pane-toolbar { flex-wrap:wrap; justify-content:flex-start; }
-.workspace .reading-pane .pane-toolbar > .eyebrow { flex:1; min-width:0; overflow-wrap:anywhere; }
+.workspace .reading-pane .pane-toolbar > .eyebrow { flex:1 1 0; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.workspace .reading-pane .pane-toolbar > .reader-display { display:flex; gap:var(--space-1); }
 .workspace .workspace-body .resize-handle {
  position:relative;
  flex:0 0 var(--space-3);
@@ -227,17 +228,17 @@ html:not([data-input-modality=keyboard]) .workspace .reading-pane:focus { outlin
 :is(.workspace,.web-chat-local) .aui-user-message-content { border-radius:var(--radius-chat); }
 :is(.workspace,.web-chat-local) [data-role=assistant] { border-radius:var(--radius-container); background:var(--color-background-card); }
 :is(.workspace,.web-chat-local) :is(.blank-chat,.chat-start) > * { animation:none; }
-:is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],summary):not(.paragraph-action,.section-action,[data-slot=document-citation],.model-controls *) { min-height:40px; min-width:40px; }
+:is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],summary):not(.paragraph-action,.section-action,[data-slot=document-citation],.model-controls *,[class*=astryx-]) { min-height:40px; min-width:40px; }
 :is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],input,textarea,summary):focus-visible {
  outline:var(--focus-outline-width) var(--focus-outline-style) var(--focus-outline-color);
  outline-offset:var(--focus-outline-offset);
 }
-:is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) button { transition:transform 150ms ease-out; }
-:is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) button:not(:disabled):not([aria-disabled=true]):active { transform:scale(.97); }
+:is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) button:not([class*=astryx-]) { transition:transform 150ms ease-out; }
+:is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) button:not([class*=astryx-]):not(:disabled):not([aria-disabled=true]):active { transform:scale(.97); }
 .model-controls { flex-wrap:wrap; gap:var(--spacing-2); }
 .model-controls [role=combobox] { max-width:none; }
 @media (pointer:coarse) {
- :is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],summary):not(.paragraph-action,.section-action,[data-slot=document-citation],.model-controls *) { min-height:44px; min-width:44px; }
+ :is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],summary):not(.paragraph-action,.section-action,[data-slot=document-citation],.model-controls *,[class*=astryx-]) { min-height:44px; min-width:44px; }
 }
 @media (prefers-reduced-motion:reduce) {
  :is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) button { transition:none; }

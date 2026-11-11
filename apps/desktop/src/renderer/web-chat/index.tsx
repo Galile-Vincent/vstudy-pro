@@ -7,7 +7,7 @@ import { tr } from '../../shared/i18n';
 import { type WebChatProvider, type WebChatState } from '../../shared/web-chat';
 import { hasNavigationOverlay } from '../shell/history-swipe-navigation';
 import { Button } from "@astryxdesign/core";
-import { PageContainer } from '../components/ui';
+import { PageContainer, PageHeader } from '../components/ui';
 import { Layout, LayoutHeader, LayoutContent, LayoutFooter, SegmentedControl, SegmentedControlItem } from '@astryxdesign/core';
 import { DesktopChat } from './desktop-chat';
 import './web-chat.css';
@@ -22,7 +22,7 @@ export function WebChatHub() {
   const label=(value:Tab)=>tr(`web-chat:${value}`);
   const launcher=<SegmentedControl label={tr('web-chat:choose')} value={tab} onChange={value => { if (value) choose(value as Tab); }} aria-label={tr('web-chat:choose')}>{tabs.map(value=><SegmentedControlItem key={value} value={value} id={`web-chat-tab-${value}`} label={label(value)}/>)}</SegmentedControl>;
   return <PageContainer as="main" className="web-chat-hub" aria-label={tr('web-chat:title')}>
-    <Layout padding={0} header={<LayoutHeader height={56} padding={4}><div className="flex items-center justify-between gap-4"><div><h1>{tr('web-chat:title')}</h1><p>{tr('web-chat:subtitle')}</p></div><div ref={setToolbar} className="min-w-0 max-w-full"/></div></LayoutHeader>} content={<LayoutContent padding={0} isScrollable={false}><DesktopChat active launcher={launcher} toolbarSlot={toolbar}/></LayoutContent>}/>
+    <Layout padding={0} header={<LayoutHeader height="auto" padding={0}><PageHeader title={tr('web-chat:title')} description={tr('web-chat:subtitle')} actions={<div ref={setToolbar} className="min-w-0 max-w-full"/>}/></LayoutHeader>} content={<LayoutContent padding={0} isScrollable={false}><DesktopChat active launcher={launcher} toolbarSlot={toolbar}/></LayoutContent>}/>
   </PageContainer>;
 }
 export function HostedChat({provider,compact=false}:{provider:WebChatProvider;compact?:boolean}) {

@@ -41,7 +41,6 @@
 
 .library-toolbar { flex-wrap:wrap; gap:var(--space-3); }
 .library-toolbar > div { display:contents; }
-.library-view .library-search { min-height:40px; border-radius:var(--radius-element); }
 .library-mode { flex:none; width:max-content; }
 .library-mode button { white-space:nowrap; }
 .library-mode svg { width:var(--space-4); height:var(--space-4); }
@@ -50,3 +49,28 @@
 }
 
 .library-results[data-view=grid] .document-forms { flex-wrap:wrap; white-space:normal; overflow-wrap:anywhere; }
+
+/* Documents and folders share one panel that fills the page; the result list scrolls inside it. */
+.library-search { flex:1 1 12rem; min-width:10rem; }
+.library-view [data-slot=page-header] { padding-block-end:var(--space-6); }
+.library-section { display:flex; flex:0 1 auto; flex-direction:column; min-height:0; }
+.library-section > * { display:flex; flex:0 1 auto; flex-direction:column; min-height:0; }
+.library-section > * > section { display:flex; flex:0 1 auto; flex-direction:column; min-height:0; }
+.library-section .ui-panel-body { display:flex; flex:0 1 auto; flex-direction:column; gap:var(--space-3); min-height:0; padding-block:var(--space-3) 0; }
+.library-section :is(.library-results,.library-folders) { flex:0 1 auto; }
+.library-section .library-results,.library-section .library-folders { margin-inline:calc(var(--space-4) * -1); padding-inline:var(--space-4); }
+.library-section .library-empty { align-self:center; margin-block:var(--space-8); }
+
+.library-results[data-view=list] .library-document { border-radius:0; padding-inline:0; }
+.library-results[data-view=list] .library-document:not([data-index="0"]) { border-block-start:1px solid var(--line); }
+.document-title-cell { display:flex; align-items:center; gap:var(--space-2); }
+.document-title-text { flex:1; min-width:0; }
+.document-gutter { flex:none; }
+
+.folder-grid,.library-folders .folder-grid { display:flex; flex-direction:column; gap:0; }
+.folder-grid > li + li { border-block-start:1px solid var(--line); }
+.folder-grid .folder-row { min-height:0; padding:var(--space-3) 0; border-radius:0; }
+.folder-grid .folder-row:hover { background:var(--color-overlay-hover); }
+.folder-grid .folder-row-icon { width:var(--space-5); height:var(--space-5); color:var(--muted); }
+.course-folder-meta > span::before { content:"·"; margin-inline-end:var(--space-2); }
+.library-section :is(.library-toolbar,#library-filter-panel,.filter-chips) { flex:none; }

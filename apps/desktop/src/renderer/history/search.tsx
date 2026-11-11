@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Dialog, DialogHeader } from "@astryxdesign/core";
+import { Button, Dialog, DialogHeader } from "@astryxdesign/core";
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
@@ -194,7 +194,7 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
     const choose = () => set(chip === 'pinned'
       ? { pinned: filters.pinned ? undefined : true }
       : { scope: chip, pinned: undefined, courseIds: courseId ? [courseId] : undefined, documentId });
-    return <button key={chip} aria-pressed={pressed} onClick={choose}>{tr('history:' + chip)}</button>;
+    return <Button key={chip} variant={pressed ? 'secondary' : 'ghost'} aria-pressed={pressed} label={tr('history:' + chip)} onClick={choose}/>;
   })}/>
   <details className="history-filters"><summary>{tr('history:more_filters')}</summary><div className="history-filter-grid">
    <FormField label={tr('history:course')}>{field => <select {...field} value={filters.courseIds?.[0] ?? ''} onChange={e => set({ courseIds: e.target.value ? [e.target.value] : undefined })}><option value="">{tr('history:all')}</option>{facets.courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}</select>}</FormField>
@@ -209,18 +209,18 @@ function SearchContent({ onOpen, documentId, courseId, compact = false, onFocusF
    <label className="history-check"><input type="checkbox" checked={!!filters.hasCitations} onChange={e => set({ hasCitations: e.target.checked ? true : undefined })}/>{tr('history:citations')}</label>
    <label className="history-check"><input type="checkbox" checked={grouped} onChange={e => setGrouped(e.target.checked)}/>{tr('history:group_courses')}</label>
   </div></details>
-  {undo && <div role="status" className="history-undo">{tr('history:updated')}<button ref={undoButton} onClick={() => { afterDelete.current = null; void desktop.invoke('chats:update', { conversationId: undo.id, patch: undo.patch }).then(() => { leaveUndo(); setUndo(null); restoreRow(undo.restore); setRevision(n => n + 1); window.dispatchEvent(new Event('vstudy:history-changed')); }).catch(() => setError(true)); }}>{tr('history:undo')}</button></div>}
-  {error && <p role="alert">{tr('history:error')} <button onClick={() => setRevision(n => n + 1)}>{tr('common:retry')}</button></p>}
+  {undo && <div role="status" className="history-undo">{tr('history:updated')}<Button ref={undoButton} variant="secondary" label={tr('history:undo')} onClick={() => { afterDelete.current = null; void desktop.invoke('chats:update', { conversationId: undo.id, patch: undo.patch }).then(() => { leaveUndo(); setUndo(null); restoreRow(undo.restore); setRevision(n => n + 1); window.dispatchEvent(new Event('vstudy:history-changed')); }).catch(() => setError(true)); }}/></div>}
+  {error && <p role="alert">{tr('history:error')} <Button variant="secondary" label={tr('common:retry')} onClick={() => setRevision(n => n + 1)}/></p>}
   <div className="history-results" ref={resultsList} aria-busy={loading}>
    <p role="status" className={searching ? undefined : 'sr-only'}>{searching ? tr('history:searching') : announcement}</p>
    {!loading && !page.items.length && !error && <EmptyState headingLevel={2} icon={<Search size={28}/>} title={tr(filters.query ? 'history:no_results' : 'history:empty')} description={tr(filters.query ? 'history:no_results_hint' : 'history:empty_hint')}/>}
    {<HistoryResults items={page.items} onOpen={onOpen} onUpdate={(h, p) => { void update(h, p); }} onRename={h => { setTitle(h.title); setRenaming(h); }} groupByCourse={grouped}/>}
-   {page.nextCursor && <button disabled={loading} onClick={() => void more()}>{tr('history:more')}</button>}
+   {page.nextCursor && <Button variant="secondary" isDisabled={loading} label={tr('history:more')} onClick={() => void more()}/>}
   </div>
   <>{!!renaming && <Dialog aria-describedby={dialogDescriptionId} role="dialog" isOpen={!!renaming} onOpenChange={open => { if (!open)
     setRenaming(null); }} ><DialogHeader title={<>{tr('common:rename')}</>} /><div id={dialogDescriptionId} className="dialog-description">{tr('history:rename_hint')}</div><form onSubmit={e => { e.preventDefault(); if (renaming && title.trim()) {
     void update(renaming, { title: title.trim() });
     setRenaming(null);
-  } }}><input autoFocus aria-label={tr('common:rename_thread')} {...{maxLength: 300}} value={title} onChange={e => setTitle(e.target.value)}/><button type="submit" disabled={!title.trim()}>{tr('history:save')}</button></form></Dialog>}</>
+  } }}><input autoFocus aria-label={tr('common:rename_thread')} {...{maxLength: 300}} value={title} onChange={e => setTitle(e.target.value)}/><Button type="submit" variant="primary" isDisabled={!title.trim()} label={tr('history:save')}/></form></Dialog>}</>
  </div>;
 }

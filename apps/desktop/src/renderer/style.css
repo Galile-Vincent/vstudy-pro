@@ -236,7 +236,7 @@ h3 {
   background: transparent;
   border-color: transparent;
 }
-.pane-toolbar button {
+.pane-toolbar button:not([class*="astryx-"]) {
   padding: 2px 6px;
   font-size: 1rem;
   border-color: transparent;

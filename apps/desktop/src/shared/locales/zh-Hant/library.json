@@ -126,6 +126,8 @@
   "documentCount_one": "{{formatted}} 份文件",
   "documentCount_other": "{{formatted}} 份文件",
   "pages": "{{formatted}} 頁",
+  "pages_one": "{{formatted}} 頁",
+  "pages_other": "{{formatted}} 頁",
   "noFolders": "尚無資料夾",
   "customDates": "自訂日期⋯",
   "unknown_size": "大小不明",

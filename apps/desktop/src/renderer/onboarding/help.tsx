@@ -1,6 +1,7 @@
 /** Global Help entry points and contextual, profile-local learning guidance. */
-import { Button, Card, Dialog, DialogHeader, DropdownMenu, IconButton, Popover, ProgressBar, SegmentedControl, SegmentedControlItem } from '@astryxdesign/core';
+import { Button, Dialog, DialogHeader, DropdownMenu, IconButton, Popover, ProgressBar, SegmentedControl, SegmentedControlItem } from '@astryxdesign/core';
 import { ListRow, Section } from '../components/ui';
+import { Panel } from '../components/panel';
 import { Brand } from '../components/brand';
 import { useEffect, useRef, useState } from 'react';
 import { Check, CircleHelp, X } from 'lucide-react';
@@ -128,11 +129,10 @@ export function GettingStarted({ detailed = false, dialogTitle = false, onNaviga
       </div>
     );
   }
-  const body = (
-    <Section
-      title={tr('onboarding:checklist')}
-      actions={<span>{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>}
-    >
+  const title = tr('onboarding:checklist');
+  const count = <span className="text-[var(--muted)]">{tr('onboarding:checklist_progress', { current: progress.done.length, total: items.length })}</span>;
+  const content = (
+    <>
       <p>{tr('onboarding:checklist_body')}</p>
       <ProgressBar
         className="art-reader-setup-progress"
@@ -175,9 +175,11 @@ export function GettingStarted({ detailed = false, dialogTitle = false, onNaviga
         />
       )}
       {error && <p role="alert">{error}</p>}
-    </Section>
+    </>
   );
-  return dialogTitle ? body : <Card padding={6}>{body}</Card>;
+  return dialogTitle
+    ? <Section title={title} actions={count}>{content}</Section>
+    : <Panel title={title} actions={count}><div className="grid gap-[var(--space-3)] py-[var(--space-3)]">{content}</div></Panel>;
 }
 export function ContextCoach({ inline = false }: { inline?: boolean }) {
   useTranslation();
@@ -193,6 +195,6 @@ export function ContextCoach({ inline = false }: { inline?: boolean }) {
     <Button variant="ghost" label={tr('onboarding:help_walkthroughs')} onClick={() => openLearningHelp('walkthroughs')}/>
     <IconButton variant="ghost" label={tr('onboarding:dismiss_tip')} icon={<X size={16}/>} onClick={dismiss}/>
     {error && <p role="alert">{error}</p>}
-  </div>}><Button variant="ghost" size="sm" className="art-reader-coach-trigger" label={tr('art-reader:tip')} icon={<CircleHelp size={15}/>}/></Popover>;
+  </div>}><IconButton variant="ghost" className="art-reader-coach-trigger" label={tr('art-reader:tip')} tooltip={tr('art-reader:tip')} icon={<CircleHelp size={16}/>}/></Popover>;
   return <aside className="context-coach" aria-label={tr('onboarding:tip')}><div><details open={expanded} onToggle={event => setExpanded(event.currentTarget.open)}><summary><strong>{tr(`onboarding:coach_${kind}`)}</strong></summary><p>{tr(`onboarding:coach_${kind}_body`)}</p></details><Button variant="ghost" label={tr('onboarding:help_walkthroughs')} onClick={() => openLearningHelp('walkthroughs')}/>{error && <p role="alert">{error}</p>}</div><IconButton variant="ghost" label={tr('onboarding:dismiss_tip')} tooltip={tr('onboarding:dismiss_tip')} icon={<X size={16}/>} onClick={dismiss}/></aside>;
 }
