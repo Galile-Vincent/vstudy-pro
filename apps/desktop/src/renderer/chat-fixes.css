@@ -226,7 +226,7 @@ html:not([data-input-modality=keyboard]) .workspace .reading-pane:focus { outlin
 
 :is(.workspace,.web-chat-local) { --composer-radius:var(--radius-container); }
 :is(.workspace,.web-chat-local) .aui-user-message-content { border-radius:var(--radius-chat); }
-:is(.workspace,.web-chat-local) [data-role=assistant] { border-radius:var(--radius-container); background:var(--color-background-card); }
+:is(.workspace,.web-chat-local) [data-role=assistant] { border:0; border-radius:0; background:transparent; box-shadow:none; }
 :is(.workspace,.web-chat-local) :is(.blank-chat,.chat-start) > * { animation:none; }
 :is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],summary):not(.paragraph-action,.section-action,[data-slot=document-citation],.model-controls *,[class*=astryx-]) { min-height:40px; min-width:40px; }
 :is(.workspace,.web-chat-local,.document-original,.course-file-actions,.ai-parse-popover) :is(button,[role=button],input,textarea,summary):focus-visible {

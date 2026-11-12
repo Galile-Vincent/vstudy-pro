@@ -72,7 +72,13 @@ for (const theme of builtinThemes) for (const scheme of ['light','dark']) for (l
   const peak=composite(accentWash,tokens.background,accent);
   const fields=[tokens.background,peak,composite(complementWash,tokens.background,complement),composite(complementWash,peak,complement)];
   const card=scheme==='dark' ? composite(tokens.surface,tokens.ink,.94) : tokens.surface;
-  const checks=[];
+  const checks=[
+    ['reader canvas',tokens.background,allText],
+    ['reader panel',tokens['reader-background'],['reader-ink','muted','accent-color']],
+    ['reader chrome',tokens.surface,allText],
+    ['reader sidebar',tokens.sidebar,allText],
+    ['reader card',card,allText],
+  ];
   for (const field of fields) {
     checks.push(['field',field,allText]);
     for (const [name,base,opacity] of [['panel',card,glassModel.panel],['topbar',tokens.surface,glassModel.chrome],['sidebar',tokens.sidebar,glassModel.chrome],['overlay',tokens.surface,glassModel.float]]) {
