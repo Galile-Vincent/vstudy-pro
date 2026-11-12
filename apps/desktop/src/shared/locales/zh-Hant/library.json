@@ -204,7 +204,7 @@
   "original.capture": "擷取範圍",
   "original.sendPage": "加入此頁",
   "original.drag": "拖曳框選即可加入。也可用方向鍵移動、Shift 加方向鍵調整大小、Enter 加入。Esc 取消。",
-  "original.shortcuts": "方向鍵切換頁面 · Ctrl/⌘ Shift S 擷取 · Ctrl/⌘ Shift Enter 加入此頁",
+  "original.shortcuts": "捲動或使用 Page Up/Down 閱讀 · Ctrl/⌘ Shift S 擷取 · Ctrl/⌘ Shift Enter 附加頁面",
   "original.tools": "原始頁面工具",
   "original.pageAlt": "{{name}}，第 {{page}} 頁",
   "original.error": "無法預覽原始檔案。請重試或使用原始檔案開啟功能。",

@@ -204,7 +204,7 @@
   "original.capture": "範囲を撮影",
   "original.sendPage": "ページを添付",
   "original.drag": "ドラッグで添付。矢印で移動、Shift と矢印でサイズ変更、Enter で添付、Esc でキャンセル。",
-  "original.shortcuts": "矢印キーで移動 · Ctrl/⌘ Shift S で撮影 · Ctrl/⌘ Shift Enter で添付",
+  "original.shortcuts": "スクロールまたは Page Up/Down で読む · Ctrl/⌘ Shift S で範囲選択 · Ctrl/⌘ Shift Enter でページを添付",
   "original.tools": "元のページのツール",
   "original.pageAlt": "{{name}}、{{page}} ページ",
   "original.error": "元のファイルを表示できません。再試行するか元のファイルを開いてください。",
