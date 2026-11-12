@@ -7,6 +7,7 @@
  *   UI_SHOTS_BASE=<dir>  optional earlier run, adds before/after columns and metric deltas to index.html
  *   UI_SHOTS_ONLY=a,b    optional view names, for quick re-runs
  *   UI_SHOTS_MODES=light,dark  UI_SHOTS_THEME=vstudy  UI_SHOTS_SCALE=1
+ *   VSTUDY_CONVERTER_VENV=<installed venv>  optional, copied into the disposable profile
  */
 import { _electron as electron } from 'playwright';
 import { createServer } from 'vite';
@@ -31,7 +32,7 @@ const wanted = name => !only || only.includes(name);
 const settingsPanes = ['general','appearance','providers','agents','usage','storage','privacy'];
 
 /** Shots beyond marketing's views. Each prepares a state that opens deterministically from a seeded profile. */
-function extraViews({ page, go, settings, documents }) {
+function extraViews({ page, go, settings, documents, call }) {
   const home = '.home-page', dialog = () => page.getByRole('dialog').last();
   const help = async view => { await go({view:'home'},home); await page.evaluate(view=>window.dispatchEvent(new window.CustomEvent('vstudy:learning-help',{detail:view})),view); await dialog().waitFor(); };
   const reader = () => go({view:'workspace',documentId:documents[0].id},'[data-slot=aui_assistant-message-root]');
@@ -41,6 +42,14 @@ function extraViews({ page, go, settings, documents }) {
     exams: route('exams','#active-tab-panel *'),
     review: route('review','#active-tab-panel *'),
     'ai-chats': route('ai-chats','#active-tab-panel *'),
+    'web-chat-local': async()=>{
+      const conversations=await call('conversations:list',{scope:'general'});
+      if (!conversations[0]) throw new Error('Seed has no general conversation');
+      await page.evaluate(id=>window.localStorage.setItem('vstudy-web-chat-conversation',id),conversations[0].id);
+      await go({view:'ai-chats'},'.web-chat-local [data-role=assistant]');
+    },
+    'reader-table': async()=>{await reader();await page.locator('.reading-pane .markdown table').evaluate(element=>element.scrollIntoView({block:'center'}));},
+    'reader-cjk': async()=>{await go({view:'workspace',documentId:documents[1].id},'.reading-pane .markdown');},
     'overlay-help-menu': async()=>{await go({view:'home'},home);await page.locator('.learning-help-trigger').first().click();await page.getByRole('menu').waitFor();},
     'overlay-help-shortcuts': ()=>help('shortcuts'),
     'overlay-help-walkthroughs': ()=>help('walkthroughs'),
