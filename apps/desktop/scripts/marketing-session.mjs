@@ -3,6 +3,8 @@ import { _electron as electron } from 'playwright';
 import assert from 'node:assert/strict';
 import { Buffer } from 'node:buffer';
 import sharp from 'sharp';
+import { cp } from 'node:fs/promises';
+import { join } from 'node:path';
 import { seedMarketing, captureTime } from './marketing-seed.mjs';
 import { installMarketingMoodle } from './marketing-webview.mjs';
 
@@ -12,6 +14,7 @@ export const aliases = {'document-figures':'figures','original-page':'original',
 
 export async function launchMarketing({desktop,directory,scale=2,launch={}}) {
   const errors = [];
+  if (process.env.VSTUDY_CONVERTER_VENV) await cp(process.env.VSTUDY_CONVERTER_VENV,join(directory,'converter-venv'),{recursive:true});
   const app = await electron.launch({args:[desktop,`--user-data-dir=${directory}`,`--force-device-scale-factor=${scale}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',HOME:directory,XDG_CONFIG_HOME:directory,VSTUDY_LOCALE:'en',VSTUDY_FAKE_PROVIDER:'1'},...launch});
   let moodle;
   try {
@@ -80,7 +83,7 @@ export async function launchMarketing({desktop,directory,scale=2,launch={}}) {
 
 /** Waits for the view to settle, then returns a 1440x900 CSS-pixel PNG of the window plus its child views. */
 export async function captureRaw({app,page},name,scale=2) {
-  await page.getByText('Loading conversation',{exact:true}).waitFor({state:'hidden'});
+  await page.getByText('Loading conversation',{exact:true}).filter({visible:true}).first().waitFor({state:'hidden'});
   await page.locator('img:visible').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
   // Astryx fields keep an empty assertive live region mounted for later validation text; only a populated one is an error.
   assert.equal(await page.getByRole('alert').filter({hasText:/\S/}).count(),0,`${name} has an error alert`);
