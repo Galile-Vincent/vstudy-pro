@@ -22,8 +22,6 @@ html :is([data-slot=card][data-variant=interactive],.ui-row-target,[data-slot=se
 [data-slot=setting-row][data-layout=stack] > :last-child { width:100%; flex:1 1 auto; }
 [data-slot=setting-row][data-layout=stack] textarea { width:100%; font-family:var(--font-mono); }
 
-/* The Astryx track is a borderless tone; a hairline keeps its edge perceivable (WCAG 1.4.11). */
-.astryx-segmented-control { border:1px solid var(--line); }
 html:is([data-theme=contrast],[data-contrast=more]) :is([data-slot=card],.astryx-segmented-control) { outline:1px solid var(--hairline); outline-offset:0; }
 @media (prefers-contrast:more), (forced-colors:active) {
  :is([data-slot=card],.astryx-segmented-control) { outline:1px solid var(--hairline); outline-offset:0; }

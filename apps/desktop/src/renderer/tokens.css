@@ -90,7 +90,6 @@ button,summary { min-inline-size:var(--space-6); min-block-size:var(--space-6); 
 
 .markdown[data-citation-layout] > * { content-visibility:visible; }
 input[type="checkbox"] { accent-color:var(--accent-color); }
-.astryx-segmented-control { border:1px solid var(--line-strong); }
 .astryx-segmented-control-item,.astryx-switch-thumb { box-shadow:none; }
 
 /* Typography, scale, and density are independent of the selected theme. */
