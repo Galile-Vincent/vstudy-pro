@@ -204,7 +204,7 @@
   "original.capture": "Capture region",
   "original.sendPage": "Attach page",
   "original.drag": "Drag to attach a region, or use arrows to move, Shift + arrows to resize, Enter to attach. Escape cancels.",
-  "original.shortcuts": "Arrow keys change pages · Ctrl/⌘ Shift S captures · Ctrl/⌘ Shift Enter attaches page",
+  "original.shortcuts": "Scroll or use Page Up/Down to read · Ctrl/⌘ Shift S captures · Ctrl/⌘ Shift Enter attaches page",
   "original.tools": "Original page tools",
   "original.pageAlt": "{{name}}, page {{page}}",
   "original.error": "Original preview unavailable. Retry or use Open original file.",

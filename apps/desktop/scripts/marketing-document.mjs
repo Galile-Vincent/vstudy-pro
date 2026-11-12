@@ -1,10 +1,18 @@
 /** Synthetic one-page PDF with selectable text and an embedded figure, for real conversion. */
 import sharp from 'sharp';
 import { Buffer } from 'node:buffer';
-export async function marketingPdf() {
+export async function marketingPdf(pageCount=1) {
   const graph=await sharp(Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="900" height="360"><rect width="900" height="360" fill="#eef4f8"/><g fill="none" stroke="#668dab" stroke-width="5"><path d="M120 180L340 80L570 180L780 80M120 180L340 280L570 180L780 280"/></g>${[[120,180,'A'],[340,80,'B'],[340,280,'C'],[570,180,'D'],[780,80,'E'],[780,280,'F']].map(([x,y,t])=>`<circle cx="${x}" cy="${y}" r="36" fill="#315d79"/><text x="${x}" y="${y+10}" text-anchor="middle" font-size="30" font-family="sans-serif" fill="white">${t}</text>`).join('')}</svg>`)).jpeg().toBuffer();
   const stream=`BT /F1 11 Tf 50 740 Td (CS201 / WEEK 8 / DEMO COURSEWORK) Tj /F1 26 Tf 0 -52 Td (Graphs, one connection at a time) Tj /F1 12 Tf 0 -38 Td (Breadth-first search explores a graph one layer at a time.) Tj 0 -23 Td (A queue keeps the frontier in order. Start at A and trace the route to F.) Tj ET\nq 512 0 0 205 50 345 cm /Im1 Do Q\nBT /F1 12 Tf 50 310 Td (Figure 1. Follow the frontier from A to its neighbours B and C.) Tj 0 -42 Td (Try it on paper) Tj 0 -26 Td (1. Record the queue after each visit.) Tj 0 -23 Td (2. Mark each vertex when it enters the queue.) Tj 0 -23 Td (3. Compare breadth-first and depth-first exploration.) Tj 0 -62 Td (The first route to a vertex is a shortest path in an unweighted graph.) Tj ET`;
   const objects=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [4 0 R] /Count 1 >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> /XObject << /Im1 6 0 R >> >> /Contents 5 0 R >>',`<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`,Buffer.concat([Buffer.from(`<< /Type /XObject /Subtype /Image /Width 900 /Height 360 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${graph.length} >>\nstream\n`),graph,Buffer.from('\nendstream')])];
+  const kids=['4 0 R'];
+  for(let page=2;page<=pageCount;page++) {
+    const id=objects.length+1;
+    kids.push(`${id} 0 R`);
+    const content=stream+`\nBT /F1 12 Tf 50 60 Td (Reader fixture / Page ${page}) Tj ET`;
+    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> /XObject << /Im1 6 0 R >> >> /Contents ${id+1} 0 R >>`,`<< /Length ${Buffer.byteLength(content)} >>\nstream\n${content}\nendstream`);
+  }
+  objects[1]=`<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pageCount} >>`;
   const chunks=[Buffer.from('%PDF-1.4\n')], offsets=[0];
   for(const [i,obj] of objects.entries()){offsets.push(Buffer.concat(chunks).length);chunks.push(Buffer.from(`${i+1} 0 obj\n`),Buffer.isBuffer(obj)?obj:Buffer.from(obj),Buffer.from('\nendobj\n'));}
   const xref=Buffer.concat(chunks).length;

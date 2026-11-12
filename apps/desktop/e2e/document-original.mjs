@@ -28,7 +28,7 @@ try {
  await page.setViewportSize({width:1440,height:1000});await page.emulateMedia({reducedMotion:'reduce'});
  await page.getByTestId('document-markdown').waitFor();
  await page.getByRole('button',{name:'Original file',exact:true}).click();
- const image=page.locator('.original-page img');await image.waitFor({timeout:45000});await image.evaluate(el=>el.decode());
+ const image=page.locator('.original-page img').first();await image.waitFor({timeout:45000});await image.evaluate(el=>el.decode());
  await page.getByRole('button',{name:'Attach page',exact:true}).click();await page.locator('.document-context-chip').first().waitFor();
  assert.ok(await page.locator('.document-context-chip').first().textContent().then(t=>t.includes('Lecture.pdf · 1')));
  await page.screenshot({path:join(root,'page-attached.png')});
@@ -40,7 +40,7 @@ try {
 
  const input=page.locator('.aui-composer-input');await input.waitFor();await input.fill('Explain the attached page region.');
  await page.getByRole('button',{name:'Send message',exact:true}).click();await page.locator('[data-role=assistant]').waitFor();
- await page.getByRole('spinbutton',{name:'Page',exact:true}).fill('24');await image.waitFor();await page.waitForFunction(()=>document.querySelector('.original-page img')?.complete);await image.evaluate(el=>el.decode());
+ await page.getByRole('button',{name:'Page',exact:true}).click();await page.getByRole('spinbutton',{name:'Page',exact:true}).fill('24');await page.getByRole('spinbutton',{name:'Page',exact:true}).press('Enter');await page.locator('.original-page[data-page="24"] img').waitFor();await page.locator('.original-page[data-page="24"] img').evaluate(el=>el.decode());
  await page.getByRole('button',{name:'Attach page',exact:true}).click();await page.locator('.document-context-chip').filter({hasText:'24'}).waitFor();
  await page.screenshot({path:join(root,'page24-attached.png')});
  const chipImage=await page.locator('.document-context-chip img').first().getAttribute('src');

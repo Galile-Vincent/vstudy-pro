@@ -93,7 +93,7 @@ export async function seedMarketing(app, page, directory) {
     documents.push(doc);
   }
   const pdfPath=join(directory,'Graph traversal worksheet.pdf');
-  await writeFile(pdfPath,await marketingPdf());
+  await writeFile(pdfPath,await marketingPdf(Number(process.env.UI_SHOTS_ORIGINAL_PAGES ?? 1)));
   await app.evaluate(({dialog},path)=>{dialog.showMessageBox=async()=>({response:1});dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},pdfPath);
   const pdf=await call('documents:import',{folderId:folders.get('Course notes').id});
   for(let attempt=0;attempt<600;attempt++){
