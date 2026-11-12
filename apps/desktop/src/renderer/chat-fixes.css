@@ -148,7 +148,6 @@
  background:color-mix(in oklab,var(--ink) 6%,var(--surface));
  box-shadow:none;
 }
-.workspace [data-role=assistant] { border:0; background:transparent; box-shadow:none; }
 .workspace :is(.aui-reasoning-root,.aui-tool-group-root) {
  border:0;
  border-radius:var(--radius-element);

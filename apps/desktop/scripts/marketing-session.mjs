@@ -47,7 +47,7 @@ export async function launchMarketing({desktop,directory,scale=2,launch={}}) {
     };
     const views = {
       'document-figures': async()=>{await go({view:'workspace',documentId:pdf.id},'[data-testid=document-markdown] img');await page.locator('.aui-composer-input').waitFor();await page.locator('[data-testid=document-markdown] img').evaluate(el=>el.scrollIntoView({block:'center'}));},
-      'original-page': async()=>{await go({view:'workspace',documentId:pdf.id},'[data-testid=document-markdown]');await page.getByRole('button',{name:'Original file',exact:true}).click();await page.locator('.original-page img').waitFor();await page.locator('.aui-composer-input').waitFor();},
+      'original-page': async()=>{await go({view:'workspace',documentId:pdf.id},'[data-testid=document-markdown]');await page.getByRole('button',{name:'Original file',exact:true}).click();await page.locator('.original-page img').first().waitFor();await page.locator('.aui-composer-input').waitFor();},
       'capture-to-chat': async()=>{await views['original-page']();await page.getByRole('button',{name:'Attach page',exact:true}).click();await page.locator('.document-context-chip').waitFor();await page.locator('.aui-composer-input').fill('Explain how the frontier moves through this graph.');},
       'usage-settings': async()=>{await settings('usage');await page.locator('.subscription-meters[aria-busy=false]').last().waitFor();},
       'connect-ai': async()=>{await go({view:'home'},'.home-page');await page.evaluate(()=>window.dispatchEvent(new window.CustomEvent('vstudy:ai-cli-setup')));await page.locator('.ai-cli-sheet').waitFor();},

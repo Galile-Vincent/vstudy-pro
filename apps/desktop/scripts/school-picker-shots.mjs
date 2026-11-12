@@ -45,8 +45,22 @@ try {
       await input.press('Escape');
       await input.fill('new-school.example/moodle');
       await dialog.getByRole('button',{name:'Find my school',exact:true}).waitFor();
+      await input.fill('zzzz-no-matching-school');
+      await page.screenshot({path:join(out,`after-${mode}-no-results.png`)});
       await input.fill('Taiwan');
       assert((await dialog.getByRole('option').count())>0);
+      await page.screenshot({path:join(out,`after-${mode}-searching.png`)});
+      if(mode==='light') {
+        await app.evaluate(({ipcMain})=>{
+          const original=ipcMain._invokeHandlers.get('moodle:check-site');
+          if(!original)throw Error('Missing school check handler');
+          ipcMain.removeHandler('moodle:check-site');
+          ipcMain.handle('moodle:check-site',()=>new Promise(()=>{}));
+        });
+        await dialog.getByRole('option').first().click();
+        await dialog.locator('small[role=status]').filter({hasText:'Checking your school'}).waitFor();
+        await page.screenshot({path:join(out,'after-light-checking.png')});
+      }
     }
     if(phase==='after' && mode==='dark') {
       await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(720,600));

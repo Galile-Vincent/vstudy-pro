@@ -16,3 +16,5 @@
 .document-context-chip span { flex:1; overflow-wrap:anywhere; }
 .document-context-chip button { flex-shrink:0; }
 .original-reader .document-original:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; border-radius:var(--radius-element); }
+
+.original-announcement { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }

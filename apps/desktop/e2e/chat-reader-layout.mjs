@@ -29,7 +29,7 @@ try {
     await page.getByText('Loading conversation', { exact: true }).waitFor({ state: 'hidden' });
     if (view !== 'reader-chat-with-answer') {
       await page.getByRole('button', { name: 'Original file', exact: true }).click();
-      await page.locator('.original-page img').waitFor();
+      await page.locator('.original-page img').first().waitFor();
       if (view === 'capture-to-chat') {
         await page.getByRole('button', { name: 'Attach page', exact: true }).click();
         await page.locator('.document-context-chip').waitFor();

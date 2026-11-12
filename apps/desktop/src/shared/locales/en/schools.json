@@ -1,6 +1,7 @@
 {
   "search_label": "School name, country, or Moodle URL",
   "search_placeholder": "Search schools or paste your Moodle address",
+  "contact_hint": "Choosing a school contacts that school and may download its logo.",
   "privacy_summary": "Search stays on this device",
   "privacy_hint": "Search stays on this device. Choosing a school or checking a URL contacts that school and may download its logo. Requests appear in Settings > Privacy.",
   "results": "Schools",

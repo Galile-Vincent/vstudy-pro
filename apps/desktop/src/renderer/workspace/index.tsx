@@ -66,7 +66,7 @@ export function Workspace() {
     [showSettings, setShowSettings] = useState(false),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
-    [loadingSource, setLoadingSource] = useState(false);
+    [loadingSource, setLoadingSource] = useState(true);
 
   const [startupError, setStartupError] = useState(''), [sourceError, setSourceError] = useState(''),
     [conversationError, setConversationError] = useState(''), [historyError, setHistoryError] = useState('');

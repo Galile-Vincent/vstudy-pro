@@ -40,7 +40,6 @@
 }
 .workspace .reading-pane .markdown :is(h1,h2,h3,h4,h5,h6) { letter-spacing:-.015em; line-height:1.35; text-wrap:pretty; margin-block:2em .75em; padding-top:0; }
 .workspace .reading-pane .markdown h1 { font-size:2.25em; line-height:1.2; font-weight:600; margin-block:0 .6em; text-wrap:balance; }
-.workspace .reading-pane .markdown h1 + p { color:var(--muted); margin-block:0 2em; }
 .workspace .reading-pane .markdown h2 { font-size:1.5em; }
 .workspace .reading-pane .markdown h3 { font-size:1.2em; }
 .workspace .reading-pane .markdown :is(h4,h5,h6) { font-size:1em; }
@@ -87,7 +86,7 @@
 .art-reader-welcome h2 { font-size:1.5rem; line-height:1.35; letter-spacing:-.02em; font-weight:600; max-width:22ch; margin:0 0 var(--space-3); text-wrap:balance; }
 .art-reader-welcome > p:last-of-type { color:var(--muted); line-height:1.7; font-size:var(--type-base); overflow-wrap:anywhere; }
 .art-reader-welcome [data-slot=suggestions] { margin-top:var(--space-6); gap:var(--space-2); justify-content:flex-start; }
-.app-shell .workspace [data-slot=suggestions] button { min-height:44px; padding:var(--space-2) var(--space-3); background:var(--surface); font-size:var(--type-xs); }
+.app-shell .workspace [data-slot=suggestions] button { min-height:44px; padding:var(--space-2) var(--space-3); font-size:var(--type-xs); }
 .app-shell .workspace .ai-setup-notice.art-reader-offline { display:grid; grid-template-columns:20px minmax(0,1fr); align-items:start; gap:var(--space-2) var(--space-3); margin:var(--space-2) 0; padding:var(--space-4); border:0; border-radius:var(--art-reader-radius); background:var(--surface);  box-shadow:none; }
 .art-reader-offline > svg { color:var(--accent-color); margin-top:2px; }
 .art-reader-offline > p,.art-reader-offline-actions { grid-column:2; }

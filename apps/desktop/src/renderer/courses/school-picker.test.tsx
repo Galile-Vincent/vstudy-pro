@@ -60,3 +60,10 @@ it('puts Taiwan directory entries first in Traditional Chinese and sorts English
   const names=Array.from(document.querySelector('[role=group][aria-label="School directory"]')!.querySelectorAll('[role=option]')).map(option => option.getAttribute('aria-label') ?? '');
   expect(names).toEqual([...names].sort(new Intl.Collator('en').compare));
 });
+
+it('shows checking status and contact disclosure without expanding details',async()=>{
+  await act(async()=>root.render(<SchoolPicker schools={schools} recent={[]} accounts={[]} input="Taiwan" onInput={()=>{}} onFind={()=>{}} busy/>));
+  expect(Array.from(document.querySelectorAll('[role=status]')).some(el=>el.textContent?.includes('Checking your school'))).toBe(true);
+  expect(document.querySelector('details')?.open).toBe(false);
+  expect(Array.from(document.querySelectorAll('small')).some(el=>!el.closest('details')&&el.textContent?.includes('may download its logo'))).toBe(true);
+});

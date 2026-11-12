@@ -1,6 +1,7 @@
 {
   "search_label": "學校名稱、國家或 Moodle 網址",
   "search_placeholder": "搜尋學校或貼上 Moodle 網址",
+  "contact_hint": "選擇學校會連線至該校，並可能下載其標誌。",
   "privacy_summary": "搜尋只在此裝置進行",
   "privacy_hint": "搜尋只在此裝置進行。選擇學校或檢查網址時會連線至該學校，並可能下載校徽。可在「設定 > 隱私權」查看連線記錄。",
   "results": "學校",

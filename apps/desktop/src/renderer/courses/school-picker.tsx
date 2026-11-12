@@ -50,10 +50,12 @@ export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind,
             setActive(next);document.getElementById(`moodle-school-${next}`)?.scrollIntoView?.({block:'nearest'});
           } else if (event.key === 'Escape' && active !== -1) {event.preventDefault();event.stopPropagation();setActive(-1);}
         }} />} />
-      {urlLike && <Button icon={busy ? <LoaderCircle className="moodle-spin" /> : <ArrowRight />} label={(tr(busy ? 'moodle:checking_site' : 'moodle:check_site'))} type="submit"  isDisabled={(!urlLike && !results.length) || busy}>{tr(busy ? 'moodle:checking_site' : 'moodle:check_site')}</Button>}
+      {urlLike && <Button icon={busy ? <LoaderCircle className="moodle-spin" /> : <ArrowRight />} label={(tr(busy ? 'moodle:checking_site' : 'moodle:check_site'))} type="submit"  isDisabled={busy}>{tr(busy ? 'moodle:checking_site' : 'moodle:check_site')}</Button>}
     </form>
+    {busy && <small role="status">{tr('moodle:checking_site')}</small>}
+    <small>{tr('schools:contact_hint')}</small>
     <small id="moodle-search-count" role="status" aria-live="polite">{tr('schools:result_count',{count:results.length})}</small>
-    <div className="moodle-school-scroll"><div id="moodle-school-results" className="moodle-school-results" role="listbox" aria-label={tr('schools:results')}>
+    <div className="moodle-school-scroll"><div id="moodle-school-results" className="moodle-school-results" hidden={!results.length} role="listbox" aria-label={tr('schools:results')}>
       {(['connected','recent','directory'] as const).map(group => results.some(choice => choice.group === group) && <div key={group} role="group" aria-label={tr(`schools:${group}`)} className="moodle-site-list">
         <h3 aria-hidden="true">{tr(`schools:${group}`)}</h3>
         {results.map((choice,index) => choice.group === group && <ListRow className="moodle-school-row" aria-label={`${choice.name} ${new URL(choice.url).host}`} leading={<SchoolLogo name={choice.name} icon={choice.icon} />} title={choice.name} subtitle={<span>{new URL(choice.url).host}{new URL(choice.url).pathname.replace(/\/$/,'')}{choice.country ? ' · ' + (new Intl.DisplayNames([language],{type:'region'}).of(choice.country) ?? choice.country) : ''}</span>} meta={<ArrowRight aria-hidden="true" />} key={choice.url} id={`moodle-school-${index}`} role="option" aria-selected={active === index} disabled={busy} onClick={() => onFind(choice.url)} />)}
