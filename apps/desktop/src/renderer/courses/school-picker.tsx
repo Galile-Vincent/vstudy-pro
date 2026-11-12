@@ -37,8 +37,8 @@ export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind,
     : /^(?!https?:)[a-z][a-z0-9+.-]*:\/\//i.test(input) || /[?&](?:qrlogin|qrloginkey|token|wstoken)=/i.test(input)
       ? tr("schools:qr_unsupported") : error;
   return <>
-    <form className="moodle-connect-form" onSubmit={event => {event.preventDefault();if (!busy) {if (selected) onFind(selected.url); else if (urlLike) onFind(input);else if (results[0]) onFind(results[0].url);}}}>
-      <FormField error={fieldError} controlId="moodle-site" label={tr('schools:search_label')} describedBy="moodle-url-hint moodle-search-count" children={field => <TextInput label={tr('schools:search_label')} isLabelHidden {...field} {...(fieldError ? {status:{type:"error" as const,message:fieldError}} : {})} ref={inputRef} value={input} autoComplete="off" autoCapitalize="none" hasSpellCheck={false}
+    <form className="moodle-connect-form moodle-school-search" onSubmit={event => {event.preventDefault();if (!busy) {if (selected) onFind(selected.url); else if (urlLike) onFind(input);else if (results[0]) onFind(results[0].url);}}}>
+      <FormField error={fieldError} controlId="moodle-site" label={tr('schools:search_label')} describedBy="moodle-search-count" children={field => <TextInput label={tr('schools:search_label')} isLabelHidden {...field} {...(fieldError ? {status:{type:"error" as const,message:fieldError}} : {})} ref={inputRef} value={input} autoComplete="off" autoCapitalize="none" hasSpellCheck={false}
         placeholder={tr('schools:search_placeholder')} isDisabled={busy}
         role="combobox" aria-autocomplete="list" aria-expanded={results.length > 0} aria-controls="moodle-school-results"
         aria-activedescendant={selected ? `moodle-school-${active}` : undefined}
@@ -50,19 +50,18 @@ export function SchoolPicker({schools,recent,accounts,input,onInput,busy,onFind,
             setActive(next);document.getElementById(`moodle-school-${next}`)?.scrollIntoView?.({block:'nearest'});
           } else if (event.key === 'Escape' && active !== -1) {event.preventDefault();event.stopPropagation();setActive(-1);}
         }} />} />
-      <small id="moodle-url-hint">{tr('schools:privacy_hint')}</small>
-      <Button icon={busy ? <LoaderCircle className="moodle-spin" /> : <ArrowRight />} label={(tr(busy ? 'moodle:checking_site' : 'moodle:check_site'))} type="submit"  isDisabled={(!urlLike && !results.length) || busy}>{tr(busy ? 'moodle:checking_site' : 'moodle:check_site')}</Button>
+      {urlLike && <Button icon={busy ? <LoaderCircle className="moodle-spin" /> : <ArrowRight />} label={(tr(busy ? 'moodle:checking_site' : 'moodle:check_site'))} type="submit"  isDisabled={(!urlLike && !results.length) || busy}>{tr(busy ? 'moodle:checking_site' : 'moodle:check_site')}</Button>}
     </form>
     <small id="moodle-search-count" role="status" aria-live="polite">{tr('schools:result_count',{count:results.length})}</small>
-    <div id="moodle-school-results" className="moodle-school-results" role="listbox" aria-label={tr('schools:results')}>
+    <div className="moodle-school-scroll"><div id="moodle-school-results" className="moodle-school-results" role="listbox" aria-label={tr('schools:results')}>
       {(['connected','recent','directory'] as const).map(group => results.some(choice => choice.group === group) && <div key={group} role="group" aria-label={tr(`schools:${group}`)} className="moodle-site-list">
         <h3 aria-hidden="true">{tr(`schools:${group}`)}</h3>
         {results.map((choice,index) => choice.group === group && <ListRow className="moodle-school-row" aria-label={`${choice.name} ${new URL(choice.url).host}`} leading={<SchoolLogo name={choice.name} icon={choice.icon} />} title={choice.name} subtitle={<span>{new URL(choice.url).host}{new URL(choice.url).pathname.replace(/\/$/,'')}{choice.country ? ' · ' + (new Intl.DisplayNames([language],{type:'region'}).of(choice.country) ?? choice.country) : ''}</span>} meta={<ArrowRight aria-hidden="true" />} key={choice.url} id={`moodle-school-${index}`} role="option" aria-selected={active === index} disabled={busy} onClick={() => onFind(choice.url)} />)}
       </div>)}
     </div>
-    {!results.length && <p>{tr('schools:no_results')}</p>}
+    {!results.length && <p>{tr('schools:no_results')}</p>}</div>
     <div className="moodle-school-footer"><Button label={(tr('schools:add_url'))} variant="ghost"  isDisabled={busy} onClick={() => {if (urlLike) onFind(input);else {onInput('');setActive(-1);inputRef.current?.focus();}}}>{tr('schools:add_url')}</Button>
-    <small>{tr('schools:multiple_accounts')}</small></div>
+    <details className="moodle-school-privacy"><summary>{tr('schools:privacy_summary')}</summary><small>{tr('schools:privacy_hint')}</small><small>{tr('schools:multiple_accounts')}</small></details></div>
   </>;
 }
 

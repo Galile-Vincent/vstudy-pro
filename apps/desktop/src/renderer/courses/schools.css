@@ -1,26 +1,53 @@
-.moodle-school-results { max-height: clamp(100px, calc(100dvh - 574px), 280px); overflow-y: auto; overscroll-behavior: contain; }
-.moodle-school-results [aria-selected="true"] { background: var(--subtle); outline: 2px solid var(--ring); outline-offset: -2px; }
-.moodle-school-logo, .moodle-school-monogram {
-  width: 36px;
-  height: 36px;
-  flex: 0 0 36px;
-  border-radius: var(--radius-element);
-  object-fit: contain;
-  background: var(--subtle);
-}
-.moodle-site-list button > .moodle-school-monogram { flex: 0 0 36px; }
-.moodle-school-monogram { display: grid; place-items: center; font-weight: 600; font-size: 13px; }
-.moodle-site-result > .moodle-school-logo, .moodle-site-result > .moodle-school-monogram { width: 44px; height: 44px; }
-
-.moodle-site-list { display:flex; flex-direction:column; gap:var(--space-3); padding-block:var(--space-4); }
-.moodle-site-list + .moodle-site-list { border-top:1px solid var(--line); }
-.moodle-site-list h3 { margin:0; font-size:var(--type-lg); font-weight:600; }
-.moodle-connect-form { display:flex; flex-direction:column; gap:var(--space-4); }
-
+.moodle-connect > div { gap:var(--space-4); }
+.moodle-connect .dialog-description { color:var(--muted); font-size:var(--type-base); }
 .moodle-connect-title { display:flex; align-items:center; gap:var(--space-2); }
+.moodle-connect-steps { margin:0; padding-block:var(--space-3); border-block:1px solid var(--line); }
+.moodle-connect-steps li { font-size:var(--type-base); }
+.moodle-connect-steps li > span { flex-shrink:0; }
+.moodle-connect-form { display:flex; flex-direction:column; gap:var(--space-4); }
+.moodle-school-search { flex-shrink:0; }
+.moodle-school-scroll {
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  min-height:0;
+  flex:1 1 auto;
+}
+.moodle-school-results {
+  height:min(400px, 42dvh);
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  padding-block:var(--space-3);
+  scroll-padding-block:var(--space-3);
+  mask-image:linear-gradient(to bottom, transparent, black var(--space-3), black calc(100% - var(--space-3)), transparent);
+}
+.moodle-school-results [aria-selected="true"] { background:var(--subtle); outline:2px solid var(--ring); outline-offset:-2px; }
+.moodle-school-logo, .moodle-school-monogram {
+  width:36px;
+  height:36px;
+  flex:0 0 36px;
+  border-radius:var(--radius-element);
+  object-fit:contain;
+  background:var(--subtle);
+}
+.moodle-school-monogram { display:grid; place-items:center; font-weight:600; font-size:var(--type-base); color:var(--ink); }
+.moodle-site-result > .moodle-school-logo, .moodle-site-result > .moodle-school-monogram { width:44px; height:44px; }
+.moodle-site-list { display:flex; flex-direction:column; }
+.moodle-site-list + .moodle-site-list { margin-block-start:var(--space-4); }
+.moodle-site-list h3 { margin:0; padding:var(--space-2) var(--space-3); font-size:var(--type-sm); color:var(--muted); font-weight:600; }
+.moodle-school-row { flex-shrink:0; border-radius:0; }
 .moodle-school-row + .moodle-school-row { border-top:1px solid var(--line); }
-.moodle-school-results { border-bottom:1px solid var(--line); }
-.moodle-school-footer { display:flex; flex-direction:column; align-items:flex-start; gap:var(--space-2); padding-block:var(--space-3); }
-.moodle-school-row > .ui-row-target { padding-inline:0; }
-.moodle-site-list { gap:var(--space-1); }
-.moodle-school-row { border-radius:0; }
+.moodle-school-row > .ui-row-target { min-height:72px; padding:var(--space-3); font-size:var(--type-base); }
+.moodle-school-row .ui-row-target > .min-w-0 > span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.moodle-school-row .ui-row-target > .min-w-0 > span + span { font-size:var(--type-sm); margin-block-start:var(--space-1); }
+.moodle-school-footer { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:var(--space-3); border-top:1px solid var(--line); padding-block-start:var(--space-3); }
+.moodle-school-privacy { font-size:var(--type-sm); color:var(--muted); }
+.moodle-school-privacy summary { cursor:pointer; padding-block:var(--space-2); }
+.moodle-school-privacy[open] { flex-basis:100%; }
+.moodle-school-privacy small { display:block; margin-block-start:var(--space-2); }
+@media (max-width:540px) {
+  .moodle-connect-steps { gap:var(--space-2); }
+  .moodle-connect-steps li { font-size:var(--type-sm); }
+}

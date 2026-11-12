@@ -1,6 +1,7 @@
 {
   "search_label": "学校名、国、または Moodle URL",
   "search_placeholder": "学校を検索するか Moodle のアドレスを貼り付け",
+  "privacy_summary": "検索はこの端末内で行います",
   "privacy_hint": "検索はこの端末内で行います。学校の選択や URL の確認時に、その学校に接続し、ロゴをダウンロードする場合があります。接続履歴は「設定 > プライバシー」で確認できます。",
   "results": "学校",
   "connected": "接続済みの学校",

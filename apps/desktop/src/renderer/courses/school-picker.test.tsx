@@ -19,6 +19,8 @@ it('keeps search local and selects a matching school with the keyboard',async ()
   const {find}=await mount('Taiwan');
   expect(document.querySelectorAll('[role=option]')).toHaveLength(schools.filter(school => school.country === 'TW').length);
   expect(find).not.toHaveBeenCalled();
+  expect(document.querySelector('button[type=submit]')).toBeNull();
+  expect(document.querySelector('details summary')?.textContent).toBe('Search stays on this device');
   const input=document.querySelector('[role=combobox]')!;
   await act(async () => input.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true})));
   expect(input.getAttribute('aria-activedescendant')).toBe('moodle-school-0');
@@ -37,6 +39,7 @@ it('offers URL entry when no bundled school matches and submits the entered addr
   expect(document.querySelectorAll('[role=option]')).toHaveLength(0);
   expect(document.body.textContent).toContain('No matching schools');
   expect(document.body.textContent).toContain('Add by URL');
+  expect(document.querySelector('button[type=submit]')?.textContent).toContain('Find my school');
   await act(async () => document.querySelector('form')!.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
   expect(find).toHaveBeenCalledWith('new-university.example/moodle');
 });
