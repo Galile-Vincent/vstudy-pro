@@ -72,14 +72,10 @@ it('treats an image original as one page regardless of parsed page count',async(
   expect(screen.getByRole('button',{name:/Page .* of /}).textContent).toBe('1 / 1');
 });
 
-it('preserves a saved page while the source is empty and reports only after restoring',async()=>{
-  const onPage=vi.fn(),onAttach=vi.fn();
-  const {container,rerender}=render(<DocumentOriginal document={doc} pageCount={0} initialPage={12} onPage={onPage} onAttach={onAttach}/>);
-  expect(onPage).not.toHaveBeenCalled();expect(invoke).not.toHaveBeenCalled();
-  rerender(<DocumentOriginal document={doc} pageCount={12} initialPage={12} onPage={onPage} onAttach={onAttach}/>);
-  await waitFor(()=>expect(container.querySelector('.document-original')?.scrollTop).toBe(8800));
-  expect(onPage.mock.calls.every(([page])=>page===12)).toBe(true);
-  expect(onPage).toHaveBeenCalledWith(12);
+it('shows page 1 of a PDF whose source has no page markers instead of a blank reader',async()=>{
+  render(<DocumentOriginal document={doc} pageCount={0} onAttach={()=>{}}/>);
+  await screen.findByAltText('Lecture, page 1');
+  expect(screen.getByRole('button',{name:/Page .* of /}).textContent).toBe('1 / 1');
 });
 it('loads the visible page before skipped pages after a fast scroll and evicts distant images',async()=>{
   const {container}=render(<DocumentOriginal document={doc} pageCount={30} onAttach={()=>{}}/>);
@@ -104,10 +100,19 @@ it('updates the current page after the viewer resizes',async()=>{
   viewportHeight=1600;await act(async()=>resize());
   expect(onPage).toHaveBeenLastCalledWith(3);
 });
+it('keeps the current page when the viewer is hidden and resizes to zero',async()=>{
+  const onPage=vi.fn();const {container}=render(<DocumentOriginal document={doc} pageCount={6} initialPage={1} onPage={onPage} onAttach={()=>{}}/>);
+  await waitFor(()=>expect(container.querySelectorAll('.original-page')).toHaveLength(6));
+  const root=container.querySelector('.document-original')!;root.scrollTop=2500;fireEvent.scroll(root);
+  expect(onPage).toHaveBeenLastCalledWith(4);
+  viewportHeight=0;await act(async()=>resize());
+  expect(onPage).toHaveBeenLastCalledWith(4);
+});
 it('announces capture instructions and leaves toolbar Enter to the focused button',async()=>{
   const {container}=render(<DocumentOriginal document={doc} pageCount={1} onAttach={()=>{}}/>);
   await screen.findByAltText('Lecture, page 1');fireEvent.click(screen.getByRole('button',{name:'Capture region'}));
-  expect(container.querySelector('.original-announcement')?.textContent).toContain('Enter to attach');
+  const [pageStatus,captureStatus]=[...container.querySelectorAll('.original-announcement')].map(node=>node.textContent);
+  expect(captureStatus).toContain('Enter to attach');expect(pageStatus).not.toContain('Enter to attach');
   const button=screen.getByRole('button',{name:'Attach page'});
   expect(fireEvent.keyDown(button,{key:'Enter'})).toBe(true);
   expect(fireEvent.keyDown(container.querySelector('.document-original')!,{key:'ArrowRight'})).toBe(false);

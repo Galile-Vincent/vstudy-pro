@@ -14,7 +14,6 @@ type Selection = {page:number;start:Point;end:Point};
 type OriginalProps = {document:Document;pageCount:number;initialPage?:number;onPage?:(page:number)=>void;onAttach:(context:DocumentContextAttachment)=>void};
 
 export function DocumentOriginal(props:OriginalProps) {
-  if(props.document.mime==='application/pdf' && !props.pageCount)return null;
   return <OriginalPages key={props.document.id} {...props}/>;
 }
 
@@ -82,7 +81,7 @@ function OriginalPages({document:doc,pageCount,onAttach,initialPage=1,onPage}:Or
   useEffect(()=>{
     const root=viewer.current;if(!root||!ratio)return;
     const observer=new IntersectionObserver(entries=>{
-      observePages.current(entries);
+      trackPage();observePages.current(entries);
     },{root,rootMargin:'100% 0px'});
     elements.current.forEach(element=>observer.observe(element));
     return()=>observer.disconnect();
@@ -91,7 +90,7 @@ function OriginalPages({document:doc,pageCount,onAttach,initialPage=1,onPage}:Or
 
   const trackPage=()=>{
     const root=viewer.current;if(!root||!restored.current)return;
-    const bounds=root.getBoundingClientRect();let best=page,area=0;
+    const bounds=root.getBoundingClientRect();if(!bounds.height)return;let best=currentPage.current,area=0;
     elements.current.forEach((element,n)=>{
       const rect=element.getBoundingClientRect();
       const visible=Math.max(0,Math.min(rect.bottom,bounds.bottom)-Math.max(rect.top,bounds.top));
@@ -157,7 +156,8 @@ function OriginalPages({document:doc,pageCount,onAttach,initialPage=1,onPage}:Or
         </div>;
       })}
     </div>
-    <span className="original-announcement" role="status">{capturing?`${pageLabel}. ${tr('library:original.drag')}`:pageLabel}</span>
+    <span className="original-announcement" role="status">{pageLabel}</span>
+    <span className="original-announcement" role="status">{capturing?tr('library:original.drag'):''}</span>
     <div className="original-controls"><div className="original-toolbar" role="toolbar" aria-label={tr('library:original.tools')}>
       {editing?<form onSubmit={event=>{event.preventDefault();const n=Number(draft);if(Number.isInteger(n)&&n>=1&&n<=total){jump(n);setEditing(false);viewer.current?.focus();}}}><input autoFocus type="number" min={1} max={total} aria-label={tr('library:original.page')} value={draft} onChange={event=>setDraft(event.target.value)} onBlur={()=>setEditing(false)} onKeyDown={event=>{if(event.key==='Escape'){setEditing(false);viewer.current?.focus();}}}/><span>/ {total}</span></form>:<Button label={pageLabel} variant="ghost" size="sm" onClick={()=>{setDraft(String(page));setEditing(true);}}><span>{page} / {total}</span></Button>}
       <Button label={tr('library:original.capture')} variant="ghost" size="sm" isIconOnly icon={<Scan size={16}/>} isDisabled={!ready} aria-pressed={capturing} tooltip={`${tr('library:original.capture')} · ${tr('library:original.shortcuts')} · ${tr('library:original.drag')}`} onClick={toggleCapture}/>
