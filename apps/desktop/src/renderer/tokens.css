@@ -7,7 +7,7 @@
  --motion-fast:125ms; --motion-base:175ms; --motion-slow:300ms;
  --opacity-hover:.04; --opacity-pressed:.08; --opacity-disabled:.4;
  --sidebar-width:232px; --topbar-height:52px; --filter-width:300px; --library-row-height:2.75rem; --library-card-height:148px;
- --line-strong:var(--muted); --line:color-mix(in oklab,var(--ink) 10%,transparent);
+ --line-strong:var(--muted); --line:color-mix(in oklab,var(--ink) 6%,transparent);
  --hairline:var(--line);
  --focus-ring:var(--focus-outline-width,2px) var(--focus-outline-style,solid) var(--focus);
 }
