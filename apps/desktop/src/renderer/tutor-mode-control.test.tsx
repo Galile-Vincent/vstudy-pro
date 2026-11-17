@@ -45,7 +45,7 @@ it('keeps Just answer focusable but inert, with its reason announced, while it c
   expect(button.getAttribute('aria-disabled')).toBe('true');
   expect(button.hasAttribute('disabled')).toBe(false);
   expect(button.getAttribute('aria-describedby')).toBeTruthy();
-  expect(document.getElementById(button.getAttribute('aria-describedby')!)!.textContent).toBe(reason);
+  expect(button.getAttribute('aria-describedby')!.split(' ').map(id=>document.getElementById(id)?.textContent).join(' ')).toContain(reason);
   fireEvent.click(button);
   expect(answer).not.toHaveBeenCalled();
 });

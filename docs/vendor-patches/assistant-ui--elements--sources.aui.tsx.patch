@@ -1,5 +1,14 @@
 --- a/apps/desktop/src/renderer/components/assistant-ui/elements/sources.aui.tsx
 +++ b/apps/desktop/src/renderer/components/assistant-ui/elements/sources.aui.tsx
+@@ -11,7 +11,7 @@
+ import { cva, type VariantProps } from "class-variance-authority";
+ import type { SourceMessagePartComponent } from "@assistant-ui/react";
+ import { cn } from "@/lib/utils";
+-import { Badge } from "@/components/ui/badge";
++import { Badge } from "@astryxdesign/core";
+ import { hostOf, safeHref } from "../utils/href";
+ 
+ const sourceVariants = cva(
 @@ -42,7 +42,7 @@
        },
      },
@@ -9,3 +18,25 @@
        size: "default",
      },
    },
+@@ -182,14 +182,13 @@
+   if (part.sourceType === "document") {
+     return (
+       <Badge
+-        variant="secondary"
+-        className="focus-visible:border-ring focus-visible:ring-ring/50 outline-none focus-visible:ring-1"
+-      >
+-        <span data-slot="source" className="inline-flex items-center gap-1.5">
+-          <DocumentSourceIcon />
+-          <SourceTitle>{part.title}</SourceTitle>
+-        </span>
+-      </Badge>
++        label={
++          <span data-slot="source" className="inline-flex items-center gap-1.5">
++            <DocumentSourceIcon />
++            <SourceTitle>{part.title}</SourceTitle>
++          </span>
++        }
++      />
+     );
+   }
+ 

@@ -1,13 +1,20 @@
 --- a/apps/desktop/src/renderer/components/assistant-ui/elements/thread-list.aui.tsx
 +++ b/apps/desktop/src/renderer/components/assistant-ui/elements/thread-list.aui.tsx
-@@ -1,4 +1,7 @@
+@@ -1,8 +1,11 @@
  "use client";
 +import { useFormat } from "../../../i18n";
 +import { useTranslation } from "react-i18next";
 +import { tr } from '../../../../shared/i18n';
  
- import { Button } from "@/components/ui/button";
- import { Input } from "@/components/ui/input";
+-import { Button } from "@/components/ui/button";
+-import { Input } from "@/components/ui/input";
+-import { Skeleton } from "@/components/ui/skeleton";
++import { Button } from "@astryxdesign/core";
++import { TextInput as Input } from "@astryxdesign/core";
++import { Skeleton } from "@astryxdesign/core";
+ import { cn } from "@/lib/utils";
+ import {
+   AuiIf,
 @@ -22,6 +25,8 @@
    TrashIcon,
  } from "lucide-react";
@@ -17,7 +24,7 @@
    forwardRef,
    Fragment,
    useEffect,
-@@ -33,18 +38,21 @@
+@@ -33,28 +38,31 @@
    type FC,
  } from "react";
  
@@ -42,17 +49,33 @@
    );
  };
  
-@@ -66,8 +74,8 @@
+ export const ThreadListSearch = forwardRef<
+   HTMLInputElement,
+-  Omit<ComponentPropsWithoutRef<typeof Input>, "value" | "onChange"> & {
++  Omit<ComponentPropsWithoutRef<typeof Input>, "value" | "onChange" | "label"> & {
+     value: string;
+     onValueChange: (value: string) => void;
+   }
+->(({ className, value, onValueChange, ...props }, ref) => {
++>(({ controlClassName: className, value, onValueChange, ...props }, ref) => {
+   return (
+     <div data-slot="aui_thread-list-search" className="relative px-0.5 py-1">
+       <SearchIcon
+@@ -65,10 +73,10 @@
+         ref={ref}
          type="search"
          value={value}
-         onChange={(event) => onValueChange(event.target.value)}
+-        onChange={(event) => onValueChange(event.target.value)}
 -        aria-label="Search threads"
 -        placeholder="Search threads"
-+        aria-label={tr('common:search_threads')}
+-        className={cn("h-8 ps-8 text-sm", className)}
++        onChange={(_value, event) => onValueChange(event.target.value)}
++        isLabelHidden label={tr('common:search_threads')}
 +        placeholder={tr('common:search_threads')}
-         className={cn("h-8 ps-8 text-sm", className)}
++        controlClassName={cn("h-8 ps-8 text-sm", className)}
          {...props}
        />
+     </div>
 @@ -80,6 +88,7 @@
  export const ThreadListRoot: FC<
    ComponentPropsWithoutRef<typeof ThreadListPrimitive.Root>
@@ -113,7 +136,31 @@
      );
    }
  
-@@ -285,8 +296,7 @@
+@@ -261,20 +272,18 @@
+ 
+ export const ThreadListNew = forwardRef<
+   HTMLButtonElement,
+-  ComponentPropsWithoutRef<typeof Button> & { labelClassName?: string }
++  Omit<ComponentPropsWithoutRef<typeof Button>, "label"> & { labelClassName?: string }
+ >(({ className, labelClassName, children, ...props }, ref) => {
+   return (
+     <ThreadListPrimitive.New asChild>
+-      <Button
+-        ref={ref}
++      <Button label={tr('common:new_thread')} ref={ref}
+         variant="ghost"
+         data-slot="aui_thread-list-new"
+         className={cn(
+           "hover:bg-muted data-active:bg-muted h-8 justify-start gap-2 rounded-md px-2.5 text-sm font-normal",
+           className,
+         )}
+-        {...props}
+-      >
++        {...props}>
+         {children ?? (
+           <>
+             <PlusIcon
+@@ -285,8 +294,7 @@
                data-slot="aui_thread-list-new-label"
                className={cn("whitespace-nowrap", labelClassName)}
              >
@@ -123,7 +170,7 @@
            </>
          )}
        </Button>
-@@ -297,10 +307,11 @@
+@@ -297,10 +305,11 @@
  ThreadListNew.displayName = "ThreadListNew";
  
  const ThreadListSkeleton: FC = () => {
@@ -136,7 +183,17 @@
        className="flex flex-col gap-0.5"
      >
        {Array.from({ length: 5 }, (_, i) => (
-@@ -321,6 +332,13 @@
+@@ -312,7 +321,8 @@
+         >
+           <Skeleton
+             data-slot="aui_thread-list-skeleton"
+-            className="h-3.5 w-full"
++            height={14}
++            index={i}
+           />
+         </div>
+       ))}
+@@ -321,6 +331,13 @@
  };
  
  export const ThreadListItem: FC = () => {
@@ -150,7 +207,7 @@
    const isRunning = useAuiState((s) => s.threadListItem.isRunning);
    const [isRenaming, setIsRenaming] = useState(false);
    const triggerRef = useRef<HTMLButtonElement>(null);
-@@ -335,7 +353,7 @@
+@@ -335,7 +352,7 @@
    return (
      <ThreadListItemPrimitive.Root
        data-slot="aui_thread-list-item"
@@ -159,7 +216,7 @@
      >
        {isRenaming ? (
          <ThreadListItemRename
-@@ -361,9 +379,9 @@
+@@ -361,9 +378,9 @@
              data-slot="aui_thread-list-item-title"
              className="min-w-0 flex-1 truncate"
            >
@@ -171,7 +228,7 @@
          </ThreadListItemPrimitive.Trigger>
        )}
        <ThreadListItemMore onRename={() => setIsRenaming(true)} />
-@@ -374,6 +392,7 @@
+@@ -374,6 +391,7 @@
  const ThreadListItemRename: FC<{
    onDone: (restoreFocus: boolean) => void;
  }> = ({ onDone }) => {
@@ -179,16 +236,24 @@
    const aui = useAui();
    const title = useAuiState((s) => s.threadListItem.title) ?? "";
    const [value, setValue] = useState(title);
-@@ -417,7 +436,7 @@
+@@ -415,12 +433,12 @@
+   return (
+     <Input
        ref={inputRef}
-       autoFocus
+-      autoFocus
++      hasAutoFocus
        data-slot="aui_thread-list-item-rename"
 -      aria-label="Rename thread"
-+      aria-label={tr('common:rename_thread')}
++      isLabelHidden label={tr('common:rename_thread')}
        value={value}
-       className="h-7 min-w-0 flex-1 ps-2.5 pe-9 text-sm"
-       onChange={(event) => setValue(event.target.value)}
-@@ -438,6 +457,7 @@
+-      className="h-7 min-w-0 flex-1 ps-2.5 pe-9 text-sm"
+-      onChange={(event) => setValue(event.target.value)}
++      controlClassName="h-7 min-w-0 flex-1 ps-2.5 pe-9 text-sm"
++      onChange={(_value, event) => setValue(event.target.value)}
+       onBlur={() => commit(false)}
+       onKeyDown={(event) => {
+         if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229)
+@@ -438,17 +456,16 @@
  };
  
  const ThreadListItemMore: FC<{ onRename: () => void }> = ({ onRename }) => {
@@ -196,16 +261,32 @@
    return (
      <ThreadListItemMorePrimitive.Root sharedFocusGroup>
        <ThreadListItemMorePrimitive.Trigger asChild>
-@@ -448,7 +468,7 @@
-           className="data-[state=open]:bg-accent absolute end-1.5 top-1/2 size-6 -translate-y-1/2 p-0 opacity-0 group-hover:opacity-100 group-has-focus-visible:opacity-100 group-data-active:opacity-100 data-[state=open]:opacity-100"
-         >
-           <MoreHorizontalIcon className="size-3.5" />
+-        <Button
+-          variant="ghost"
+-          size="icon"
++        <Button label={tr('common:more_options')} variant="ghost"
++          size="md"
+           data-slot="aui_thread-list-item-more"
+-          className="data-[state=open]:bg-accent absolute end-1.5 top-1/2 size-6 -translate-y-1/2 p-0 opacity-0 group-hover:opacity-100 group-has-focus-visible:opacity-100 group-data-active:opacity-100 data-[state=open]:opacity-100"
+-        >
+-          <MoreHorizontalIcon className="size-3.5" />
 -          <span className="sr-only">More options</span>
++          className="data-[state=open]:bg-accent absolute end-1.5 top-1/2 size-6 -translate-y-1/2 p-0 opacity-0 group-hover:opacity-100 group-has-focus-visible:opacity-100 group-data-active:opacity-100 data-[state=open]:opacity-100" icon={<MoreHorizontalIcon className="size-3.5" />}>
++
 +          <span className="sr-only">{tr('common:more_options')}</span>
          </Button>
        </ThreadListItemMorePrimitive.Trigger>
        <ThreadListItemMorePrimitive.Content
-@@ -464,16 +484,14 @@
+@@ -456,7 +473,7 @@
+         align="start"
+         sideOffset={6}
+         data-slot="aui_thread-list-item-more-content"
+-        className="bg-popover text-popover-foreground data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:animate-out data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-32 overflow-hidden rounded-xl border p-1.5"
++        className="bg-popover text-popover-foreground z-50 min-w-32 overflow-hidden rounded-xl border p-1.5"
+       >
+         <ThreadListItemMorePrimitive.Item
+           data-slot="aui_thread-list-item-more-item"
+@@ -464,16 +481,14 @@
            onSelect={onRename}
          >
            <PencilIcon className="size-4" />
@@ -224,7 +305,7 @@
          </ThreadListItemPrimitive.Archive>
          <ThreadListItemPrimitive.Delete asChild>
            <ThreadListItemMorePrimitive.Item
-@@ -481,8 +499,7 @@
+@@ -481,8 +496,7 @@
              className="text-destructive hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm outline-none select-none"
            >
              <TrashIcon className="size-4" />

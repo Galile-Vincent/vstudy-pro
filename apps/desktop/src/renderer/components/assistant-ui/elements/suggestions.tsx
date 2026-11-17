@@ -49,7 +49,7 @@ export function Suggestions({
             disabled={disabled}
             onClick={() => onSuggestion(suggestion.id)}
             className={cn(
-              "aui-suggestion flex items-center rounded-(--r-pill) border-0 px-(--space-3) py-(--space-2) text-(length:--type-base) text-(--ink)",
+              "aui-suggestion flex items-center rounded-(--radius-full) border-0 px-(--space-3) py-(--space-2) text-(length:--type-base) text-(--ink)",
               list
                 ? "w-full text-start"
                 : "text-center",

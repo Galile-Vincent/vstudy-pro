@@ -1,9 +1,9 @@
+import { Badge } from '@astryxdesign/core';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import { RELEASE_CHANNEL } from '../../shared/release';
-import './beta-badge.css';
 
 export function BetaBadge() {
   useTranslation();
-  return <span className="beta-badge">{tr(`library:${RELEASE_CHANNEL}`)}</span>;
+  return <Badge className="beta-badge" label={tr(`library:${RELEASE_CHANNEL}`)} />;
 }

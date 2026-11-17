@@ -1,7 +1,7 @@
 /** Explain optional AI access without requiring a student to understand developer tools. */
 import { useTranslation } from 'react-i18next';
 import { tr } from '../shared/i18n';
-import { Button } from './components/ui/button';
+import { Button } from '@astryxdesign/core';
 import './ai-setup.css';
 
 /** Keep reading available while offering an explicit route out of unavailable AI chat. */
@@ -10,22 +10,23 @@ export function AiSetupNotice({ onSettings }: { onSettings: () => void }) {
   return <aside className="ai-setup-notice" aria-label={tr('novice:ai_off')}>
     <strong>{tr('novice:ai_off')}</strong>
     <p>{tr('novice:without_ai')}</p>
-    <Button variant="secondary" size="sm" onClick={onSettings}>{tr('novice:connect_ai')}</Button>
+    <Button label={tr('novice:connect_ai')} variant="secondary" size="sm" onClick={onSettings} />
   </aside>;
 }
 
 /** Give first-time students a complete setup sequence and a useful no-account fallback. */
-export function AiSetupGuide({ onClose }: { onClose: () => void }) {
+export function AiSetupGuide({ onClose, leadingSteps = [] }: { onClose: () => void; leadingSteps?: readonly string[] }) {
   useTranslation();
   return <section className="ai-setup-guide" aria-label={tr('novice:setup_title')}>
     <h3>{tr('novice:setup_title')}</h3>
     <p>{tr('novice:without_ai')}</p>
     <ol>
+      {leadingSteps.map(step => <li key={step}>{step}</li>)}
       <li>{tr('novice:step_answer')}</li>
     </ol>
     <h4>{tr('novice:no_account')}</h4>
     <p>{tr('novice:ask_school')}</p>
     <blockquote>{tr('novice:school_request')}</blockquote>
-    <Button variant="secondary" size="sm" onClick={onClose}>{tr('novice:continue_reading')}</Button>
+    <Button label={tr('novice:continue_reading')} variant="secondary" size="sm" onClick={onClose} />
   </section>;
 }

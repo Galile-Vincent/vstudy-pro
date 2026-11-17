@@ -20,7 +20,7 @@
   align-items: center;
   gap: var(--space-2);
   border: 0;
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-full);
   background: color-mix(in oklab, var(--ink) 5%, var(--surface));
   color: var(--muted);
   padding: 4px 10px;
@@ -36,8 +36,8 @@
 }
 
 .composer-usage:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
+  outline: var(--focus-outline-width, 2px) solid var(--focus-color, var(--focus));
+  outline-offset: var(--focus-outline-offset, 2px);
 }
 
 /* Simple meter without outlines */
@@ -56,19 +56,19 @@
   height: var(--space-2);
   border: 0;
   background: color-mix(in oklab, var(--ink) 8%, var(--surface));
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .usage-meter progress::-webkit-progress-bar {
   background: color-mix(in oklab, var(--ink) 8%, var(--surface));
-  border-radius: var(--r-pill);
+  border-radius: var(--radius-full);
 }
 
 .usage-meter progress::-webkit-progress-value {
   background: var(--folder-sage);
-  border-radius: var(--r-pill);
-  transition: width var(--motion-base) var(--ease-out-soft);
+  border-radius: var(--radius-full);
+  transition: width var(--motion-base) var(--ease-entrance);
 }
 
 .usage-meter.amber progress::-webkit-progress-value {
@@ -86,7 +86,7 @@
   flex-wrap: wrap;
   gap: var(--space-2) var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border-radius: var(--r-sm);
+  border-radius: var(--radius-element);
   background: color-mix(in oklab, var(--warning) 12%, var(--surface));
   font-size: var(--type-sm);
   border: 0;
@@ -107,7 +107,7 @@
   height: 28px;
   padding-inline: var(--space-2);
   font-size: var(--type-xs);
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-inner);
 }
 
 /* Usage dashboard: unboxed summary, chart and table; sections breathe with --space-6 */
@@ -206,7 +206,7 @@
   display: inline-block;
   width: 0.75rem;
   height: 0.75rem;
-  border-radius: var(--r-xs);
+  border-radius: var(--radius-inner);
   margin: 0 var(--space-1) 0 var(--space-2);
 }
 
@@ -300,7 +300,7 @@
 
 .usage-breakdown td {
   padding: var(--space-2) var(--space-3);
-  border-bottom: thin solid var(--glass-tone);
+  border-bottom: thin solid var(--line);
   color: var(--ink);
 }
 
@@ -318,7 +318,11 @@
   border-bottom: 0;
 }
 
-.usage-trend svg { width:100%; height:124px; }
+.usage-trend svg {
+  width: 100%;
+  aspect-ratio: 16 / 5;
+  height: auto;
+}
 
 .usage-dashboard .subscription-meters { padding:0; }
 .subscription-meters { padding:8px; font-size:12px; min-width:0; }
@@ -373,14 +377,57 @@
   padding:var(--space-1);
 }
 .subscription-details { max-block-size:calc(45dvh - var(--space-8) - var(--space-1)); overflow:auto; overscroll-behavior:contain; padding:var(--space-2); }
-.subscription-progress { block-size:var(--space-2); background:var(--line); }
-.subscription-progress [data-slot=progress-indicator] { background:var(--accent-color); transition:none; }
-.subscription-progress:dir(rtl) { transform:scaleX(-1); }
 .subscription-details:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
 @media (prefers-contrast:more) {
-  .subscription-progress { outline:1px solid var(--ink); background:var(--surface); }
+  .subscription-progress .astryx-progress-bar-track { outline:1px solid var(--ink); background:var(--surface); }
 }
 @media (forced-colors:active) {
-  .subscription-progress { outline:1px solid CanvasText; background:Canvas; }
-  .subscription-progress [data-slot=progress-indicator] { background:Highlight; forced-color-adjust:none; }
+  .subscription-progress .astryx-progress-bar-track { outline:1px solid CanvasText; background:Canvas; }
+  .subscription-progress .astryx-progress-bar-fill { background:Highlight; forced-color-adjust:none; }
+}
+
+/* Settings summaries share a quiet, readable tile surface. */
+.usage-summary [data-slot=stat],
+.usage-dashboard .subscription-window {
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-container);
+  background: var(--card-surface);
+  font-variant-numeric: tabular-nums;
+}
+.usage-summary [data-slot=stat] { text-align: end; }
+.usage-dashboard .subscription-windows { gap: var(--space-4); margin-top: var(--space-3); }
+.usage-dashboard .subscription-provider { margin-top: var(--space-4); }
+.usage-dashboard .subscription-window > span { font-size: var(--type-sm); gap: var(--space-2); }
+.usage-dashboard .subscription-meters small { font-size: var(--type-xs); }
+
+.usage-panel-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.usage-settings .settings-intro { color: var(--muted); }
+.usage-settings .usage-token-details > div {
+  padding-block: var(--space-3);
+  border: 0;
+}
+.usage-settings .usage-token-details > div + div {
+  border-top: 1px solid var(--line);
+}
+.usage-settings .subscription-meters { padding: 0; }
+.usage-settings .subscription-provider {
+  margin: 0;
+  padding-block: var(--space-3);
+}
+.usage-settings .subscription-provider + .subscription-provider,
+.usage-settings .subscription-consent {
+  border-top: 1px solid var(--line);
+}
+.usage-settings .subscription-consent {
+  margin: 0;
+  padding-block: var(--space-3);
+}
+.usage-settings .usage-breakdown :is(th, td) {
+  padding-block: var(--space-3);
 }

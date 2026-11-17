@@ -17,7 +17,7 @@ it('asks once, above the composer, before study memory starts recording this cha
   render(<Chat conversation={conversation} history={[]} draft="" onDraft={() => {}} selection={null} onClearSelection={() => {}} providers={[]} model="" onModel={() => {}} onSettings={() => {}} onProvidersChanged={async () => {}} onUsage={() => {}} />);
   expect(await screen.findByText(tr('review:memory_disclosure'))).toBeTruthy();
   const disclosure = screen.getByText(tr('review:memory_disclosure')).closest('[role=region]');
-  expect(disclosure?.getAttribute('tabindex')).toBe('0');
+  expect(disclosure?.getAttribute('aria-labelledby')).toBe('review-consent-title');
   expect(disclosure?.contains(screen.getByRole('button', { name: tr('review:consent_turn_on') }))).toBe(false);
   expect(screen.getByRole('button', { name: tr('review:consent_not_now') })).toBeTruthy();
 });

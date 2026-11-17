@@ -8,7 +8,7 @@ import { inspect, regressions, collect, run } from './ui-lint.mjs';
 test('counts unsafe declarations while accepting tokens and focus rings', async () => {
   assert.deepEqual(inspect(await readFile(new URL('./fixtures/ui-lint.css',import.meta.url),'utf8')), {shadow:1,radius:1,color:2,backdrop:1,'surface-class':1});
   assert.equal(inspect('.x { box-shadow: 0 0 0 2px var(--focus), 3px 4px black; }').shadow,1);
-  assert.equal(inspect('const style = {boxShadow: "var(--glass-shadow)", backdropFilter: "var(--glass-blur)"}',false).shadow,0);
+  assert.equal(inspect('const style = {boxShadow: "var(--shadow-med)", backdropFilter: "var(--backdrop-none)"}',false).shadow,0);
   assert.equal(inspect('const style = {borderRadius: "8px", color: "rgb(1,2,3)"}',false).radius,1);
 });
 test('ratchets by file and rule, including new files', () => {
@@ -38,7 +38,7 @@ test('excludes library and token sources and refuses baseline increases on disk'
 });
 
 test('accepts token radii and catches physical corners and numeric styles', () => {
-  assert.equal(inspect('.x { border-radius: calc(var(--r-md) - 2px); border-top-left-radius: var(--r-sm) 8px; }').radius, 1);
+  assert.equal(inspect('.x { border-radius: calc(var(--radius-container) - 2px); border-top-left-radius: var(--radius-element) 8px; }').radius, 1);
   for (const corner of ['top-left', 'top-right', 'bottom-left', 'bottom-right']) {
     assert.equal(inspect(`.x { border-${corner}-radius: 8px; }`).radius, 1);
   }
@@ -102,11 +102,11 @@ test('covers literal colors in utility, shorthand, and SVG fixtures', () => {
 
 test('accepts zero resets and requires every radius length to use tokens', () => {
   for (const key of ['border-radius', 'borderRadius', 'border-top-left-radius']) {
-    for (const value of ['0', '0px', 'var(--r-sm)', 'calc(var(--r-md) - 2px)']) {
+    for (const value of ['0', '0px', 'var(--radius-element)', 'calc(var(--radius-container) - 2px)']) {
       assert.equal(inspect(`.x { ${key}: ${value}; }`).radius, 0, `${key}: ${value}`);
       assert.equal(inspect(`const style = {'${key}': '${value}'}`, false).radius, 0);
     }
-    for (const value of ['var(--r-sm) 8px', '.5rem', '.5em', '8px']) {
+    for (const value of ['var(--radius-element) 8px', '.5rem', '.5em', '8px']) {
       assert.equal(inspect(`.x { ${key}: ${value}; }`).radius, 1, `${key}: ${value}`);
       assert.equal(inspect(`const style = {'${key}': '${value}'}`, false).radius, 1);
     }

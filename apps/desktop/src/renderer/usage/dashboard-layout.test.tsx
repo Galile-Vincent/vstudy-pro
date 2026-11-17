@@ -32,5 +32,5 @@ it('orders controls, two stats, token details, chart, breakdown, then subscripti
   for (let i = 1; i < order.length; i++)
     expect(order[i - 1]!.compareDocumentPosition(order[i]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   expect(container.querySelector('h1, main')).toBeNull();
-  expect(container.querySelector('h3')).not.toBeNull();
+  expect(container.querySelector('h2')).not.toBeNull();
 });

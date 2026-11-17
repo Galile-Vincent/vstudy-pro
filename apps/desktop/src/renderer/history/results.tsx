@@ -1,5 +1,5 @@
-/** Shared assistant-ui thread list for full History and scoped quick finders. */
-import { createContext, useContext } from 'react';
+import { DropdownMenu, DropdownMenuItem } from "@astryxdesign/core";
+import { createContext, useContext, useState } from 'react';
 import { AssistantRuntimeProvider, ThreadListPrimitive, ThreadListItemPrimitive, useExternalStoreRuntime, useAuiState, type ThreadMessage } from '@assistant-ui/react';
 import { Pin, MoreHorizontal } from 'lucide-react';
 import type { ChatHit, ChatPatch } from '../../shared/chat-history';
@@ -7,7 +7,6 @@ import { tr } from '../../shared/i18n';
 import { useTranslation } from 'react-i18next';
 import { useFormat } from '../i18n';
 import { ThreadListRoot } from '../components/assistant-ui/elements/thread-list.aui';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 export function HistorySnippet({ text }: {
   text: string;
 }) {
@@ -30,6 +29,7 @@ type ContextValue = {
 const Context = createContext<ContextValue | null>(null);
 function Result() {
   useTranslation();
+  const [menuOpen, setMenuOpen] = useState(false);
   const format = useFormat();
   const id = useAuiState(s => s.threadListItem.id), context = useContext(Context)!;
   const hit = context.byId.get(id);
@@ -45,12 +45,7 @@ function Result() {
   </button></ThreadListItemPrimitive.Trigger>
   <p className="history-meta"><span className="history-course-dot" style={{ background: courseColor(hit.courseId) }}/>{group}{hit.term ? ' · ' + hit.term : ''} · {hit.modelId}</p>
   {hit.matches.map(m => <button key={m.messageId} className="history-match" onClick={() => context.open(hit, m.messageId)}><span className="history-role">{tr(m.role === 'user' ? 'history:question' : 'history:answer')}</span><HistorySnippet text={m.snippet}/></button>)}
-  <DropdownMenu><DropdownMenuTrigger className="history-more" aria-label={tr('common:more_options')}><MoreHorizontal size={16}/></DropdownMenuTrigger><DropdownMenuContent>
-   <DropdownMenuItem onSelect={() => context.rename(hit)}>{tr('common:rename')}</DropdownMenuItem>
-   <DropdownMenuItem onSelect={() => context.update(hit, { pinned: !hit.pinned })}>{tr(hit.pinned ? 'history:unpin' : 'history:pin')}</DropdownMenuItem>
-   <DropdownMenuItem onSelect={() => context.update(hit, { archived: !hit.archived })}>{tr(hit.archived ? 'history:unarchive' : 'common:archive')}</DropdownMenuItem>
-   <DropdownMenuItem onSelect={() => context.update(hit, { deleted: true })}>{tr('common:delete')}</DropdownMenuItem>
-  </DropdownMenuContent></DropdownMenu>
+  <DropdownMenu isMenuOpen={menuOpen} onOpenChange={setMenuOpen} alignment="end" renderTrigger={triggerProps => <><button {...triggerProps} className="history-more" aria-label={tr('common:more_options')}><MoreHorizontal size={16}/></button></>}>{menuOpen && <><DropdownMenuItem onClick={() => context.rename(hit)} label={<>{tr('common:rename')}</>} /><DropdownMenuItem onClick={() => context.update(hit, { pinned: !hit.pinned })} label={<>{tr(hit.pinned ? 'history:unpin' : 'history:pin')}</>} /><DropdownMenuItem onClick={() => context.update(hit, { archived: !hit.archived })} label={<>{tr(hit.archived ? 'history:unarchive' : 'common:archive')}</>} /><DropdownMenuItem onClick={() => queueMicrotask(() => context.update(hit, { deleted: true }))} label={<>{tr('common:delete')}</>} /></>}</DropdownMenu>
  </ThreadListItemPrimitive.Root></>;
 }
 export function HistoryResults({ items, onOpen, onUpdate, onRename, groupByCourse = false }: {

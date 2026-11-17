@@ -4,7 +4,7 @@ import { classifySetupError, setupDiagnostic, setupErrors } from '../../shared/a
 import { desktopPlatform } from '../../shared/platform';
 import { tr } from '../../shared/i18n';
 import { Toolbar } from '../components/ui';
-import { Button } from '../components/ui/button';
+import { Button } from '@astryxdesign/core';
 import { cliNames } from './model';
 
 export function SetupRecovery({ failure, tool, session, busy, onAction }: {
@@ -24,8 +24,8 @@ export function SetupRecovery({ failure, tool, session, busy, onAction }: {
     <strong>{tr(classified === 'unknown' && failure !== 'unknown' ? `ai-cli:failure_${failure}` : `ai-cli:error_title_${issue.title}`)}</strong>
     <p>{tr(`ai-cli:error_next_${issue.next}`)}</p>
     <Toolbar left={<>
-      <Button variant="secondary" disabled={busy || !tool.consented} onClick={() => onAction(issue.action)}>{tr('ai-cli:retry')}</Button>
-      <Button variant="ghost" onClick={() => void copy()}>{tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_details')}</Button>
+      <Button label={tr('ai-cli:retry')} variant="secondary" isDisabled={busy || !tool.consented} onClick={() => onAction(issue.action)} />
+      <Button label={tr(copied ? 'ai-cli:copied' : 'ai-cli:copy_details')} variant="ghost" onClick={() => void copy()} />
     </>} />
     {copyError && <p>{tr('ai-cli:copy_error')}</p>}
   </div>;

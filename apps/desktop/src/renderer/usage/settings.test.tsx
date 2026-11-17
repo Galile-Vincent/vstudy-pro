@@ -19,11 +19,14 @@ it('labels the budget fields and saves their values', async () => {
   const budget = screen.getByLabelText('Monthly budget (USD)') as HTMLInputElement;
   const cap = screen.getByLabelText('Monthly token cap') as HTMLInputElement;
   const warn = screen.getByLabelText('Warn at (%)') as HTMLInputElement;
-  expect([budget.type, cap.type, warn.type]).toEqual(['number', 'number', 'number']);
+  expect([budget.inputMode, cap.inputMode, warn.inputMode]).toEqual(['decimal', 'decimal', 'decimal']);
   for (const field of [budget, cap, warn]) expect(field.labels).toHaveLength(1);
   fireEvent.change(budget, { target: { value: '12.5' } });
+  fireEvent.blur(budget);
   fireEvent.change(cap, { target: { value: '5000' } });
+  fireEvent.blur(cap);
   fireEvent.change(warn, { target: { value: '70' } });
+  fireEvent.blur(warn);
   expect(screen.getByLabelText('Price overrides (USD per 1M tokens)')).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Save usage settings' }));
   await act(async () => {});
@@ -31,6 +34,6 @@ it('labels the budget fields and saves their values', async () => {
     'settings:set',
     expect.objectContaining({ monthlyBudgetUsd: 12.5, monthlyTokenBudget: 5000, warnAtPercent: 70 }),
   );
-  expect(screen.getByRole('status').textContent).toBe('Usage settings saved');
+  expect(container.querySelector('p[role="status"]')?.textContent).toBe('Usage settings saved');
   expect(container.querySelector('h1, main')).toBeNull();
 });

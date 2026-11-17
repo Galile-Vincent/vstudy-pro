@@ -4,7 +4,7 @@ import type { StudyPrefs } from '../../shared/review';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
 import './memory-consent.css';
-import { Button } from '../components/ui/button';
+import { Button, Card } from '@astryxdesign/core';
 
 /** "Not now" lasts until the app restarts (session storage), so the card never nags twice in one session. */
 const POSTPONED = 'vstudy.memoryConsentPostponed';
@@ -41,15 +41,29 @@ export function MemoryConsentCard() {
   }
   if (state === 'done') return <p role="status" className="review-consent-done">{tr('review:consent_done')}</p>;
   if (state === 'hidden' || !prefs || !prefs.memoryEnabled || prefs.consentAcknowledged) return null;
-  return <div ref={card} className="review-consent">
-    <div className="review-consent-body" role="region" aria-labelledby="review-consent-title" tabIndex={0}>
-    <h2 id="review-consent-title">{tr('review:consent_title')}</h2>
-    <p>{tr('review:memory_disclosure')}</p>
-    </div>
-    <div className="review-actions">
-      <Button type="button" disabled={busy} onClick={() => void turnOn()}>{tr('review:consent_turn_on')}</Button>
-      <Button type="button" variant="ghost" disabled={busy} onClick={() => { postpone(); leave('hidden'); }}>{tr('review:consent_not_now')}</Button>
-    </div>
-    {error && <p role="alert">{tr('review:error')}</p>}
-  </div>;
+  return (
+    <Card ref={card} className="review-consent" elevation="none">
+      <div className="review-consent-body" role="region" aria-labelledby="review-consent-title">
+        <h2 id="review-consent-title">{tr('review:consent_title')}</h2>
+        <p>{tr('review:memory_disclosure')}</p>
+      </div>
+      <div className="review-actions">
+        <Button
+          type="button"
+          variant="primary"
+          isDisabled={busy}
+          label={tr('review:consent_turn_on')}
+          onClick={() => void turnOn()}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          isDisabled={busy}
+          label={tr('review:consent_not_now')}
+          onClick={() => { postpone(); leave('hidden'); }}
+        />
+      </div>
+      {error && <p role="alert">{tr('review:error')}</p>}
+    </Card>
+  );
 }

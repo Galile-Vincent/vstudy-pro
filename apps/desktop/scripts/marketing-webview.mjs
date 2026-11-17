@@ -17,7 +17,7 @@ export async function installMarketingMoodle(app,directory,desktop,fixture) {
     if(req.url.startsWith('/admin/tool/mobile/')) {res.writeHead(303,{'Set-Cookie':'MoodleSession=demo; Path=/; HttpOnly; SameSite=Lax',Location:'/course/view.php?id=1'});res.end();return;}
     res.setHeader('Content-Type','text/html; charset=utf-8');res.end(html);
   });
-  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(47831,'127.0.0.1',()=>{server.off('error',reject);resolve();});});
+  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',()=>{server.off('error',reject);resolve();});});
   try {
   const siteUrl=`http://127.0.0.1:${server.address().port}`;
   const entry=join(directory,'webview-entry.ts');

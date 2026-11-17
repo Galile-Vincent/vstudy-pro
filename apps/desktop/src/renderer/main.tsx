@@ -1,3 +1,4 @@
+import { AstryxTheme } from './astryx-theme';
 import { bootstrap, showBootstrapError } from './bootstrap';
 import { reportRendererError } from './renderer-errors';
 import { SurfaceErrorBoundary } from './components/surface-error-boundary';
@@ -10,7 +11,6 @@ import { createRoot } from "react-dom/client";
 import { App } from "./app";
 import "./style.css";
 import "./tokens.css";
-import "./page-depth.css";
 import "./settings/themes.css";
 import "./settings/theme-transition.css";
 import "./motion/surfaces.css";
@@ -19,7 +19,7 @@ void bootstrap(initializeAppearance, () => {
   if (!root) throw new Error(tr('common:missing_application_root'));
   createRoot(root, { onUncaughtError: error => { reportRendererError(error, 'render'); showBootstrapError(); } }).render(
     <StrictMode>
-      <I18nextProvider i18n={i18n}><SurfaceErrorBoundary><App /></SurfaceErrorBoundary></I18nextProvider>
+      <I18nextProvider i18n={i18n}><SurfaceErrorBoundary><AstryxTheme><App /></AstryxTheme></SurfaceErrorBoundary></I18nextProvider>
     </StrictMode>,
   );
 });

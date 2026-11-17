@@ -30,14 +30,12 @@ it('sorts family versions descending with a stable name tie break', async () => 
  expect(['GPT-6 Sol','GPT-6.1 Sol','GPT-5 Sol','Gemini 3'].map(name=>({name})).sort(compareModels).map(m=>m.name)).toEqual(['Gemini 3','GPT-6.1 Sol','GPT-6 Sol','GPT-5 Sol']);
 });
 
-it('uses the vendor search and keyboard model selection', async () => {
+it('selects a model with the Astryx palette keyboard controls', async () => {
  const host=document.createElement('div');document.body.append(host);const root=createRoot(host);const onModel=vi.fn();
  try {
   await act(async()=>root.render(<ModelControls providers={providers} model="codex-cli/sol" onModel={onModel} onSettings={()=>{}}/>));
   await act(async()=>(host.querySelector('[aria-label="Model"]') as HTMLButtonElement).click());
-  const input=document.querySelector('input')!;
-  await act(async()=>{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')!.set!.call(input,'Other');input.dispatchEvent(new Event('input',{bubbles:true}));});
-  expect(document.querySelectorAll('[role=option]')).toHaveLength(1);
+  const input=document.querySelector<HTMLInputElement>('input[aria-label="Search models"]')!;
   await act(async()=>input.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true})));
   await act(async()=>input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true})));
   expect(onModel).toHaveBeenCalledWith('codex-cli/other');

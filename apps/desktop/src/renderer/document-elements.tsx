@@ -24,7 +24,7 @@ export function DocumentCitationLink({ id, children }: {id:string;children:React
   const citations = documentCitationSchema.array().safeParse(raw);
   const index = citations.success ? citations.data.findIndex(c => c.id === id) : -1;
   const citation = citations.success ? citations.data[index] : undefined;
-  return citation ? <Citation index={index} source={{title:citation.title,snippet:citation.quote}} onClick={() => jumpToCitation(citation)} /> : <span>{children}</span>;
+  return citation ? <Citation data-slot="document-citation" index={index} source={{title:citation.title,snippet:citation.quote}} onClick={() => jumpToCitation(citation)} /> : <span>{children}</span>;
 }
 export const DocumentTool: ToolCallMessagePartComponent = props => {
   useTranslation();

@@ -112,7 +112,7 @@ try {
     await page.keyboard.press('Escape');
     await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];window.setSize(800,900);window.webContents.setZoomFactor(2);});
     await page.waitForTimeout(400);
-    if(await page.locator('.shell-sidebar').evaluate(el=>el.hidden)) await page.evaluate(()=>window.dispatchEvent(new Event('vstudy:toggle-sidebar')));
+    await page.evaluate(()=>window.dispatchEvent(new Event('vstudy:toggle-sidebar')));
     await page.waitForTimeout(500);assert.equal((await nativeState())[0].visible,false,'sidebar hides native content');
     await page.evaluate(()=>window.dispatchEvent(new Event('vstudy:toggle-sidebar')));
     await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];window.webContents.setZoomFactor(1);window.setSize(1400,960);});

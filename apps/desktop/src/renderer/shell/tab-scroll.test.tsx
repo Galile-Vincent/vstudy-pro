@@ -13,7 +13,7 @@ let root:Root,host:HTMLDivElement,ids:string[];
 beforeEach(()=>{
   vi.useFakeTimers();localStorage.clear();
   vi.stubGlobal('matchMedia',()=>({matches:false,addEventListener(){},removeEventListener(){}}));
-  vi.stubGlobal('ResizeObserver',class {observe(){} disconnect(){}});
+  vi.stubGlobal('ResizeObserver',class {observe(){} unobserve(){} disconnect(){}});
   host=document.createElement('div');document.body.append(host);root=createRoot(host);
 });
 afterEach(async()=>{await act(async()=>root.unmount());host.remove();vi.useRealTimers();vi.unstubAllGlobals();});

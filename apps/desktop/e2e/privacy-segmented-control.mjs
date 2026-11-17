@@ -25,7 +25,7 @@ try {
     await page.reload();
     await page.locator('.app-shell').first().waitFor();
     await page.evaluate(() => window.dispatchEvent(new Event('vstudy:open-settings')));
-    await page.locator('.settings-dialog[data-state=open]').waitFor();
+    await page.locator('.settings-dialog[open]').waitFor();
     await page.locator('.settings-tabs').getByRole('tab').last().click();
     await page.setViewportSize({ width, height: 900 });
     const group = page.getByRole('radiogroup', { name: 'Converter mode' });

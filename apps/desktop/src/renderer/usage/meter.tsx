@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
 import { useEffect, useState, useRef, type SyntheticEvent } from 'react';
 import type { Conversation, Settings, UsageRecord, UsageSummary } from '../../shared';
-import { Progress } from '../components/ui/progress';
+import { ProgressBar } from '@astryxdesign/core';
 import { desktop } from '../bridge';
 import { money, compactTokens } from './chip';
 import { budgetState } from './budget';
@@ -226,10 +226,10 @@ export function SubscriptionWindowMeter({ label, usedPercent }: { label: string;
       <span className="subscription-label" title={label}>{label}</span>
       <small>{Math.round(usedPercent)}%</small>
     </span>
-    <Progress
+    <ProgressBar
       className="subscription-progress"
-      aria-label={label}
-      aria-valuenow={usedPercent}
+      label={label}
+      isLabelHidden
       value={usedPercent}
     />
   </div>;

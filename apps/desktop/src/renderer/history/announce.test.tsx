@@ -62,7 +62,7 @@ it.each([
   await type(host, 'none');
   await settle();
   expect(live(host)!.textContent).toBe(none);
-  expect(host.querySelectorAll('[role=status]:not(.history-undo)')).toHaveLength(1);
+  expect(host.querySelectorAll('[role=status]:not(.history-undo):not(.astryx-button *)')).toHaveLength(1);
 });
 it('announces a partial page with a plus sign and one conversation without plural', async () => {
   const cursor = { rank: 0, updatedAt: make(1).updatedAt, id: make(1).id };

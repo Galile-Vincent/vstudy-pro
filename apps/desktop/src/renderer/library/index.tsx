@@ -1,17 +1,13 @@
+import { IconButton } from "@astryxdesign/core";
+import { Badge, CheckboxInput, TextInput, Tooltip, Card, Layout, LayoutContent, LayoutHeader, LayoutFooter, Button } from "@astryxdesign/core";
 import { provesExistence } from './selection';
 import { virtualWindow } from './window';
 import { localDate, dayBound, validDay } from './dates';
 import { recovery } from "./recovery";
 import { openDocument } from '../document-open';
-import type { CSSProperties } from 'react';
-import { PageContainer, PageHeader, Toolbar, FormField, EmptyState, Card } from '../components/ui';
-import { Badge } from '../components/ui/badge';
-import { Tooltip, TooltipTrigger, TooltipContent } from '../components/ui/tooltip';
+import { PageContainer, PageHeader, Toolbar, FormField, EmptyState } from "../components/ui";
+import { Panel } from "../components/panel";
 import './ui3.css';
-import { Popover, PopoverTrigger, PopoverContent } from '../components/ui/popover';
-import { Checkbox } from '../components/checkbox';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
 import { contentLanguage } from "../../shared/content-language";
 import { Select } from "../components/select";
 import {
@@ -30,7 +26,7 @@ import {
   MoreHorizontal,
   LayoutGrid,
   List,
-  SlidersHorizontal, AlertTriangle, LoaderCircle, X,
+  SlidersHorizontal, AlertTriangle, LoaderCircle, X, ArrowDownWideNarrow, ArrowUpNarrowWide,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { libraryQuerySchema, type LibraryQuery } from "../../shared/library";
@@ -73,7 +69,7 @@ export function formatSize(bytes: number | null, locale: string, short = false) 
 }
 function DocumentTitle({title,details,onOpen}:{title:string;details:string;onOpen:(event: React.MouseEvent<HTMLButtonElement>)=>void}) {
  const ref=useRef<HTMLButtonElement>(null);const [visible,setVisible]=useState(false);
- return <Tooltip delayDuration={500} open={visible} onOpenChange={next=>{const button=ref.current;const hidden=button?.closest('.library-document')?.querySelectorAll(':scope > div');setVisible(next&&!!button&&(button.scrollWidth>button.clientWidth||Array.from(hidden??[]).some(e=>getComputedStyle(e).display==='none')));}}><TooltipTrigger asChild><Button ref={ref} variant="ghost" className="document-title" tabIndex={-1} lang={contentLanguage(title)} onAuxClick={event=>{if(event.button===1){event.preventDefault();onOpen(event);}}} onClick={onOpen}>{title}</Button></TooltipTrigger><TooltipContent className="document-tooltip"><div>{title}</div><div>{details}</div></TooltipContent></Tooltip>;
+ return <Tooltip delay={500} isOpen={visible} onOpenChange={next=>{const button=ref.current;const hidden=button?.closest('.library-document')?.querySelectorAll(':scope > div');setVisible(next&&!!button&&(button.scrollWidth>button.clientWidth||Array.from(hidden??[]).some(e=>getComputedStyle(e).display==='none')));}} content={visible ? <><div>{title}</div><div>{details}</div></> : null}><button  ref={ref}  className="document-title" tabIndex={-1} {...{lang: contentLanguage(title)}} onAuxClick={event=>{if(event.button===1){event.preventDefault();onOpen(event);}}} onClick={onOpen}>{title}</button></Tooltip>;
 }
 function useEvent<T extends (...args: never[]) => unknown>(callback: T): T {
   const latest = useRef(callback);
@@ -619,9 +615,6 @@ export function LibraryView() {
     if (!destination) return;
     await run(() => desktop.invoke("library:documents:move", { documentIds: [item.document.id], ...destination }));
   };
-  const bulkBar=useRef<HTMLDivElement>(null);
-  const [bulkHeight,setBulkHeight]=useState(0);
-  useLayoutEffect(()=>{const bar=bulkBar.current;if(!bar){setBulkHeight(0);return;}const observer=new ResizeObserver(()=>setBulkHeight(bar.getBoundingClientRect().height));observer.observe(bar);return()=>observer.disconnect();},[selected.length]);
   const [textScale,setTextScale]=useState(()=>parseFloat(getComputedStyle(document.documentElement).fontSize));
   useEffect(()=>{const update=()=>setTextScale(parseFloat(getComputedStyle(document.documentElement).fontSize));const observer=new MutationObserver(update);observer.observe(document.documentElement,{attributes:true,attributeFilter:['style']});window.addEventListener('resize',update);return()=>{observer.disconnect();window.removeEventListener('resize',update);};},[]);
   const [viewportWidth, setViewportWidth] = useState(700);
@@ -634,7 +627,7 @@ export function LibraryView() {
   }, [loading, grid, items.length > 0, showFolders]);
 
   const rowRem=parseFloat(getComputedStyle(document.documentElement).getPropertyValue(query.text?'--library-search-row-height':'--library-row-height'));
-  const baseHeight = grid ? 10 * (textScale || 16) : (rowRem || 2.75) * (textScale || 16);
+  const baseHeight = grid ? 7.5 * (textScale || 16) : (rowRem || 2.75) * (textScale || 16);
   const rowHeight = baseHeight;
   const columns = grid ? Math.max(1, Math.floor(viewportWidth / 280)) : 1;
   const [statusHeights, setStatusHeights] = useState<Record<string, number>>({});
@@ -684,17 +677,17 @@ export function LibraryView() {
   }, [activeRow, start, end]);
   useLayoutEffect(()=>{
     const viewport=scroller.current;
-    if(!viewport||!selected.length||!bulkHeight)return;
+    if(!viewport||!selected.length)return;
     const index=shown.findIndex(item=>item.document.id===selected[selected.length-1]);
     if(index<0)return;
     const rowTop=layout.offsets[Math.floor(index/columns)]!;
-    const available=Math.max(rowHeight,viewport.clientHeight-bulkHeight-24);
+    const available=Math.max(rowHeight,viewport.clientHeight);
     if(rowTop<viewport.scrollTop)viewport.scrollTop=rowTop;
     else if(rowTop+layout.heights[Math.floor(index/columns)]!>viewport.scrollTop+available)viewport.scrollTop=rowTop+layout.heights[Math.floor(index/columns)]!-available;
-  },[selected,bulkHeight,rowHeight,columns,shown,layout]);
+  },[selected,rowHeight,columns,shown,layout]);
   const viewControls = (
     <div className="library-view-controls">
-        <Select
+        <Select size="sm"
           className="library-sort"
           aria-label={tr("library:sort")}
           value={query.sort}
@@ -713,19 +706,16 @@ export function LibraryView() {
             ),
           )}
         </Select>
-        <Button variant="outline"
-          className="library-sort"
-          aria-label={tr("library:direction")}
+        <IconButton label={tr("library:direction")} variant="secondary" tooltip={tr("library:direction")}
           onClick={() =>
             setQuery((q) => ({
               ...q,
               direction: q.direction === "asc" ? "desc" : "asc",
             }))
           }
-        >
-          {query.direction === "asc" ? "↑" : "↓"}
-        </Button>
-        <Button variant="outline"
+          icon={query.direction === "asc" ? <ArrowUpNarrowWide aria-hidden="true" /> : <ArrowDownWideNarrow aria-hidden="true" />}
+        />
+        <IconButton label={tr("library:viewToggle")} variant="secondary" tooltip={tr("library:viewToggle")}
           aria-label={tr("library:viewToggle")}
           aria-pressed={grid}
           onClick={() =>
@@ -733,10 +723,7 @@ export function LibraryView() {
               localStorage.setItem("library-grid", String(!v));
               return !v;
             })
-          }
-        >
-          {grid ? <LayoutGrid /> : <List />}
-        </Button>
+          } icon={grid ? <LayoutGrid /> : <List />} />
     </div>
   );
   const DocumentSurface = grid ? Card : "div";
@@ -749,7 +736,7 @@ export function LibraryView() {
       </div>
   );
   return (
-    <PageContainer
+    <PageContainer as="main"
       onDragOver={(e) => e.preventDefault()}
       onDrop={(e) => {
         e.preventDefault();
@@ -762,21 +749,16 @@ export function LibraryView() {
           );
       }}
       className="library-view"
-      role="region"
       aria-label={tr("common:library")}
     >
-      <PageHeader
+<Layout height="fill" header={<> <LayoutHeader className="library-filter-header">      <PageHeader
         ref={element => {
           heading.current = element?.querySelector('h1') ?? null;
           heading.current?.setAttribute('tabindex', '-1');
         }}
         title={openGroup ? openGroup.name ?? tr("library:unfiled") : (folderPath(folders, query.folderId) || route.title || tr("common:library"))}
-        description={tr("library:documentCount", {
-          count: items.length,
-          formatted: format.number(items.length) + (cursor ? "+" : ""),
-        })}
         actions={
-        <Button variant="outline" className="primary"
+        <Button label={(tr("common:import_document"))} variant="primary" className="primary"
           hidden={!loading && !items.length && !text && !filters.length}
           data-testid="import-document"
           onClick={() => void run(() => importFiles(query.folderId ?? null))}
@@ -785,22 +767,23 @@ export function LibraryView() {
         </Button>
         }
       />
+      </LayoutHeader> </>} content={<LayoutContent isScrollable={false} className="library-content">
+      <div className="library-section"><Panel
+        title={<>{tr(showFolders ? "library:viewFolders" : "library:documents")} <Badge label={showFolders ? format.number(groups.length) : format.number(items.length) + (cursor ? "+" : "")} /></>}
+        actions={viewKey === "all" && !query.folderId ? <LibraryModeToggle mode={mode} onChange={chooseMode} /> : undefined}
+      >
       <Toolbar className="library-toolbar" hidden={!loading && !items.length && !text && !filters.length && !query.folderId} left={<>
-        {viewKey === "all" && !query.folderId && <LibraryModeToggle mode={mode} onChange={chooseMode} />}
-        <label className="library-search">
-          <Search aria-hidden="true" />
-          <Input
+          <TextInput containerClassName="library-search" width="100%" startIcon={Search} label={tr("library:search")} isLabelHidden
             aria-label={tr("library:search")}
             placeholder={tr("library:search")}
             value={text}
-            maxLength={200}
-            onChange={(e) => setText(e.target.value)}
+            {...{maxLength: 200}}
+            onChange={(_value, e) => setText(e.target.value)}
           />
-        </label>
-        <Popover open={filtersOpen} onOpenChange={setFiltersOpen}><PopoverTrigger asChild>
-          <Button variant="outline" className="secondary" data-testid="library-filters" aria-expanded={filtersOpen} aria-controls="library-filter-panel"><SlidersHorizontal aria-hidden="true" />{tr("library:filters")}{filters.length > 0 && <span>{format.number(filters.length)}</span>}</Button></PopoverTrigger>
-          <PopoverContent id="library-filter-panel" aria-label={tr("library:filters")} align="start" collisionPadding={16} className="filter-panel">
-            {(
+          <Button icon={<SlidersHorizontal aria-hidden="true" />} label={tr("library:filters") + (filters.length ? ' ' + format.number(filters.length) : '')} variant="secondary" className="secondary" data-testid="library-filters" onClick={() => setFiltersOpen(value => !value)} aria-expanded={filtersOpen} aria-controls="library-filter-panel" endContent={filters.length > 0 ? <Badge label={format.number(filters.length)} /> : undefined}>{tr("library:filters")}</Button>
+        {!showFolders && !compactToolbar && viewControls}
+      </>} />
+      {filtersOpen && <section id="library-filter-panel" aria-label={tr("library:filters")} className="filter-panel" onKeyDown={event => { if(event.key === "Escape") { event.preventDefault(); setFiltersOpen(false); document.querySelector<HTMLButtonElement>('[data-testid="library-filters"]')?.focus(); } }}>            {(
               ["type", "status", "converter", "tagId", "folderId"] as const
             ).map((key) => (
               <FormField key={key} label={tr(`library:${key}`)}>
@@ -849,17 +832,13 @@ export function LibraryView() {
               </FormField>
             ))}
             {(["subfolders", "hasChats", "pinned"] as const).map((key) => (
-              <FormField key={key} label={tr(`library:${key}`)}>
-                {control => <Checkbox {...control} style={{width:40, height:40}}
-                  checked={query[key] ?? false}
-                  onChange={(e) =>
-                    setQuery((q) => ({
-                      ...q,
-                      [key]: e.target.checked || undefined,
-                    }))
-                  }
-                />}
-              </FormField>
+              <CheckboxInput key={key} label={tr(`library:${key}`)}
+                className="library-filter-checkbox"
+                value={query[key] ?? false}
+                onChange={(checked) =>
+                  setQuery((q) => ({ ...q, [key]: checked || undefined }))
+                }
+              />
             ))}
             <FormField label={tr("library:addedAfter")}>{control => <Select {...control} aria-label={tr("library:addedAfter")} value={customDates ? 'custom' : query.addedAfter ? 'current' : ''} onChange={e => { if(e.target.value === "custom") {setDateDraft({addedAfter:localDate(query.addedAfter),addedBefore:localDate(query.addedBefore)});setCustomDates(true);return;} setCustomDates(false); setDateError(false); setQuery(q => ({...q, addedBefore:undefined, addedAfter:e.target.value ? new Date(Date.now() - Number(e.target.value) * 86400000).toISOString() : undefined})); }}>
               <option value="">{tr("library:any")}</option><option value="7">{tr("library:past7")}</option><option value="30">{tr("library:past30")}</option><option value="365">{tr("library:pastYear")}</option><option value="custom">{tr("library:customDates")}</option>{query.addedAfter && <option value="current">{format.date(query.addedAfter)}</option>}
@@ -867,7 +846,7 @@ export function LibraryView() {
             {customDates && (["addedAfter", "addedBefore"] as const).map(key => (
               <FormField key={key} label={tr(`library:${key}`)}
                 error={dateError ? tr("library:dateRangeInvalid") : undefined}>
-                {control => <Input {...control} type="date"
+                {control => <input {...control} type="date"
                   aria-label={tr(`library:${key}`)} value={dateDraft[key]}
                   onChange={e => updateDate(key, e.target.value)} />}
               </FormField>
@@ -876,16 +855,20 @@ export function LibraryView() {
               <option value="">{tr("library:any")}</option><option value="small">{tr("library:sizeSmall")}</option><option value="medium">{tr("library:sizeMedium")}</option><option value="large">{tr("library:sizeLarge")}</option>
             </Select>}</FormField>
             {!showFolders && compactToolbar && <div className="filter-view"><span>{tr("library:sort")}</span>{viewControls}</div>}
-            {filters.length > 0 && <footer><Button variant="outline" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button></footer>}
-          </PopoverContent>
-        </Popover>
-        {!showFolders && !compactToolbar && viewControls}
-      </>} />
+            {filters.length > 0 && <footer><Button label={(tr("library:clearFilters"))} variant="secondary" className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button></footer>}
+</section>}
       <div className="filter-chips">
-        {filters.length > 0 && !filtersOpen && <Button variant="outline"
+        {filters.length > 0 && !filtersOpen && <Button label={(tr("library:clearFilters"))} variant="secondary"
           className="ghost" onClick={clearFilters}>{tr("library:clearFilters")}</Button>}
         {filters.map(([key, value]) => (
-          <Button variant="outline"
+          <Button endContent={<X size={12} aria-hidden="true" />} label={(tr(`library:${key}`)) + (":") + (" ") + (typeof value === "boolean"
+              ? tr("library:yes")
+              : (folders.find((f) => f.id === value)?.name ??
+                tags.find((t) => t.id === value)?.name ??
+                (["status", "type", "converter"].includes(key) ? tr(`library:${value}`)
+                  : ["addedAfter", "addedBefore"].includes(key) ? format.date(String(value))
+                  : ["minSize", "maxSize"].includes(key) ? formatSize(Number(value), language, true)
+                  : String(value)))) + (" ")} variant="secondary"
             key={key}
             onClick={() => {
               if (key === 'addedAfter' || key === 'addedBefore') {
@@ -904,12 +887,12 @@ export function LibraryView() {
                   : ["addedAfter", "addedBefore"].includes(key) ? format.date(String(value))
                   : ["minSize", "maxSize"].includes(key) ? formatSize(Number(value), language, true)
                   : String(value)))}{" "}
-            <X size={12} aria-hidden="true" />
+
           </Button>
         ))}
         {filters.length > 0 && (
           <>
-            <Button variant="outline" className="ghost"
+            <Button label={(tr("library:saveFilter"))} variant="secondary" className="ghost"
               onClick={async () => {
                 const name = await prompt(tr("library:saveFilter"));
                 if (name)
@@ -927,48 +910,11 @@ export function LibraryView() {
           </>
         )}
       </div>
-      {selected.length > 0 && (
-        <div className="bulk-bar" ref={bulkBar}>
-          <span role="status">
-            {tr("library:selected", {
-              count: selected.length,
-              formatted: format.number(selected.length),
-            })}
-          </span>
-          <Button variant="outline"
-            onClick={async () => {
-              setMenu(null);
-              openMove(true);
-            }}
-          >
-            {tr("library:move")}
-          </Button>
-          <Button variant="outline"
-            onClick={() =>
-              void run(async () => {
-                for (const documentId of selected)
-                  await desktop.invoke("library:documents:pin", {
-                    documentId,
-                    pinned: true,
-                  });
-              })
-            }
-          >
-            {tr("library:pin")}
-          </Button>
-          <Button variant="outline" disabled={busy} onClick={() => void remove(selected)}>
-            {tr("library:delete")}
-          </Button>
-          <Button variant="outline" onClick={() => setSelected([])}>
-            {tr("library:clearSelection")}
-          </Button>
-        </div>
-      )}
       {text.trim().length === 1 ? <p role="status">{tr('errors:search_refine')}</p> : error ? (
         <div className="empty" role="alert">
           <h2>{tr("library:error")}</h2>
           <p>{error}</p>
-          <Button variant="outline" onClick={refresh}>{tr("library:retry")}</Button>
+          <Button label={(tr("library:retry"))} variant="secondary" onClick={refresh}>{tr("library:retry")}</Button>
         </div>
       ) : loading && !items.length ? (
         <div
@@ -990,7 +936,13 @@ export function LibraryView() {
           )}
           description={tr(text ? "library:searchHint" : filters.length ? "library:filterHint" : "library:emptyHint")}
           action={<>
-          <Button
+          <Button label={(tr(
+              text
+                ? "library:clearSearch"
+                : filters.length
+                  ? "library:clearFilters"
+                  : "common:import_document",
+            ))}
             onClick={() =>
               text
                 ? setText("")
@@ -1007,7 +959,7 @@ export function LibraryView() {
                   : "common:import_document",
             )}
           </Button>
-          {!text && !filters.length && <Button variant="outline" className="ghost" onClick={() => void run(async () => { await desktop.invoke('documents:importSample',{language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}); changed(); })}>{tr('onboarding:sample')}</Button>}
+          {!text && !filters.length && <Button label={(tr('onboarding:sample'))} variant="secondary" className="ghost" onClick={() => void run(async () => { await desktop.invoke('documents:importSample',{language:document.documentElement.lang.startsWith('ja') ? 'ja' : document.documentElement.lang.startsWith('zh') ? 'zh-Hant' : 'en'}); changed(); })}>{tr('onboarding:sample')}</Button>}
           </>}
         />
       ) : showFolders ? (
@@ -1022,7 +974,6 @@ export function LibraryView() {
           className="library-results"
           data-view={grid ? "grid" : "list"}
           data-bulk={selected.length>0}
-          style={{'--bulkbar-h':`${bulkHeight}px`} as CSSProperties}
           role="list"
           aria-label={tr("library:documents")}
           tabIndex={0}
@@ -1080,7 +1031,7 @@ export function LibraryView() {
                 locale={i18n.resolvedLanguage} page={progress[d.id]?.page}
                 total={progress[d.id]?.total} render={() => (
                 <DocumentSurface
-                  {...(grid ? {variant:"flat" as const} : {})}
+                  {...(grid ? {elevation:"none" as const} : {})}
                   id={`library-document-${d.id}`}
                   data-index={index}
                   role="listitem"
@@ -1257,15 +1208,15 @@ export function LibraryView() {
 {grid ? <><div className="document-cell">
                     <div className="document-info">
                       {item.pinned && <Pin role="img" aria-label={tr("library:pinned")} />}
-                      <Button variant="ghost"
+                      <button
                         className="document-title"
                         tabIndex={-1}
-                        lang={contentLanguage(d.title)}
+                        {...{lang: contentLanguage(d.title)}}
                         onAuxClick={event => { if (event.button === 1) { event.preventDefault(); open(item, true); } }}
                         onClick={event => open(item, event.metaKey || event.ctrlKey)}
                       >
                         {d.title}
-                      </Button>
+                      </button>
                       <div className="document-meta" title={`${d.sourceName} · ${d.converter}`}>
                         {!query.folderId && <span className="document-course">{placeOf(item)}</span>}
                         <span>{d.sourceName.split('.').pop()?.toUpperCase()}</span>
@@ -1287,35 +1238,35 @@ export function LibraryView() {
 
                       </div>
                     </div>
-                    <Button variant="outline"
+                    <IconButton label={tr("library:actions", { name: d.title })} variant="secondary"
                       aria-label={tr("library:actions", { name: d.title })}
                       tabIndex={-1}
-                      onClick={(e) => { menuAnchor.current = e.currentTarget; setMenu(item); }}
-                    >
-                      <MoreHorizontal />
-                    </Button>
-                  </div></> : <>                  <div className="document-gutter" title={d.status!=='ready'?tr(`library:${d.status}`):item.pinned?tr('library:pinned'):undefined}>
-                    {d.status==='failed'?<AlertTriangle className="failed"/>:d.status==='converting'?<LoaderCircle/>:item.pinned?<Pin fill="currentColor"/>:null}
-                    <span className="sr-only">{d.status!=='ready'?tr(`library:${d.status}`):item.pinned?tr('library:pinned'):''}</span>
-                  </div>
+                      onClick={(e) => { menuAnchor.current = e.currentTarget; setMenu(item); }} icon={<MoreHorizontal />} />
+                  </div></> : <>
                   <div className="document-title-cell">
+                    {(d.status!=='ready'||item.pinned)&&<span className="document-gutter" title={d.status!=='ready'?tr(`library:${d.status}`):tr('library:pinned')}>
+                    {d.status==='failed'?<AlertTriangle className="failed"/>:d.status==='converting'?<LoaderCircle/>:<Pin fill="currentColor"/>}
+                    <span className="sr-only">{d.status!=='ready'?tr(`library:${d.status}`):tr('library:pinned')}</span>
+                    </span>}
+                    <div className="document-title-text">
                     <DocumentTitle title={d.title} onOpen={event=>open(item,event.button === 1 || event.metaKey || event.ctrlKey)} details={`${placeOf(item)} · ${d.sourceName.split('.').pop()?.toUpperCase()} · ${item.pageCount!=null?tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)}):''} · ${formatSize(item.sizeBytes,document.documentElement.lang)} · ${format.date(d.createdAt)}`}/>
 
                     <div className="document-course-inline" title={placeOf(item)}>{placeOf(item)}</div>
                     {item.snippet&&<p className="search-snippet"><Snippet text={item.snippet}/></p>}
+                    </div>
                   </div>
-                  <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge variant="outline" key={t.id}>{t.name}</Badge>)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>
+                  <div className="document-tags">{item.tags?.slice(0,2).map(t=><Badge key={t.id} label={t.name} />)}{(item.tags?.length??0)>2&&<span>+{item.tags!.length-2}</span>}</div>
                   <div className="document-folder" title={placeOf(item)}>{placeOf(item)}</div>
                   <div className="document-size">{item.pageCount!=null&&<>{tr('library:pages',{count:item.pageCount,formatted:format.number(item.pageCount)})} · </>}{item.sizeBytes===null?tr("library:unknown_size"):new Intl.NumberFormat(document.documentElement.lang,{style:"unit",unit:"kilobyte",unitDisplay:"short",maximumFractionDigits:1}).format(item.sizeBytes/1000)}</div>
                   <div className="document-added">{format.date(d.createdAt)}</div>
-                  <div className="document-type"><Badge variant="secondary">{d.sourceName.split('.').pop()?.toUpperCase()}</Badge></div>
-                  <Button variant="ghost" size="icon-sm" className="document-actions" aria-label={tr('library:actions',{name:d.title})} tabIndex={-1} onClick={e=>{menuAnchor.current=e.currentTarget;setMenu(item);}}><MoreHorizontal/></Button></>}
+                  <div className="document-type"><Badge label={d.sourceName.split('.').pop()?.toUpperCase()} /></div>
+                  <IconButton label={tr('library:actions',{name:d.title})} variant="ghost"  size="md" className="document-actions" aria-label={tr('library:actions',{name:d.title})} tabIndex={-1} onClick={e=>{menuAnchor.current=e.currentTarget;setMenu(item);}} icon={<MoreHorizontal/>} /></>}
                   {d.status !== 'ready' && <StatusBlock id={d.id} measure={measureStatus}>
                     <span className="status-badge" data-status={d.status}>
                       {d.status === 'failed' ? <AlertTriangle/> : <LoaderCircle/>}
                       {tr(`library:${d.status}`)}
                     </span>
-                    {d.status === 'failed' && <Button variant="outline" tabIndex={-1}
+                    {d.status === 'failed' && <Button label={(tr('library:retry'))} variant="secondary" tabIndex={-1}
                       onClick={() => void run(() => desktop.invoke('documents:retry', {documentId:d.id}))}>
                       {tr('library:retry')}
                     </Button>}
@@ -1328,20 +1279,21 @@ export function LibraryView() {
             })}
           </div>
           {cursor && !groupedView && (
-            <Button variant="outline" className="load-more" onClick={() => void more()}>
+            <Button label={(tr("library:loadMore"))} variant="secondary" className="load-more" onClick={() => void more()}>
               {tr("library:loadMore")}
             </Button>
           )}
         </div>
         </>
       )}
+      </Panel></div>
       {liveRegion}
       {(notice || recoveryNotice) && (
         <div className="library-toast">
           {notice || recoveryNotice}
-          {notice && <Button variant="ghost" onClick={() => setNotice("")}>{tr("library:close")}</Button>}
+          {notice && <Button label={(tr("library:close"))} variant="ghost" onClick={() => setNotice("")}>{tr("library:close")}</Button>}
           {recoveries.length > 0 && (
-            <Button variant="outline"
+            <Button label={`${tr("library:undo")}: ${recoveryNotice}`} variant="secondary"
               aria-label={`${tr("library:undo")}: ${recoveryNotice}`}
               onClick={() =>
                 void run(async () => {
@@ -1357,6 +1309,43 @@ export function LibraryView() {
       )}
       <LibraryMenus busy={busy} moveNotice={notice} menu={menu} move={move} tagging={tagging} anchor={menuAnchor.current} items={items} folders={folders} tags={tags} ids={ids} prompt={prompt} run={run} remove={remove} moveTo={moveTo} open={open} setMenu={setMenu} setMove={openMove} setTagging={value => { if (value) setNotice(""); setTagging(value); }}/>
       {promptDialog}
+</LayoutContent>} footer={selected.length > 0 && (
+        <LayoutFooter hasDivider padding={4} height="auto" className="bulk-bar">
+          <span role="status">
+            {tr("library:selected", {
+              count: selected.length,
+              formatted: format.number(selected.length),
+            })}
+          </span>
+          <Button label={(tr("library:move"))} variant="secondary"
+            onClick={async () => {
+              setMenu(null);
+              openMove(true);
+            }}
+          >
+            {tr("library:move")}
+          </Button>
+          <Button label={(tr("library:pin"))} variant="secondary"
+            onClick={() =>
+              void run(async () => {
+                for (const documentId of selected)
+                  await desktop.invoke("library:documents:pin", {
+                    documentId,
+                    pinned: true,
+                  });
+              })
+            }
+          >
+            {tr("library:pin")}
+          </Button>
+          <Button label={(tr("library:delete"))} variant="destructive"  isDisabled={busy} onClick={() => void remove(selected)}>
+            {tr("library:delete")}
+          </Button>
+          <Button label={(tr("library:clearSelection"))} variant="secondary" onClick={() => setSelected([])}>
+            {tr("library:clearSelection")}
+          </Button>
+        </LayoutFooter>
+      )} />
     </PageContainer>
   );
 }

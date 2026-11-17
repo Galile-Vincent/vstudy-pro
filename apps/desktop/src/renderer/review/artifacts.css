@@ -1,11 +1,11 @@
 .review-artifacts {display:grid;gap:var(--space-4);}
 .review-artifacts fieldset {border:0;padding:var(--space-3) 0;min-width:0;}
 .review-artifacts legend {font-weight:600;padding:0;margin-bottom:var(--space-3);}
-.review-artifact-reader {padding:var(--space-6);background:color-mix(in oklab,var(--ink) 3%,var(--surface));border-radius:var(--r-md);overflow-wrap:anywhere;}
+.review-artifact-reader {padding:var(--space-6);background:color-mix(in oklab,var(--ink) 3%,var(--surface));border-radius:var(--radius-container);overflow-wrap:anywhere;}
 .review-artifact-reader .markdown {color:var(--ink);max-width:72ch;}
 .review-resolved {margin-block:var(--space-3);}
 .review-footnote {font-size:var(--type-sm);}
-.review-artifacts [role=alertdialog] {padding:var(--space-5);background:var(--subtle);border-radius:var(--r-md);}
+.review-artifacts [role=alertdialog] {padding:var(--space-5);background:var(--subtle);border-radius:var(--radius-container);}
 .review-artifacts [role=progressbar] {color:var(--muted);}
 
 .review-scope-choices,.review-test-player fieldset {display:grid;gap:var(--space-3);}

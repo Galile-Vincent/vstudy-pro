@@ -8,8 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Document, Settings } from '../../shared';
 import { systemLanguage, tr } from '../../shared/i18n';
-import { Dialog, DialogContent, DialogTitle } from '../components/ui/dialog';
-import { Button } from '../components/ui/button';
+import { Button, Dialog } from '@astryxdesign/core';
 import { desktop } from '../bridge';
 import { saveLanguage } from '../i18n';
 import { useOptionalNavigation } from '../shell';
@@ -86,6 +85,13 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
   const [error, setError] = useState('');
   const heading = useRef<HTMLHeadingElement>(null);
   const index = steps.indexOf(step);
+  useEffect(() => () => {
+    window.setTimeout(() => {
+      if (document.querySelector('.onboarding') || leaving.current === 'privacy') return;
+      if (leaving.current) document.querySelector<HTMLElement>('#shell-content[role=main]')?.focus();
+      else (onCloseAutoFocus ?? returnFocusTo(() => opener))(new Event('close'));
+    }, 0);
+  }, []);
   useEffect(() => {
     loadConsent();
     void desktop.invoke('settings:get', {}).then(s => { setLanguage(s.language); setSettings(s); }).catch(e => setError(errorText(e)));
@@ -153,28 +159,13 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
     : progress.goal === 'school' ? 'onboarding:open_courses'
     : imported || progress.goal === 'sample' ? 'onboarding:open_document'
     : 'onboarding:open_library';
-  return <Dialog open onOpenChange={open => { if (!open && !busy) void exit(false); }}>
-    <DialogContent
-      showCloseButton={false}
-      className="onboarding"
-      data-step={step}
-      aria-labelledby="onboarding-title"
-      onPointerDownOutside={event => event.preventDefault()}
-      onCloseAutoFocus={event => {
-        if (leaving.current === 'privacy') event.preventDefault();
-        else if (leaving.current) {
-          event.preventDefault();
-          document.querySelector<HTMLElement>('#shell-content[role=main]')?.focus();
-        } else (onCloseAutoFocus ?? returnFocusTo(() => opener))(event);
-      }}
-      onOpenAutoFocus={event => { event.preventDefault(); heading.current?.focus(); }}
-    >
+  return <Dialog isOpen onOpenChange={open => { if (!open && !busy) void exit(false); }} purpose="form" width={640} maxHeight="min(640px,calc(100dvh - var(--space-8)))" className="onboarding" data-step={step} aria-labelledby="onboarding-title">
       <div className="onboarding-top">
         <p role="status">{tr('onboarding:progress', { current: index + 1, total: steps.length })}</p>
-        <Button variant="ghost" disabled={busy} onClick={() => void exit(false)}>{tr('onboarding:later')}</Button>
+        <Button variant="ghost" label={tr('onboarding:later')} isDisabled={busy} onClick={() => void exit(false)}/>
       </div>
       <div className="onboarding-progress" aria-hidden="true">{steps.map(item => <span key={item} data-current={item === step}/>)}</div>
-      <DialogTitle asChild><h1 id="onboarding-title" ref={heading} tabIndex={-1}>{tr(`onboarding:step_${step}`)}</h1></DialogTitle>
+      <h1 id="onboarding-title" ref={heading} tabIndex={-1}>{tr(`onboarding:step_${step}`)}</h1>
       <p id="onboarding-intro" className="onboarding-intro">{tr(step === 'welcome' ? 'onboarding:welcome_body' : `onboarding:step_${step}_body`)}</p>
       <div className="onboarding-content" key={step} tabIndex={0} role="region" aria-labelledby="onboarding-title">
         {step === 'welcome' && <ProductPreview/>}
@@ -238,7 +229,7 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
             : consent.kind === 'failed' ? (
               <div role="alert">
                 <p>{tr('errors:generic')}</p>
-                <Button variant="secondary" onClick={loadConsent}>{tr('analytics:retry')}</Button>
+                <Button variant="secondary" label={tr('analytics:retry')} onClick={loadConsent}/>
               </div>
             ) : consent.kind === 'decided' ? (
               <ConsentSaved enabled={consent.enabled} busy={busy} onOpenPrivacy={() => void exit(false, 'privacy')}/>
@@ -260,27 +251,22 @@ export function Onboarding({ onComplete, onCloseAutoFocus, onOpenPrivacy }: { on
         {step === 'start' && <>
           <p>{tr(`onboarding:before_${progress.goal}`)}</p>
           {progress.goal === 'documents' && <UploadCard showOpen={false} showSample={false} onImported={doc => { setImported(doc); try { saveProgress({ documentId: doc.id, done: [...new Set([...progress.done, 'document' as const])] }); } catch { setError(tr('onboarding:save_error')); } }}/>}
-          {progress.goal === 'sample' && <Button variant="outline" disabled={busy || !!imported} onClick={() => void addSample()}>{tr(imported ? 'onboarding:sample_added' : 'onboarding:sample')}</Button>}
+          {progress.goal === 'sample' && <Button variant="secondary" label={tr(imported ? 'onboarding:sample_added' : 'onboarding:sample')} isDisabled={busy || !!imported} onClick={() => void addSample()}/>}
           <details className="onboarding-walkthrough" open={walkthroughOpen} onToggle={event => setWalkthroughOpen(event.currentTarget.open)}><summary>{tr('onboarding:help_walkthroughs')}</summary>{walkthroughOpen && <Walkthrough lesson={progress.goal === 'school' ? 'school' : 'selection'}/>}</details>
         </>}
       </div>
       {imported && <p role="status">{tr('onboarding:ready_to_open', { title: imported.title })}</p>}
       {error && <p role="alert">{error}</p>}
       <footer>
-        {index > 0 && (
-          <Button className="onboarding-back" variant="ghost" disabled={busy} onClick={() => move(steps[index - 1]!)}>
-            {tr('onboarding:back')}
-          </Button>
-        )}
+        {index > 0 && <Button className="onboarding-back" variant="ghost" label={tr('onboarding:back')} isDisabled={busy} onClick={() => move(steps[index - 1]!)}/>}
         {(step !== 'privacy' || consent.kind === 'decided') && (
           <Button
-            disabled={busy || (step === 'start' && progress.goal === 'sample' && !imported)}
+            variant="primary"
+            label={tr(nextLabel)}
+            isDisabled={busy || (step === 'start' && progress.goal === 'sample' && !imported)}
             onClick={() => step === 'start' ? void exit(true, 'goal') : move(steps[index + 1]!)}
-          >
-            {tr(nextLabel)}
-          </Button>
+          />
         )}
       </footer>
-    </DialogContent>
   </Dialog>;
 }

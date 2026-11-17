@@ -16,13 +16,16 @@
   "link_moodle": "Moodle コースを連携",
   "unlinked": "未連携",
   "inbox_help": "コースを作成するか Moodle と連携して、会話を整理しましょう。",
-  "inbox_empty": "未分類の会話はありません。質問した会話をここで整理できます。",
+  "inbox_empty": "未分類の会話はありません",
+  "inbox_empty_hint": "質問した会話をここで整理できます。",
   "chat_number": "会話 {{number}}",
   "move": "コースへ移動",
   "recent_help": "質問は学びの出発点です。苦手とは限りません。",
-  "recent_empty": "コースの会話で質問すると、ここに要約が表示されます。",
+  "recent_empty": "記録された質問はまだありません",
+  "recent_empty_hint": "コースの会話で質問すると、ここに要約が表示されます。",
   "weak_help": "自分のペースで、もう一度見直したいこと。",
-  "weak_empty": "今は復習が必要な項目はありません。「最近の質問」を振り返ることもできます。",
+  "weak_empty": "今は復習が必要な項目はありません",
+  "weak_empty_hint": "「最近の質問」を振り返ることもできます。",
   "why": "なぜ表示されるの？",
   "evidence_rule": "質問しただけで苦手とは判断しません。別の日にもつまずいた記録、明確な誤解、誤答後の「わからない」を参考にします。理解を示せたらリストから外れます。能力の評価ではなく、復習の提案です。",
   "evidence": "根拠を見る",
@@ -154,5 +157,7 @@
   "bounded_session_other": "{{total}} 個中 {{selected}} 個の概念を復習します。残り {{count}} 個は次回に復習します",
   "scope_required": "生成するには、1〜{{max}} 件の項目または有効な日付範囲を選択してください。",
   "scope_limit_other": "1 回に選べる概念は {{count}} 個までです。他の概念を選ぶには選択を解除してください。",
-  "row_actions": "{{concept}} の操作"
+  "row_actions": "{{concept}} の操作",
+  "ask_question": "質問する",
+  "show_recent": "最近の質問を見る"
 }

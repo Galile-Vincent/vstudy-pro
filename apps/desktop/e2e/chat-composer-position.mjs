@@ -14,6 +14,7 @@ let positions=0, axeScans=0;
 try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1',VSTUDY_LOCALE:'en'}});
  const page=await app.firstWindow();
+ await page.evaluate(()=>window.desktop.invoke('analytics:setConsent',{enabled:false}));
  await page.evaluate(()=>window.sessionStorage.setItem('vstudy.memoryConsentPostponed','1'));
  const shot=async name=>{
   const base64=await app.evaluate(async({BrowserWindow})=>(await BrowserWindow.getAllWindows()[0].webContents.capturePage()).toPNG().toString('base64'));

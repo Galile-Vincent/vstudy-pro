@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useId, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { BookOpen, MoreHorizontal, RefreshCw } from "lucide-react";
+import { ChevronRight, BookOpen, MoreHorizontal, RefreshCw } from "lucide-react";
 import type { Conversation } from "../../shared/domain";
 import type { IpcResponse } from "../../shared/ipc";
 import { MAX_REVIEW_CONCEPTS } from "../../shared/review-artifacts";
@@ -13,27 +13,18 @@ import {
   PageHeader,
   Toolbar,
   ListRow,
-  Section,
   EmptyState,
 } from "../components/ui";
 import {
+  Button,
   DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
   DropdownMenuItem,
-} from "../components/ui/dropdown-menu";
-import { Button } from "../components/ui/button";
-import {
   Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../components/ui/popover";
-import {
-  Tabs,
-  SegmentedTabsList,
-  SegmentedTabsTrigger,
-  TabsContent,
-} from "../components/ui/segmented-tabs";
+  Tab,
+  TabList,
+} from "@astryxdesign/core";
+import { Panel } from "../components/panel";
+import { Select } from "../components/select";
 import { useReviewPage, type Cursor } from "./paging";
 import type { ReviewSelection } from "./review-selection";
 import { ArtifactPanel } from "./artifacts";
@@ -54,29 +45,28 @@ function PageState({
     retry: () => void;
     more: () => void;
   };
-  empty?: string;
+  empty?: { title: string; hint?: string; action?: ReactNode };
 }) {
   return (
     <>
       {page.error && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button variant="secondary" onClick={page.retry}>{tr("review:retry")}</Button>
+          <Button variant="secondary" label={tr("review:retry")} onClick={page.retry} />
         </p>
       )}
       {page.loading && <p role="status">{tr("review:loading")}</p>}
       {!page.loading && !page.error && !page.items.length && empty && (
         <EmptyState
-          headingLevel={2}
+          headingLevel={3}
           icon={<BookOpen aria-hidden="true" />}
-          title={tr(`review:${empty}`)}
-          action={<Button variant="secondary" onClick={page.retry}>{tr("review:retry")}</Button>}
+          title={tr(`review:${empty.title}`)}
+          {...(empty.hint ? { description: tr(`review:${empty.hint}`) } : {})}
+          {...(empty.action ? { action: empty.action } : {})}
         />
       )}
       {page.cursor && (
-        <Button variant="secondary" disabled={page.loading} onClick={page.more}>
-          {tr("review:load_more")}
-        </Button>
+        <Button variant="secondary" isDisabled={page.loading} label={tr("review:load_more")} onClick={page.more} />
       )}
     </>
   );
@@ -102,6 +92,13 @@ function useOnline() {
   }, []);
   return online;
 }
+function ReviewDisclosure({ label, open = false, children, className }: { label: string; open?: boolean; children: ReactNode; className?: string }) {
+  const [expanded, setExpanded] = useState(open);
+  const id = useId();
+  useEffect(() => { setExpanded(open); }, [open]);
+  return <div className={className}><Button variant="ghost" label={label} icon={<ChevronRight aria-hidden="true" style={{ transform: expanded ? "rotate(90deg)" : undefined }} />} aria-expanded={expanded} aria-controls={id} onClick={() => setExpanded(!expanded)} /><div id={id} hidden={!expanded}>{children}</div></div>;
+}
+
 export function ReviewView() {
   useTranslation();
   const { navigate, route } = useNavigate();
@@ -184,11 +181,14 @@ export function ReviewView() {
   useEffect(() => {
     const ids = pendingFocus.current;
     if (!ids || busy || weak.loading) return;
-    pendingFocus.current = null;
-    ids
+    const el = ids
       .map((id) => document.getElementById(id))
-      .find(Boolean)
-      ?.focus();
+      .find(Boolean);
+    if (el && el.closest("[hidden]")) {
+      return;
+    }
+    pendingFocus.current = null;
+    el?.focus();
   }, [revision, busy, weak.loading, weak.items, tab, selection]);
   const open = (conversationId: string, messageId?: string) =>
     navigate({
@@ -221,38 +221,35 @@ export function ReviewView() {
         actions={
           <Button
             variant="ghost"
-            aria-label={tr("review:retry")}
+            isIconOnly
+            label={tr("review:retry")}
+            icon={<RefreshCw size={16} />}
             onClick={() => {
               courses.retry();
               weak.retry();
               reload();
             }}
-          >
-            <RefreshCw size={16} />
-          </Button>
+          />
         }
       />
 
-      <p role="status" aria-live="polite" aria-atomic="true">{tab === "notes" ? bounded.note : tab === "tests" ? bounded.test : ""}</p>
+      <p className="review-announcement" role="status" aria-live="polite" aria-atomic="true">{tab === "notes" ? bounded.note : tab === "tests" ? bounded.test : ""}</p>
       <MemoryConsentCard />
       {!online && <p role="status">{tr("review:offline")}</p>}
       <Toolbar
         left={
-          <label>
-            {tr("review:course_picker")}
-            <select
-              aria-label={tr("review:course_picker")}
-              value={courseId}
-              onChange={(e) => selectCourse(e.target.value)}
-            >
-              <option value="">{tr("review:unsorted")}</option>
-              {courses.items.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.title}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            aria-label={tr("review:course_picker")}
+            value={courseId}
+            onChange={(e) => selectCourse(e.target.value)}
+          >
+            <option value="">{tr("review:unsorted")}</option>
+            {courses.items.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.title}
+              </option>
+            ))}
+          </Select>
         }
       />
       <PageState page={courses} />
@@ -268,51 +265,81 @@ export function ReviewView() {
       {actionError && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button variant="secondary"
+          <Button
+            variant="secondary"
+            label={tr("review:retry")}
             onClick={() => {
               if (failedAction.current) void mutate(failedAction.current);
             }}
-          >
-            {tr("review:retry")}
-          </Button>
+          />
         </p>
       )}
       {!courseId ? (
         <Inbox key={revision} courses={courses.items} open={open} />
       ) : (
-        <Tabs value={tab} onValueChange={setUserTab}>
-          <SegmentedTabsList aria-label={tr("review:title")}>
-            {["recent", "weak", "notes", "tests"].map((t) => (
-              <SegmentedTabsTrigger
+        <div className="flex flex-col gap-[var(--space-4)]">
+          <TabList
+            role="tablist"
+            value={tab}
+            onChange={setUserTab}
+            aria-label={tr("review:title")}
+          >
+            {(["recent", "weak", "notes", "tests"] as const).map((t) => (
+              <Tab
                 key={t}
+                id={`tab-${t}`}
                 value={t}
-                className="whitespace-normal text-start"
-              >
-                {tr(`review:${t}`)}
-              </SegmentedTabsTrigger>
+                label={tr(`review:${t}`)}
+                panelId={`panel-${t}`}
+                onFocus={() => setUserTab(t)}
+                onMouseDown={() => setUserTab(t)}
+              />
             ))}
-          </SegmentedTabsList>
-          <TabsContent value="recent">
-            <Recent
-              key={courseId + revision}
-              course={course}
-              courseId={courseId}
-              open={open}
-              mutate={mutate}
-              busy={busy}
-            />
-          </TabsContent>
-          <TabsContent value="weak">
-            <Weak
-              key={courseId}
-              weak={weak}
-              open={open}
-              mutate={mutate}
-              busy={busy}
-              artifacts={artifacts}
-            />
-          </TabsContent>
-          <TabsContent value="notes" forceMount hidden={tab !== "notes"}>
+          </TabList>
+          <div
+            role="tabpanel"
+            id="panel-recent"
+            aria-labelledby="tab-recent"
+            aria-label={tr("review:recent")}
+            hidden={tab !== "recent"}
+          >
+            {tab === "recent" && (
+              <Recent
+                key={courseId + revision}
+                course={course}
+                courseId={courseId}
+                open={open}
+                mutate={mutate}
+                busy={busy}
+              />
+            )}
+          </div>
+          <div
+            role="tabpanel"
+            id="panel-weak"
+            aria-labelledby="tab-weak"
+            aria-label={tr("review:weak")}
+            hidden={tab !== "weak"}
+          >
+            {tab === "weak" && (
+              <Weak
+                key={courseId}
+                weak={weak}
+                open={open}
+                mutate={mutate}
+                busy={busy}
+                artifacts={artifacts}
+                showRecent={() => setUserTab("recent")}
+              />
+            )}
+          </div>
+          <div
+            role="tabpanel"
+            id="panel-notes"
+            aria-labelledby="tab-notes"
+            aria-label={tr("review:notes")}
+            hidden={tab !== "notes"}
+          >
             <ArtifactPanel
               key={courseId + "note"}
               courseId={courseId}
@@ -321,8 +348,14 @@ export function ReviewView() {
               kind="note"
               selection={selection}
             />
-          </TabsContent>
-          <TabsContent value="tests" forceMount hidden={tab !== "tests"}>
+          </div>
+          <div
+            role="tabpanel"
+            id="panel-tests"
+            aria-labelledby="tab-tests"
+            aria-label={tr("review:tests")}
+            hidden={tab !== "tests"}
+          >
             <ArtifactPanel
               key={courseId + "test"}
               courseId={courseId}
@@ -332,8 +365,8 @@ export function ReviewView() {
               selection={selection}
               onConfirmed={() => { pendingFocus.current = ["review-test-heading"]; reload(); }}
             />
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       )}
     </PageContainer>
   );
@@ -368,8 +401,7 @@ function CourseTools({
     }
   };
   return (
-    <details className="review-tools" open={open || undefined}>
-      <summary>{tr("review:manage_courses")}</summary>
+    <ReviewDisclosure className="review-tools" open={open} label={tr("review:manage_courses")}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -392,14 +424,14 @@ function CourseTools({
             onChange={(e) => setTitle(e.target.value)}
           />
         </label>
-        <Button variant="secondary" disabled={busy || !title.trim()} type="submit">
-          {tr("review:create_course")}
-        </Button>
+        <Button variant="secondary" isDisabled={busy || !title.trim()} type="submit" label={tr("review:create_course")} />
       </form>
       {course && (
         <>
-          <Button variant="secondary"
-            disabled={busy}
+          <Button
+            variant="secondary"
+            isDisabled={busy}
+            label={tr("review:archive")}
             onClick={() =>
               void run(() =>
                 desktop
@@ -410,58 +442,54 @@ function CourseTools({
                   .then(() => onCreated("")),
               )
             }
-          >
-            {tr("review:archive")}
-          </Button>
-          <Button variant="secondary"
-            disabled={busy}
+          />
+          <Button
+            variant="secondary"
+            isDisabled={busy}
+            label={tr("review:link_moodle")}
             onClick={() =>
               void run(async () =>
                 setMoodle(await desktop.invoke("moodle:overview", {})),
               )
             }
-          >
-            {tr("review:link_moodle")}
-          </Button>
+          />
           {moodle && (
-            <label>
-              {tr("review:link_moodle")}
-              <select
-                value={course.moodleCourseId ?? ""}
-                disabled={busy}
-                onChange={(e) =>
-                  void run(() =>
-                    desktop.invoke("review:courses:link-moodle", {
-                      courseId: course.id,
-                      moodleCourseId: e.target.value || null,
-                    }),
-                  )
-                }
-              >
-                <option value="">{tr("review:unlinked")}</option>
-                {moodle.courses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.fullName}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Select
+              aria-label={tr("review:link_moodle")}
+              value={course.moodleCourseId ?? ""}
+              disabled={busy}
+              onChange={(e) =>
+                void run(() =>
+                  desktop.invoke("review:courses:link-moodle", {
+                    courseId: course.id,
+                    moodleCourseId: e.target.value || null,
+                  }),
+                )
+              }
+            >
+              <option value="">{tr("review:unlinked")}</option>
+              {moodle.courses.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.fullName}
+                </option>
+              ))}
+            </Select>
           )}
         </>
       )}
       {failed && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button variant="secondary"
+          <Button
+            variant="secondary"
+            label={tr("review:retry")}
             onClick={() => {
               if (failedAction.current) void run(failedAction.current);
             }}
-          >
-            {tr("review:retry")}
-          </Button>
+          />
         </p>
       )}
-    </details>
+    </ReviewDisclosure>
   );
 }
 function Inbox({
@@ -471,6 +499,7 @@ function Inbox({
   courses: Course[];
   open: (id: string) => void;
 }) {
+  const { navigate } = useNavigate();
   const page = useReviewPage(
     useCallback(
       (cursor?: Cursor) =>
@@ -501,47 +530,52 @@ function Inbox({
       {failed && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button variant="secondary"
+          <Button
+            variant="secondary"
+            label={tr("review:retry")}
             onClick={() => {
               setFailed(false);
               page.retry();
             }}
-          >
-            {tr("review:retry")}
-          </Button>
+          />
         </p>
       )}
       <ul className="review-list">
         {page.items.map((link, i) => (
           <li key={link.conversationId}>
-            <Button variant="ghost" onClick={() => open(link.conversationId)}>
-              {tr("review:chat_number", { number: i + 1 })}
-            </Button>
-            <label>
-              {tr("review:move")}
-              <select
-                aria-label={tr("review:move")}
-                value=""
-                disabled={busy}
-                onChange={(e) =>
-                  void run(() =>
-                    desktop.invoke("review:chat:assign", {
-                      conversationId: link.conversationId,
-                      courseId: e.target.value,
-                    }),
-                  )
-                }
-              >
-                <option value="">{tr("review:course_picker")}</option>
-                {courses.map((c) => (
-                  <option value={c.id} key={c.id}>
-                    {c.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <Button variant="secondary"
+            <Button
+              variant="ghost"
+              label={tr("review:chat_number", { number: i + 1 })}
+              onClick={() => open(link.conversationId)}
+            />
+            <Select
+              aria-label={tr("review:move")}
+              value=""
               disabled={busy}
+              onChange={(e) =>
+                void run(() =>
+                  desktop.invoke("review:chat:assign", {
+                    conversationId: link.conversationId,
+                    courseId: e.target.value,
+                  }),
+                )
+              }
+            >
+              <option value="">{tr("review:move")}</option>
+              {courses.map((c) => (
+                <option value={c.id} key={c.id}>
+                  {c.title}
+                </option>
+              ))}
+            </Select>
+            <Button
+              variant="secondary"
+              isDisabled={busy}
+              label={tr(
+                link.excludeFromMemory
+                  ? "review:include_chat"
+                  : "review:exclude_chat",
+              )}
               onClick={() =>
                 void run(() =>
                   desktop.invoke("review:chat:exclude", {
@@ -550,17 +584,18 @@ function Inbox({
                   }),
                 )
               }
-            >
-              {tr(
-                link.excludeFromMemory
-                  ? "review:include_chat"
-                  : "review:exclude_chat",
-              )}
-            </Button>
+            />
           </li>
         ))}
       </ul>
-      <PageState page={page} empty="inbox_empty" />
+      <PageState
+        page={page}
+        empty={{
+          title: "inbox_empty",
+          hint: "inbox_empty_hint",
+          action: <Button variant="secondary" label={tr("review:ask_question")} onClick={() => navigate("home")} />,
+        }}
+      />
     </section>
   );
 }
@@ -581,6 +616,7 @@ function Recent({
   mutate: Mutate;
   busy: boolean;
 }) {
+  const { navigate } = useNavigate();
   const page = useReviewPage(
     useCallback(
       (cursor?: Cursor) =>
@@ -626,17 +662,17 @@ function Recent({
       {paused.length > 0 && (
         <p role="status">
           {tr("review:budget")}{" "}
-          <Button variant="secondary"
-            disabled={busy}
+          <Button
+            variant="secondary"
+            isDisabled={busy}
+            label={tr("review:retry")}
             onClick={() =>
               void mutate(async () => {
                 for (const job of paused)
                   await desktop.invoke("review:jobs:retry", { jobId: job.id });
               }, ["review-recent-heading"])
             }
-          >
-            {tr("review:retry")}
-          </Button>
+          />
         </p>
       )}
       <p>{tr("review:recent_help")}</p>
@@ -685,34 +721,31 @@ function Recent({
                     onChange={(e) => setText(e.target.value)}
                   />
                 </label>
-                <Button variant="secondary" type="submit" disabled={busy || !text.trim()}>
-                  {tr("review:save")}
-                </Button>
-                <Button variant="secondary" type="button" onClick={() => setEdit(null)}>
-                  {tr("review:cancel")}
-                </Button>
+                <Button variant="secondary" type="submit" isDisabled={busy || !text.trim()} label={tr("review:save")} />
+                <Button variant="secondary" type="button" label={tr("review:cancel")} onClick={() => setEdit(null)} />
               </form>
             ) : (
               <Button
                 variant="ghost"
                 className="review-question"
+                label={job.questionSummary ?? tr("review:pending")}
                 onClick={() => open(job.conversationId, job.userMessageId)}
-              >
-                {job.questionSummary ?? tr("review:pending")}
-              </Button>
+              />
             )}
             <div className="review-actions">
-              <Button variant="secondary"
-                disabled={busy}
+              <Button
+                variant="secondary"
+                isDisabled={busy}
+                label={tr("review:edit")}
                 onClick={() => {
                   setEdit(job.id);
                   setText(job.questionSummary ?? "");
                 }}
-              >
-                {tr("review:edit")}
-              </Button>
-              <Button variant="secondary"
-                disabled={busy}
+              />
+              <Button
+                variant="secondary"
+                isDisabled={busy}
+                label={tr("review:exclude_chat")}
                 onClick={() =>
                   void mutate(
                     () =>
@@ -723,15 +756,15 @@ function Recent({
                     ["review-recent-heading"],
                   )
                 }
-              >
-                {tr("review:exclude_chat")}
-              </Button>
+              />
               {job.status !== "succeeded" && (
                 <span>
                   {tr(`review:job_${job.status}`)}
                   {job.status === "failed" && (
-                    <Button variant="secondary"
-                      disabled={busy}
+                    <Button
+                      variant="secondary"
+                      isDisabled={busy}
+                      label={tr("review:retry")}
                       onClick={() =>
                         void mutate(() =>
                           desktop.invoke("review:jobs:retry", {
@@ -739,9 +772,7 @@ function Recent({
                           }),
                         )
                       }
-                    >
-                      {tr("review:retry")}
-                    </Button>
+                    />
                   )}
                 </span>
               )}
@@ -749,12 +780,18 @@ function Recent({
           </li>
         ))}
       </ol>
-      <PageState page={page} empty="recent_empty" />
-      <details>
-        <summary>{tr("review:related_units")}</summary>
+      <PageState
+        page={page}
+        empty={{
+          title: "recent_empty",
+          hint: "recent_empty_hint",
+          action: <Button variant="secondary" label={tr("review:ask_question")} onClick={() => navigate("home")} />,
+        }}
+      />
+      <ReviewDisclosure label={tr("review:related_units")}>
         <PageState page={units} />
         <PageState page={observations} />
-      </details>
+      </ReviewDisclosure>
     </section>
   );
 }
@@ -764,7 +801,9 @@ function Weak({
   mutate,
   busy,
   artifacts,
+  showRecent,
 }: {
+  showRecent: () => void;
   weak: {
     items: WeakConcept[];
     loading: boolean;
@@ -783,8 +822,6 @@ function Weak({
 }) {
   const [editing, setEditing] = useState<string | null>(null),
     [label, setLabel] = useState("");
-  const leavingRow = useRef(false);
-  const renameTarget = useRef<string | null>(null);
   const renameInput = useRef<HTMLInputElement>(null);
   const finishRename = (id: string) => {
     setEditing(null);
@@ -798,9 +835,12 @@ function Weak({
   const remove = (index: number, action: () => Promise<unknown>) =>
     void mutate(action, neighbour(index));
   return (
-    <Section title={<span id="review-weak-heading" tabIndex={-1}>{tr("review:needs_review")}</span>}
-      actions={<Button variant="default"
-          disabled={!items.length}
+    <Panel title={<span id="review-weak-heading" tabIndex={-1}>{tr("review:needs_review")}</span>}
+      actions={
+        <Button
+          variant="primary"
+          isDisabled={!items.length}
+          label={tr("review:today")}
           onClick={() =>
             artifacts(
               "test",
@@ -809,20 +849,15 @@ function Weak({
               items.length,
             )
           }
-        >
-          {tr("review:today")}
-        </Button>}
+        />
+      }
     >
       <p>{tr("review:weak_help")}</p>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" className="review-help">
-            {tr("review:why")}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent>
-          <p>{tr("review:evidence_rule")}</p>
-        </PopoverContent>
+      <Popover
+        label={tr("review:why")}
+        content={<p>{tr("review:evidence_rule")}</p>}
+      >
+        <Button variant="ghost" className="review-help" label={tr("review:why")} />
       </Popover>
       <ul className="review-list">
         {items.map((c, index) => (
@@ -836,11 +871,11 @@ function Weak({
               actions={
                 <div className="review-actions">
                   <Evidence courseId={c.courseId} conceptKey={c.key} open={open} />
-                        <Button variant="secondary" onClick={() => artifacts("test", [c.key], [c.label])}>
-                    {tr("review:make_test")}
-                  </Button>
-                  <Button variant="ghost"
-                    disabled={busy}
+                  <Button variant="secondary" label={tr("review:make_test")} onClick={() => artifacts("test", [c.key], [c.label])} />
+                  <Button
+                    variant="ghost"
+                    isDisabled={busy}
+                    label={tr("review:understood")}
                     onClick={() =>
                       remove(index, () =>
                         desktop.invoke("review:concepts:understood", {
@@ -848,58 +883,48 @@ function Weak({
                         }),
                       )
                     }
-                  >
-                    {tr("review:understood")}
-                  </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                  />
+                  <DropdownMenu
+                    alignment="end"
+                    renderTrigger={(triggerProps) => (
                       <Button
+                        {...triggerProps}
                         variant="ghost"
+                        isIconOnly
                         id={`weak-menu-${c.id}`}
-                        aria-label={tr("review:row_actions", {
+                        label={tr("review:row_actions", {
                           concept: c.label,
                         })}
-                      >
-                        <MoreHorizontal size={16} />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" onCloseAutoFocus={(event) => {
-                      if (leavingRow.current) {
-                        event.preventDefault();
-                        leavingRow.current = false;
-                        document.getElementById("review-note-heading")?.focus();
+                        icon={<MoreHorizontal size={16} />}
+                      />
+                    )}
+                  >
+                    <DropdownMenuItem
+                      label={tr("review:make_note")}
+                      onClick={() => {
+                        artifacts("note", [c.key], [c.label]);
+                        setTimeout(() => document.getElementById("review-note-heading")?.focus(), 0);
+                      }}
+                    />
+                    <DropdownMenuItem
+                      label={tr("review:rename")}
+                      onClick={() => {
+                        setEditing(c.id);
+                        setLabel(c.label);
+                        setTimeout(() => renameInput.current?.focus(), 0);
+                      }}
+                    />
+                    <DropdownMenuItem
+                      label={tr("review:dismiss")}
+                      isDisabled={busy}
+                      onClick={() =>
+                        remove(index, () =>
+                          desktop.invoke("review:concepts:dismiss", {
+                            conceptId: c.id,
+                          }),
+                        )
                       }
-                      if (renameTarget.current === c.id) {
-                        event.preventDefault();
-                        renameTarget.current = null;
-                        renameInput.current?.focus();
-                      }
-                    }}>
-                      <DropdownMenuItem onSelect={() => { leavingRow.current = true; artifacts("note", [c.key], [c.label]); }}>
-                        {tr("review:make_note")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onSelect={() => {
-                          renameTarget.current = c.id;
-                          setEditing(c.id);
-                          setLabel(c.label);
-                        }}
-                      >
-                        {tr("review:rename")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        disabled={busy}
-                        onSelect={() =>
-                          remove(index, () =>
-                            desktop.invoke("review:concepts:dismiss", {
-                              conceptId: c.id,
-                            }),
-                          )
-                        }
-                      >
-                        {tr("review:dismiss")}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
+                    />
                   </DropdownMenu>
                 </div>
               }
@@ -930,12 +955,8 @@ function Weak({
                     onChange={(e) => setLabel(e.target.value)}
                   />
                 </label>
-                <Button variant="secondary" disabled={busy || !label.trim()} type="submit">
-                  {tr("review:save")}
-                </Button>
-                <Button variant="secondary" type="button" onClick={() => finishRename(c.id)}>
-                  {tr("review:cancel")}
-                </Button>
+                <Button variant="secondary" isDisabled={busy || !label.trim()} type="submit" label={tr("review:save")} />
+                <Button variant="secondary" type="button" label={tr("review:cancel")} onClick={() => finishRename(c.id)} />
               </form>
             )}
           </li>
@@ -945,17 +966,19 @@ function Weak({
       {weak.error && (
         <p role="alert">
           {tr("review:error")}{" "}
-          <Button variant="secondary" onClick={weak.retry}>{tr("review:retry")}</Button>
+          <Button variant="secondary" label={tr("review:retry")} onClick={weak.retry} />
         </p>
       )}
       {!weak.loading && !weak.error && !items.length && (
         <EmptyState
-          headingLevel={2}
+          headingLevel={3}
           icon={<BookOpen aria-hidden="true" />}
           title={tr("review:weak_empty")}
+          description={tr("review:weak_empty_hint")}
+          action={<Button variant="secondary" label={tr("review:show_recent")} onClick={showRecent} />}
         />
       )}
-    </Section>
+    </Panel>
   );
 }
 function Evidence({
@@ -1006,13 +1029,12 @@ function EvidencePage({
             <li key={o.id}>
               <p>{o.weaknessNote}</p>
               <blockquote>{o.evidenceQuote}</blockquote>
-              <Button variant="secondary" onClick={() => open(o.conversationId, o.userMessageId)}>
-                {tr("review:open_evidence")}
-              </Button>
+              <Button variant="secondary" label={tr("review:open_evidence")} onClick={() => open(o.conversationId, o.userMessageId)} />
             </li>
           ))}
       </ul>
-      <PageState page={page} empty="evidence_empty" />
+      {!page.loading && !page.error && !page.items.length && <p>{tr("review:evidence_empty")}</p>}
+      <PageState page={page} />
     </>
   );
 }

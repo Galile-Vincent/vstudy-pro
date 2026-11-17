@@ -1,11 +1,11 @@
-import { Card, Section } from '../components/ui';
+import { Section } from '../components/ui';
 /** Explicit opt-ins for network update checks, idle updates, and the separate advanced shell capability. */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { CliPreferences } from '../../shared/ai-cli';
 import { tr } from '../../shared/i18n';
 import { desktop } from '../bridge';
-import { Button } from '../components/ui/button';
+import { Button, Card, CheckboxInput } from '@astryxdesign/core';
 
 import { aiCliChanged } from './entry';
 import './setup.css';
@@ -31,12 +31,12 @@ export function CliPrivacyPreferences() {
     catch { setError(true); }
     finally { setBusy(false); }
   };
-  return <Section level={3} title={tr('ai-cli:privacy_title')}><Card variant="flat" className="gap-[var(--space-4)] p-[var(--space-4)]">
+  return <Section level={3} title={tr('ai-cli:privacy_title')}><Card padding={4} className="settings-stack">
     <div className="ai-cli-preferences"><p>{tr('ai-cli:inventory')}</p>
-      {preferences && <>{(['updateChecks', 'autoUpdateWhenIdle', 'advancedShell'] as const).map(key => <label className="ai-cli-consent" key={key}><input type="checkbox" checked={preferences[key]} disabled={busy || key === 'autoUpdateWhenIdle' && !preferences.updateChecks} onChange={event => void save(key, event.target.checked)} /><span>{tr(`ai-cli:pref_${key}`)}<small>{tr(`ai-cli:pref_${key}_help`)}</small></span></label>)}
-      <Button variant="secondary" disabled={busy} onClick={() => void check()}>{tr('ai-cli:check_now')}</Button></>}
+      {preferences && <>{(['updateChecks', 'autoUpdateWhenIdle', 'advancedShell'] as const).map(key => <CheckboxInput key={key} label={tr(`ai-cli:pref_${key}`)} description={tr(`ai-cli:pref_${key}_help`)} value={preferences[key]} isDisabled={busy || key === 'autoUpdateWhenIdle' && !preferences.updateChecks} onChange={enabled => void save(key, enabled)} />)}
+      <Button label={tr('ai-cli:check_now')} variant="secondary" isDisabled={busy} onClick={() => void check()} /></>}
       {busy && <p role="status">{tr('ai-cli:checking')}</p>}{checked && <p role="status">{tr('ai-cli:checked')}</p>}
-      {error && <div role="alert"><p>{tr('ai-cli:preferences_error')}</p>{!preferences && <Button variant="secondary" onClick={() => void load()}>{tr('ai-cli:retry')}</Button>}</div>}
+      {error && <div role="alert"><p>{tr('ai-cli:preferences_error')}</p>{!preferences && <Button label={tr('ai-cli:retry')} variant="secondary" onClick={() => void load()} />}</div>}
     </div>
   </Card></Section>;
 }
@@ -48,5 +48,5 @@ export function AdvancedShell({ busy, onPreview }: { busy: boolean; onPreview: (
     load(); window.addEventListener('vstudy:ai-cli-changed', load);
     return () => window.removeEventListener('vstudy:ai-cli-changed', load);
   }, []);
-  return <details className="ai-cli-help"><summary>{tr('ai-cli:advanced_title')}</summary><p>{tr('ai-cli:pref_advancedShell_help')}</p><p>{tr('ai-cli:advanced_warning')}</p><Button variant="secondary" disabled={!enabled || busy} onClick={onPreview}>{tr('ai-cli:advanced_preview')}</Button>{!enabled && <p>{tr('ai-cli:advanced_enable')}</p>}</details>;
+  return <details className="ai-cli-help"><summary>{tr('ai-cli:advanced_title')}</summary><p>{tr('ai-cli:pref_advancedShell_help')}</p><p>{tr('ai-cli:advanced_warning')}</p><Button label={tr('ai-cli:advanced_preview')} variant="secondary" isDisabled={!enabled || busy} onClick={onPreview} />{!enabled && <p>{tr('ai-cli:advanced_enable')}</p>}</details>;
 }

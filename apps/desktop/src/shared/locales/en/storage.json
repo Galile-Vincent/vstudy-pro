@@ -47,5 +47,7 @@
   "bytes": "{{value}} B",
   "kibibytes": "{{value}} KiB",
   "mebibytes": "{{value}} MiB",
-  "gibibytes": "{{value}} GiB"
+  "gibibytes": "{{value}} GiB",
+  "maintenance": "Maintenance",
+  "clear": "Clear"
 }

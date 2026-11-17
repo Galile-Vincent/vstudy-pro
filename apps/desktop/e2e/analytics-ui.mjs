@@ -12,7 +12,7 @@ for (const language of ['en','zh-Hant','ja']) for (const colorScheme of ['light'
   try {
     app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_ANALYTICS_ENABLE:'',VSTUDY_NEWSLETTER_URL:'',VSTUDY_LOCALE:language,VSTUDY_FAKE_PROVIDER:'1'}});
     const page=await app.firstWindow();const errors=[],consoleMessages=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',message=>{if(['error','warning'].includes(message.type()))consoleMessages.push(message.text());});
-    await page.locator('.onboarding[data-state=open]').waitFor();
+    await page.locator('.onboarding').waitFor();
     await page.evaluate(async ({language,colorScheme})=>{const settings=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...settings,language,colorScheme});},{language,colorScheme});
     await page.reload();await page.emulateMedia({reducedMotion:'reduce'});
     await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setSize(1200,900));
@@ -41,9 +41,9 @@ for (const language of ['en','zh-Hant','ja']) for (const colorScheme of ['light'
     const privacy=page.getByTestId('privacy-settings');await privacy.waitFor();
     await privacy.locator('summary').filter({hasText:copy.exact}).click();
     const toggle=privacy.getByRole('switch',{name:copy.enabled,exact:true});
-    assert.equal(await toggle.getAttribute('aria-checked'),'false');
-    await toggle.click();await page.waitForFunction(()=>window.document.querySelector('[data-testid=privacy-settings] [role=switch]')?.getAttribute('aria-checked')==='true');
-    await toggle.click();await page.waitForFunction(()=>window.document.querySelector('[data-testid=privacy-settings] [role=switch]')?.getAttribute('aria-checked')==='false');
+    assert.equal(await toggle.isChecked(),false);
+    await toggle.click();await page.waitForFunction(()=>window.document.querySelector('[data-testid=privacy-settings] [role=switch]')?.checked===true);
+    await toggle.click();await page.waitForFunction(()=>window.document.querySelector('[data-testid=privacy-settings] [role=switch]')?.checked===false);
     await page.screenshot({path:join(evidence,`${language}-${colorScheme}-privacy.png`)});
     await privacy.getByRole('button',{name:copy.delete,exact:true}).scrollIntoViewIfNeeded();
     await page.screenshot({path:join(evidence,`${language}-${colorScheme}-privacy-id.png`)});

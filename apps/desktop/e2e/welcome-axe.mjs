@@ -9,7 +9,7 @@ for(const language of ['en','zh-Hant','ja']){
  const directory=await mkdtemp(join(tmpdir(),'vstudy-axe-'));let app;
  try{
   app=await electron.launch({args:[resolve('.'),`--user-data-dir=${directory}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_LOCALE:language,VSTUDY_FAKE_PROVIDER:'1'}});
-  const page=await app.firstWindow();await page.locator('.onboarding[data-state=open]').waitFor();await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:true,language});},language);await page.reload();await page.locator('#welcome-entry').click();await page.locator('.welcome').evaluate(e=>e.dataset.testSpotlight='true');
+  const page=await app.firstWindow();await page.locator('.onboarding').waitFor();await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,onboardingCompleted:true,language});},language);await page.reload();await page.locator('#welcome-entry').click();await page.locator('.welcome').evaluate(e=>e.dataset.testSpotlight='true');
   for(const theme of ['light','dark'])for(const reducedMotion of ['reduce','no-preference']){
    await page.emulateMedia({colorScheme:theme,reducedMotion});await page.waitForTimeout(1500);
    const result=await new AxeBuilder({page}).setLegacyMode(true).include('.welcome').analyze();audits.push({language,theme,reducedMotion,violations:result.violations});

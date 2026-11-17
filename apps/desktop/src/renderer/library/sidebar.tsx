@@ -1,6 +1,4 @@
-import { SidebarGroup, SidebarGroupLabel, SidebarGroupAction, SidebarMenuButton } from '../components/ui/sidebar';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
+import { IconButton, SideNavItem, SideNavSection, TextInput, Button } from "@astryxdesign/core";
 import { Select } from "../components/select";
 import { useEffect, useState, useRef, type DragEvent } from "react";
 import {
@@ -10,7 +8,7 @@ import {
   Plus,
   MoreHorizontal,
   BookOpen,
-  Star, Files, Clock, Inbox, AlertTriangle, ListFilter,
+  Star, Files, Clock, Inbox, AlertTriangle, ListFilter, ArrowUp, ArrowDown,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { tr } from "../../shared/i18n";
@@ -132,26 +130,17 @@ export function LibrarySidebar() {
   const visible = visibleFolders(folders, expanded);
   const [treeTop,setTreeTop] = useState(0);
   const treeRef = useRef<HTMLDivElement>(null);
-  const treeStart = Math.max(0,Math.floor(treeTop / 32)-2);
-  const treeEnd = treeStart + Math.ceil((treeRef.current?.clientHeight || 400)/32)+4;
+  const folderRowHeight = 32;
+  const treeStart = Math.max(0,Math.floor(treeTop / folderRowHeight)-2);
+  const treeEnd = treeStart + Math.ceil((treeRef.current?.clientHeight || 400)/folderRowHeight)+4;
   return (
-    <SidebarGroup>
-  <SidebarGroupLabel asChild><h2>{tr('art-reader:collection')}</h2></SidebarGroupLabel>
-  <nav
-    className="library-smart"
-    aria-label={tr('library:smartViews')}
-  >
+    <section className="library-folders">
+  <SideNavSection title={tr('art-reader:collection')}>
     {(['all', 'recent', 'pinned', 'unfiled', 'converting-failed'] as const).map(
       (view) => (
-        <SidebarMenuButton
-          isActive={route.view === 'library' && route.query?.view === view}
+        <SideNavItem
           key={view}
-          aria-current={
-            route.view === 'library' && route.query?.view === view ? 'page' : undefined
-          }
-          onClick={() => go({ view }, tr(`library:${view}`))}
-        >
-          {view === 'all' ? (
+          icon={view === 'all' ? (
             <Files />
           ) : view === 'recent' ? (
             <Clock />
@@ -162,83 +151,76 @@ export function LibrarySidebar() {
           ) : (
             <AlertTriangle />
           )}
-          {tr(`library:${view}`)}
-          {view === 'converting-failed' && !!counts[view] && (
-            <small>{format.number(counts[view] ?? 0)}</small>
-          )}
-        </SidebarMenuButton>
+          label={tr(`library:${view}`)}
+          isSelected={route.view === 'library' && route.query?.view === view}
+          {...(view === 'converting-failed' && !!counts[view]
+            ? { endContent: <small>{format.number(counts[view] ?? 0)}</small> }
+            : {})}
+          onClick={() => go({ view }, tr(`library:${view}`))}
+        />
       ),
     )}
-  </nav>
+  </SideNavSection>
   {!!pins.length && (
-    <SidebarGroupLabel className="mt-[var(--space-6)]" asChild>
-      <h2>{tr('library:pinnedFolders')}</h2>
-    </SidebarGroupLabel>
+    <SideNavSection title={tr('library:pinnedFolders')}>
+      {pins.map((f, index) => (
+        <div
+          className="folder-pin"
+          onKeyDown={(e) => {
+            if (e.altKey && ['ArrowUp', 'ArrowDown'].includes(e.key)) {
+              e.preventDefault();
+              reorderPin(index, index + (e.key === 'ArrowUp' ? -1 : 1));
+            }
+          }}
+          key={f.id}
+          draggable
+          onDragStart={(e) => e.dataTransfer.setData('application/vstudy-pin', String(index))}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const source = e.dataTransfer.getData('application/vstudy-pin');
+            if (source) reorderPin(Number(source), index);
+          }}
+        >
+          <SideNavItem
+            icon={<Pin />}
+            label={f.name}
+            actions={
+              <>
+                <IconButton label={tr('library:moveUp', { name: f.name })}
+                  variant="ghost"
+                  isDisabled={index === 0}
+                  onClick={() => reorderPin(index, index - 1)}
+                  icon={<ArrowUp />} />
+                <IconButton label={tr('library:moveDown', { name: f.name })}
+                  variant="ghost"
+                  isDisabled={index === pins.length - 1}
+                  onClick={() => reorderPin(index, index + 1)}
+                  icon={<ArrowDown />} />
+              </>
+            }
+            onClick={() => go({ folderId: f.id }, f.name)}
+          />
+        </div>
+      ))}
+    </SideNavSection>
   )}
-  {pins.map((f, index) => (
-    <div
-      className="folder-pin"
-      onKeyDown={(e) => {
-        if (e.altKey && ['ArrowUp', 'ArrowDown'].includes(e.key)) {
-          e.preventDefault();
-          reorderPin(index, index + (e.key === 'ArrowUp' ? -1 : 1));
-        }
-      }}
-      key={f.id}
-      draggable
-      onDragStart={(e) => e.dataTransfer.setData('application/vstudy-pin', String(index))}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={(e) => {
-        e.preventDefault();
-        const source = e.dataTransfer.getData('application/vstudy-pin');
-        if (source) reorderPin(Number(source), index);
-      }}
-    >
-      <Button
-        variant="ghost"
-        onClick={() => go({ folderId: f.id }, f.name)}
-      >
-        <Pin />
-        {f.name}
-      </Button>
-      <Button
-        variant="ghost"
-        aria-label={tr('library:moveUp', { name: f.name })}
-        disabled={index === 0}
-        onClick={() => reorderPin(index, index - 1)}
-      >
-        ↑
-      </Button>
-      <Button
-        variant="ghost"
-        aria-label={tr('library:moveDown', { name: f.name })}
-        disabled={index === pins.length - 1}
-        onClick={() => reorderPin(index, index + 1)}
-      >
-        ↓
-      </Button>
-    </div>
-  ))}
-  <div className="relative mt-[var(--space-6)]">
-    <SidebarGroupLabel asChild>
-      <h2>{tr('library:folders')}</h2>
-    </SidebarGroupLabel>
-    <SidebarGroupAction
-      aria-label={tr('library:newFolder')}
-      onClick={async () => {
-        const name = await prompt(tr('library:newFolder'));
-        if (name)
-          void run(() =>
-            desktop.invoke('library:folders:create', {
-              name,
-              parentId: null,
-            }),
-          );
-      }}
-    >
-      <Plus />
-    </SidebarGroupAction>
-  </div>
+  <SideNavSection
+    title={tr('library:folders')}
+    endContent={
+      <IconButton label={tr("library:newFolder")} variant="ghost" size="sm"
+        onClick={async () => {
+          const name = await prompt(tr('library:newFolder'));
+          if (name)
+            void run(() =>
+              desktop.invoke('library:folders:create', {
+                name,
+                parentId: null,
+              }),
+            );
+        }} icon={<Plus />} />
+    }
+  >
   {!folders.length && <p className="sidebar-empty">{tr('library:noFolders')}</p>}
   <div
     ref={treeRef}
@@ -249,7 +231,7 @@ export function LibrarySidebar() {
   >
     <div
       role="presentation"
-      style={{ height: visible.length * 32, position: 'relative' }}
+      style={{ height: visible.length * folderRowHeight, position: 'relative' }}
     >
       {visible.slice(treeStart, treeEnd).map(({ folder: f, level }, offset) => {
         const index = treeStart + offset;
@@ -275,9 +257,10 @@ export function LibrarySidebar() {
             data-over={over === f.id}
             style={{
               position: 'absolute',
-              top: index * 32,
+              top: index * folderRowHeight,
+              height: folderRowHeight,
               width: '100%',
-              paddingInlineStart: `calc(var(--space-3) * ${level - 1})`,
+              paddingInlineStart: `calc(var(--space-1) + var(--space-3) * ${level - 1})`,
             }}
             draggable
             onFocus={() => setFocus(f.id)}
@@ -327,8 +310,8 @@ export function LibrarySidebar() {
               if (next) {
                 setFocus(next.folder.id);
                 if (treeRef.current) {
-                  treeRef.current.scrollTop = target * 32;
-                  setTreeTop(target * 32);
+                  treeRef.current.scrollTop = target * folderRowHeight;
+                  setTreeTop(target * folderRowHeight);
                 }
                 requestAnimationFrame(() =>
                   document.getElementById(`folder-tree-${next.folder.id}`)?.focus(),
@@ -336,20 +319,17 @@ export function LibrarySidebar() {
               }
             }}
           >
-            <Button
+            <IconButton label={tr('library:expand')}
               variant="ghost"
               tabIndex={-1}
               aria-label={tr('library:expand')}
-              onClick={() => toggle(f.id)}
-            >
-              <ChevronRight className={expanded.includes(f.id) ? 'expanded' : ''} />
-            </Button>
+              onClick={() => toggle(f.id)} icon={<ChevronRight className={expanded.includes(f.id) ? 'expanded' : ''} />} />
             {editing === f.id && (
-              <Input
+              <TextInput label={tr('library:name')} isLabelHidden
                 aria-label={tr('library:name')}
-                autoFocus
+                hasAutoFocus
                 value={rename}
-                onChange={(e) => setRename(e.target.value)}
+                onChange={(_value, e) => setRename(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') setEditing('');
                   if (e.key === 'Enter') {
@@ -366,58 +346,51 @@ export function LibrarySidebar() {
                 }}
               />
             )}
-            <Button
-              variant="ghost"
-              className="folder-link"
-              tabIndex={-1}
-              onClick={() => go({ folderId: f.id }, f.name)}
-            >
-              {f.icon === 'book' ? (
+            <Button icon={f.icon === 'book' ? (
                 <BookOpen />
               ) : f.icon === 'star' ? (
                 <Star />
               ) : (
                 <FolderIcon />
-              )}
+              )} label={f.name} endContent={<small>{typeof f.count === 'number' ? format.number(f.count) : ''}</small>}
+              variant="ghost"
+              className="folder-link"
+              tabIndex={-1}
+              onClick={() => go({ folderId: f.id }, f.name)}
+            >
+
               <span className="folder-name">{f.name}</span>
-              <small>{typeof f.count === 'number' ? format.number(f.count) : ''}</small>
             </Button>
-            <Button
+            <IconButton label={tr('library:folderActions', { name: f.name })}
               variant="ghost"
               aria-label={tr('library:folderActions', { name: f.name })}
               tabIndex={-1}
               onClick={async () => {
                 setMenu(f);
                 setRename(f.name);
-              }}
-            >
-              <MoreHorizontal />
-            </Button>
+              }} icon={<MoreHorizontal />} />
           </div>
         );
       })}
     </div>
   </div>
+  </SideNavSection>
   {!!saved.length && (
-    <SidebarGroupLabel className="mt-[var(--space-6)]" asChild>
-      <h2>{tr('library:savedFilters')}</h2>
-    </SidebarGroupLabel>
+    <SideNavSection title={tr('library:savedFilters')}>
+      {saved.map((s) => (
+        <SideNavItem
+          key={s.id}
+          icon={<ListFilter />}
+          label={s.name}
+          onClick={() => go(JSON.parse(s.queryJson), s.name)}
+        />
+      ))}
+    </SideNavSection>
   )}
-  {saved.map((s) => (
-    <Button
-      variant="ghost"
-      className="library-saved-filter"
-      key={s.id}
-      onClick={() => go(JSON.parse(s.queryJson), s.name)}
-    >
-      <ListFilter />
-      {s.name}
-    </Button>
-  ))}
   {error && (
     <p role="alert">
       {error}
-      <Button
+      <Button label={(tr('library:retry'))}
         variant="ghost"
         onClick={refresh}
       >
@@ -442,19 +415,17 @@ export function LibrarySidebar() {
           setMenu(null);
         }}
       >
-        <label>
-          {tr('library:name')}
-          <Input
+        <TextInput label={tr('library:name')}
             value={rename}
-            onChange={(e) => setRename(e.target.value)}
-            autoFocus
-            required
+            onChange={(_value, e) => setRename(e.target.value)}
+            hasAutoFocus
+            isRequired
           />
-        </label>
-        <Button variant="ghost">{tr('library:rename')}</Button>
+        <Button type="submit" label={tr('library:rename')} variant="primary" />
       </form>
-      <Button
-        variant="ghost"
+      <div className="library-dialog-actions">
+      <Button label={tr(menu.pinned ? 'library:unpin' : 'library:pin')}
+        variant="secondary"
         onClick={() =>
           void run(() =>
             desktop.invoke('library:folders:update', {
@@ -463,11 +434,9 @@ export function LibrarySidebar() {
             }),
           )
         }
-      >
-        {tr('library:pin')}
-      </Button>
-      <Button
-        variant="ghost"
+      />
+      <Button label={tr('library:newSubfolder')}
+        variant="secondary"
         onClick={async () => {
           const name = await prompt(tr('library:newFolder'));
           if (name)
@@ -478,9 +447,8 @@ export function LibrarySidebar() {
               }),
             );
         }}
-      >
-        {tr('library:newSubfolder')}
-      </Button>
+      />
+      </div>
       <label>
         {tr('library:move')}
         <Select
@@ -557,9 +525,10 @@ export function LibrarySidebar() {
           ))}
         </Select>
       </label>
+      <div className="library-dialog-actions" data-danger="">
       {(['parent', 'unfiled'] as const).map((destination) => (
-        <Button
-          variant="ghost"
+        <Button label={tr(`library:deleteFolder_${destination}`)}
+          variant="destructive"
           key={destination}
           onClick={async () => {
             void run(() =>
@@ -570,10 +539,9 @@ export function LibrarySidebar() {
             );
             setMenu(null);
           }}
-        >
-          {tr(`library:deleteFolder_${destination}`)}
-        </Button>
+        />
       ))}
+      </div>
     </LibraryDialog>
   )}
   {undo && (
@@ -582,7 +550,7 @@ export function LibrarySidebar() {
       role="status"
     >
       {tr('library:moved')}
-      <Button
+      <Button label={(tr('library:undo'))}
         variant="ghost"
         onClick={() =>
           void run(async () => {
@@ -596,6 +564,6 @@ export function LibrarySidebar() {
     </div>
   )}
   {promptDialog}
-</SidebarGroup>
+</section>
   );
 }

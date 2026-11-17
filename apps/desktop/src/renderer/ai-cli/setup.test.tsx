@@ -73,7 +73,7 @@ it.each(['claude', 'codex', 'agy'] as const)('guides %s from missing through exp
   await click('Test');
   expect(document.body.textContent).toContain('Ready to study');
   expect(document.querySelector<HTMLDetailsElement>('.ai-cli-details')?.open).toBe(false);
-  expect(button('Continue').getAttribute('data-variant')).toBe('default');
+  expect(button('Continue').getAttribute('data-variant')).toBe('primary');
   expect([...document.querySelectorAll('.ai-cli-steps li')].every(li => li.getAttribute('data-state') === 'done')).toBe(true);
   expect(runs().map(call => call.payload.actionId)).toEqual([`install-${provider}`, `login-${provider}`, `test-${provider}`]);
   for (const call of runs()) {
@@ -172,13 +172,13 @@ it('shows a cancelled sign-in as one neutral status with retry, not as a failure
   fixture.hold(true); await mount(); await click('Sign in');
   await click('Stop this action');
   const section = document.querySelector('.ai-cli-sign-in')!;
-  expect(section.querySelector('[role=status]')?.textContent).toBe(i18n.t('ai-cli:signin_cancelled'));
+  expect(section.querySelector('p[role=status]')?.textContent).toBe(i18n.t('ai-cli:signin_cancelled'));
   expect(document.querySelectorAll('[role=alert]')).toHaveLength(0);
   expect(document.querySelector('.ai-cli-recovery')).toBeNull();
   expect(fixture.tools[0]).toMatchObject({ status: 'error', error: { hint: 'cancelled' } });
   expect(document.querySelector('.ai-cli-chip')?.getAttribute('data-status')).not.toBe('error');
   expect(document.querySelector('.ai-cli-tool-heading')?.textContent).not.toContain(i18n.t('ai-cli:status_error'));
-  expect(document.querySelectorAll('.ai-cli-sign-in [role=status]')).toHaveLength(1);
+  expect(document.querySelectorAll('.ai-cli-sign-in p[role=status]')).toHaveLength(1);
   expect(document.querySelector('.ai-cli-steps li[aria-current=step]')?.textContent).toContain(i18n.t('ai-cli:step_login'));
   expect(document.body.textContent!.split(i18n.t('ai-cli:phase_cancelled'))).toHaveLength(1);
   expect(document.querySelector('.ai-cli-steps li[aria-current=step]')?.getAttribute('data-state')).not.toBe('failed');
@@ -269,7 +269,7 @@ it.each(['en', 'zh-Hant', 'ja'].flatMap(language => (['claude', 'codex', 'agy'] 
     expect(document.querySelector('.ai-cli-manual-steps')?.textContent).toBe(['manual_step_copy', 'manual_step_terminal', 'manual_step_return'].map(key => i18n.t(`ai-cli:${key}`)).join(''));
     expect(document.querySelectorAll('.ai-cli-manual-steps li')).toHaveLength(3);
     expect(document.querySelector('.ai-cli-consent')?.textContent).toContain(i18n.t('ai-cli:consent_manual', { provider: provider === 'claude' ? 'Claude Code' : provider === 'codex' ? 'Codex' : 'Antigravity' }));
-    expect(button(i18n.t('ai-cli:check_again')).dataset.variant).toBe('default');
+    expect(button(i18n.t('ai-cli:check_again')).dataset.variant).toBe('primary');
     expect(button(i18n.t('ai-cli:open_terminal')).disabled).toBe(false);
     expect(document.querySelector('.ai-cli-workarea')?.textContent).not.toMatch(/managed copy|executable|reviewed action/i);
     await click(i18n.t('ai-cli:copy_command'));
@@ -531,7 +531,7 @@ it('keeps a manual terminal fallback when embedded sign-in is unsupported', asyn
     return channel === 'ai-cli:preview' ? { ...response, available: false, reason: 'unsupported' } : response;
   });
   await mount();
-  expect(document.querySelector('.ai-cli-action-area [data-slot=button]:not([data-variant=ghost])')?.textContent).toBe('Try again');
+  expect(document.querySelector('.ai-cli-action-area button:not([data-variant=ghost])')?.textContent).toBe('Try again');
   expect(button('Open in my own Terminal').disabled).toBe(false);
   await click('Open in my own Terminal');
   expect(runs()).toHaveLength(0);

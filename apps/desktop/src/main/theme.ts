@@ -15,16 +15,15 @@ export function nativeBackground(settings: Settings): string {
   return resolveTheme(settings)[scheme].background;
 }
 
-type WindowAppearance = { color: string; target: string; vibrancy: 'under-window' | null; timer?: ReturnType<typeof setTimeout> };
+type WindowAppearance = { color: string; target: string; timer?: ReturnType<typeof setTimeout> };
 const appearances = new WeakMap<BrowserWindow, WindowAppearance>();
 
-function updateBackground(window: BrowserWindow, color: string, vibrancy: WindowAppearance['vibrancy']): void {
+function updateBackground(window: BrowserWindow, color: string): void {
   const previous = appearances.get(window);
-  if (previous?.target === color && previous.vibrancy === vibrancy) return;
+  if (previous?.target === color) return;
   clearTimeout(previous?.timer);
-  const state: WindowAppearance = {color:previous?.color ?? color, target:color, vibrancy};
+  const state: WindowAppearance = {color:previous?.color ?? color, target:color};
   appearances.set(window, state);
-  if (process.platform === 'darwin' && (!previous || previous.vibrancy !== vibrancy)) window.setVibrancy(vibrancy);
   if (!previous || !window.isVisible() || systemPreferences.getAnimationSettings().prefersReducedMotion) {
     state.color = color;
     window.setBackgroundColor(color);
@@ -48,6 +47,6 @@ function updateBackground(window: BrowserWindow, color: string, vibrancy: Window
 export function applyNativeTheme(settings: Settings): void {
   if (nativeTheme.themeSource !== settings.colorScheme) nativeTheme.themeSource = settings.colorScheme;
   for (const window of BrowserWindow.getAllWindows()) {
-    updateBackground(window, nativeBackground(settings), process.platform === 'darwin' && settings.material === 'glass' && settings.glassOpacity < 100 && !nativeTheme.prefersReducedTransparency ? 'under-window' : null);
+    updateBackground(window, nativeBackground(settings));
   }
 }

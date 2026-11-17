@@ -1,14 +1,11 @@
+import { IconButton } from "@astryxdesign/core";
+import { TextInput, Button } from "@astryxdesign/core";
 import { useState } from "react";
 import { Bell, BellRing } from "lucide-react";
 import type { MoodleDeadline, MoodleReminder } from "../../shared/moodle";
 import { tr } from "../../shared/i18n";
-import { Button } from "../components/ui/button";
-import { Input, FormField, ListRow } from "../components/ui";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../components/ui/popover";
+import { FormField, ListRow } from "../components/ui";
+import { Popover } from "@astryxdesign/core";
 import type { MoodleApi } from "./api";
 
 export function Reminder({
@@ -53,27 +50,15 @@ export function Reminder({
     }
   };
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          className="moodle-reminder-trigger"
-          data-active={existing.length > 0}
-          size="icon"
-          aria-label={tr("moodle:remind_for", { title: deadline.title })}
-        >
-          {existing.length ? <BellRing /> : <Bell />}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="moodle-reminder" align="end">
+    <Popover isOpen={open} onOpenChange={setOpen} isModal={false} alignment="end" label={tr("moodle:set_reminder")} content={<div data-slot="popover-content" className="moodle-reminder">
         <h3>{tr("moodle:set_reminder")}</h3>
         <p>{deadline.title}</p>
         <div className="moodle-presets">
           {[1, 24, 72].map((hours) => (
-            <Button
+            <Button label={(tr(`moodle:before_${hours}`))}
               key={hours}
-              variant="outline"
-              disabled={
+              variant="secondary"
+               isDisabled={
                 busy ||
                 Date.parse(deadline.dueAt) - hours * 3600000 <= Date.now()
               }
@@ -85,7 +70,7 @@ export function Reminder({
             </Button>
           ))}
         </div>
-        <FormField error={invalid ? tr("moodle:future_time") : undefined} label={tr("moodle:custom_time")} children={field => <Input {...field}
+        <FormField error={invalid ? tr("moodle:future_time") : undefined} label={tr("moodle:custom_time")} children={field => <input {...field}
             type="datetime-local"
             value={custom}
             onChange={(e) => {
@@ -93,13 +78,13 @@ export function Reminder({
               setInvalid(false);
             }}
           />} />
-        <FormField label={tr("moodle:note")} children={field => <Input {...field}
-            maxLength={280}
+        <FormField label={tr("moodle:note")} children={field => <TextInput label={tr("moodle:note")} isLabelHidden {...field}
+            {...{maxLength: 280}}
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={(_value, e) => setNote(e.target.value)}
           />} />
-        <Button
-          disabled={busy || !custom}
+        <Button label={(tr("moodle:save_reminder"))}
+           isDisabled={busy || !custom}
           onClick={() => void save(new Date(custom).getTime())}
         >
           {tr("moodle:save_reminder")}
@@ -111,9 +96,9 @@ export function Reminder({
                 document.documentElement.lang || "en",
               )}
             </time>
-            </>} actions={<Button
+            </>} actions={<Button label={(tr("moodle:remove"))}
               variant="ghost"
-              disabled={busy}
+               isDisabled={busy}
               onClick={async () => {
                 setBusy(true);
                 try {
@@ -129,7 +114,12 @@ export function Reminder({
               {tr("moodle:remove")}
             </Button>} />
         ))}
-      </PopoverContent>
-    </Popover>
+</div>}>{triggerProps => <>        <IconButton {...triggerProps} label={tr("moodle:remind_for", { title: deadline.title })}
+          variant="ghost"
+          className="moodle-reminder-trigger"
+          data-active={existing.length > 0}
+           size="md"
+          aria-label={tr("moodle:remind_for", { title: deadline.title })} icon={existing.length ? <BellRing /> : <Bell />} />
+</>}</Popover>
   );
 }

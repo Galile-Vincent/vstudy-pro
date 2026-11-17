@@ -13,7 +13,7 @@ if (process.platform !== 'darwin') {
  try {
   app = await electron.launch({ args: [resolve('.'), `--user-data-dir=${directory}`], env: { ...process.env, ELECTRON_RUN_AS_NODE: '', VSTUDY_FAKE_PROVIDER: '', VSTUDY_LOCALE: 'en' } });
   const page = await app.firstWindow(); page.setDefaultTimeout(120_000);
-  await page.locator('.onboarding[data-state=open]').waitFor();
+  await page.locator('.onboarding').waitFor();
   await page.evaluate(async () => { const settings = await window.desktop.invoke('settings:get', {}); await window.desktop.invoke('settings:set', { ...settings, onboardingCompleted: true, language: 'en' }); window.localStorage.setItem('vstudy-route', JSON.stringify({ view: 'workspace' })); });
   await page.reload(); await page.getByTestId('bridge-status').waitFor({ state: 'attached' });
   await app.evaluate(({dialog},path) => { dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [path] }); }, resolve('e2e/fixtures/reading.md'));

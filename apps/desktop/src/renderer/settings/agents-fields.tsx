@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { scopeSchema, type Scope, type AgentsState } from '../../shared/mcp';
 import { tr } from '../../shared/i18n';
 import { useFormat } from '../i18n';
-import { Checkbox } from '../components/ui/checkbox';
+import { CheckboxInput } from '@astryxdesign/core';
 
 type SelectionProps = {
   availableScopes: readonly Scope[];
@@ -19,18 +19,16 @@ export function AgentSelection({ availableScopes, scopes, accountIds, accounts, 
   return <div className="agents-selection">
     <fieldset disabled={disabled}>
       <legend>{tr('agents:scopes')}</legend>
-      {scopeSchema.options.filter(scope => availableScopes.includes(scope)).map(scope => <label className="agents-choice" key={scope}>
-        <Checkbox checked={scopes.includes(scope)} disabled={disabled} onCheckedChange={checked => onScopes(checked ? [...scopes, scope] : scopes.filter(value => value !== scope))} />
-        <span>{tr(`agents:scope_${scope.replace(':', '_')}`)}<small><code>{scope}</code></small></span>
-      </label>)}
+      {scopeSchema.options.filter(scope => availableScopes.includes(scope)).map(scope => <div className="agents-choice" key={scope}>
+        <CheckboxInput label={tr(`agents:scope_${scope.replace(':', '_')}`)} description={scope} value={scopes.includes(scope)} isDisabled={disabled} onChange={checked => onScopes(checked ? [...scopes, scope] : scopes.filter(value => value !== scope))} />
+      </div>)}
       {!availableScopes.length && <p>{tr('agents:no_scopes')}</p>}
     </fieldset>
     <fieldset disabled={disabled}>
       <legend>{tr('agents:accounts')}</legend>
-      {accounts.map(account => <label className="agents-choice" key={account.id}>
-        <Checkbox checked={accountIds.includes(account.id)} disabled={disabled} onCheckedChange={checked => onAccounts(checked ? [...accountIds, account.id] : accountIds.filter(value => value !== account.id))} />
-        <span>{account.school}<small>{account.user}</small><code>{account.id}</code></span>
-      </label>)}
+      {accounts.map(account => <div className="agents-choice" key={account.id}>
+        <CheckboxInput label={account.school} description={`${account.user} · ${account.id}`} value={accountIds.includes(account.id)} isDisabled={disabled} onChange={checked => onAccounts(checked ? [...accountIds, account.id] : accountIds.filter(value => value !== account.id))} />
+      </div>)}
       {!accounts.length && <p className="agents-muted">{tr('agents:no_accounts')}</p>}
     </fieldset>
     <p className="agents-muted">{tr('agents:selection_hint')}</p>

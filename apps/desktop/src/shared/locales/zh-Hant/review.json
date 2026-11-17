@@ -16,13 +16,16 @@
   "link_moodle": "連結 Moodle 課程",
   "unlinked": "未連結 Moodle",
   "inbox_help": "先建立課程或連結 Moodle，再把對話移到課程，方便一起複習。",
-  "inbox_empty": "還沒有未分類的對話。開始提問後，就能在這裡整理。",
+  "inbox_empty": "還沒有未分類的對話",
+  "inbox_empty_hint": "開始提問後，就能在這裡整理。",
   "chat_number": "對話 {{number}}",
   "move": "移到課程",
   "recent_help": "每個問題都是起點，不一定代表需要加強。",
-  "recent_empty": "在課程對話中問幾個問題後，這裡就會出現問題摘要。",
+  "recent_empty": "還沒有記錄的問題",
+  "recent_empty_hint": "在課程對話中問幾個問題後，這裡就會出現問題摘要。",
   "weak_help": "值得再看一次的內容，照自己的步調來。",
-  "weak_empty": "目前沒有需要複習的項目，也可以回顧「最近問過」。",
+  "weak_empty": "目前沒有需要複習的項目",
+  "weak_empty_hint": "也可以回顧「最近問過」。",
   "why": "為什麼出現在這裡？",
   "evidence_rule": "單純提問不會被列為弱點。我們會參考不同天重複卡住的紀錄、明確的觀念誤解，或答錯後表示不懂的情況。當你展現理解，就會移出這份清單。這只是複習建議，不是能力評分。",
   "evidence": "查看依據",
@@ -154,5 +157,7 @@
   "bounded_session_other": "本次複習 {{total}} 個概念中的 {{selected}} 個；剩餘 {{count}} 個留待下次複習",
   "scope_required": "請選擇有效範圍以產生內容：1–{{max}} 個項目或有效日期範圍。",
   "scope_limit_other": "每次最多選擇 {{count}} 個概念。請先取消勾選，再選擇其他概念。",
-  "row_actions": "{{concept}} 的操作"
+  "row_actions": "{{concept}} 的操作",
+  "ask_question": "提出問題",
+  "show_recent": "查看最近的問題"
 }

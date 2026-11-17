@@ -1,9 +1,4 @@
 {
-  "cardTransparency": "Card transparency",
-  "cardTransparency_hint": "Choose how much background shows through cards and panels. Accessibility preferences keep surfaces solid.",
-  "card_solid": "Solid",
-  "card_soft": "Soft",
-  "card_glass": "Glass",
   "loading": "Loading appearance…",
   "scheme": "Color scheme",
   "system": "System",
@@ -15,8 +10,6 @@
   "untitled": "My theme",
   "contrast": "Contrast",
   "contrast_hint": "Strengthen text, borders, and focus indicators. 100% is the accessible baseline.",
-  "glassOpacity": "Glass opacity",
-  "glassOpacity_hint": "Higher values make menus, dialogs, and the composer more solid.",
   "selection": "Selected passage",
   "editor": "Theme editor",
   "editor_hint": "Edit light and dark colors. Preview changes across the app before saving.",

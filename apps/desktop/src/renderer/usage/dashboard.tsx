@@ -1,6 +1,7 @@
+import { Panel } from '../components/panel';
 import { SubscriptionMeters } from './subscriptions';
+import { Button } from '@astryxdesign/core';
 import { Select } from '../components/select';
-import { Button } from '../components/ui/button';
 import { Stat, Toolbar } from '../components/ui';
 import { useTranslation } from 'react-i18next';
 import { tr } from '../../shared/i18n';
@@ -38,6 +39,7 @@ export function UsageTrend({ days }: Pick<Dashboard, 'days'>) {
         </span>
       </figcaption>
       <svg
+        className="w-full aspect-[16/5]"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
         aria-label={tr(
@@ -224,35 +226,26 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
 
   return (
     <section className="usage-dashboard" aria-label={tr('common:overall_token_dashboard')}>
-      <div className="usage-block">
-        <div>
-          <h3 className="text-[length:var(--type-md)] font-semibold leading-snug">
-            {tr('common:overall_usage')}
-          </h3>
-          <p className="muted">
-            {tr('common:all_providers_and_documents_recorded_by_vstudy_on_this_device')}
-          </p>
-        </div>
-        <Toolbar
-          left={
-            <>
+      <Panel title={tr('common:overall_usage')} actions={<div className="usage-panel-actions">
               <Select
+                size="sm"
                 aria-label={tr('common:usage_period')}
                 value={period}
-                onChange={(e) => setPeriod(e.target.value as UsagePeriod)}
+                onChange={(event) => setPeriod(event.target.value as typeof period)}
               >
                 <option value="all">{tr('common:all_time')}</option>
                 <option value="month">{tr('common:this_month')}</option>
                 <option value="last30days">{tr('common:last_30_days')}</option>
                 <option value="day">{tr('common:today')}</option>
               </Select>
-              <Button variant="secondary" size="sm" onClick={() => setRevision((r) => r + 1)}>
-                {tr('common:refresh_usage')}
-              </Button>
-            </>
-          }
-        />
-      </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                label={tr('common:refresh_usage')}
+                onClick={() => setRevision((r) => r + 1)}
+              />
+      </div>}>
+      <p className="muted">{tr('common:all_providers_and_documents_recorded_by_vstudy_on_this_device')}</p>
       {error ? (
         <p role="alert">{error}</p>
       ) : !data ? (
@@ -272,6 +265,10 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
               )}
             </p>
           </div>
+        </>
+      )}
+      </Panel>
+      {data && <>
           <div className="usage-block">
             <UsageTrend days={data.days} />
             {period === 'all' && (
@@ -280,14 +277,15 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
               </p>
             )}
           </div>
-          <div className="usage-block">
+          <Panel title={tr('common:breakdown')}>
             <Toolbar
               left={<strong>{tr('common:breakdown')}</strong>}
               right={
                 <Select
+                size="sm"
                   aria-label={tr('common:group_usage_by')}
                   value={by}
-                  onChange={(e) => setBy(e.target.value as typeof by)}
+                  onChange={(event) => setBy(event.target.value as typeof by)}
                 >
                   <option value="provider">{tr('common:provider')}</option>
                   <option value="model">{tr('common:model')}</option>
@@ -326,9 +324,8 @@ export function UsageDashboard({ documents }: { documents: IpcResponse<'document
                 </tbody>
               </table>
             </div>
-          </div>
-        </>
-      )}
+          </Panel>
+        </>}
       <SubscriptionMeters />
     </section>
   );

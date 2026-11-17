@@ -27,14 +27,14 @@ try {
  assert.equal(await panel.locator('input[type=checkbox]').count(),0);checks++;
  await panel.getByRole('combobox',{name:'Model',exact:true}).click();
  await page.locator('[data-slot=model-selector-search]').fill('Fixture');
- await page.locator('[data-slot=model-selector-item]').filter({hasText:'Fixture model'}).click();
+ await page.locator('[role=option]').filter({hasText:'Fixture model'}).click();
  assert.match(await panel.getByRole('combobox',{name:'Model',exact:true}).innerText(),/Fixture model/);checks++;
  await panel.getByRole('button',{name:'Estimate cost',exact:true}).click();
  await panel.getByText(/Price unknown/).waitFor();
  assert.equal(await panel.getByRole('button',{name:'Confirm and improve',exact:true}).isEnabled(),true);checks++;
  await panel.getByRole('combobox',{name:'Model',exact:true}).click();
  await page.locator('[data-slot=model-selector-search]').fill('Fake');
- await page.locator('[data-slot=model-selector-item]').filter({hasText:'Fake (test only)'}).click();
+ await page.locator('[role=option]').filter({hasText:'Fake (test only)'}).click();
  assert.equal(await panel.getByRole('button',{name:'Confirm and improve',exact:true}).isEnabled(),false);checks++;
 
  await panel.getByRole('button',{name:'Estimate cost',exact:true}).click();
@@ -45,13 +45,14 @@ try {
  await panel.getByText('1 · Done',{exact:true}).waitFor();checks++;
  await panel.getByRole('button',{name:'Use AI version',exact:true}).click();
  await page.locator('.ai-parse-controls button[aria-pressed=true]').filter({hasText:'AI version'}).waitFor();
- assert.equal(await page.getByTestId('document-markdown').locator('strong').innerText(),'Faithful document text with all facts preserved.');checks++;
+ await page.waitForFunction(()=>window.document.querySelector('[data-testid=document-markdown] strong')?.textContent==='Faithful document text with all facts preserved.');checks++;
  await page.getByRole('button',{name:'Original parse',exact:true}).click();
  await page.locator('.ai-parse-controls button[aria-pressed=true]').filter({hasText:'Original parse'}).waitFor();
- assert.equal(await page.getByTestId('document-markdown').locator('strong').count(),0);checks++;
+ await page.waitForFunction(()=>!window.document.querySelector('[data-testid=document-markdown] strong'));checks++;
  // Both row menus share the same collision-aware host, including context clicks.
  for(let i=0;i<8;i++) {const p=join(directory,`menu-${i}.md`);await writeFile(p,`Document ${i}`);await app.evaluate(({dialog},path)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[path]});},p);await page.evaluate(()=>window.desktop.invoke('documents:import',{}));}
- await page.evaluate(()=>window.localStorage.setItem('vstudy-route',JSON.stringify({view:'library'})));await page.reload();
+ await page.locator('.shell-sidebar').getByRole('button',{name:'All documents',exact:true}).click();
+ await page.getByRole('radio',{name:'All files',exact:true}).click();
  await page.locator('.library-document').first().waitFor();
  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setSize(960,800));
  for(const grid of [false,true]) {
@@ -76,8 +77,16 @@ try {
  await page.getByRole('menuitem',{name:'Re-parse with AI',exact:true}).click();await panel.waitFor();checks++;await audit();
  await page.screenshot({path:join(evidence,'panel-200-percent.png')});
  for(const [language,title] of [['zh-Hant','用 AI 重新解析'],['ja','AIで再解析']]) {
-  await page.evaluate(async language=>{const s=await window.desktop.invoke('settings:get',{});await window.desktop.invoke('settings:set',{...s,language});},language);
-  await page.reload();await panel.getByRole('heading',{name:title,exact:true}).waitFor();await panel.waitFor();await audit();
+  await page.evaluate(() => window.dispatchEvent(new window.Event('vstudy:open-settings')));
+  await page.getByTestId('language').click();
+  await page.getByRole('option',{name:language==='zh-Hant'?'繁體中文':'日本語',exact:true}).click();
+  await page.waitForFunction(language=>document.documentElement.lang===language,language);
+  await page.keyboard.press('Escape');
+  await page.locator('.settings-dialog[open]').waitFor({state:'hidden'});
+  if (!await panel.isVisible()) {
+    await page.getByRole('button',{name:title,exact:true}).first().click();
+  }
+  await panel.getByRole('heading',{name:title,exact:true}).waitFor();await audit();
  }
  assert.deepEqual(errors,[]);
  console.log(JSON.stringify({result:'PASS',checks,axeScans,axeViolations:0,evidence,liveProviders:0}));

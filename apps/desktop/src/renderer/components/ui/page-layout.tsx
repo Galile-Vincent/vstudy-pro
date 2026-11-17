@@ -1,6 +1,6 @@
 import { useId, type ComponentProps, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { Badge } from './badge';
+import { Badge } from '@astryxdesign/core';
 import './ui.css';
 
 type DivProps = ComponentProps<'div'>;
@@ -14,9 +14,9 @@ export function PageHeader({
   meta,
   className,
   ...props
-}: Omit<ComponentProps<'header'>, 'title'> & Slots & { leading?: ReactNode; meta?: ReactNode }) {
+}: Omit<ComponentProps<'div'>, 'title'> & Slots & { leading?: ReactNode; meta?: ReactNode }) {
   return (
-    <header
+    <div
       {...props}
       data-slot="page-header"
       className={cn('flex flex-col gap-[var(--space-4)]', className)}
@@ -30,7 +30,7 @@ export function PageHeader({
         {actions && <div className="flex min-w-0 max-w-full flex-wrap items-center gap-[var(--space-2)]">{actions}</div>}
       </div>
       {meta && <div>{meta}</div>}
-    </header>
+    </div>
   );
 }
 
@@ -59,7 +59,7 @@ export function Section({
           className="flex items-center gap-[var(--space-2)] text-[length:var(--type-lg)] font-medium"
         >
           {title}
-          {count !== undefined && <Badge variant="secondary">{count}</Badge>}
+          {count !== undefined && <Badge label={count} />}
         </Heading>
         {actions}
       </div>

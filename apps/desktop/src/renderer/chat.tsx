@@ -29,7 +29,7 @@ import {
 } from "@assistant-ui/react";
 import type { Conversation, Message, Selection } from "../shared";
 import { Thread } from "./components/assistant-ui/elements/thread.aui";
-import { Button } from "./components/ui/button";
+import { Button } from "@astryxdesign/core";
 import { SelectionPreview } from "./selection-preview-view";
 export { SelectionPreview } from "./selection-preview-view";
 import { desktop } from "./bridge";
@@ -205,7 +205,7 @@ function ComposerSelection() {
 function ComposerBanner() {
   useTranslation();
   const {usage,budget} = useDocumentChat();
-  return <><MemoryConsentCard /><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert" title={tr('common:the_estimate_allows_1_024_output_tokens_actual_usage_can_be_higher')}><span>{budget.reason}</span><div className="usage-warning-actions"><Button type="button" variant="outline" size="sm" onClick={budget.approve}>{tr('common:send_anyway')}</Button><Button type="button" variant="ghost" size="sm" onClick={budget.dismiss}>{tr('common:cancel')}</Button></div></div>}</>;
+  return <><MemoryConsentCard /><UsageMeter {...usage} />{budget.warning && <div className="usage-warning" role="alert" title={tr('common:the_estimate_allows_1_024_output_tokens_actual_usage_can_be_higher')}><span>{budget.reason}</span><div className="usage-warning-actions"><Button label={tr('common:send_anyway')} type="button" variant="secondary" size="sm" onClick={budget.approve}>{tr('common:send_anyway')}</Button><Button label={tr('common:cancel')} type="button" variant="ghost" size="sm" onClick={budget.dismiss}>{tr('common:cancel')}</Button></div></div>}</>;
 }
 function ModelSwitchNote() {
   useTranslation();

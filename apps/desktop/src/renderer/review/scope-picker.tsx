@@ -7,7 +7,8 @@ import {
 import type { IpcResponse } from "../../shared/ipc";
 import { tr } from "../../shared/i18n";
 import { desktop } from "../bridge";
-import { Button } from "../components/ui/button";
+import { Button } from "@astryxdesign/core";
+import { Select } from "../components/select";
 import { useReviewPage, type Cursor } from "./paging";
 
 export type ReviewScope = z.infer<typeof studyScopeSchema>;
@@ -194,23 +195,21 @@ export function ScopePicker({
           {tr("review:scope_limit", { count: MAX_REVIEW_CONCEPTS })}
         </p>
       )}
-      <label>
-        {tr("review:scope_kind")}
-        <select
-          value={kind}
-          onChange={(event) =>
-            setKind(event.target.value as ReviewScope["kind"])
-          }
-        >
-          {(["units", "documents", "dates", "concepts", "weak"] as const).map(
-            (value) => (
-              <option key={value} value={value}>
-                {tr(`review:scope_${value}`)}
-              </option>
-            ),
-          )}
-        </select>
-      </label>
+      <Select
+        aria-label={tr("review:scope_kind")}
+        value={kind}
+        onChange={(event) =>
+          setKind(event.target.value as ReviewScope["kind"])
+        }
+      >
+        {(["units", "documents", "dates", "concepts", "weak"] as const).map(
+          (value) => (
+            <option key={value} value={value}>
+              {tr(`review:scope_${value}`)}
+            </option>
+          ),
+        )}
+      </Select>
       {kind === "dates" ? (
         <div className="review-actions">
           <label>
@@ -244,14 +243,14 @@ export function ScopePicker({
           {error && (
             <p role="alert">
               {tr("review:error")}{" "}
-              <Button variant="secondary"
+              <Button
+                variant="secondary"
                 type="button"
+                label={tr("review:retry")}
                 onClick={() =>
                   page ? page.retry() : setReload((value) => value + 1)
                 }
-              >
-                {tr("review:retry")}
-              </Button>
+              />
             </p>
           )}
           <div className="review-scope-choices">
@@ -274,27 +273,29 @@ export function ScopePicker({
             <p>{tr("review:scope_empty")}</p>
           )}
           {page?.cursor && (
-            <Button variant="secondary" type="button" disabled={page.loading} onClick={page.more}>
-              {tr("review:load_more")}
-            </Button>
+            <Button
+              variant="secondary"
+              type="button"
+              isDisabled={page.loading}
+              label={tr("review:load_more")}
+              onClick={page.more}
+            />
           )}
         </>
       )}
-      <label>
-        {tr("review:scope_size")}
-        <select
-          value={size}
-          onChange={(event) =>
-            onSizeChange?.(event.target.value as "short" | "standard" | "long")
-          }
-        >
-          {(["short", "standard", "long"] as const).map((value) => (
-            <option key={value} value={value}>
-              {tr(`review:scope_${value}`)}
-            </option>
-          ))}
-        </select>
-      </label>
+      <Select
+        aria-label={tr("review:scope_size")}
+        value={size}
+        onChange={(event) =>
+          onSizeChange?.(event.target.value as "short" | "standard" | "long")
+        }
+      >
+        {(["short", "standard", "long"] as const).map((value) => (
+          <option key={value} value={value}>
+            {tr(`review:scope_${value}`)}
+          </option>
+        ))}
+      </Select>
     </fieldset>
   );
 }

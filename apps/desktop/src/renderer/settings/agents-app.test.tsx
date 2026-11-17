@@ -48,9 +48,10 @@ it('mounts the live indicator in the actual shell while Home is visible', async 
   expect(host.querySelector('[data-testid=agents-settings]')).toBeNull();
   await click('Agent active · 1 call');
   expect(document.querySelector('[data-testid=agents-settings]')).not.toBeNull();
-  expect(document.querySelector('[role=tab][data-state=active]')?.textContent).toBe('Agents');
+  expect(document.querySelector('[role=tab][aria-selected=true]')?.textContent).toContain('Agents');
   expect(invoke.mock.calls.filter(([channel]) => channel === 'mcp:state')).toHaveLength(1);
   await click(tr('common:close_settings'));
+  await act(() => new Promise(resolve => setTimeout(resolve, 300)));
   expect(document.querySelector('[data-testid=agents-settings]')).toBeNull();
 });
 
@@ -67,7 +68,7 @@ it.each(['pairing', 'proposal'])('mounts global %s consent on Home with Settings
   await act(() => root.render(<App />));
   expect(host.textContent).toContain('Home fixture');
   expect(document.querySelector('[data-testid=agents-settings]')).toBeNull();
-  expect(document.querySelector('[role=dialog]')?.textContent).toContain(tr(kind === 'pairing' ? 'agents:pair_title' : 'agents:proposal_title'));
+  expect(document.querySelector('dialog[open]')?.textContent).toContain(tr(kind === 'pairing' ? 'agents:pair_title' : 'agents:proposal_title'));
 });
 
 it('keeps consent open when Settings closes underneath it', async () => {
@@ -79,6 +80,7 @@ it('keeps consent open when Settings closes underneath it', async () => {
     await act(()=>vi.advanceTimersByTimeAsync(1100));
     expect(document.querySelector('[data-testid=agent-consent]')).not.toBeNull();
     await click(tr('common:close_settings'));
+    await act(()=>vi.advanceTimersByTimeAsync(300));
     expect(document.querySelector('[data-testid=agents-settings]')).toBeNull();
     expect(document.querySelector('[data-testid=agent-consent]')).not.toBeNull();
     expect(invoke.mock.calls.filter(([c])=>c==='mcp:pair-decision')).toHaveLength(0);

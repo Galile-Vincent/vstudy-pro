@@ -1,9 +1,4 @@
 {
-  "cardTransparency": "卡片透明度",
-  "cardTransparency_hint": "選擇卡片與面板透出背景的程度。輔助使用偏好會保留不透明表面。",
-  "card_solid": "不透明",
-  "card_soft": "柔和",
-  "card_glass": "玻璃",
   "loading": "載入外觀設定…",
   "scheme": "色彩模式",
   "system": "跟隨系統",
@@ -15,8 +10,6 @@
   "untitled": "我的主題",
   "contrast": "對比度",
   "contrast_hint": "提高文字、邊框與焦點的對比度。100% 為無障礙基準。",
-  "glassOpacity": "玻璃不透明度",
-  "glassOpacity_hint": "數值越高，選單、對話框與輸入區越不透明。",
   "selection": "已選取段落",
   "editor": "主題編輯器",
   "editor_hint": "編輯淺色與深色配色，儲存前可預覽整個應用程式。",

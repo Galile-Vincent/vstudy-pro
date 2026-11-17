@@ -7,6 +7,7 @@ import ja from '../../shared/locales/ja/review.json';
 import zhHant from '../../shared/locales/zh-Hant/review.json';
 import { ArtifactPanel } from './artifacts';
 const { invoke, subscribe } = vi.hoisted(() => ({ invoke: vi.fn(), subscribe: vi.fn() }));
+vi.mock('../components/select', () => import('../../test/native-select'));
 vi.mock('../bridge', () => ({ desktop: { invoke, onReviewProgress: subscribe } }));
 vi.mock('../markdown', () => ({ DocumentMarkdown: ({ source }: { source: string }) => <article>{source}</article> }));
 vi.mock('./scope-picker', () => ({ ScopePicker: ({ onChange }: { onChange: (s: unknown) => void }) => <button onClick={() => onChange({ kind: 'weak' })}>scope</button> }));

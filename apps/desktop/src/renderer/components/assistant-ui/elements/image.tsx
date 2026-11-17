@@ -261,7 +261,7 @@ function ImagePreview({
           data-slot="image-preview-loading"
           className="bg-muted/50 absolute inset-0 flex items-center justify-center"
         >
-          <ImageIcon className="text-muted-foreground size-8 animate-pulse" />
+          <ImageIcon className="text-muted-foreground size-8" />
         </div>
       )}
       {error ? (
@@ -482,7 +482,7 @@ function ImageZoom({ src, alt = tr('common:image_preview'), children }: ImageZoo
             data-slot="image-zoom-overlay"
             role="dialog"
             aria-modal="true"
-            className="aui-image-zoom-overlay fade-in animate-in fixed inset-0 z-50 flex items-center justify-center bg-black/80 duration-200"
+            className="aui-image-zoom-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/80 duration-200"
             onClick={handleClose}
             aria-label={tr('common:zoomed_image')}
           >
@@ -490,7 +490,7 @@ function ImageZoom({ src, alt = tr('common:image_preview'), children }: ImageZoo
               data-slot="image-zoom-content"
               src={src}
               alt={alt}
-              className="aui-image-zoom-content fade-in zoom-in-95 animate-in max-h-[90%] max-w-[90%] cursor-zoom-out object-contain duration-200"
+              className="aui-image-zoom-content max-h-[90%] max-w-[90%] object-contain duration-200"
               onClick={(e) => {
                 e.stopPropagation();
                 handleClose();

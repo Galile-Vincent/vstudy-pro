@@ -44,7 +44,7 @@ it.each([
   turnOn();
   expect(answer().getAttribute('aria-disabled')).toBe('true');
   expect(answer().getAttribute('aria-describedby')).toBeTruthy();
-  expect(document.getElementById(answer().getAttribute('aria-describedby')!)!.textContent).toBe(tr(key));
+  expect(answer().getAttribute('aria-describedby')!.split(' ').map(id=>document.getElementById(id)?.textContent).join(' ')).toContain(tr(key));
   fireEvent.click(answer());
   expect(guardSend).not.toHaveBeenCalled();
 });
@@ -54,7 +54,7 @@ it('blocks Just answer while a reply is streaming and sends once the reply ends'
   turnOn();
   fireEvent.click(answer());
   await waitFor(() => expect(answer().getAttribute('aria-disabled')).toBe('true'));
-  expect(document.getElementById(answer().getAttribute('aria-describedby')!)!.textContent).toBe(tr('chat:answer_directly_running'));
+  expect(answer().getAttribute('aria-describedby')!.split(' ').map(id=>document.getElementById(id)?.textContent).join(' ')).toContain(tr('chat:answer_directly_running'));
   fireEvent.click(answer());
   expect(guardSend).toHaveBeenCalledOnce();
   events.emit?.({type:'done'});

@@ -19,6 +19,8 @@ it('keeps search local and selects a matching school with the keyboard',async ()
   const {find}=await mount('Taiwan');
   expect(document.querySelectorAll('[role=option]')).toHaveLength(schools.filter(school => school.country === 'TW').length);
   expect(find).not.toHaveBeenCalled();
+  expect(document.querySelector('button[type=submit]')).toBeNull();
+  expect(document.querySelector('details summary')?.textContent).toBe('Search stays on this device');
   const input=document.querySelector('[role=combobox]')!;
   await act(async () => input.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true})));
   expect(input.getAttribute('aria-activedescendant')).toBe('moodle-school-0');
@@ -37,6 +39,7 @@ it('offers URL entry when no bundled school matches and submits the entered addr
   expect(document.querySelectorAll('[role=option]')).toHaveLength(0);
   expect(document.body.textContent).toContain('No matching schools');
   expect(document.body.textContent).toContain('Add by URL');
+  expect(document.querySelector('button[type=submit]')?.textContent).toContain('Find my school');
   await act(async () => document.querySelector('form')!.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
   expect(find).toHaveBeenCalledWith('new-university.example/moodle');
 });
@@ -54,6 +57,13 @@ it('puts Taiwan directory entries first in Traditional Chinese and sorts English
   expect(Array.from(options).slice(0,taiwan.length-1).every(option => option.textContent?.includes('.edu.tw'))).toBe(true);
   await i18n.changeLanguage('en');
   await mount();
-  const names=Array.from(document.querySelector('[role=group][aria-label="School directory"]')!.querySelectorAll('[role=option]')).map(option => option.querySelector('span:not(.moodle-school-monogram)')!.firstChild!.textContent ?? '');
+  const names=Array.from(document.querySelector('[role=group][aria-label="School directory"]')!.querySelectorAll('[role=option]')).map(option => option.getAttribute('aria-label') ?? '');
   expect(names).toEqual([...names].sort(new Intl.Collator('en').compare));
+});
+
+it('shows checking status and contact disclosure without expanding details',async()=>{
+  await act(async()=>root.render(<SchoolPicker schools={schools} recent={[]} accounts={[]} input="Taiwan" onInput={()=>{}} onFind={()=>{}} busy/>));
+  expect(Array.from(document.querySelectorAll('[role=status]')).some(el=>el.textContent?.includes('Checking your school'))).toBe(true);
+  expect(document.querySelector('details')?.open).toBe(false);
+  expect(Array.from(document.querySelectorAll('small')).some(el=>!el.closest('details')&&el.textContent?.includes('may download its logo'))).toBe(true);
 });

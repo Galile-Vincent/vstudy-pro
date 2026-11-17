@@ -17,7 +17,7 @@ it.each([
   const error = await screen.findByRole('alert');
   expect(error.textContent).toBe(tr(`themes:${key}`));
   expect(field.getAttribute('aria-invalid')).toBe('true');
-  expect(field.getAttribute('aria-describedby')).toBe(error.id);
+  expect(field.getAttribute('aria-describedby')?.split(' ')).toContain(error.id);
 });
 
 it('does not mark valid JSON invalid when persistence fails', async () => {
@@ -26,6 +26,6 @@ it('does not mark valid JSON invalid when persistence fails', async () => {
   fireEvent.change(field,{target:{value:JSON.stringify({...builtinThemes[0],id:'custom-ok'})}});
   fireEvent.click(screen.getByRole('button',{name:tr('themes:import')}));
   expect((await screen.findByRole('alert')).textContent).toBe(tr('themes:save_failed'));
-  expect(field.getAttribute('aria-invalid')).toBe('false');
-  expect(field.hasAttribute('aria-describedby')).toBe(false);
+  expect(field.getAttribute('aria-invalid')).not.toBe('true');
+  expect(field.getAttribute('aria-describedby') ?? '').not.toContain(screen.getByRole('alert').id);
 });

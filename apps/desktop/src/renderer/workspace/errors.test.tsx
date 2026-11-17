@@ -82,7 +82,7 @@ it('retries only the document source and preserves the mounted chat',async()=>{
 
 it('only exposes tabpanels and their Tab stops while the compact tablist is shown',async()=>{
   setup();let compact=false;let changed=()=>{};
-  vi.stubGlobal('matchMedia',()=>({get matches(){return compact;},addEventListener:(_event:string,listener:()=>void)=>{changed=listener;},removeEventListener:()=>{}}));
+  vi.stubGlobal('matchMedia',(query:string)=>({get matches(){return query.includes('819') && compact;},addEventListener:(_event:string,listener:()=>void)=>{if(query.includes('819'))changed=listener;},removeEventListener:()=>{}}));
   try {
     const {container}=render(<Workspace/>);await screen.findByText('Readable document');
     const panes=()=>Array.from(container.querySelectorAll<HTMLElement>('[data-panel]'));

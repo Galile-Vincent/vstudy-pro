@@ -14,7 +14,7 @@ for(const language of ['en','ja','zh-Hant']) {
  const dir=await mkdtemp(join(tmpdir(),'design1-'));let app,db;
  try {
  app=await electron.launch({args:[resolve('.'),`--user-data-dir=${dir}`],env:{...process.env,ELECTRON_RUN_AS_NODE:'',VSTUDY_FAKE_PROVIDER:'1',VSTUDY_LOCALE:language}});
- const page=await app.firstWindow();await page.waitForLoadState('domcontentloaded');page.setDefaultTimeout(30000);const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.locator('.onboarding[data-state=open]').waitFor();
+ const page=await app.firstWindow();await page.waitForLoadState('domcontentloaded');page.setDefaultTimeout(30000);const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.locator('.onboarding').waitFor();
  const call=(channel,request={})=>page.evaluate(({channel,request})=>window.desktop.invoke(channel,request),{channel,request});
  await call('settings:set',{...await call('settings:get'),language,onboardingCompleted:true,monthlyBudgetUsd:20});await page.reload({waitUntil:'domcontentloaded'});await page.locator('.home-upload').waitFor();const sample=await call('documents:importSample',{language});await poll(()=>page.evaluate(async id=>(await window.desktop.invoke('documents:list',{})).find(d=>d.id===id)?.status==='ready',sample.id));
  db=new DatabaseSync(join(dir,'vstudy.sqlite'));db.exec('PRAGMA busy_timeout=5000');const now=new Date().toISOString(),folders=[];
@@ -47,7 +47,7 @@ for(const language of ['en','ja','zh-Hant']) {
  await page.getByRole('combobox',{name:common.model,exact:true}).click();await page.locator('[data-slot=model-selector-content]').waitFor();await capture('picker',width,theme);if(width===1200)await audit('picker-'+theme);await page.keyboard.press('Escape');
  await page.getByRole('button',{name:common.open_settings,exact:true}).click();await page.getByRole('dialog').waitFor();await capture('settings',width,theme);if(width===1200)await audit('settings-'+theme);await page.keyboard.press('Escape');
  }
- await call('settings:set',{...await call('settings:get'),onboardingCompleted:false});await go('home');await page.locator('.onboarding[data-state=open]').waitFor();
+ await call('settings:set',{...await call('settings:get'),onboardingCompleted:false});await go('home');await page.locator('.onboarding').waitFor();
  for(let step=0;step<4;step++){for(const width of [720,900,1200])for(const theme of ['light','dark']){await page.setViewportSize({width,height:872});await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});await capture('onboarding-'+step,width,theme);if(width===1200)await audit('onboarding-'+step+'-'+theme);}await onboardingForward(page).click();}
  db.exec('DELETE FROM document_tags; DELETE FROM messages; DELETE FROM conversations; DELETE FROM activity_events; DELETE FROM activity_days; DELETE FROM usage_daily; DELETE FROM documents;');
  for(const width of [720,900,1200])for(const theme of ['light','dark']){await page.setViewportSize({width,height:872});await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});await go('home');await capture('home-empty',width,theme);await go('library');await page.locator('.library-empty').waitFor();await capture('library-empty',width,theme);}

@@ -20,7 +20,7 @@ export function transitionTo(apply: () => void, morph = false, immediate = false
         { opacity:1, transform:'none' },
       ], {
         duration:parseFloat(style.getPropertyValue('--motion-base')) || 0,
-        easing:style.getPropertyValue('--ease-out-soft').trim() || 'ease-out',
+        easing:style.getPropertyValue('--ease-entrance').trim() || 'ease-out',
       });
     }
     return;

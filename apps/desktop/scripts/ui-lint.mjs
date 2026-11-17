@@ -33,8 +33,8 @@ export function inspect(source, css = true) {
     'border-radius|borderRadius|border-(?:start|end)-(?:start|end)-radius|border-(?:top|bottom)-(?:left|right)-radius|border(?:Top|Bottom)(?:Left|Right)Radius',
     (value) => {
       const lengths = value
-        .replace(/calc\([^)]*var\(--r-[\w-]+\)[^)]*\)/g, '')
-        .replace(/var\(--r-[\w-]+\)/g, '')
+        .replace(/calc\([^)]*var\(--(?:r|radius)-[\w-]+\)[^)]*\)/g, '')
+        .replace(/var\(--(?:r|radius)-[\w-]+\)/g, '')
         .match(/-?(?:\d*\.)?\d+(?:px|rem|em|%|vw|vh|vmin|vmax|cm|mm|in|pt|pc|ex|ch)?/g) ?? [];
       return lengths.every((length) => Number.parseFloat(length) === 0);
     },

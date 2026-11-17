@@ -23,9 +23,9 @@ export async function verifyAgentPairing(page, pairing, accountIds) {
   assert.equal(await dialog.getByRole('button', { name: 'Pair with selected access', exact: true }).isDisabled(), true);
   const checks = await dialog.getByRole('checkbox').all();
   for (const check of checks) {
-    const label = await check.evaluate(node => node.closest('label')?.textContent ?? '');
+    const label = await check.evaluate(node => node.closest('.agents-choice')?.textContent ?? '');
     if (label.includes('read:grades') || label.includes('write:') || accountIds.some(id => label.includes(id))) {
-      assert.equal(await check.getAttribute('aria-checked'), 'false');
+      assert.equal(await check.isChecked(), false);
     }
   }
   assert.match(await dialog.textContent(), /self-reported/);

@@ -63,7 +63,7 @@ try {
   const reader = page.getByTestId('document-markdown');
   await reader.waitFor();
   const sidebarToggle = page.getByRole('button', { name: 'Toggle document library', exact: true });
-  if (await page.locator('.shell-sidebar').isVisible()) await sidebarToggle.click();
+  if ((await page.locator('.app-shell').getAttribute('data-sidebar'))==='expanded') await sidebarToggle.click();
   await reader.evaluate((element, text) => {
     const walker = window.document.createTreeWalker(element, window.NodeFilter.SHOW_TEXT);
     let node;
@@ -95,7 +95,7 @@ try {
     await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: scheme });
     await page.reload();
     await page.locator('[data-role=assistant]').filter({ hasText: 'Close the notes.' }).waitFor();
-    if (await page.locator('.shell-sidebar').isVisible()) await sidebarToggle.click();
+    if ((await page.locator('.app-shell').getAttribute('data-sidebar'))==='expanded') await sidebarToggle.click();
     await page.waitForFunction(scheme => window.document.documentElement.dataset.scheme === scheme, scheme);
     await page.evaluate(() => window.document.fonts.ready);
     await page.addStyleTag({ content: '.message-usage, .composer-usage, .aui-thread-scroll-to-bottom { visibility: hidden !important; }' });

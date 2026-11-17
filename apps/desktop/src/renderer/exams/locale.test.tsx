@@ -46,5 +46,5 @@ it.each(languages)('formats the results percentages with the app language (%s)',
   explanations={{}} gradedEarlier={false} onDraft={vi.fn()} onMove={vi.fn()} onSubmit={vi.fn()} onResults={vi.fn()} onExplain={vi.fn()} onRetry={vi.fn()} onReport={vi.fn()} />);
  const percent = new Intl.NumberFormat(lang, { style: 'percent' }).format(2 / 3);
  expect(document.querySelector('[data-slot="stat"]')!.textContent).toContain(percent);
- expect(screen.getByRole('progressbar', { name: 'exams:mcq' }).parentElement!.textContent).toContain(percent);
+ expect(screen.getByRole('progressbar', { name: 'exams:mcq' }).closest('.flex-wrap')!.textContent).toContain(percent);
 });

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import {
   cleanup,
   fireEvent,
@@ -16,6 +16,10 @@ vi.mock("../../shared/i18n", () => ({ tr: (key: string) => key }));
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ i18n: { language: "en" } }),
 }));
+beforeEach(() => {
+  HTMLDialogElement.prototype.showModal ??= function() { this.open = true; };
+  HTMLDialogElement.prototype.close ??= function() { this.open = false; };
+});
 afterEach(() => {
   cleanup();
   vi.resetAllMocks();
@@ -121,9 +125,9 @@ it("requires a document and sends per-type counts, custom prompt and language", 
   fireEvent.change(screen.getByLabelText("exams:calculation"), {
     target: { value: "4" },
   });
-  fireEvent.change(screen.getByLabelText("exams:language"), {
-    target: { value: "ja" },
-  });
+  fireEvent.blur(screen.getByLabelText("exams:calculation"));
+  fireEvent.click(screen.getByRole("combobox", { name: "exams:language" }));
+  fireEvent.click(await screen.findByRole("option", { name: "日本語" }));
   fireEvent.click(generate);
   await waitFor(() =>
     expect(invoke).toHaveBeenCalledWith(

@@ -23,7 +23,7 @@
   "month_tokens": "Tokens · {{cost}} estimated",
   "sparkline": "Daily tokens over the last 14 days",
   "budget": "Monthly budget used: {{percent}}%",
-  "view_usage": "View Usage",
+  "view_usage": "View usage",
   "pinned_folders": "Pinned folders",
   "pinned_documents": "Pinned documents",
   "no_pinned_folders": "Keep a topic close: pin a folder in your Library.",

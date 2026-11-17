@@ -7,7 +7,11 @@ import ja from '../../shared/locales/ja/review.json';
 import { MemorySettings } from './memory-settings';
 const invoke = vi.fn();
 vi.mock('../bridge', () => ({ desktop: { invoke: (...args: unknown[]) => invoke(...args) } }));
-beforeEach(async () => { await i18n.changeLanguage('en'); });
+beforeEach(async () => {
+  HTMLDialogElement.prototype.showModal ??= function() { this.open = true; };
+  HTMLDialogElement.prototype.close ??= function() { this.open = false; };
+  await i18n.changeLanguage('en');
+});
 afterEach(() => { cleanup(); vi.resetAllMocks(); });
 it('shows memory as off until the student agrees, then saves the switch and requires confirmation before erasing', async () => {
   let prefs = { memoryEnabled: true, noticeAcknowledged: false, consentAcknowledged: false, timeZone: 'UTC' };
@@ -15,10 +19,10 @@ it('shows memory as off until the student agrees, then saves the switch and requ
   render(<MemorySettings />);
   const toggle = await screen.findByRole('switch', { name: en.memory_enabled }) as HTMLInputElement;
   expect(screen.getByText(en.memory_disclosure)).toBeTruthy();
-  expect(toggle.getAttribute('aria-checked')).toBe('false');
+  expect(toggle.checked).toBe(false);
   fireEvent.click(toggle);
   await waitFor(() => expect(invoke).toHaveBeenCalledWith('review:prefs:set', { memoryEnabled: true, consentAcknowledged: true }));
-  await waitFor(() => expect(toggle.getAttribute('aria-checked')).toBe('true'));
+  await waitFor(() => expect(toggle.checked).toBe(true));
   fireEvent.click(toggle);
   await waitFor(() => expect(invoke).toHaveBeenCalledWith('review:prefs:set', { memoryEnabled: false }));
   fireEvent.click(screen.getByRole('button', { name: en.erase_memory }));
@@ -31,7 +35,7 @@ it('describes the automatic provider request in the interface language', async (
   invoke.mockResolvedValue({ memoryEnabled: true, noticeAcknowledged: true, consentAcknowledged: true, timeZone: 'UTC' });
   render(<MemorySettings />);
   expect(await screen.findByText(ja.memory_disclosure)).toBeTruthy();
-  expect(screen.getByRole('switch').getAttribute('aria-checked')).toBe('true');
+  expect((screen.getByRole('switch') as HTMLInputElement).checked).toBe(true);
 });
 it('offers retry when preferences cannot be read', async () => {
   invoke.mockRejectedValueOnce(new Error('offline'));

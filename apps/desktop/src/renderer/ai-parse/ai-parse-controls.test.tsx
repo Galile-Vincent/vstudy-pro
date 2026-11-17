@@ -36,7 +36,7 @@ it('discovers a cold catalog, selects another model, and starts without cap or o
   const picker=document.querySelector<HTMLButtonElement>('.ai-parse-popover [aria-label=Model]');
   if(!picker)throw new Error('Missing model picker');
   await act(async()=>picker.click());
-  const second=Array.from(document.querySelectorAll<HTMLElement>('[data-slot=model-selector-item]')).find(item=>item.textContent?.includes('Second model'));
+  const second=Array.from(document.querySelectorAll<HTMLElement>('[role=option]')).find(item=>item.textContent?.includes('Second model'));
   if(!second)throw new Error('Missing second model');
   await act(async()=>second.click());
   expect(document.querySelector('.ai-parse-popover [data-slot=model-selector-value]')?.textContent).toContain('Second model');
@@ -63,7 +63,7 @@ it('shows an actionable publication failure and hides unusable AI version action
  const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
  try {
   await act(async()=>root.render(<AiParseControls document={doc} providers={[]} pageCount={1} initiallyOpen onProvidersChanged={async()=>{}} onReload={async()=>{}} onSettings={()=>{}}/>));
-  expect(document.querySelector('[role=alert]')?.textContent).toContain('could not be saved');
+  expect(Array.from(document.querySelectorAll('[role=alert]')).map(node=>node.textContent).join(' ')).toContain('could not be saved');
   expect(Array.from(document.querySelectorAll('button')).some(button=>button.textContent==='Use AI version')).toBe(false);
  } finally {await act(async()=>root.unmount());host.remove();if(previous)Object.defineProperty(window,'desktop',previous);else Reflect.deleteProperty(window,'desktop');}
 });

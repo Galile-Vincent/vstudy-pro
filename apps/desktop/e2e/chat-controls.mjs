@@ -29,9 +29,13 @@ try {
  await input.fill('');
  await page.getByRole('combobox',{name:'Model',exact:true}).click();
  await page.screenshot({path: temporaryPath('vstudy-picker-open.png'), animations:'disabled'});
+ await page.getByRole('combobox',{name:'Search models'}).fill('no-such-model-87193');
+ await page.getByText(/No models found/).waitFor();
+ assert.equal(await page.getByRole('option').count(),0);
  await page.getByRole('combobox',{name:'Search models'}).fill('Fake');
  await page.screenshot({path: temporaryPath('vstudy-picker-search.png'), animations:'disabled'});
- await page.locator('[data-slot=model-selector-list] [role=option]').filter({hasText:'Fake'}).click();
+ await page.getByRole('combobox',{name:'Search models'}).press('ArrowDown');
+ await page.getByRole('combobox',{name:'Search models'}).press('Enter');
  await page.getByRole('combobox',{name:'Effort',exact:true}).click();
  await page.getByRole('option',{name:'High',exact:true}).click();
  assert.match(await page.getByRole('combobox',{name:'Effort',exact:true}).innerText(),/High/);

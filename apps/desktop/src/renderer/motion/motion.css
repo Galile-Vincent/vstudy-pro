@@ -1,18 +1,1 @@
 .motion-sr { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
-.animated-text { display:block; }
-.animated-stack { display:grid; }
-.animated-stack > span { grid-area:1/1; overflow-wrap:anywhere; }
-.motion-reserve { visibility:hidden; }
-.motion-current { animation:quiet-reveal var(--motion-base) var(--ease-out-soft) both; }
-.motion-typewriter { animation:quiet-reveal var(--motion-slow) var(--ease-out-soft) both; }
-@keyframes quiet-reveal { from { opacity:0; transform:translateY(var(--space-1)); } to { opacity:1; transform:none; } }
-.blank-chat { display:grid; place-content:center; gap:var(--space-4); padding:var(--space-8); text-align:center; color:var(--ink); }
-.blank-chat > * { margin:0; animation:quiet-reveal var(--motion-base) var(--ease-out-soft) both; }
-.blank-chat > :nth-child(2) { animation-delay:var(--motion-fast); }
-.blank-chat p { color:var(--muted); }
-@media(prefers-reduced-motion:reduce) { .motion-current,.motion-typewriter,.blank-chat > * { animation:none; } }
-
-.blank-chat > svg { justify-self:center; }
-
-.blank-suggestions { display:flex; flex-wrap:wrap; justify-content:center; gap:var(--space-2); }
-.blank-suggestions button { border-radius:var(--r-sm); padding:var(--space-2) var(--space-3); font-size:var(--type-base); }

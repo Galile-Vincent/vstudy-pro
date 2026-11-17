@@ -11,21 +11,21 @@ it('shows version and last check and routes the automatic switch and manual chec
   render(<UpdateSettings />);
   expect(screen.getByText(/0.4.5/)).toBeTruthy();
   const toggle = screen.getByRole('switch');
-  expect(toggle.getAttribute('aria-checked')).toBe('true');
+  expect((toggle as HTMLInputElement).checked).toBe(true);
   fireEvent.click(toggle);
   expect(state.invoke).toHaveBeenCalledWith('updates:setAuto',{enabled:false});
-  fireEvent.click(screen.getByRole('button'));
+  fireEvent.click(screen.getByRole('button',{name:'Check now'}));
   expect(state.invoke).toHaveBeenCalledWith('updates:check',{});
 });
 it('keeps an empty live region mounted and clears check feedback', async () => {
   vi.useFakeTimers();
   try {
     const view = render(<UpdateSettings />);
-    const live = screen.getByRole('status');
+    const live = screen.getByText('', {selector:'p[role=status]'});
     expect(live.textContent).toBe('');
     Object.assign(state.snapshot, {result:'current'});
     view.rerender(<UpdateSettings />);
-    expect(screen.getByRole('status')).toBe(live);
+    expect(document.querySelector('p[role=status]')).toBe(live);
     expect(live.textContent).not.toBe('');
     await import('@testing-library/react').then(({act}) => act(() => vi.advanceTimersByTimeAsync(5000)));
     expect(live.textContent).toBe('');

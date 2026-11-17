@@ -1,9 +1,9 @@
-/** Confirmation cards disclose complete proposed writes and material-provider access before approval. */
+import { Card, Button } from "@astryxdesign/core";
 import type { MoodleAgentAction, MoodleCourse, MoodleDeadline, MoodleFile } from "../../shared/moodle";
 import type { PlannerSnapshot } from "../../shared/planner";
 import { i18n, tr } from "../../shared/i18n";
 import { displayTitle } from "../../shared/moodle-course-display";
-import { Button, Card, ListRow } from "../components/ui";
+import { ListRow } from "../components/ui";
 export function plannerDate(value: string, timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone) {
   return new Intl.DateTimeFormat(i18n.resolvedLanguage || "en", { timeZone, dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
@@ -21,7 +21,7 @@ export function PlannerProposal({ action, snapshot, courses, deadlines, files = 
   const blocks = action.type === "make-study-plan" || action.type === "plan-today" ? action.blocks : action.type === "schedule-study-block" ? [action.block] : [];
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const Subheading = headingLevel === 2 ? "h3" : "h4";
-  return <Card variant="flat" role="article" className="planner-proposal moodle-proposal p-6" aria-label={tr("planner:confirm")}>
+  return <Card elevation="none" role="article" className="planner-proposal moodle-proposal p-6" aria-label={tr("planner:confirm")}>
     <p className="moodle-eyebrow">{tr(action.type === "create-reminder" || action.type === "export-calendar" ? "moodle:confirm_action" : "planner:confirm")}</p>
     <Heading>{tr(`planner:action_${action.type}`)}</Heading>
     {action.type === "create-task" && <>
@@ -68,8 +68,8 @@ export function PlannerProposal({ action, snapshot, courses, deadlines, files = 
     </>}
     <p className="planner-muted">{tr("planner:approval_notice")}</p>
     <div className="planner-actions">
-      <Button disabled={busy} onClick={onApprove}>{action.type === "create-reminder" || action.type === "export-calendar" ? tr("moodle:approve") : tr(isMaterials ? "planner:approve_materials" : "planner:approve")}</Button>
-      <Button disabled={busy} variant="ghost" onClick={onDismiss}>{tr("moodle:dismiss")}</Button>
+      <Button label={(action.type === "create-reminder" || action.type === "export-calendar" ? tr("moodle:approve") : tr(isMaterials ? "planner:approve_materials" : "planner:approve"))}  isDisabled={busy} onClick={onApprove}>{action.type === "create-reminder" || action.type === "export-calendar" ? tr("moodle:approve") : tr(isMaterials ? "planner:approve_materials" : "planner:approve")}</Button>
+      <Button label={(tr("moodle:dismiss"))}  isDisabled={busy} variant="ghost" onClick={onDismiss}>{tr("moodle:dismiss")}</Button>
     </div>
   </Card>;
 }

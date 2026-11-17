@@ -1,4 +1,5 @@
-/** React owns the toolbar and geometry; main clips the sandboxed native view to the measured content slot. */
+import { IconButton } from "@astryxdesign/core";
+import { Button } from "@astryxdesign/core";
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Copy, ExternalLink, LockKeyhole, Minus, Plus, RefreshCw, ShieldAlert, Square, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +9,7 @@ import type { WebviewAction, WebviewState, WebviewTarget, WebviewTheme } from '.
 import { useOptionalNavigation } from '../shell';
 import { hasNavigationOverlay } from '../shell/history-swipe-navigation';
 import { desktop } from '../bridge';
-import { Button, PageHeader, Toolbar, EmptyState } from '../components/ui';
+import { PageHeader, Toolbar, EmptyState } from "../components/ui";
 import { builtinThemes, type ThemeToken } from '../../shared/themes';
 import './webview.css';
 
@@ -99,7 +100,7 @@ export function MoodleWebviewPane({tabId,accountId,target,onClose,onDocument,onR
   },[state?.id,failed]);
   const error = state?.error ?? (failed ? 'unavailable' : null);
   const busy = !error && (!state || ['connecting','loading'].includes(state.status));
-  const tool = (name:WebviewAction,Icon:typeof X,disabled=false) => <Button variant="ghost" size="icon" title={tr(`webview:${name}`)} aria-label={tr(`webview:${name}`)} disabled={disabled} onClick={() => void action(name)}><Icon /></Button>;
+  const tool = (name:WebviewAction,Icon:typeof X,disabled=false) => <IconButton label={tr(`webview:${name}`)} variant="ghost"  size="md" {...{title:tr(`webview:${name}`)}} aria-label={tr(`webview:${name}`)}  isDisabled={disabled} onClick={() => void action(name)} icon={<Icon />} />;
   const zoom = new Intl.NumberFormat(undefined,{style:'percent',maximumFractionDigits:0}).format(state?.zoom ?? 1);
   return <main ref={pane} data-testid="moodle-webview" className="moodle-webview-pane moodle-tab-page" onKeyDown={event => {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'r') {event.preventDefault();void action('reload');}
@@ -108,7 +109,7 @@ export function MoodleWebviewPane({tabId,accountId,target,onClose,onDocument,onR
       <PageHeader className="moodle-webview-header"
         title={<span id="moodle-webview-title">{state?.title || tr('webview:title')}</span>}
         description={<span id="moodle-webview-description">{tr('webview:session_hint')}</span>}
-        actions={<Button ref={closeButton} variant="ghost" size="icon" aria-label={tr('webview:close')} title={tr('webview:close')} onClick={close}><X /></Button>}
+        actions={<IconButton label={tr('webview:close')} ref={closeButton} variant="ghost"  size="md" aria-label={tr('webview:close')} {...{title:tr('webview:close')}} onClick={close} icon={<X />} />}
       />
       <Toolbar role="navigation" className="moodle-webview-toolbar" aria-label={tr('webview:toolbar')} left={<>
         {tool('back',ArrowLeft,!state?.canGoBack)}{tool('forward',ArrowRight,!state?.canGoForward)}
@@ -120,21 +121,21 @@ export function MoodleWebviewPane({tabId,accountId,target,onClose,onDocument,onR
       </div>
       <div ref={slot} className="moodle-webview-slot" data-testid="moodle-webview-slot">
         {busy && <div className="moodle-webview-message" role="status"><RefreshCw className="moodle-spin" /><p>{tr(state?.status === 'loading' ? 'webview:loading' : 'webview:connecting')}</p></div>}
-        {!busy && !error && target.kind==='file' && state?.importedDocumentId && <div className="moodle-webview-message" role="status"><p>{tr('webview:imported')}</p><Button onClick={()=>callbacks.current.onDocument(state.importedDocumentId!)}>{tr('webview:open_document')}</Button></div>}
+        {!busy && !error && target.kind==='file' && state?.importedDocumentId && <div className="moodle-webview-message" role="status"><p>{tr('webview:imported')}</p><Button label={(tr('webview:open_document'))} onClick={()=>callbacks.current.onDocument(state.importedDocumentId!)}>{tr('webview:open_document')}</Button></div>}
         {error && <EmptyState className="moodle-webview-message" role="alert" headingLevel={2} icon={<ShieldAlert />} title={tr(`webview:error_${error}`)} description={tr(`webview:hint_${error}`)} action={<>
           {state?.retryAt && state.retryAt > Date.now() && <p>{tr('webview:rate_limit',{time:new Date(state.retryAt).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'})})}</p>}
-          {error==='resource-limit' && <Button onClick={()=>setAttempt(value=>value+1)}>{tr('common:retry')}</Button>}
-          {failed && <Button onClick={() => { setAttempt(value => value + 1); }}>{tr('common:retry')}</Button>}
-          {!failed && state && <Button onClick={() => void action(error === 'session-expired' || error === 'unavailable' ? 'reconnect' : 'reload')} disabled={!!state.retryAt && state.retryAt > Date.now()}>{tr(error === 'session-expired' || error === 'unavailable' ? 'webview:reconnect' : 'webview:reload')}</Button>}
-          {['session-expired','unavailable'].includes(error) && <Button variant="outline" onClick={() => callbacks.current.onReconnect()}>{tr('webview:sign_in')}</Button>}
+          {error==='resource-limit' && <Button label={(tr('common:retry'))} onClick={()=>setAttempt(value=>value+1)}>{tr('common:retry')}</Button>}
+          {failed && <Button label={(tr('common:retry'))} onClick={() => { setAttempt(value => value + 1); }}>{tr('common:retry')}</Button>}
+          {!failed && state && <Button label={(tr(error === 'session-expired' || error === 'unavailable' ? 'webview:reconnect' : 'webview:reload'))} onClick={() => void action(error === 'session-expired' || error === 'unavailable' ? 'reconnect' : 'reload')}  isDisabled={!!state.retryAt && state.retryAt > Date.now()}>{tr(error === 'session-expired' || error === 'unavailable' ? 'webview:reconnect' : 'webview:reload')}</Button>}
+          {['session-expired','unavailable'].includes(error) && <Button label={(tr('webview:sign_in'))} variant="secondary" onClick={() => callbacks.current.onReconnect()}>{tr('webview:sign_in')}</Button>}
         </>} />}
       </div>
       <footer><Toolbar className="moodle-webview-footer" left={<><span role="status">{copied ? tr('webview:copied') : tr('webview:footer_hint')}</span>
-        <Button variant="ghost" size="icon" aria-label={tr('webview:zoom-out')} disabled={!state || state.zoom <= .5} onClick={() => void action('zoom-out')}><Minus /></Button>
-        <Button variant="ghost" aria-label={tr('webview:zoom-reset')} onClick={() => void action('zoom-reset')}>{zoom}</Button>
-        <Button variant="ghost" size="icon" aria-label={tr('webview:zoom-in')} disabled={!state || state.zoom >= 2} onClick={() => void action('zoom-in')}><Plus /></Button>
-        <Button variant="ghost" onClick={() => void action('copy')}>{tr('webview:copy')}</Button>
-        <Button variant="ghost" aria-label={tr('webview:focus')} onClick={() => void action('focus')} disabled={!state || state.status !== 'ready'}>{tr('webview:focus')}</Button>
+        <IconButton label={tr('webview:zoom-out')} variant="ghost"  size="md" aria-label={tr('webview:zoom-out')}  isDisabled={!state || state.zoom <= .5} onClick={() => void action('zoom-out')} icon={<Minus />} />
+        <Button label={tr('webview:zoom-reset')} variant="ghost" aria-label={tr('webview:zoom-reset')} onClick={() => void action('zoom-reset')}>{zoom}</Button>
+        <IconButton label={tr('webview:zoom-in')} variant="ghost"  size="md" aria-label={tr('webview:zoom-in')}  isDisabled={!state || state.zoom >= 2} onClick={() => void action('zoom-in')} icon={<Plus />} />
+        <Button label={(tr('webview:copy'))} variant="ghost" onClick={() => void action('copy')}>{tr('webview:copy')}</Button>
+        <Button label={tr('webview:focus')} variant="ghost" aria-label={tr('webview:focus')} onClick={() => void action('focus')}  isDisabled={!state || state.status !== 'ready'}>{tr('webview:focus')}</Button>
       </>} /></footer>
     </main>;
 }
