@@ -127,6 +127,7 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
                 className="course-counts flex items-center gap-3 pe-2"
               >
                 <span
+                  id={`${prefix}-overdue`}
                   role={attention.overdue ? "img" : undefined}
                   aria-label={attention.overdue ? tr("moodle:course_overdue", {count: attention.overdue}) : undefined}
                   className="course-count course-overdue shrink-0 inline-flex items-center gap-1 text-[var(--danger)]"
@@ -147,6 +148,7 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
                   )}
                 </span>
                 <span
+                  id={`${prefix}-unread`}
                   role={attention.unread ? "img" : undefined}
                   aria-label={attention.unread ? tr("moodle:course_unread", {count: attention.unread}) : undefined}
                   className="course-count course-unread-count shrink-0 inline-flex items-center gap-1 text-[var(--muted)]"
@@ -199,16 +201,6 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
               >
                 <Pin aria-hidden="true" fill={pinned ? "currentColor" : "none"} />
               </button>
-              {attention.overdue > 0 && (
-                <span id={`${prefix}-overdue`} className="sr-only">
-                  {tr("moodle:course_overdue", { count: attention.overdue })}
-                </span>
-              )}
-              {attention.unread > 0 && (
-                <span id={`${prefix}-unread`} className="sr-only">
-                  {tr("moodle:course_unread", { count: attention.unread })}
-                </span>
-              )}
               <span id={`${prefix}-raw`} className="sr-only">
                 {course.fullName}
                 {course.identity.lifecycle === "unknown" &&

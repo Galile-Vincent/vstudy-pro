@@ -101,7 +101,7 @@ describe("Courses", () => {
       "Electronics Laboratory",
     );
     expect(host.querySelector(".moodle-course-card progress")).toBeNull();
-    expect(host.querySelector('.moodle-course-card [id$="-unread"]')?.textContent).toBe('2 unread');
+    expect(host.querySelector('.moodle-course-card [id$="-unread"]')?.getAttribute('aria-label')).toBe('2 unread');
     expect(host.textContent).toContain('Amplifier lab report');
     expect(host.textContent).not.toContain('No deadlines this week');
   });
@@ -812,7 +812,7 @@ it('keeps empty count slots, caps the visible number, and orders the accessible 
   expect(host.querySelector('.course-pin')?.classList.contains('size-[calc(var(--space-3)*3)]')).toBe(true);
   expect(host.querySelector('.course-heading-row')).toBeNull();
   const button = host.querySelector<HTMLButtonElement>('.course-open')!;
-  const labels = button.getAttribute('aria-labelledby')!.split(' ').map(id=>document.getElementById(id)!.textContent);
+  const labels = button.getAttribute('aria-labelledby')!.split(' ').map(id=>{const node=document.getElementById(id)!;return node.getAttribute('aria-label') ?? node.textContent;});
   expect(labels[0]).toBe(displayTitle(course.identity,'en',course.fullName));
   expect(labels[1]).toBe(course.identity.teachers[0]!.en);
   expect(labels.at(-2)).toBe('120 unread');
@@ -1548,6 +1548,7 @@ it('groups deadlines by course within an explicit overdue section', async () => 
   const panel = host.querySelector('.course-due-summary')!;
   const overdue = panel.querySelector('h3')!;
   expect(overdue.textContent).toBe('Overdue');
+  expect([...panel.querySelectorAll('.course-due-group')].map(node=>node.textContent)).toEqual(['Overdue', 'The next 7 days']);
   expect(overdue.getAttribute('data-overdue')).toBe('true');
   expect(overdue.querySelector('svg')).toBeTruthy();
   const groups = panel.querySelectorAll('.course-due-course');
@@ -1560,6 +1561,7 @@ it('groups deadlines by course within an explicit overdue section', async () => 
 });
 
 it('keeps revealable row actions focusable and names attention badges', async () => {
+  navigationMock.value = {openTab:vi.fn()};
   await mount(createMockMoodleApi());
   const row = host.querySelector('[data-course-id]')!;
   const pin = row.querySelector<HTMLButtonElement>('.course-pin')!;
@@ -1567,10 +1569,46 @@ it('keeps revealable row actions focusable and names attention badges', async ()
   expect(pin.hidden).toBe(false);
   expect(pin.getAttribute('aria-hidden')).toBeNull();
   expect(pin.tabIndex).toBe(0);
-  for (const badge of row.querySelectorAll<HTMLElement>('.course-count[data-count]:not([data-count="0"])')) {
+  const open = getByRole(row as HTMLElement, 'button', {name:/Open .+ in new tab/});
+  expect(open.classList.contains('course-row-action')).toBe(true);
+  expect(open.tabIndex).toBe(0);
+  expect(open.hidden).toBe(false);
+  expect(open.getAttribute('aria-hidden')).toBeNull();
+  const badges = row.querySelectorAll<HTMLElement>('.course-count[data-count]:not([data-count="0"])');
+  expect(badges.length).toBeGreaterThan(0);
+  const labelledBy = row.querySelector('.course-open')!.getAttribute('aria-labelledby')!.split(' ');
+  for (const badge of badges) {
+    expect(labelledBy).toContain(badge.id);
+    expect(host.querySelectorAll(`[id="${badge.id}"]`)).toHaveLength(1);
+    expect(badge.classList.contains('sr-only')).toBe(false);
     expect(badge.getAttribute('role')).toBe('img');
     expect(badge.getAttribute('aria-label')).toMatch(/\d+ (overdue|unread)/);
     expect(badge.title).toBeTruthy();
     expect(badge.closest('[aria-hidden=true]')).toBeNull();
   }
+});
+
+
+it('keeps each school recovery notice below its own identity line', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const account = overview.accounts[0]!;
+  api.overview = async () => ({...overview, accounts:[
+    {...account, status:'expired'},
+    {...account, id:'00000000-0000-4000-a000-000000000999', siteName:'Second school', signInStorage:'unsaved'},
+  ]});
+  await mount(api);
+  const schools = host.querySelectorAll('.course-account');
+  expect(schools).toHaveLength(2);
+  for (const [index, action] of ['Reconnect', 'Retry secure storage'].entries()) {
+    const school = schools[index]!;
+    const line = school.querySelector('.course-account-line')!;
+    const notice = school.querySelector('.course-account-notice')!;
+    expect(notice.parentElement).toBe(school);
+    expect(line.contains(notice)).toBe(false);
+    expect(line.nextElementSibling).toBe(notice);
+    expect(getByRole(notice as HTMLElement, 'button', {name:action})).toBeTruthy();
+  }
+  expect(schools[0]!.querySelector('[role=alert]')?.textContent).toContain('Your school session has expired.');
+  expect(schools[1]!.querySelector('.course-account-notice[role=status]')?.textContent).toContain('Could not save your sign-in securely.');
 });

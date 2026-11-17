@@ -595,7 +595,8 @@ function CoursesBody({
               <IconButton icon={<RefreshCw className={syncing ? "moodle-spin" : ""} />} {...{title:tr(courseId ? "moodle:refresh_this_course" : "moodle:refresh_all_schools")}} label={(tr(courseId ? "moodle:refresh_this_course" : "moodle:refresh_all_schools"))} variant="ghost"  isDisabled={syncing} onClick={() => void sync()} />
             </div>
             <div className="course-account-list">{overview.accounts.map((account) => (
-              <div key={account.id} className="course-account flex flex-wrap items-center gap-2">
+              <div key={account.id} className={courseId ? "course-account flex flex-wrap items-center gap-2" : "course-account"}>
+                <div className={courseId ? "contents" : "course-account-line"}>
                 <span className="course-account-identity" title={`${account.displayName} · ${account.siteName} · ${new URL(account.siteUrl).host}`}>
                   <strong>{account.displayName}</strong>
                   <span>{account.siteName} · {new URL(account.siteUrl).host}</span>
@@ -614,15 +615,16 @@ function CoursesBody({
                     disconnectSchool.current = account.siteName;
                     setConfirmDisconnect(account.id);
                   }} icon={<Unplug />} />
-                {account.signInStorage && <div role="status">
+                </div>
+                {account.signInStorage && <div className="course-account-notice" role="status">
                   <p>{tr(account.signInStorage === 'unsaved' ? 'moodle:keychain_unsaved' : 'moodle:keychain_session')}</p>
                   <Button label={(tr('moodle:keychain_retry'))} onClick={async () => {
                     try {await api.retrySave(account.id);await refresh();} catch {failure();}
                   }}>{tr('moodle:keychain_retry')}</Button>
                 </div>}
                 {account.status === "expired" && (
-                  <div className="moodle-expired" role="alert">
-                    {tr("moodle:expired")}
+                  <div className="moodle-expired course-account-notice" role="alert">
+                    {courseId ? tr("moodle:expired") : <p>{tr("moodle:expired")}</p>}
                     <Button label={(tr("moodle:reconnect"))} ref={connectTrigger} variant="secondary" onClick={() => setConnect(true)}>
                       {tr("moodle:reconnect")}
                     </Button>
@@ -843,7 +845,7 @@ function CoursesBody({
             <section key={group} className="flex flex-col">
               <h3 className="course-due-group" data-overdue={group === 0}>
                 {group === 0 && <AlarmClock aria-hidden="true" />}
-                {tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:this_week" : "moodle:no_due_date")}
+                {tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:next_seven_days" : "moodle:no_due_date")}
               </h3>
               {[...groupDeadlinesByCourse(items.slice(0, allDue ? undefined : 5))].map(([courseId, deadlines]) => {
                 const course = overview.courses.find(c => c.id === courseId);

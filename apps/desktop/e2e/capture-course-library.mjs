@@ -85,6 +85,7 @@ try {
           const actions = node.querySelector('.course-accounts-actions').getBoundingClientRect();
           return {identity, actions};
         });
+        assert.ok(await page.locator('.course-account').first().evaluate(node => node.getBoundingClientRect().height < 80), 'school strip is compact');
         assert.ok(Math.abs(strip.identity.y - strip.actions.y) < strip.actions.height, 'account strip stays on one line');
         const quiet = page.locator('.course-row-action').first();
         assert.equal(await quiet.evaluate(node => getComputedStyle(node).opacity), '0', 'quiet actions are visually hidden');
@@ -92,6 +93,7 @@ try {
       }
       await capture(`${scheme}-${width}-populated`);
       if (phase === 'after') {
+        assert.equal(await page.locator('.moodle-due-link').first().evaluate(node => getComputedStyle(node).minHeight), '0px', 'deadline titles use their text height');
         await page.locator('.course-due-summary').evaluate(node => node.scrollIntoView({block:'start'}));
         await capture(`${scheme}-${width}-due-soon`);
         await page.locator('.course-accounts').scrollIntoViewIfNeeded();
@@ -178,6 +180,42 @@ try {
     await navigate('light', language);
     await capture(`${language}-720`);
   }
+  for (const width of [1440,960,720]) for (const scheme of ['light','dark']) {
+    await app.evaluate(({BrowserWindow}, width) => BrowserWindow.getAllWindows()[0].setContentSize(width, width === 1440 ? 900 : 700), width);
+    for (const state of ['expired-school','keychain-unsaved-school','two-schools']) {
+      await app.evaluate(({ipcMain}, state) => {
+        ipcMain.removeHandler('moodle:overview');
+        ipcMain.handle('moodle:overview', () => {
+          const overview = globalThis.__coursesDesignOverview();
+          const account = overview.accounts[0];
+          const expired = {...account, status:'expired'};
+          const unsaved = {...account, signInStorage:'unsaved'};
+          return {...overview, accounts:state === 'expired-school' ? [expired] : state === 'keychain-unsaved-school' ? [unsaved] : [expired, {...unsaved, id:'dc000000-0000-4000-a000-000000000999', siteName:'Second Example University'}]};
+        });
+      }, state);
+      await navigate(scheme);
+      await page.mouse.move(0, 0);
+      if (phase === 'after') {
+        for (const notice of await page.locator('.course-account-notice').all()) {
+          const geometry = await notice.evaluate(node => {
+            const line = node.parentElement.querySelector('.course-account-line').getBoundingClientRect();
+            const box = node.getBoundingClientRect();
+            const button = node.querySelector('button').getBoundingClientRect();
+            return {below:box.top >= line.bottom, fits:node.scrollWidth <= node.clientWidth, buttonVisible:button.left >= box.left && button.right <= box.right + 1};
+          });
+          assert.deepEqual(geometry, {below:true, fits:true, buttonVisible:true}, `${state} recovery row`);
+          await notice.locator('button').focus();
+          assert.notEqual(await notice.locator('button').evaluate(node => getComputedStyle(node).outlineStyle), 'none');
+        }
+        assert.equal(await page.locator('.course-account-list').evaluate(node => node.scrollWidth > node.clientWidth), false, 'school list has no hidden horizontal scroll');
+      }
+      await capture(`${scheme}-${width}-${state}`);
+    }
+  }
+  await app.evaluate(({ipcMain}) => {
+    ipcMain.removeHandler('moodle:overview');
+    ipcMain.handle('moodle:overview', globalThis.__coursesDesignOverview);
+  });
   for (const width of [1440,720]) for (const scheme of ['light','dark']) {
     await app.evaluate(({BrowserWindow},width) => BrowserWindow.getAllWindows()[0].setContentSize(width, width === 1440 ? 900 : 700), width);
     await app.evaluate(({ipcMain}) => {
@@ -199,7 +237,7 @@ try {
     await page.getByRole('alert').first().waitFor();
     await capture(`${scheme}-${width}-error`);
   }
-  await writeFile(join(evidence, 'verification.json'), JSON.stringify({passed:true, captures:results.length, checks:['page overflow','row geometry','complete deadlines','action alignment','full Tab and Shift+Tab walk','metadata row click','whole-row focus outline','arrows and Home','refresh','Updates M','axe']}, null, 2));
+  await writeFile(join(evidence, 'verification.json'), JSON.stringify({passed:true, captures:results.length, checks:['school recovery rows and focus','compact school strip','deadline title height','page overflow','row geometry','complete deadlines','action alignment','full Tab and Shift+Tab walk','metadata row click','whole-row focus outline','arrows and Home','refresh','Updates M','axe']}, null, 2));
   console.log(`PASS ${results.length} library captures, no page overflow`);
 } finally {
   await writeFile(join(evidence,'layout-results.json'), JSON.stringify(layouts,null,2));
