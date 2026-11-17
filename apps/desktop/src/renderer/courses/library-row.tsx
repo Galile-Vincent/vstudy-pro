@@ -35,6 +35,7 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
   ];
   const tooltip = [
     course.fullName,
+    attention.next?.title,
     attention.overdue
       ? tr("moodle:course_overdue_tooltip", { count: attention.overdue })
       : "",

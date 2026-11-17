@@ -814,6 +814,7 @@ function CoursesBody({
                 event.preventDefault();
                 const columns = view === 'cards' ? Math.max(1, getComputedStyle(event.currentTarget).gridTemplateColumns.split(' ').length) : 1;
                 const step = event.key === 'ArrowDown' ? columns : event.key === 'ArrowUp' ? -columns : event.key === 'ArrowRight' ? 1 : -1;
+                if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && (index + step < 0 || index + step >= buttons.length)) return;
                 const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : Math.max(0, Math.min(buttons.length - 1, index + step));
                 buttons[next]?.focus();
               }}

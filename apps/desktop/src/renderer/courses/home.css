@@ -46,7 +46,6 @@
 .course-library > main { gap:var(--space-6); }
 .course-library .course-accounts { padding:var(--space-2) var(--space-4); }
 .course-library .course-account { flex-basis:var(--filter-width); }
-.course-library .courses-list-layout { grid-template-columns:minmax(0,1fr) 320px; gap:var(--space-6); }
 .course-library .moodle-term-tabs > :first-child { margin:0; padding-block:var(--space-2) var(--space-4); row-gap:var(--space-2); }
 .course-library .moodle-term-tabs [role=tablist] { min-width:0; max-width:100%; overflow-x:auto; }
 .course-library .moodle-term-tabs [role=tab] { flex:none; white-space:nowrap; }
@@ -66,8 +65,10 @@
 .course-library .course-count { display:grid; grid-template-columns:1rem 3ch; width:calc(1rem + 3ch + var(--space-1)); gap:var(--space-1); font-size:var(--type-base); }
 .course-library .course-pin { position:relative; z-index:1; width:var(--control-height); height:var(--control-height); color:var(--muted); }
 .course-library .course-pin[aria-pressed=true] { color:var(--ink); }
-.course-library [data-course-id]:hover .course-library-row { background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
-.course-library [data-course-id]:focus-within .course-library-row { background:color-mix(in oklab,var(--focus) 8%,var(--surface)); }
+.course-library .moodle-grid[data-view=list] [data-course-id]:hover .course-library-row,
+.course-library .moodle-grid[data-view=cards] [data-course-id]:hover > div { background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
+.course-library .moodle-grid[data-view=list] [data-course-id]:focus-within .course-library-row,
+.course-library .moodle-grid[data-view=cards] [data-course-id]:focus-within > div { background:color-mix(in oklab,var(--focus) 8%,var(--surface)); }
 .course-library [data-course-id] { position:relative; }
 .course-library .course-open::after { content:""; position:absolute; inset:0; border-radius:var(--radius-element); }
 .course-library .moodle-grid [data-course-id] .course-open:focus-visible { outline:none; }
@@ -93,9 +94,6 @@
   .course-library > main { padding:var(--space-5); }
   .course-library .course-accounts-actions { margin-inline-start:0; }
   .course-library .course-account { flex-basis:100%; }
-}
-@media (forced-colors:active), (prefers-contrast:more) {
-  .course-library [data-course-id]:focus-within { outline:var(--focus-ring); }
 }
 .course-library .course-account { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:var(--space-2); }
 .course-library .moodle-grid[data-view=list] .course-open { min-height:0; }

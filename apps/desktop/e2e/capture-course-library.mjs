@@ -181,7 +181,7 @@ try {
     await page.getByRole('alert').first().waitFor();
     await capture(`${scheme}-${width}-error`);
   }
-  await writeFile(join(evidence, 'verification.json'), JSON.stringify({passed:true, captures:results.length, checks:['page overflow','row geometry','complete deadlines','action alignment','full Tab and Shift+Tab walk','metadata row click','whole-row focus outline','arrows and Home','refresh','Updates M','axe'], appPath:resolve(import.meta.dirname, '..')}, null, 2));
+  await writeFile(join(evidence, 'verification.json'), JSON.stringify({passed:true, captures:results.length, checks:['page overflow','row geometry','complete deadlines','action alignment','full Tab and Shift+Tab walk','metadata row click','whole-row focus outline','arrows and Home','refresh','Updates M','axe']}, null, 2));
   console.log(`PASS ${results.length} library captures, no page overflow`);
 } finally {
   await writeFile(join(evidence,'layout-results.json'), JSON.stringify(layouts,null,2));

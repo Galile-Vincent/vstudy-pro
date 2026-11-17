@@ -42,6 +42,7 @@ beforeEach(async () => {
 afterEach(async () => {
   await act(async () => root.unmount());
   host.remove();
+  localStorage.clear();
   vi.useRealTimers();
 });
 async function mount(api: MoodleApi, courseId?: string, onDocument = vi.fn()) {
@@ -853,7 +854,6 @@ it('pins without opening a course, exposes pressed state, and keeps the course b
 });
 
 describe("Courses view switch", () => {
-  afterEach(() => localStorage.clear());
   const list = () => host.querySelector<HTMLElement>(".moodle-grid")!;
   const switchButton = (label: string) => host.querySelector<HTMLButtonElement>(`.course-view-switch button[aria-label="${label}"]`)!;
 
@@ -1464,5 +1464,61 @@ it('moves through cards by rendered columns and supports left and right', async 
     await act(async () => document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', {key,bubbles:true})));
     expect(document.activeElement).toBe(entries[index]);
   }
-  localStorage.clear();
+});
+
+
+it('includes the next assignment name in the stretched course opener tooltip', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const deadline = overview.upcoming[0]!;
+  api.overview = async () => ({...overview, upcoming:[{...deadline, courseId:overview.courses[0]!.id, title:'Synthetic next assignment', dueAt:new Date(Date.now() + 3600000).toISOString(), submitted:false, orphaned:false}]});
+  await mount(api);
+  const opener = host.querySelector<HTMLButtonElement>('.course-open')!;
+  expect(opener.title).toContain('Synthetic next assignment');
+  expect(opener.title).toContain(overview.courses[0]!.fullName);
+});
+
+it.each([2, 5])('keeps vertical card moves in their column with %s courses in three tracks', async count => {
+  localStorage.setItem('vstudy.courses.view', 'cards');
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const course = overview.courses[0]!;
+  api.overview = async () => ({...overview, courses:Array.from({length:count}, (_, index) => ({...course, id:`grid-${index}`, fullName:`Course ${index}`}))});
+  await mount(api);
+  const list = host.querySelector<HTMLElement>('.moodle-grid')!;
+  list.style.gridTemplateColumns = '100px 100px 100px';
+  const entries = [...list.querySelectorAll<HTMLButtonElement>('.course-open')];
+  for (const [index, key, expected] of [
+    [1, 'ArrowUp', 1],
+    [count - 2, 'ArrowDown', count - 2],
+    [count - 1, 'ArrowDown', count - 1],
+    ...(count === 5 ? [[2, 'ArrowDown', 2], [0, 'ArrowDown', 3], [4, 'ArrowUp', 1]] as const : []),
+  ] as const) {
+    await act(async () => entries[index]!.focus());
+    await act(async () => entries[index]!.dispatchEvent(new KeyboardEvent('keydown', {key, bubbles:true})));
+    expect(document.activeElement).toBe(entries[expected]);
+  }
+});
+
+it('shows the empty-term hint only for an empty term with courses elsewhere', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, courses:[overview.courses[0]!]});
+  await mount(api);
+  await tab('Upcoming0');
+  expect(host.textContent).toContain('Try another term to find your courses.');
+  await tab('All1');
+  expect(host.textContent).not.toContain('Try another term to find your courses.');
+});
+
+it('suppresses the empty-term hint with no courses, including on All', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  api.overview = async () => ({...overview, courses:[], upcoming:[]});
+  await mount(api);
+  for (const name of ['Upcoming0', 'All0']) {
+    await tab(name);
+    expect(host.textContent).toContain('No courses in this period.');
+    expect(host.textContent).not.toContain('Try another term to find your courses.');
+  }
 });
