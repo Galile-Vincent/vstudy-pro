@@ -77,15 +77,16 @@ Electron checks use real memory. Run one Electron instance at a time.
 
 A UI change needs real rendered evidence before it moves to Ready for PR. Code review, a passing build, and structural assertions do not prove the UI.
 
-- Capture the real built Electron app. Mockups, static HTML, and hand-edited images do not count.
-- Use synthetic demo data in a disposable profile. `apps/desktop/scripts/marketing-seed.mjs` and `apps/desktop/e2e/fixtures/` hold fixtures. `VSTUDY_FAKE_PROVIDER=1` avoids AI calls.
+- Capture desktop changes from the real built Electron app. Capture website changes from the built website rendered in a browser. Mockups and hand-edited images do not count.
+- Use synthetic demo data in a disposable profile. `apps/desktop/scripts/marketing-seed.mjs` and `apps/desktop/e2e/fixtures/` hold fixtures. Set `VSTUDY_FAKE_PROVIDER=1` and select the `anthropic-api` fake adapter, as the marketing harness does. The flag replaces only that adapter. Leave the other API and CLI providers disabled during capture.
 - Cover light and dark. Cover a wide window (1440 px) and a narrow one (about 720 to 900 px). Cover each changed state, such as empty, loading, error, and selected.
 - Capture before and after for every UI change. Take the "before" from the base commit.
 - Inspect each image for clipping, overflow, wrapping, spacing, alignment, and contrast. Check keyboard focus on changed controls. Say what you checked.
+- The independent reviewer also inspects the rendered before and after evidence for the exact reviewed head, with the same checks, plus changed interactions and keyboard focus. That the screenshots exist is not enough.
 - Run `pnpm --filter @vstudy/desktop contrast:check` and `pnpm --filter @vstudy/desktop ui:check` when you change colors, themes, or styles.
 - Harness examples. `apps/desktop/scripts/marketing-shots.mjs` captures 1440 px views in light and dark. `apps/desktop/e2e/assistant-elements.mjs` and `apps/desktop/e2e/privacy-segmented-control.mjs` resize the window and switch the color scheme. Copy their pattern for a new capture.
 - `marketing-shots.mjs` overwrites tracked files under `docs/evidence/marketing`, `docs/assets/readme`, and `apps/website/src/assets/shots`. Do not commit those changes unless the issue is about marketing images. Use `SHOT_ONLY`, `SHOT_THEMES`, and `SHOT_MODES` to limit a run, then restore unrelated files.
-- Do not commit screenshots or recordings. Follow the evidence policy in CONTRIBUTING.md. Attach the images to the Linear issue. Link them from the PR with the commit and command that produced them.
+- Do not commit generated verification screenshots or recordings. CONTRIBUTING.md still allows optimized, stable README images under `docs/assets/readme/` with their source recorded. Attach the images to the Linear issue. Link them from the PR with the commit and command that produced them.
 
 ## 5. Privacy
 
