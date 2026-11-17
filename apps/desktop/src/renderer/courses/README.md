@@ -1,3 +1,39 @@
+# VC-4 course library
+
+The catalog uses shared Panel, ListRow, Card and toolbar controls. List rows keep
+attention counts and actions in fixed-width slots. Every list row is 64px high,
+with a single-line title above muted teacher and deadline metadata. Teacher names
+ellipsize before deadlines; deadline phrases never truncate. List titles retain
+their full tooltip so long names remain available without changing row density.
+Cards wrap titles and use auto-fill columns
+so a sparse result does not stretch across the whole catalog. The account strip
+and due-soon section adapt independently at narrow window widths.
+
+Arrow Up/Down, Home and End move between course openers. Enter opens a course;
+Tab reaches its separate actions. Sorting updates immediately and serializes
+preference writes. Keyboard reordering and reduced motion skip FLIP animation.
+Updates retains its existing M shortcut for read state.
+
+From the repository root, run `pnpm build`, then
+`COURSES_CAPTURE_PHASE=after node apps/desktop/e2e/capture-course-library.mjs`.
+The capture uses fictional course fixtures, a disposable profile and the fake
+Anthropic adapter. It writes outside the repository to
+`/Users/vc/.t3/evidence/vc-4/after/`. It covers light/dark at 1440, 960, 760 and
+720 pixels, list/cards, hover, focus, pins, empty terms, loading and errors.
+It also checks 64px list rows, complete deadlines, aligned action slots, course
+keyboard navigation, Tab focus on open-tab and pin, refresh, Updates M and axe.
+
+Design reference: [T3 Code](https://github.com/pingdotgg/t3code), commit
+`25fada9351ce9f907ecbe8ca3a819e358646777d`, MIT, copyright T3 Tools Inc.
+Studied Sidebar, SidebarThreadRow and theme tokens for dense rows, tonal states,
+focus and explicit empty states. No source or assets were copied or adapted.
+VStudy retains its shared components, theme packs, identity and course data.
+
+## Historical design notes
+
+The notes below describe earlier iterations; the implementation and capture
+command above supersede their layout and capture descriptions.
+
 # Capture the Courses design
 
 Run this command from `apps/desktop`.

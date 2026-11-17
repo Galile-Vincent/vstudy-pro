@@ -2,9 +2,11 @@ import { useLayoutEffect, useRef, type RefObject } from 'react';
 
 export function useCourseMovement(root: RefObject<HTMLElement | null>, order: string) {
   const previous = useRef(new Map<string, DOMRect>());
+  const keyboard = useRef(false);
   const focused = useRef<HTMLElement | null>(null);
   const prepare = () => {
     previous.current.clear();
+    keyboard.current = document.activeElement?.matches(':focus-visible') ?? false;
     focused.current = document.activeElement instanceof HTMLElement && root.current?.contains(document.activeElement) ? document.activeElement : null;
     root.current?.querySelectorAll<HTMLElement>('[data-course-id]').forEach(row => previous.current.set(row.dataset.courseId!,row.getBoundingClientRect()));
   };
@@ -12,7 +14,7 @@ export function useCourseMovement(root: RefObject<HTMLElement | null>, order: st
     if (focused.current?.isConnected && document.activeElement !== focused.current) focused.current.focus({preventScroll:true});
     focused.current=null;
     if (!previous.current.size) return;
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {previous.current.clear();return;}
+    if (keyboard.current || matchMedia('(prefers-reduced-motion: reduce)').matches) {previous.current.clear();return;}
     root.current?.querySelectorAll<HTMLElement>('[data-course-id]').forEach(row => {
       const before = previous.current.get(row.dataset.courseId!);
       if (!before) return;

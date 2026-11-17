@@ -266,5 +266,6 @@
   "jump_current_week": "跳至本週",
   "open_deadline": "開啟截止事項：{{title}}",
   "open_notification": "開啟通知：{{title}}",
-  "open_original_file": "開啟原始檔案：{{title}}"
+  "open_original_file": "開啟原始檔案：{{title}}",
+  "term_empty_hint": "試試其他學期，查看你的課程。"
 }

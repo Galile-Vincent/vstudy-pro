@@ -41,3 +41,58 @@
     outline-offset: -2px;
   }
 }
+
+.course-library { background:var(--background); }
+.course-library > main { gap:var(--space-6); }
+.course-library .course-accounts { padding:var(--space-2) var(--space-4); }
+.course-library .course-account { flex-basis:var(--filter-width); }
+.course-library .courses-list-layout { grid-template-columns:minmax(0,1fr) minmax(0,var(--filter-width)); gap:var(--space-8); }
+.course-library .moodle-term-tabs > :first-child { margin:0; padding-block:var(--space-2) var(--space-4); row-gap:var(--space-2); }
+.course-library .moodle-term-tabs [role=tablist] { min-width:0; max-width:100%; overflow-x:auto; }
+.course-library .moodle-term-tabs [role=tab] { flex:none; white-space:nowrap; }
+.course-library .course-view-switch { padding:0; height:var(--control-height); }
+.course-library .course-view-switch button { width:var(--control-height); height:var(--control-height); min-height:var(--control-height); transition:none; }
+.course-library .moodle-grid { list-style:none; margin:0; padding:0; display:grid; gap:var(--space-1); }
+.course-library .moodle-grid[data-view=cards] { grid-template-columns:repeat(auto-fill,minmax(min(100%,var(--filter-width)),1fr)); gap:var(--space-3); align-items:start; }
+.course-library .moodle-grid > li + li { border:0; }
+.course-library .moodle-grid[data-view=list] .course-library-row { flex-wrap:nowrap; gap:var(--space-2); padding:var(--space-2) var(--space-3); }
+.course-library .moodle-grid[data-view=list] .ui-row-target { padding:0; min-width:0; min-block-size:0; }
+.course-library .course-open { min-width:0; min-height:var(--control-height); color:var(--ink); font-size:var(--type-md); font-weight:600; line-height:1.5; }
+.course-library .course-title { display:block; overflow-wrap:anywhere; }
+.course-library .course-meta { display:flex; flex-wrap:nowrap; min-width:0; color:var(--muted); font-size:var(--type-base); line-height:1.5; }
+.course-library .course-meta > [id$="-teacher"] { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.course-library .course-meta-separator,.course-library .course-meta time { flex:none; white-space:nowrap; }
+.course-library .course-counts { gap:var(--space-2); padding:0; font-variant-numeric:tabular-nums; }
+.course-library .course-count { display:grid; grid-template-columns:1rem 3ch; width:calc(1rem + 3ch + var(--space-1)); gap:var(--space-1); font-size:var(--type-base); }
+.course-library .course-pin { width:var(--control-height); height:var(--control-height); color:var(--muted); }
+.course-library .course-pin[aria-pressed=true] { color:var(--ink); }
+.course-library [data-course-id]:hover .course-library-row { background:color-mix(in oklab,var(--ink) 4%,var(--surface)); }
+.course-library [data-course-id]:focus-within .course-library-row { background:var(--active); }
+.course-library .course-open:focus-visible { outline:var(--focus-ring); outline-offset:var(--space-1); border-radius:var(--radius-element); }
+.course-library .moodle-grid[data-view=cards] .course-library-row { flex-direction:column; align-items:stretch; gap:var(--space-2); padding:var(--space-4); }
+.course-library .moodle-grid[data-view=cards] .course-library-row > .ui-row-target { padding:0; }
+.course-library .moodle-grid[data-view=cards] .course-library-row > :last-child > div { justify-content:flex-end; }
+.course-library .moodle-grid[data-view=cards] .course-counts { margin-inline-end:auto; }
+.course-library .moodle-grid[data-view=cards] .course-open { min-height:calc(var(--control-height) * 2); }
+.course-library .course-due-meta { font-size:var(--type-base); }
+.course-library-loading { padding:var(--space-4); }
+.course-library-placeholder { height:calc(var(--control-height) * 2); margin-block:var(--space-2); border-radius:var(--radius-element); background:var(--subtle); }
+.course-library [role=alert] { padding:var(--space-4); border-radius:var(--radius-element); background:var(--subtle); }
+@media (max-width:1200px) {
+  .course-library .courses-list-layout { grid-template-columns:minmax(0,1fr); }
+}
+@media (max-width:960px) {
+  .course-library > main { padding:var(--space-5); }
+  .course-library .course-accounts-actions { margin-inline-start:0; }
+  .course-library .course-account { flex-basis:100%; }
+}
+@media (forced-colors:active), (prefers-contrast:more) {
+  .course-library [data-course-id]:focus-within { outline:var(--focus-ring); }
+}
+.course-library .course-account { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:var(--space-2); }
+.course-library .moodle-term-tabs { container:course-catalog / inline-size; }
+.course-library .moodle-grid[data-view=list] > li + li { border:0; }
+.course-library .moodle-grid[data-view=list] .course-open { min-height:0; }
+.course-library .moodle-grid[data-view=list] .course-title { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.course-library .moodle-grid[data-view=list] .course-library-row { height:calc(var(--space-8) * 2); }
+.course-library .course-library-row { box-sizing:border-box; }

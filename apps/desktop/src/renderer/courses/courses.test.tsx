@@ -982,11 +982,11 @@ it("keeps all four filters with zero counts and associated empty panels", async 
   expect(host.querySelector('[data-slot=empty-state]')).not.toBeNull();
 });
 
-it("retains a one-column grid fallback and separate course actions", async () => {
+it("retains course actions in a non-interactive card", async () => {
   await mount(createMockMoodleApi());
   const grid = host.querySelector<HTMLElement>(".moodle-grid[data-view]")!;
   await act(async () => getByRole(host, "button", { name: "Cards" }).click());
-  expect(grid.className).toContain("min(100%,22rem)");
+  expect(grid.dataset.view).toBe("cards");
   const card = grid.querySelector('.astryx-card')!;
   expect(card.getAttribute("data-elevation")).toBe("none");
   expect(card.tagName).toBe("DIV");
@@ -1387,4 +1387,41 @@ it("names external open actions for their deadline notification and file", async
   expect(getByRole(host, "button", {name: `Open notification: ${detail.notifications[0]!.subject}`})).not.toBeNull();
   await tab("Files");
   expect(getByRole(host, "button", {name: `Open original file: ${detail.files[0]!.name}`})).not.toBeNull();
+});
+
+ it('keeps one course entry in the tab order and moves focus with arrows', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const course = overview.courses[0]!;
+  api.overview = async () => ({...overview, courses:[course, {...course, id:'second', fullName:'Second course'}]});
+  await mount(api);
+  const entries = [...host.querySelectorAll<HTMLButtonElement>('.course-open')];
+  expect(entries.filter(button => button.tabIndex === 0)).toHaveLength(1);
+  await act(async () => {
+    entries[0]!.focus();
+    entries[0]!.dispatchEvent(new KeyboardEvent('keydown', {key:'ArrowDown',bubbles:true}));
+  });
+  expect(document.activeElement).toBe(entries[1]);
+  expect(entries[1]!.tabIndex).toBe(0);
+  await act(async () => entries[1]!.dispatchEvent(new KeyboardEvent('keydown', {key:'Home',bubbles:true})));
+  expect(document.activeElement).toBe(entries[0]);
+});
+
+it('shows the latest sort immediately and persists rapid choices in order', async () => {
+  const api = createMockMoodleApi();
+  const finish: (() => void)[] = [];
+  const save = vi.fn(() => new Promise<void>(resolve => finish.push(resolve)));
+  api.setSort = save;
+  await mount(api);
+  const selector = getByRole(host, 'combobox', {name:'Sort courses'});
+  for (const name of ['Name', 'Smart']) {
+    await act(async () => selector.click());
+    await act(async () => getByRole(document.body, 'option', {name}).click());
+    expect(selector.textContent).toContain(name);
+  }
+  expect(save).toHaveBeenCalledTimes(1);
+  await act(async () => finish[0]!());
+  expect(save).toHaveBeenNthCalledWith(1, 'current', 'name');
+  expect(save).toHaveBeenNthCalledWith(2, 'current', 'smart');
+  await act(async () => finish[1]!());
 });
