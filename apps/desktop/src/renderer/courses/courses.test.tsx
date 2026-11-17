@@ -152,7 +152,7 @@ describe("Courses", () => {
     await mount(api);
     expect(host.querySelector(".planner-entry")).not.toBeNull();
     expect(host.querySelector("[data-slot=page-header]")?.textContent).not.toContain("Connect school");
-    expect(host.textContent).toContain("Connect another school");
+    expect(getByRole(host, "button", {name: "Connect another school"})).toBeTruthy();
   });
   it("preserves detail tab selection, arrow navigation, and panel associations", async () => {
     const api = createMockMoodleApi();
@@ -1520,5 +1520,57 @@ it('suppresses the empty-term hint with no courses, including on All', async () 
     await tab(name);
     expect(host.textContent).toContain('No courses in this period.');
     expect(host.textContent).not.toContain('Try another term to find your courses.');
+  }
+});
+
+it('keeps school identity and shared icon actions in a compact strip', async () => {
+  await mount(createMockMoodleApi());
+  const strip = host.querySelector('.course-accounts')!;
+  expect(strip.parentElement?.getAttribute('data-slot')).not.toBe('card');
+  expect(strip.querySelector('.course-account-identity strong')?.textContent).toBeTruthy();
+  for (const name of ['Connect another school', 'Refresh all schools']) {
+    const button = getByRole(strip as HTMLElement, 'button', {name});
+    expect(button.getAttribute('title')).toBe(name);
+  }
+});
+
+it('groups deadlines by course within an explicit overdue section', async () => {
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const course = overview.courses[0]!;
+  const deadline = overview.upcoming[0]!;
+  api.overview = async () => ({...overview, upcoming: [
+    {...deadline, id:'late-one', courseId:course.id, title:'First reflection', submitted:false, dueAt:new Date(Date.now()-7200000).toISOString()},
+    {...deadline, id:'late-two', courseId:course.id, title:'Second reflection', submitted:false, dueAt:new Date(Date.now()-3600000).toISOString()},
+    {...deadline, id:'next-one', courseId:course.id, title:'Next reflection', submitted:false, dueAt:new Date(Date.now()+3600000).toISOString()},
+  ]});
+  await mount(api);
+  const panel = host.querySelector('.course-due-summary')!;
+  const overdue = panel.querySelector('h3')!;
+  expect(overdue.textContent).toBe('Overdue');
+  expect(overdue.getAttribute('data-overdue')).toBe('true');
+  expect(overdue.querySelector('svg')).toBeTruthy();
+  const groups = panel.querySelectorAll('.course-due-course');
+  expect(groups).toHaveLength(2);
+  expect(groups[0]!.querySelectorAll('h4')).toHaveLength(1);
+  expect(groups[0]!.querySelectorAll('.moodle-due-link')).toHaveLength(2);
+  for (const link of panel.querySelectorAll('.moodle-due-link')) {
+    expect(link.getAttribute('title')).toBe(link.textContent);
+  }
+});
+
+it('keeps revealable row actions focusable and names attention badges', async () => {
+  await mount(createMockMoodleApi());
+  const row = host.querySelector('[data-course-id]')!;
+  const pin = row.querySelector<HTMLButtonElement>('.course-pin')!;
+  expect(pin.classList.contains('course-row-action')).toBe(true);
+  expect(pin.hidden).toBe(false);
+  expect(pin.getAttribute('aria-hidden')).toBeNull();
+  expect(pin.tabIndex).toBe(0);
+  for (const badge of row.querySelectorAll<HTMLElement>('.course-count[data-count]:not([data-count="0"])')) {
+    expect(badge.getAttribute('role')).toBe('img');
+    expect(badge.getAttribute('aria-label')).toMatch(/\d+ (overdue|unread)/);
+    expect(badge.title).toBeTruthy();
+    expect(badge.closest('[aria-hidden=true]')).toBeNull();
   }
 });

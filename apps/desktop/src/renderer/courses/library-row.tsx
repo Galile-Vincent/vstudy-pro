@@ -125,9 +125,10 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
             <div className="flex items-center gap-1">
               <div
                 className="course-counts flex items-center gap-3 pe-2"
-                aria-hidden="true"
               >
                 <span
+                  role={attention.overdue ? "img" : undefined}
+                  aria-label={attention.overdue ? tr("moodle:course_overdue", {count: attention.overdue}) : undefined}
                   className="course-count course-overdue shrink-0 inline-flex items-center gap-1 text-[var(--danger)]"
                   data-count={attention.overdue}
                   title={
@@ -140,12 +141,14 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
                 >
                   {attention.overdue > 0 && (
                     <>
-                      <AlarmClock />
+                      <AlarmClock aria-hidden="true" />
                       {attention.overdue > 99 ? "99+" : attention.overdue}
                     </>
                   )}
                 </span>
                 <span
+                  role={attention.unread ? "img" : undefined}
+                  aria-label={attention.unread ? tr("moodle:course_unread", {count: attention.unread}) : undefined}
                   className="course-count course-unread-count shrink-0 inline-flex items-center gap-1 text-[var(--muted)]"
                   data-count={attention.unread}
                   title={
@@ -158,7 +161,7 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
                 >
                   {attention.unread > 0 && (
                     <>
-                      <Mail />
+                      <Mail aria-hidden="true" />
                       {attention.unread > 99 ? "99+" : attention.unread}
                     </>
                   )}
@@ -169,7 +172,7 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
                 onFocus={onFocus}
                 variant="ghost"
                  size="md"
-                className="relative z-1"
+                className="course-row-action relative z-1"
                 aria-label={tr("moodle:open_course_tab", { course: name })}
                 {...{title:tr("moodle:open_course_tab", { course: name })}}
                 onClick={() =>
@@ -181,7 +184,7 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
                 } icon={<ArrowUpRight aria-hidden="true" />} />}
               <button
                 type="button"
-                className="course-pin grid size-[calc(var(--space-3)*3)] shrink-0 place-items-center rounded-[var(--radius-element)] aria-pressed:bg-[var(--active)]"
+                className="course-row-action course-pin grid size-[calc(var(--space-3)*3)] shrink-0 place-items-center rounded-[var(--radius-element)] aria-pressed:bg-[var(--active)]"
                 tabIndex={tabIndex}
                 onFocus={onFocus}
                 aria-pressed={pinned}

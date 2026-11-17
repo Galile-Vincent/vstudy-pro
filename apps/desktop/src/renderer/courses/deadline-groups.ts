@@ -14,3 +14,13 @@ export function catalogDeadlines(items: MoodleDeadline[], now: number) {
     undated: pending.filter(d => !Number.isFinite(Date.parse(d.dueAt))),
   };
 }
+
+export function groupDeadlinesByCourse(items: MoodleDeadline[]) {
+  const courses = new Map<string, MoodleDeadline[]>();
+  for (const item of items) {
+    const group = courses.get(item.courseId);
+    if (group) group.push(item);
+    else courses.set(item.courseId, [item]);
+  }
+  return courses;
+}

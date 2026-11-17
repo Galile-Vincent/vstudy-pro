@@ -1,6 +1,6 @@
 # Course library
 
-The catalog uses shared Panel, ListRow, Card and toolbar controls. List rows keep
+The catalog uses shared ListRow, Card and toolbar controls. List rows keep
 attention counts and actions in fixed-width slots. List rows have a 64px minimum height at comfortable density,
 with a single-line title above muted teacher and deadline metadata. Teacher names
 ellipsize before deadlines; deadline phrases never truncate. List titles retain
@@ -66,13 +66,22 @@ Overdue counts come from deadlines with a past due time that are not marked subm
 
 `displayTitle` removes a known term prefix and a suffix that exactly matches a known teacher, ignoring case and whitespace. A joined term prefix requires that matching teacher suffix. Uncertain names remain intact. The row button retains the raw full name in its tooltip and accessible description. Its accessible name includes the displayed name, teacher, and attention counts.
 
-### Single-line course rows
+### Page surface and attention
 
-The name uses the existing 15px medium token at weight 600. Teacher and a next deadline within seven days follow the name on the same line. Metadata shrinks before the course name. Overdue and Unread have fixed 56px slots with a single muted, right-aligned column header. Zero counts keep the slot empty. Alarm clocks identify overdue deadlines and envelopes identify unread updates; full tooltips describe the counted records. Values over 99 display 99+ while the tooltip and accessible name retain the true count.
+The catalog tabs, controls and rows sit directly on the page, with one hairline
+under the toolbar. Due soon uses an unboxed column with explicit urgency headings.
+Overdue comes first with an alarm icon and label. Within each section, deadlines
+group under a course heading. Titles clamp to two lines and retain their full title
+tooltip. Reminder bells stay beside their item.
 
-The rounded hover surface has 12px horizontal padding and 10px vertical padding. A fixed 20px main line keeps rows at 40px. A catalog container query switches to 52px rows below 600px. Due soon stacks below the catalog under a 1200px window so the normal 1100px window retains the single-line list. A negative list margin keeps text aligned with the page. Adjacent separators hide during hover and keyboard focus, without movement. The inset focus ring uses the existing theme token. Decorative separators and the thin tab underline use `--hairline`, a 10% ink mix that strengthens automatically in high contrast and forced colors. Control borders retain their control tokens.
+The account strip keeps identity and shared icon actions on one line. School names
+ellipsize and multiple schools scroll within the strip. Each school retains its own
+disconnect and recovery actions. Sync time hides at narrow widths.
 
-`vstudy` is the default theme. Its light background is #ffffff and ink is #0a0a0a. Stored `themeId` preferences select another pack, including Ocean (#eef7f9 background, #173b4a ink). Captures explicitly select VStudy, solid material, and 100% contrast. They never read the user's normal profile.
+Open and pin actions reveal on hover or focus within the row. Pinned rows and
+devices without hover always show them. Opacity preserves the accessibility tree
+and the existing roving tab order. Attention badges expose named image roles and
+native tooltips.
 
 ### Pins and Smart order
 
@@ -84,4 +93,4 @@ The pin button sits after the number columns in a reserved slot. It appears on r
 
 Ordering uses a snapshot taken when the page opens, sync completes, a pin changes, or the student changes the term or sort. Read-state updates change counts without reshuffling rows. FLIP uses a 180ms ease-out transform, preserves the focused element, and is disabled under reduced motion. The capture waits for the shell's navigation-focus frame before starting keyboard tests.
 
-Only the list ships. There is one course-row markup and one `data-view="list"` list, ready for a future presentation change without a second course implementation. No view switch or Cards view is built.
+List and card views share one course-row implementation and preserve the saved view preference.

@@ -2,9 +2,9 @@ import { Panel } from "../components/panel";
 import { useId } from "react";
 import { Table, Badge, IconButton } from "@astryxdesign/core";
 import { Layout, LayoutContent, Divider, TabList, Tab } from "@astryxdesign/core";
-import { Dialog, DialogHeader, LayoutFooter, Card, Button } from "@astryxdesign/core";
+import { Dialog, DialogHeader, LayoutFooter, Button } from "@astryxdesign/core";
 import { flushSync } from 'react-dom';
-import { catalogDeadlines } from './deadline-groups';
+import { catalogDeadlines, groupDeadlinesByCourse } from './deadline-groups';
 import { performDocumentAction, type DocumentAction } from '../document-open';
 import { documentIdSchema } from '../../shared/domain';
 import { PageContainer, PageHeader,  ListRow, Toolbar, EmptyState } from "../components/ui";
@@ -18,6 +18,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  AlarmClock,
   ArrowLeft,
   ArrowUpRight,
   CalendarDays,
@@ -588,20 +589,17 @@ function CoursesBody({
           </div>
         )}
         {!!overview?.accounts.length && !showUpdates && (!courseId || overview.accounts.some(account => account.status === "expired" || account.signInStorage)) && (
-          <Card padding={0}><div className="course-accounts">
+          <div className="course-accounts">
             <div className="course-accounts-actions">
-              <Button icon={<GraduationCap />} label={(tr("moodle:connect_another_school"))} variant="ghost" onClick={() => setConnect(true)}>
-                {tr("moodle:connect_another_school")}
-              </Button>
-              <Button icon={<RefreshCw className={syncing ? "moodle-spin" : ""} />} label={(tr(courseId ? "moodle:refresh_this_course" : "moodle:refresh_all_schools"))} variant="ghost"  isDisabled={syncing} onClick={() => void sync()}>
-
-                {tr(courseId ? "moodle:refresh_this_course" : "moodle:refresh_all_schools")}
-              </Button>
+              <IconButton icon={<GraduationCap />} {...{title:tr("moodle:connect_another_school")}} label={(tr("moodle:connect_another_school"))} variant="ghost" onClick={() => setConnect(true)} />
+              <IconButton icon={<RefreshCw className={syncing ? "moodle-spin" : ""} />} {...{title:tr(courseId ? "moodle:refresh_this_course" : "moodle:refresh_all_schools")}} label={(tr(courseId ? "moodle:refresh_this_course" : "moodle:refresh_all_schools"))} variant="ghost"  isDisabled={syncing} onClick={() => void sync()} />
             </div>
-            {overview.accounts.map((account) => (
+            <div className="course-account-list">{overview.accounts.map((account) => (
               <div key={account.id} className="course-account flex flex-wrap items-center gap-2">
-                <ListRow className="min-w-0 flex-[1_1_100%] min-[1200px]:flex-[1_1_12rem] [&_.ui-row-target]:break-words" title={account.displayName}
-                  subtitle={`${account.siteName} · ${new URL(account.siteUrl).host}`} />
+                <span className="course-account-identity" title={`${account.displayName} · ${account.siteName} · ${new URL(account.siteUrl).host}`}>
+                  <strong>{account.displayName}</strong>
+                  <span>{account.siteName} · {new URL(account.siteUrl).host}</span>
+                </span>
                 <small>
                   {account.syncedAt
                     ? tr("moodle:synced", { time: relative(account.syncedAt) })
@@ -631,8 +629,8 @@ function CoursesBody({
                   </div>
                 )}
               </div>
-            ))}
-          </div></Card>
+            ))}</div>
+          </div>
         )}
         {progress?.state === 'loading' && <p role="status">{tr('moodle:sync_progress',{completed:progress.completed,total:progress.total})}</p>}
         {showUpdates && overview ? <UpdatesInbox
@@ -778,7 +776,8 @@ function CoursesBody({
           )
         ) : overview && (overview.courses.length > 0 || overview.accounts.some(account => account.syncedAt)) ? (
           <div className="courses-list-layout">
-    <Panel title={<>{tr("moodle:your_courses")} <Badge label={String(overview.courses.length)} /></>}>
+    <section className="course-catalog ui-group" aria-labelledby="course-catalog-heading">
+      <div className="ui-panel-heading"><h2 id="course-catalog-heading">{tr("moodle:your_courses")} <Badge label={String(overview.courses.length)} /></h2></div>
       <div className="moodle-term-tabs"><Toolbar
           left={
             <TabList role="tablist" value={selectedTerm} onChange={(value) => {
@@ -835,22 +834,29 @@ function CoursesBody({
                 })}
             </ul></>}</section>
         ))}</div>
-    </Panel>
-    <Panel title={<>{tr("moodle:due_soon")} <Badge label={String(overdue.length + dueSoon.length + undated.length)} /></>}>
+    </section>
+    <section className="course-due-summary ui-group" aria-labelledby="course-due-heading">
+      <div className="ui-panel-heading"><h2 id="course-due-heading">{tr("moodle:due_soon")} <Badge label={String(overdue.length + dueSoon.length + undated.length)} /></h2></div>
       {([overdue, dueSoon, undated] as const).map(
         (items, group) =>
           items.length > 0 && (
             <section key={group} className="flex flex-col">
-              {group !== 1 && <h3 className="course-due-group">{tr(group === 0 ? "moodle:overdue_column" : "moodle:no_due_date")}</h3>}
-              <ul className="moodle-due-list list-none p-0">
-                {items.slice(0, allDue ? undefined : 5).map((d) => {
-                  const course = overview.courses.find((c) => c.id === d.courseId);
-                  return (
+              <h3 className="course-due-group" data-overdue={group === 0}>
+                {group === 0 && <AlarmClock aria-hidden="true" />}
+                {tr(group === 0 ? "moodle:overdue_column" : group === 1 ? "moodle:this_week" : "moodle:no_due_date")}
+              </h3>
+              {[...groupDeadlinesByCourse(items.slice(0, allDue ? undefined : 5))].map(([courseId, deadlines]) => {
+                const course = overview.courses.find(c => c.id === courseId);
+                return <section className="course-due-course" key={courseId}>
+                  <h4>{course ? displayTitle(course.identity, lang, course.fullName) : tr("moodle:school")}</h4>
+                  <ul className="moodle-due-list list-none p-0">
+                  {deadlines.map(d => (
                     <li key={d.id}>
                       <ListRow
                         title={
                           <button
                             className="moodle-due-link text-start"
+                            title={d.title}
                             onClick={() => onCourse(d.courseId)}
                           >
                             {d.title}
@@ -861,15 +867,15 @@ function CoursesBody({
                             {group !== 2 && <time dateTime={d.dueAt} title={date(d.dueAt)} data-urgent={group === 0 || Date.parse(d.dueAt) - Date.now() < 86400000}>
                               {relative(d.dueAt)}
                             </time>}
-                            <span>{course ? displayTitle(course.identity, lang, course.fullName) : tr("moodle:school")}</span>
                           </span>
                         }
                         actions={group !== 2 && remind(d)}
                       />
                     </li>
-                  );
-                })}
-              </ul>
+                  ))}
+                  </ul>
+                </section>;
+              })}
             </section>
           ),
       )}
@@ -879,7 +885,7 @@ function CoursesBody({
           {tr(allDue ? "moodle:show_less" : "moodle:show_all")}
         </Button>
       )}
-    </Panel>
+    </section>
   </div>
         ) : (
           !error && (

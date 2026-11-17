@@ -78,11 +78,29 @@ try {
     await app.evaluate(({BrowserWindow}, {width,height}) => BrowserWindow.getAllWindows()[0].setContentSize(width,height), {width,height});
     for (const scheme of ['light','dark']) {
       await navigate(scheme);
+      await page.mouse.move(0, 0);
+      if (phase === 'after') {
+        const strip = await page.locator('.course-accounts').evaluate(node => {
+          const identity = node.querySelector('.course-account-identity').getBoundingClientRect();
+          const actions = node.querySelector('.course-accounts-actions').getBoundingClientRect();
+          return {identity, actions};
+        });
+        assert.ok(Math.abs(strip.identity.y - strip.actions.y) < strip.actions.height, 'account strip stays on one line');
+        const quiet = page.locator('.course-row-action').first();
+        assert.equal(await quiet.evaluate(node => getComputedStyle(node).opacity), '0', 'quiet actions are visually hidden');
+        assert.equal(await quiet.getAttribute('aria-hidden'), null, 'actions remain accessible');
+      }
       await capture(`${scheme}-${width}-populated`);
+      if (phase === 'after') {
+        await page.locator('.course-due-summary').evaluate(node => node.scrollIntoView({block:'start'}));
+        await capture(`${scheme}-${width}-due-soon`);
+        await page.locator('.course-accounts').scrollIntoViewIfNeeded();
+      }
       const first = page.locator('.course-open').first();
       await first.hover();
       await capture(`${scheme}-${width}-hover`);
       await first.focus();
+      if (phase === 'after') assert.equal(await page.locator('.course-row-action').first().evaluate(node => getComputedStyle(node).opacity), '1', 'focus reveals actions');
       assert.equal(await first.evaluate(node => getComputedStyle(node).outlineStyle), 'none', 'no title-sized focus outline');
       assert.notEqual(await first.evaluate(node => getComputedStyle(node, '::after').outlineStyle), 'none', 'whole-row focus outline');
       await capture(`${scheme}-${width}-focus`);
