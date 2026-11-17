@@ -48,27 +48,29 @@ it('keeps overlapping main writes responsive while checking 2000 documents', asy
     }
     db.exec('COMMIT');
     db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
-    // No busy wait: a write that needs a lock maintenance holds fails at once instead of hiding in a retry.
+    // No busy wait: a heartbeat that needs a lock maintenance holds fails at once instead of hiding in a retry.
     db.exec('PRAGMA busy_timeout=0');
     last=performance.now();
+    const lateness=(now:number)=>now-last-Math.max(INTERVAL,prevTook);
     timer=setInterval(()=>{
       const now=performance.now();
-      // Time the loop was held up by anything other than the previous heartbeat write itself.
-      maxLate=Math.max(maxLate,now-last-Math.max(INTERVAL,prevTook));last=now;
+      maxLate=Math.max(maxLate,lateness(now));last=now;
       const start=performance.now();
       try { db.exec('INSERT OR REPLACE INTO heartbeat VALUES(1,1)'); }
       catch (error) { if (((error as {errcode?:number}).errcode ?? 0) % 256 !== 5) throw error; busy++; }
       prevTook=performance.now()-start;latencies.push(prevTook);maxWrite=Math.max(maxWrite,prevTook);
     },INTERVAL);
     await new SearchService(db,root).rebuild();
+    // A block at the very end of rebuild resolves it before the next tick could record the delay, so count it here.
+    maxLate=Math.max(maxLate,lateness(performance.now()));
     clearInterval(timer);
     process.stdout.write(`CONTENTION documents=2000 maxWriteMs=${maxWrite.toFixed(1)} maxLoopLateMs=${maxLate.toFixed(1)} busy=${busy} writes=${latencies.length}\n`);
     expect(latencies.length).toBeGreaterThan(0);
-    // Maintenance must neither hold the write lock nor run on the main thread. Both are deterministic, so they are gated everywhere.
+    // Sampled every 30ms: a lock held by maintenance makes a heartbeat fail, and work run on the main thread delays the next tick.
     expect(busy).toBe(0);
     expect(maxLate).toBeLessThan(process.env.CI ? 750 : 150);
-    // A single write also waits on the disk, which hosted runners stall for up to ~1.5s regardless of maintenance (the old p90 gate
-    // flaked on Windows at 395ms and 505ms, with the event loop otherwise free), so raw latency is strict locally and only bounded in CI.
+    // Tradeoff: the old CI p90 gate (250ms) flaked on Windows at 395ms and 505ms, but the cause is unproven, and dropping it means
+    // sustained slow successful writes between 250ms and 3s are no longer caught in CI. Latency stays strict locally.
     const sorted=[...latencies].sort((a,b)=>a-b);
     const p90=sorted[Math.min(sorted.length-1,Math.floor(sorted.length*0.9))]!;
     if(!process.env.CI) expect(p90).toBeLessThan(50);
