@@ -696,7 +696,7 @@
 .ui-panel-body .moodle-week + .moodle-week { border-block-start:1px solid var(--line); }
 .ui-panel-body .moodle-term-tabs > :first-child { margin-inline-start:calc(var(--space-3) * -1); padding-block:var(--space-2); }
 
-.courses-list-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:var(--space-6); align-items:start; }
+.courses-list-layout { display:grid; grid-template-columns:minmax(0,1fr) var(--due-column,320px); gap:var(--space-6); align-items:start; }
 @media (max-width:1150px) { .courses-list-layout { grid-template-columns:minmax(0,1fr); } }
 .course-due-meta { display:flex; gap:var(--space-2); min-width:0; font-size:var(--type-base); }
 .course-due-meta time { flex:none; }

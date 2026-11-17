@@ -49,6 +49,7 @@ try {
         return {
           row:rect(row),
           view:row.closest('[data-view]').dataset.view,
+          pin:rect(row.querySelector('.course-pin')),
           title:rect(row.querySelector('.course-title')),
           deadline:deadline ? {...rect(deadline), scrollWidth:deadline.scrollWidth, text:deadline.textContent} : null,
           meta:meta ? rect(meta) : null,
@@ -57,6 +58,8 @@ try {
       }));
       for (const row of rows) {
         if (row.view === 'list') {
+          assert.ok(row.title.x - row.row.x >= 10, `${name}: surface has start padding`);
+          assert.ok(row.row.x + row.row.width - row.pin.x - row.pin.width >= 10, `${name}: pin focus fits inside surface`);
           assert.ok(row.row.height >= (name.includes("compact") ? 56 : 64) - 1, `${name}: minimum row height`);
           if (row.meta) assert.ok(row.meta.y >= row.title.y + row.title.height, `${name}: metadata below title`);
         }
@@ -92,6 +95,11 @@ try {
         assert.equal(await quiet.getAttribute('aria-hidden'), null, 'actions remain accessible');
       }
       await capture(`${scheme}-${width}-populated`);
+      if (phase === 'after') {
+        await page.getByRole('tab', {name:/Current/}).focus();
+        await capture(`${scheme}-${width}-tab-focus`);
+        await page.locator(':focus').evaluate(node => node.blur());
+      }
       if (phase === 'after') {
         assert.equal(await page.locator('.moodle-due-link').first().evaluate(node => getComputedStyle(node).minHeight), '0px', 'deadline titles use their text height');
         await page.locator('.course-due-summary').evaluate(node => node.scrollIntoView({block:'start'}));
@@ -200,16 +208,27 @@ try {
           const geometry = await notice.evaluate(node => {
             const line = node.parentElement.querySelector('.course-account-line').getBoundingClientRect();
             const box = node.getBoundingClientRect();
+            const strip = node.closest('.course-accounts').getBoundingClientRect();
+            const style = getComputedStyle(node);
             const button = node.querySelector('button').getBoundingClientRect();
-            return {below:box.top >= line.bottom, fits:node.scrollWidth <= node.clientWidth, buttonVisible:button.left >= box.left && button.right <= box.right + 1};
+            return {fullWidth:Math.abs(box.right - strip.right) < 1 && Math.abs(box.left - strip.left) < 1, padded:parseFloat(style.paddingLeft) > 0, textColor:getComputedStyle(node.querySelector('p')).color === style.color, surface:style.backgroundColor, below:box.top >= line.bottom, fits:node.scrollWidth <= node.clientWidth, buttonVisible:button.left >= box.left && button.right <= box.right + 1};
           });
-          assert.deepEqual(geometry, {below:true, fits:true, buttonVisible:true}, `${state} recovery row`);
-          await notice.locator('button').focus();
-          assert.notEqual(await notice.locator('button').evaluate(node => getComputedStyle(node).outlineStyle), 'none');
+          const {surface, ...bounds} = geometry;
+          assert.notEqual(surface, 'rgba(0, 0, 0, 0)', `${state} recovery surface`);
+          assert.deepEqual(bounds, {fullWidth:true, padded:true, textColor:true, below:true, fits:true, buttonVisible:true}, `${state} recovery row`);
         }
         assert.equal(await page.locator('.course-account-list').evaluate(node => node.scrollWidth > node.clientWidth), false, 'school list has no hidden horizontal scroll');
       }
+      await page.evaluate(() => document.activeElement?.blur());
       await capture(`${scheme}-${width}-${state}`);
+      if (phase === 'after') {
+        const notices = await page.locator('.course-account-notice').all();
+        for (const [index, notice] of notices.entries()) {
+          await notice.locator('button').focus();
+          assert.notEqual(await notice.locator('button').evaluate(node => getComputedStyle(node).outlineStyle), 'none');
+          await capture(`${scheme}-${width}-${state}${index ? `-${index + 1}` : ''}-focus`);
+        }
+      }
     }
   }
   await app.evaluate(({ipcMain}) => {

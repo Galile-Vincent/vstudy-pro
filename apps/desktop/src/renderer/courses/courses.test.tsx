@@ -1584,7 +1584,8 @@ it('keeps revealable row actions focusable and names attention badges', async ()
     expect(badge.getAttribute('role')).toBe('img');
     expect(badge.getAttribute('aria-label')).toMatch(/\d+ (overdue|unread)/);
     expect(badge.title).toBeTruthy();
-    expect(badge.closest('[aria-hidden=true]')).toBeNull();
+    expect(badge.getAttribute('aria-hidden')).toBe('true');
+    expect(getByRole(row as HTMLElement, 'button', {name: new RegExp(badge.getAttribute('aria-label')!)})).toBe(row.querySelector('.course-open'));
   }
 });
 

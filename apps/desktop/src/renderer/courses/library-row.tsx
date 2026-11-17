@@ -128,6 +128,7 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
               >
                 <span
                   id={`${prefix}-overdue`}
+                  aria-hidden="true"
                   role={attention.overdue ? "img" : undefined}
                   aria-label={attention.overdue ? tr("moodle:course_overdue", {count: attention.overdue}) : undefined}
                   className="course-count course-overdue shrink-0 inline-flex items-center gap-1 text-[var(--danger)]"
@@ -149,6 +150,7 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
                 </span>
                 <span
                   id={`${prefix}-unread`}
+                  aria-hidden="true"
                   role={attention.unread ? "img" : undefined}
                   aria-label={attention.unread ? tr("moodle:course_unread", {count: attention.unread}) : undefined}
                   className="course-count course-unread-count shrink-0 inline-flex items-center gap-1 text-[var(--muted)]"
