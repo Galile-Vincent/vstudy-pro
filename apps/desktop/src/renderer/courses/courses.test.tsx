@@ -836,8 +836,9 @@ it('pins without opening a course, exposes pressed state, and keeps the course b
   expect(pin.getAttribute('aria-label')).toBe(`Pin ${open.textContent}`);
   expect(pin.getAttribute('aria-pressed')).toBe('false');
   expect(pin.hasAttribute('title')).toBe(false);
+  expect(pin.tabIndex).toBe(open.tabIndex);
+  await act(async () => pin.focus());
   expect(pin.tabIndex).toBe(0);
-  pin.focus();
   await act(async () => pin.click());
   expect(host.querySelector('.course-open')).toBe(open);
   expect(document.activeElement).toBe(pin);
@@ -1389,7 +1390,8 @@ it("names external open actions for their deadline notification and file", async
   expect(getByRole(host, "button", {name: `Open original file: ${detail.files[0]!.name}`})).not.toBeNull();
 });
 
- it('keeps one course entry in the tab order and moves focus with arrows', async () => {
+it('keeps one course entry in the tab order and moves focus with arrows', async () => {
+  navigationMock.value = {openTab:vi.fn()};
   const api = createMockMoodleApi();
   const overview = await api.overview();
   const course = overview.courses[0]!;
@@ -1403,6 +1405,9 @@ it("names external open actions for their deadline notification and file", async
   });
   expect(document.activeElement).toBe(entries[1]);
   expect(entries[1]!.tabIndex).toBe(0);
+  for (const [index, row] of [...host.querySelectorAll('[data-course-id]')].entries()) {
+    expect([...row.querySelectorAll('button')].map(button => button.tabIndex)).toEqual(index === 1 ? [0,0,0] : [-1,-1,-1]);
+  }
   await act(async () => entries[1]!.dispatchEvent(new KeyboardEvent('keydown', {key:'Home',bubbles:true})));
   expect(document.activeElement).toBe(entries[0]);
 });
@@ -1424,4 +1429,40 @@ it('shows the latest sort immediately and persists rapid choices in order', asyn
   expect(save).toHaveBeenNthCalledWith(1, 'current', 'name');
   expect(save).toHaveBeenNthCalledWith(2, 'current', 'smart');
   await act(async () => finish[1]!());
+});
+
+
+it.each([false, true])('restores saved sorting after failure unless a newer choice is queued (%s)', async queued => {
+  const api = createMockMoodleApi();
+  api.sortPreferences = async () => ({current:'smart'});
+  let reject!: (error: Error) => void;
+  api.setSort = vi.fn().mockImplementationOnce(() => new Promise<void>((_, fail) => {reject = fail;})).mockResolvedValue(undefined);
+  await mount(api);
+  const selector = getByRole(host, 'combobox', {name:'Sort courses'});
+  const choose = async (name: string) => {
+    await act(async () => selector.click());
+    await act(async () => getByRole(document.body, 'option', {name}).click());
+  };
+  await choose('Name');
+  if (queued) {await choose('Smart');await choose('Name');}
+  await act(async () => reject(new Error('Synthetic save failure')));
+  expect(selector.textContent).toContain(queued ? 'Name' : 'Smart');
+});
+
+it('moves through cards by rendered columns and supports left and right', async () => {
+  localStorage.setItem('vstudy.courses.view', 'cards');
+  const api = createMockMoodleApi();
+  const overview = await api.overview();
+  const course = overview.courses[0]!;
+  api.overview = async () => ({...overview, courses:Array.from({length:4}, (_, index) => ({...course, id:`grid-${index}`, fullName:`Course ${index}`}))});
+  await mount(api);
+  const list = host.querySelector<HTMLElement>('.moodle-grid')!;
+  list.style.gridTemplateColumns = '100px 100px';
+  const entries = [...list.querySelectorAll<HTMLButtonElement>('.course-open')];
+  await act(async () => entries[0]!.focus());
+  for (const [key, index] of [['ArrowDown',2], ['ArrowRight',3], ['ArrowUp',1], ['ArrowLeft',0], ['End',3]] as const) {
+    await act(async () => document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', {key,bubbles:true})));
+    expect(document.activeElement).toBe(entries[index]);
+  }
+  localStorage.clear();
 });

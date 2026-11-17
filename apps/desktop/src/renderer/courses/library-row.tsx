@@ -49,7 +49,6 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
     !!attention.next && Date.parse(attention.next.dueAt) - Date.now() < 86400000;
   return (
     <li
-      key={course.id}
       className="moodle-course-card min-w-0"
       title={course.fullName}
       data-course-id={course.id}
@@ -165,6 +164,8 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
                 </span>
               </div>
               {navigation?.openTab && <IconButton label={tr("moodle:open_course_tab", { course: name })}
+                tabIndex={tabIndex}
+                onFocus={onFocus}
                 variant="ghost"
                  size="md"
                 className="relative z-1"
@@ -180,6 +181,8 @@ export function CourseLibraryRow({course, pinned, attention, lang, view, groupSt
               <button
                 type="button"
                 className="course-pin grid size-[calc(var(--space-3)*3)] shrink-0 place-items-center rounded-[var(--radius-element)] aria-pressed:bg-[var(--active)]"
+                tabIndex={tabIndex}
+                onFocus={onFocus}
                 aria-pressed={pinned}
                 aria-label={tr(
                   pinned ? "moodle:unpin_course_named" : "moodle:pin_course_named",

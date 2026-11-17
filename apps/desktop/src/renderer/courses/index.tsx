@@ -263,7 +263,7 @@ function CoursesBody({
       refreshSequence.current++;
     };
   }, [refresh]);
-  useEffect(() => {let current=true;void api.sortPreferences().then(value => {if(current)setSortPreferences(value);}).catch(failure);return () => {current=false;};},[api]);
+  useEffect(() => {let current=true;void api.sortPreferences().then(value => {if(current) {setSortPreferences(value);savedSortPreferences.current = value;}}).catch(failure);return () => {current=false;};},[api]);
   useEffect(() => {
     let timer:ReturnType<typeof setTimeout> | undefined;
     let reorder = false;
@@ -371,6 +371,8 @@ function CoursesBody({
   const visibleCourses = orderedCourses.filter(item => matchesTerm(item.course, selectedTerm));
   const activeCourseId = visibleCourses.find(item => item.id === focusedCourseId)?.id ?? visibleCourses[0]?.id;
   const sortWrites = useRef(Promise.resolve());
+  const sortVersions = useRef<Partial<Record<MoodleTermFilter, number>>>({});
+  const savedSortPreferences = useRef(sortPreferences);
   const pinsVisible = selectedTerm === 'current' || selectedTerm === 'all';
   const orderKey = `${selectedTerm}:${orderedCourses.map(item => `${item.id}:${pinsVisible && item.pinned}`).join('|')}`;
   prepareMovement.current = useCourseMovement(pageRef,orderKey);
@@ -380,7 +382,18 @@ function CoursesBody({
     prepareMovement.current();
     if (overview) setOrderSnapshot({data:overview, now:Date.now()});
     setSortPreferences(previous => ({...previous, [filter]:value as CourseSort}));
-    sortWrites.current = sortWrites.current.then(() => api.setSort(filter, value)).catch(failure);
+    const version = (sortVersions.current[filter] ?? 0) + 1;
+    sortVersions.current[filter] = version;
+    sortWrites.current = sortWrites.current.then(async () => {
+      await api.setSort(filter, value);
+      savedSortPreferences.current = {...savedSortPreferences.current, [filter]:value};
+    }).catch(() => {
+      if (sortVersions.current[filter] === version) {
+        prepareMovement.current();
+        setSortPreferences(previous => ({...previous, [filter]:savedSortPreferences.current[filter]}));
+      }
+      failure();
+    });
     await sortWrites.current;
   };
   const pinCourse = async (accountId: string, id: string, pinned: boolean) => {
@@ -559,7 +572,7 @@ function CoursesBody({
           )}
         </div>}
         {error && (
-          <div className={courseId ? "moodle-banner" : "flex flex-wrap items-center gap-3"} role="alert">
+          <div className={courseId ? "moodle-banner" : "course-library-error flex flex-wrap items-center gap-3"} role="alert">
             <WifiOff />
             <span>
               {tr(overview ? "moodle:offline_stale" : "moodle:load_error")}
@@ -632,7 +645,7 @@ function CoursesBody({
             await refresh().catch(() => setError(true));
           }}
         /> : loading ? (
-          <div aria-busy="true" className={!courseId ? "course-library-loading" : undefined}>{!courseId && <><p role="status">{tr("moodle:loading")}</p><div aria-hidden="true">{[0,1,2,3,4].map(index => <div key={index} className="course-library-placeholder" />)}</div></>}</div>
+          <div aria-busy="true" className={!courseId ? "course-library-loading" : undefined}>{!courseId && <><p role="status">{tr("moodle:loading")}</p><div aria-hidden="true">{[0,1,2,3,4].map(index => <div key={index} className="course-library-placeholder"><span /><span /><span /><span /><span /></div>)}</div></>}</div>
         ) : courseId ? (
           detail ? (
             <>
@@ -784,7 +797,7 @@ function CoursesBody({
           }
         />{termFilters.map((filter) => (
           <section role="tabpanel" id={`panel-selectedTerm-${filter}`} aria-labelledby={`tab-selectedTerm-${filter}`} data-state={selectedTerm === filter ? "active" : "inactive"} hidden={selectedTerm !== filter}>{selectedTerm === filter && <>{!overview.courses.some((course) => matchesTerm(course, filter)) && (
-              <EmptyState title={tr("moodle:no_term_courses")} description={tr("moodle:term_empty_hint")} />
+              <EmptyState title={tr("moodle:no_term_courses")} description={filter !== "all" && overview.courses.length ? tr("moodle:term_empty_hint") : undefined} />
             )}{pinsVisible &&
               orderedCourses.some((item) => item.pinned && matchesTerm(item.course, filter)) && (
                 <div className="course-group-label py-2 text-sm text-[var(--muted)]">
@@ -793,13 +806,15 @@ function CoursesBody({
               )}<ul
               className="moodle-grid"
               onKeyDown={event => {
-                if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key) || event.altKey || event.metaKey || event.ctrlKey) return;
+                if (!['ArrowDown', 'ArrowUp', 'Home', 'End', ...(view === 'cards' ? ['ArrowLeft', 'ArrowRight'] : [])].includes(event.key) || event.altKey || event.metaKey || event.ctrlKey) return;
                 const buttons = [...event.currentTarget.querySelectorAll<HTMLButtonElement>('.course-open')];
                 const current = (event.target as HTMLElement).closest('[data-course-id]')?.querySelector('.course-open');
                 const index = buttons.findIndex(button => button === current);
                 if (index < 0) return;
                 event.preventDefault();
-                const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : Math.max(0, Math.min(buttons.length - 1, index + (event.key === 'ArrowDown' ? 1 : -1)));
+                const columns = view === 'cards' ? Math.max(1, getComputedStyle(event.currentTarget).gridTemplateColumns.split(' ').length) : 1;
+                const step = event.key === 'ArrowDown' ? columns : event.key === 'ArrowUp' ? -columns : event.key === 'ArrowRight' ? 1 : -1;
+                const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1 : Math.max(0, Math.min(buttons.length - 1, index + step));
                 buttons[next]?.focus();
               }}
               data-view={view}
