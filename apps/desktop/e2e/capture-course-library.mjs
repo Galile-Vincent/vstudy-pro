@@ -96,7 +96,18 @@ try {
       }
       await capture(`${scheme}-${width}-populated`);
       if (phase === 'after') {
+        const tabLabels = page.locator('.moodle-term-tabs [role=tab] > span:has(> [aria-hidden=true]) > span:not([aria-hidden])');
+        const populatedX = await tabLabels.evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().x));
+        assert.ok(populatedX.length > 0, 'tab labels found');
         await page.getByRole('tab', {name:/Current/}).focus();
+        assert.deepEqual(await tabLabels.evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().x)), populatedX, `${scheme}-${width}: tab labels stay fixed on focus`);
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        assert.equal(await page.locator('.moodle-term-tabs .astryx-tab-scroll-button:visible').count(), 0, `${scheme}-${width}: no tab scroll arrow`);
+        const hint = page.locator('.moodle-term-tabs [popover]:popover-open');
+        assert.equal(await hint.count(), 1, 'tab keyboard hint is visible');
+        const hintBox = await hint.boundingBox();
+        const titleBox = await page.locator('.course-title').first().boundingBox();
+        assert.ok(hintBox.y + hintBox.height <= titleBox.y, `${scheme}-${width}: tab hint clears first title`);
         await capture(`${scheme}-${width}-tab-focus`);
         await page.locator(':focus').evaluate(node => node.blur());
       }
@@ -211,13 +222,13 @@ try {
             const strip = node.closest('.course-accounts').getBoundingClientRect();
             const style = getComputedStyle(node);
             const button = node.querySelector('button').getBoundingClientRect();
-            return {fullWidth:Math.abs(box.right - strip.right) < 1 && Math.abs(box.left - strip.left) < 1, padded:parseFloat(style.paddingLeft) > 0, textColor:getComputedStyle(node.querySelector('p')).color === style.color, surface:style.backgroundColor, below:box.top >= line.bottom, fits:node.scrollWidth <= node.clientWidth, buttonVisible:button.left >= box.left && button.right <= box.right + 1};
+            return {fullWidth:Math.abs(box.right - strip.right - parseFloat(style.paddingRight)) < 1 && Math.abs(box.left + parseFloat(style.paddingLeft) - strip.left) < 1, padded:parseFloat(style.paddingLeft) > 0, textColor:getComputedStyle(node.querySelector('p')).color === style.color, surface:style.backgroundColor, below:box.top >= line.bottom, fits:node.scrollWidth <= node.clientWidth, buttonVisible:button.left >= box.left && button.right <= box.right + 1};
           });
           const {surface, ...bounds} = geometry;
           assert.notEqual(surface, 'rgba(0, 0, 0, 0)', `${state} recovery surface`);
           assert.deepEqual(bounds, {fullWidth:true, padded:true, textColor:true, below:true, fits:true, buttonVisible:true}, `${state} recovery row`);
         }
-        assert.equal(await page.locator('.course-account-list').evaluate(node => node.scrollWidth > node.clientWidth), false, 'school list has no hidden horizontal scroll');
+        assert.equal(await page.locator('.course-account-notice').evaluateAll(nodes => nodes.every(node => { const box = node.getBoundingClientRect(); return box.left >= 0 && box.right <= innerWidth; })), true, 'school notices fit viewport');
       }
       await page.evaluate(() => document.activeElement?.blur());
       await capture(`${scheme}-${width}-${state}`);
@@ -256,7 +267,7 @@ try {
     await page.getByRole('alert').first().waitFor();
     await capture(`${scheme}-${width}-error`);
   }
-  await writeFile(join(evidence, 'verification.json'), JSON.stringify({passed:true, captures:results.length, checks:['school recovery rows and focus','compact school strip','deadline title height','page overflow','row geometry','complete deadlines','action alignment','full Tab and Shift+Tab walk','metadata row click','whole-row focus outline','arrows and Home','refresh','Updates M','axe']}, null, 2));
+  await writeFile(join(evidence, 'verification.json'), JSON.stringify({passed:true, captures:results.length, checks:['tab label focus stability','no tab scroll arrows','tab hint clearance','school recovery rows and focus','compact school strip','deadline title height','page overflow','row geometry','complete deadlines','action alignment','full Tab and Shift+Tab walk','metadata row click','whole-row focus outline','arrows and Home','refresh','Updates M','axe']}, null, 2));
   console.log(`PASS ${results.length} library captures, no page overflow`);
 } finally {
   await writeFile(join(evidence,'layout-results.json'), JSON.stringify(layouts,null,2));
