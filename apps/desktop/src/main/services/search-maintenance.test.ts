@@ -34,11 +34,12 @@ it.each(['missing and duplicate rows', 'corrupt index'])('repairs %s in a disk d
 
 it('keeps overlapping main writes responsive while checking 2000 documents', async () => {
   const root=mkdtempSync(join(tmpdir(),'search-contention-')), db=new DatabaseSync(join(root,'test.sqlite'));
-  let maxWrite=0,maxGap=0,last=performance.now(),writes=0;
+  const INTERVAL=30;
+  let maxWrite=0,maxLate=0,busy=0,last=performance.now(),prevTook=0;
   const latencies:number[]=[];
   let timer:ReturnType<typeof setInterval>|undefined;
   try {
-    db.exec("PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; CREATE TABLE documents(id TEXT PRIMARY KEY,title TEXT,sourceName TEXT,deletedAt TEXT,status TEXT,markdownPath TEXT,activeVersion TEXT,contentChars INTEGER); CREATE TABLE heartbeat(id INTEGER PRIMARY KEY,value INTEGER); CREATE VIRTUAL TABLE document_fts USING fts5(documentId UNINDEXED,title,filename,content,tokenize='trigram')");
+    db.exec("PRAGMA journal_mode=WAL; CREATE TABLE documents(id TEXT PRIMARY KEY,title TEXT,sourceName TEXT,deletedAt TEXT,status TEXT,markdownPath TEXT,activeVersion TEXT,contentChars INTEGER); CREATE TABLE heartbeat(id INTEGER PRIMARY KEY,value INTEGER); CREATE VIRTUAL TABLE document_fts USING fts5(documentId UNINDEXED,title,filename,content,tokenize='trigram')");
     const content=Array.from({length:10000},(_,i)=>`word${i}`).join(' ').slice(0,60000);
     db.exec('BEGIN');
     for(let i=0;i<2000;i++) {
@@ -47,20 +48,30 @@ it('keeps overlapping main writes responsive while checking 2000 documents', asy
     }
     db.exec('COMMIT');
     db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+    // No busy wait: a write that needs a lock maintenance holds fails at once instead of hiding in a retry.
+    db.exec('PRAGMA busy_timeout=0');
     last=performance.now();
     timer=setInterval(()=>{
-      const now=performance.now();maxGap=Math.max(maxGap,now-last);last=now;
-      const start=performance.now();db.exec('INSERT OR REPLACE INTO heartbeat VALUES(1,1)');const took=performance.now()-start;latencies.push(took);maxWrite=Math.max(maxWrite,took);writes++;
-    },30);
+      const now=performance.now();
+      // Time the loop was held up by anything other than the previous heartbeat write itself.
+      maxLate=Math.max(maxLate,now-last-Math.max(INTERVAL,prevTook));last=now;
+      const start=performance.now();
+      try { db.exec('INSERT OR REPLACE INTO heartbeat VALUES(1,1)'); }
+      catch (error) { if (((error as {errcode?:number}).errcode ?? 0) % 256 !== 5) throw error; busy++; }
+      prevTook=performance.now()-start;latencies.push(prevTook);maxWrite=Math.max(maxWrite,prevTook);
+    },INTERVAL);
     await new SearchService(db,root).rebuild();
-    process.stdout.write(`CONTENTION documents=2000 maxWriteMs=${maxWrite.toFixed(1)} maxEventLoopGapMs=${maxGap.toFixed(1)} writes=${writes}\n`);
-    expect(writes).toBeGreaterThan(0);
-    // Sustained blocking shows in the typical write, so p90 stays strict locally and generous on shared runners (62ms and 92ms p90 were observed on Windows).
-    // One slow disk write on a hosted runner (116ms, 578ms and 1541ms on Windows, 75ms and 774ms on macOS were observed) only
-    // gets a loose bound, far below busy_timeout (5s).
+    clearInterval(timer);
+    process.stdout.write(`CONTENTION documents=2000 maxWriteMs=${maxWrite.toFixed(1)} maxLoopLateMs=${maxLate.toFixed(1)} busy=${busy} writes=${latencies.length}\n`);
+    expect(latencies.length).toBeGreaterThan(0);
+    // Maintenance must neither hold the write lock nor run on the main thread. Both are deterministic, so they are gated everywhere.
+    expect(busy).toBe(0);
+    expect(maxLate).toBeLessThan(process.env.CI ? 750 : 150);
+    // A single write also waits on the disk, which hosted runners stall for up to ~1.5s regardless of maintenance (the old p90 gate
+    // flaked on Windows at 395ms and 505ms, with the event loop otherwise free), so raw latency is strict locally and only bounded in CI.
     const sorted=[...latencies].sort((a,b)=>a-b);
     const p90=sorted[Math.min(sorted.length-1,Math.floor(sorted.length*0.9))]!;
-    expect(p90).toBeLessThan(process.env.CI ? 250 : 50);
+    if(!process.env.CI) expect(p90).toBeLessThan(50);
     expect(maxWrite).toBeLessThan(process.env.CI ? 3000 : 50);
     expect(db.prepare('SELECT value FROM heartbeat WHERE id=1').get()?.value).toBe(1);
   } finally {clearInterval(timer);db.close();rmSync(root,{recursive:true,force:true});}
